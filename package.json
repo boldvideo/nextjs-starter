@@ -9,13 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@boldvideo/bold-js": "^0.2.0",
+    "@boldvideo/bold-js": "0.3.4",
     "@mux/mux-player-react": "^1.10.1",
     "@next/font": "13.3.0",
     "@types/node": "18.15.11",
     "@types/react": "18.0.33",
     "@types/react-dom": "18.0.11",
     "@vercel/og": "^0.5.3",
+    "@vidstack/react": "^1.11.6",
     "date-fns": "^2.29.3",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",

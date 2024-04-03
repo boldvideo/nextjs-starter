@@ -1,7 +1,10 @@
 "use client";
-import MuxPlayer, {
-  MuxPlayerRefAttributes as MuxPlayerElement,
-} from "@mux/mux-player-react";
+import { MediaPlayer, MediaProvider, MediaTimeUpdateEventDetail, Poster, Track } from '@vidstack/react';
+import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default';
+
+import '@vidstack/react/player/styles/default/theme.css';
+import '@vidstack/react/player/styles/default/layouts/video.css';
+
 import { bold } from "client";
 import { forwardRef, useEffect, Ref, useRef, useState } from "react";
 
@@ -47,9 +50,9 @@ export const Player = forwardRef(function Player(
     };
   }, [isOutOfView]);
 
-  const handleTimeUpdate = (e: Event) => {
-    bold.trackEvent(video, e);
-    if (onTimeUpdate) onTimeUpdate(e);
+  const handleTimeUpdate = (video: any, e: MediaTimeUpdateEventDetail) => {
+    bold.trackEvent(video, { target: { currentTime: e.currentTime }, type: 'timeupdate' } as unknown as Event)
+    if (onTimeUpdate) onTimeUpdate(e as unknown as Event);
   };
 
   return (
@@ -58,21 +61,32 @@ export const Player = forwardRef(function Player(
         className={
           isOutOfView
             ? "fixed sm:bottom-0 sm:right-0 sm:top-auto top-0 w-full sm:w-1/2 lg:w-1/3 bg-black"
-            : ""
+            : "w-full"
         }
       >
-        <MuxPlayer
-          streamType="on-demand"
-          autoPlay={autoPlay}
-          playbackId={video.playback_id}
-          onTimeUpdate={handleTimeUpdate}
+        <MediaPlayer
+          title={video.title}
+          src={`https://stream.mux.com/${video.playback_id}.m3u8`}
+          className="w-full h-full"
+          onTimeUpdate={e => handleTimeUpdate(video, e)}
           onPlay={(e) => bold.trackEvent(video, e)}
           onPause={(e) => bold.trackEvent(video, e)}
           onLoadedMetadata={(e) => bold.trackEvent(video, e)}
-          currentTime={currentTime}
-          ref={ref as Ref<MuxPlayerElement> | undefined}
-          className="h-full"
-        />
+          playsInline
+        >
+          <Poster
+            className="vds-poster"
+            src={video.thumbnail}
+            alt={video.title}
+            id="media-poster"
+          ></Poster>
+          <MediaProvider>
+
+
+            {video.chapters_url && <Track kind="chapters" id="track-chapters" src={video.chapters_url} lang="en-US" label="English" default />}
+          </MediaProvider>
+          <DefaultVideoLayout thumbnails={`https://image.mux.com/${video.playback_id}/storyboard.vtt`} icons={defaultLayoutIcons} />
+        </MediaPlayer>
       </div>
     </>
   );

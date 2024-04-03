@@ -33,7 +33,7 @@ export function VideoDetail({ video }: VideoDetailProps) {
         </p>
         <p className="text-[21px] mb-12">{video.description}</p>
 
-        {video?.transcript?.json?.url ? (
+        {false && video?.transcript?.json?.url ? (
           <>
             <hr className="mb-12 border-gray-700" />
             <Transcript

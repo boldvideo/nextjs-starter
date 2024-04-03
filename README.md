@@ -1,10 +1,10 @@
 <div align="center">
-    <a href="https://wearebold.af?utm_source=github.com&utm_medium=readme&utm_campaign=bold-js" align="center">
-		<img src="https://wearebold.af/bold-js-github-header.svg"  alt="Bold Logo">
+    <a href="https://bold.video?utm_source=github.com&utm_medium=readme&utm_campaign=bold-js" align="center">
+		<img src="https://bold.video/bold-js-github-header.svg"  alt="Bold Logo">
 	</a>
 	<h1 align="center rainbow">nextjs-starter</h1>
     <p align="center">
-        Starter Kit The easiest way to get started with <a href="http://wearebold.af?utm_source=github.com&utm_medium=readme&utm_campaign=bold-js" target="_blank">Bold Video</a>. Create a fully-featured Video Portal with a single command.
+        Starter Kit The easiest way to get started with <a href="http://bold.video?utm_source=github.com&utm_medium=readme&utm_campaign=bold-js" target="_blank">Bold Video</a>. Create a fully-featured Video Portal with a single command.
     </p>
 </div>
 
@@ -16,7 +16,7 @@
     <img src="https://img.shields.io/badge/Try%20Bold-Free-09b3af?style=appveyor&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAmCAYAAADTGStiAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAGFSURBVHgBxZg9SwNBEIZ34xUpVLCwEQQRtRARxV+g4M8QLO0sBPtgZS129gr+AbEWWyshOUSCkipBjB8cBHPrM4GVQ84qZuaFJTebj+feyczu3fmxEIIbXjnjjZEy7hm3feeunfdPf33B/xO4TBk/fMoZHXMCHU1wVBP3m8Cb2mDRI/AN4K9xouJ0NA9ovzih5Vj0jutZXHcl0HIsmkicW4uBJtiR2kUr8KQJGPVMwJ62sgJ//hxrtROQNsvnDO30JbGaY9xeROggVnLcY/FYAPwcJ7Qc7xahKmAAe33vz0vmRysK6rASQs2FUC3Oq1U1xZVSWVukvCWxWlXjbgnYFc6nVMEiXK+wQx0MjhX346gPWmtOe5MQjQPdsQBLylctUi3gholjnE6bgFHVCpxZgR+s/uOGVTvdWLTTCyvXurpj3J7IfbOqY0BpLrcx3mea22Id6LZAJdYA56T3COhy8dFE4kYkHN7xcgnwDGD79/sJH6i54SQ1ItfLXZx1GC2CehmsqG96m37o1gSKagAAAABJRU5ErkJggg==" alt="Try Bold Video" />
   </a>
 </p>
-Welcome to the Bold Video Starter Kit, the easiest way to get started with <a href="http://wearebold.af?utm_source=github.com&utm_medium=readme&utm_campaign=bold-js" target="_blank">Bold Video</a>. This project is based on Next.js and Tailwind CSS and offers a simple and effective way to create video applications using Bold.
+Welcome to the Bold Video Starter Kit, the easiest way to get started with <a href="http://bold.video?utm_source=github.com&utm_medium=readme&utm_campaign=bold-js" target="_blank">Bold Video</a>. This project is based on Next.js and Tailwind CSS and offers a simple and effective way to create video applications using Bold.
 
 ## Getting Started
 There are two ways to get started: automatic mode and manual mode.

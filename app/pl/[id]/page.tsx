@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
       title: playlist.title,
       images: [
         {
-          url: `https://starter-demo.wearebold.af/og?t=${encodeURIComponent(
+          url: `https://demo.bold.video/og?t=${encodeURIComponent(
             `Playlist: ${playlist.title}`
           )}&img=${encodeURIComponent(videos[0].thumbnail)}`,
           width: 1200,
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function ({ params }: any) {
+export default async function Page({ params }: any) {
   const { data: playlist } = await bold.playlists.get(params.id);
   return (
     <div>

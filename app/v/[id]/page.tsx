@@ -4,16 +4,16 @@ import { VideoDetail } from "@/components/video-detail";
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: {params: {id: string} }) {
+export async function generateMetadata({ params }: { params: { id: string } }) {
   const { data: video } = await bold.videos.get(params.id);
-  return { 
+  return {
     title: video.title,
     description: video.description,
     openGraph: {
       title: video.title,
       images: [
         {
-          url: `https://starter-demo.wearebold.af/og?t=${encodeURIComponent(video.title)}&img=${encodeURIComponent(video.thumbnail)}`,
+          url: `https://demo.bold.video/og?t=${encodeURIComponent(video.title)}&img=${encodeURIComponent(video.thumbnail)}`,
           width: 1200,
           height: 630,
         },
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: {params: {id: string} }) {
   };
 }
 
-export default async function ({ params }: any) {
+export default async function({ params }: any) {
   const { data: video } = await bold.videos.get(params.id);
 
   if (!video) return <p>loading</p>;
