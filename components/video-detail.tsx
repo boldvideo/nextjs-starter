@@ -69,7 +69,7 @@ export function VideoDetail({ video }: VideoDetailProps) {
   console.log(video);
 
   useEffect(() => {
-    const chaptersList = video.chapters ? parseChapters(video.chapters) : null;
+    const chaptersList = video.chapters ? parseChapters(video.chapters) : [];
     setParsedChapters(chaptersList);
   }, [video]);
 
