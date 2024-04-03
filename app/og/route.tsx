@@ -4,12 +4,12 @@ export const config = {
   runtime: "edge",
 };
 
-const image = fetch(new URL("../../public/acmenet.png", import.meta.url)).then(
-  (res) => res.arrayBuffer()
-);
+// const image = fetch(new URL("../../public/acmenet.png", import.meta.url)).then(
+//   (res) => res.arrayBuffer()
+// );
 
 export async function GET(request: Request) {
-  const logo: unknown = await image;
+  // const logo: unknown = await image;
 
   const { searchParams } = new URL(request.url);
 
@@ -22,13 +22,6 @@ export async function GET(request: Request) {
         <div tw="relative flex bg-black w-full h-full ">
           {hasImage ? <img src={searchParams.get('img') as string} tw="w-full" /> : null}
           <div tw="absolute inset-x-10 px-5 py-5 border-8 border-black bottom-10 flex flex-col bg-white">
-            <img
-              src={logo as string}
-              width="320"
-              height="77"
-              alt="acmenet MediaHub"
-              tw="mb-4"
-            />
             <h1 tw="text-5xl font-bold">{searchParams.get('t')?.slice(0, 100)}</h1>
           </div>
         </div>
@@ -57,12 +50,12 @@ export async function GET(request: Request) {
           justifyContent: "center",
         }}
       >
-        <img
-          src={logo as string}
-          width="850"
-          height="205"
-          alt="acmenet MediaHub"
-        />
+        {/* <img */}
+        {/*   src={logo as string} */}
+        {/*   width="850" */}
+        {/*   height="205" */}
+        {/*   alt="acmenet MediaHub" */}
+        {/* /> */}
       </div>
     ),
     {
