@@ -2,17 +2,81 @@
 import { formatRelative } from "date-fns";
 import { Player } from "components/player";
 import { Transcript } from "@/components/transcript";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 type VideoDetailProps = {
   video: any;
 };
 
+type Chapter = {
+  startTime: string;
+  title: string;
+};
+
+const parseChapters = (webvttString: string): Chapter[] => {
+  const lines = webvttString.split('\n\n').slice(1); // Skip the WEBVTT header and split chapters
+  return lines.map(line => {
+    const [_identifier, timeRange, title] = line.split('\n');
+    const [startTime] = timeRange.split(' --> ');
+    return {
+      startTime: convertToReadableTime(startTime),
+      title,
+    };
+  });
+};
+
+const convertToReadableTime = (timeString: string): string => {
+  const parts = timeString.split(':').map(parseFloat);
+  let hours = 0, minutes = 0, seconds = 0;
+
+  if (parts.length === 3) {
+    [hours, minutes, seconds] = parts;
+  } else {
+    [minutes, seconds] = parts;
+  }
+
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  const minutesPart = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const secondsPart = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+
+  return `${minutesPart}:${secondsPart}`;
+};
+
+const timestampToSeconds = (timestamp: string): number => {
+  const parts = timestamp.split(':').map(Number);
+  let hours = 0, minutes = 0, seconds = 0;
+
+  // Determine the format and assign the correct values
+  if (parts.length === 3) {
+    [hours, minutes, seconds] = parts;
+  } else if (parts.length === 2) {
+    [minutes, seconds] = parts;
+  } else if (parts.length === 1) {
+    [seconds] = parts;
+  }
+
+  // Calculate total seconds
+  return hours * 3600 + minutes * 60 + seconds;
+};
+
+
+
+
 export function VideoDetail({ video }: VideoDetailProps) {
   const playerRef = useRef<HTMLVideoElement>(null);
+  const [parsedChapters, setParsedChapters] = useState<Chapter[]>([]);
+
+  console.log(video);
+
+  useEffect(() => {
+    const chaptersList = video.chapters ? parseChapters(video.chapters) : null;
+    setParsedChapters(chaptersList);
+  }, [video]);
+
 
   const handleCueClick = (time: number) => {
     const toTime = isNaN(time) ? 0.1 : parseFloat(time.toString());
+    console.log('playerRef', playerRef?.current)
     if (playerRef?.current) {
       playerRef.current.currentTime = toTime;
       playerRef.current.play();
@@ -32,6 +96,14 @@ export function VideoDetail({ video }: VideoDetailProps) {
           {formatRelative(new Date(video.published_at), new Date())}
         </p>
         <p className="text-[21px] mb-12">{video.description}</p>
+
+        {video.chapters && <div className="mb-12 text-[21px]">
+          {parsedChapters.map((chapter, index) => (
+            <div key={index} className="cursor-pointer" onClick={() => handleCueClick(timestampToSeconds(chapter.startTime))}>
+              <strong className="font-bold text-blue-800">{chapter.startTime}</strong> {chapter.title}
+            </div>
+          ))}
+        </div>}
 
       </div>
     </div>

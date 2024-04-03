@@ -1,5 +1,5 @@
 "use client";
-import { MediaPlayer, MediaProvider, MediaTimeUpdateEventDetail, Poster, Track } from '@vidstack/react';
+import { MediaPlayer, MediaPlayerInstance, MediaProvider, MediaTimeUpdateEventDetail, Poster, Track } from '@vidstack/react';
 import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default';
 
 import '@vidstack/react/player/styles/default/theme.css';
@@ -48,7 +48,7 @@ export const Player = forwardRef(function Player(
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [isOutOfView]);
+  }, [isOutOfView, video]);
 
   const handleTimeUpdate = (video: any, e: MediaTimeUpdateEventDetail) => {
     bold.trackEvent(video, { target: { currentTime: e.currentTime }, type: 'timeupdate' } as unknown as Event)
@@ -73,6 +73,7 @@ export const Player = forwardRef(function Player(
           onPause={(e) => bold.trackEvent(video, e)}
           onLoadedMetadata={(e) => bold.trackEvent(video, e)}
           playsInline
+          ref={ref as Ref<MediaPlayerInstance>}
         >
           <Poster
             className="vds-poster"
