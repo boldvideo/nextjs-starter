@@ -33,16 +33,6 @@ export function VideoDetail({ video }: VideoDetailProps) {
         </p>
         <p className="text-[21px] mb-12">{video.description}</p>
 
-        {false && video?.transcript?.json?.url ? (
-          <>
-            <hr className="mb-12 border-gray-700" />
-            <Transcript
-              url={video.transcript.json.url}
-              playerRef={playerRef}
-              onCueClick={handleCueClick}
-            />
-          </>
-        ) : null}
       </div>
     </div>
   );
