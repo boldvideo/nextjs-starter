@@ -72,8 +72,6 @@ export function VideoDetail({ video }: VideoDetailProps) {
   const playerRef = useRef<HTMLVideoElement>(null);
   const [parsedChapters, setParsedChapters] = useState<Chapter[]>([]);
 
-  console.log("video", video);
-
   useEffect(() => {
     const chaptersList = video.chapters ? parseChapters(video.chapters) : [];
     setParsedChapters(chaptersList);
