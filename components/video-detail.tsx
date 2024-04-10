@@ -118,7 +118,7 @@ export function VideoDetail({ video }: VideoDetailProps) {
             ))}
           </div>
         )}
-        {video.chapters && (
+        {false && video.chapters && (
           <div className="w-full overflow-x-auto">
             <div className="flex mb-12 text-sm space-x-4">
               {parsedChapters.map((chapter, index) => (
