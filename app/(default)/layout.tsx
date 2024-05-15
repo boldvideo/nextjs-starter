@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 
-import logo from "../public/yourlogohere.png";
+import logo from "../../public/yourlogohere.png";
 import { bold } from "@/client";
 import { MobileMenu } from "@/components/mobile-menu";
 
@@ -35,6 +35,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const { data: settings } = await bold.settings();
+  console.log("settings", settings);
   return (
     <html lang="en">
       <body className="bg-white text-black">
@@ -67,7 +68,7 @@ export default async function RootLayout({
             </div>
           </nav>
         </header>
-        <main className="p-5 md:p-10">{children}</main>
+        <main className="">{children}</main>
       </body>
     </html>
   );

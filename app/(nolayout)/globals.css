@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.vds-poster {
+  top: 50%;
+  transform: translateY(-50%);
+}
