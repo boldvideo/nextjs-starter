@@ -86,6 +86,7 @@ export const Player = forwardRef(function Player(
           onPause={(e) => bold.trackEvent(video, e)}
           onLoadedMetadata={(e) => bold.trackEvent(video, e)}
           playsInline
+          storage="bold-demo"
           ref={ref as Ref<MediaPlayerInstance>}
           playbackRate={video?.playback_speed || 1}
         >
