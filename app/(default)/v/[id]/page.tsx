@@ -17,13 +17,12 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
           width: 1200,
           height: 630,
         },
-      ]
-    }
-
+      ],
+    },
   };
 }
 
-export default async function({ params }: any) {
+export default async function VideoPage({ params }: any) {
   const { data: video } = await bold.videos.get(params.id);
 
   if (!video) return <p>loading</p>;

@@ -39,7 +39,7 @@ export const Player = forwardRef(function Player(
   // useImperativeHandle(ref, () => playerRef.current);
 
   useEffect(() => {
-    bold.trackPageView(video.title);
+    // bold.trackPageView(video.title);
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -87,6 +87,7 @@ export const Player = forwardRef(function Player(
           onLoadedMetadata={(e) => bold.trackEvent(video, e)}
           playsInline
           ref={ref as Ref<MediaPlayerInstance>}
+          playbackRate={video?.playback_speed || 1}
         >
           <Poster
             className="vds-poster h-full overflow-hidden"
