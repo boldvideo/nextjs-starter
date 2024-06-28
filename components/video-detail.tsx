@@ -86,19 +86,19 @@ export function VideoDetail({ video }: VideoDetailProps) {
   const hasChapters = chapters && chapters.length > 0;
 
   return (
-    <div className="flex flex-col pb-60">
+    <div className="container mx-auto flex flex-col pb-60 gap-y-8">
       <div
         className={clsx(
           "w-full lg:max-h-[75vh]",
           hasChapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
-          "overflow-hidden border-b border-b-ct-dark",
+          "overflow-hidden",
         )}
       >
         <div className="bg-black w-full flex-grow aspect-video col-span-9">
           <Player video={video} autoPlay={true} ref={playerRef} />
         </div>
         {hasChapters && (
-          <div className="relative flex flex-col col-span-3 overflow-y-scroll text-gray-700">
+          <div className="relative flex flex-col col-span-3 overflow-y-auto">
             <div className="lg:absolute top-0 left-0 w-full h-full flex flex-col">
               <h3 className="p-3 font-bold text-lg ">Chapters</h3>
               <ol>
@@ -111,11 +111,11 @@ export function VideoDetail({ video }: VideoDetailProps) {
                   >
                     <div className="group cursor-pointer flex space-x-3 p-3 font-semibold hover:bg-ct-yellow">
                       <div className="flex items-start">
-                        <div className="w-6 leading-5 pt-px text-xs opacity-60 group-hover:opacity-100 font-normal tracking-tight">
+                        <div className="w-6 leading-5 pt-px text-xs font-normal tracking-tight">
                           {idx + 1}
                         </div>
                       </div>
-                      <div className="relative w-20 h-12 aspect-video flex-shrink-0 overflow-hidden border border-gray-300">
+                      <div className="relative w-20 h-12 aspect-video flex-shrink-0 overflow-hidden border border-gray-300 group-hover:border-white">
                         <Image
                           src={`https://image.mux.com/${video.playback_id}/thumbnail.png?width=400&height=200&fit_mode=smartcrop&time=${timestampToSeconds(chapter.startTime)}`}
                           alt={chapter.title}
@@ -125,7 +125,7 @@ export function VideoDetail({ video }: VideoDetailProps) {
                         />
                       </div>
                       <div className="flex flex-col">
-                        <div className="w-full leading-tight">
+                        <div className="w-full leading-tight group-hover:underline">
                           {chapter.title}
                         </div>
                         <div>
@@ -142,14 +142,16 @@ export function VideoDetail({ video }: VideoDetailProps) {
           </div>
         )}
       </div>
-      <div className="md:max-w-4xl w-full mx-auto px-5 md:px-10">
+      <div className=" px-5 md:px-10">
         <h1 className="text-3xl md:text-[42px] font-extrabold mb-4 leading-tight">
           {video.title}
         </h1>
-        <p className="text-gray-600 text-xl mb-4">
+        <p className="text-gray-400 text-xl mb-4">
           {formatRelative(new Date(video.published_at), new Date())}
         </p>
-        <p className="text-[21px] mb-12">{video.description}</p>
+        <p className="text-[21px] mb-12 prose prose-lg max-w-2xl">
+          {video.description}
+        </p>
 
         {false && video.chapters && (
           <div className="mb-12 text-[21px]">

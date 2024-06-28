@@ -38,8 +38,8 @@ export default async function RootLayout({
   console.log("settings", settings);
   return (
     <html lang="en">
-      <body className="bg-white text-black">
-        <header className="border-gray-200 border-b px-5 md:px-10 py-4 md:py-5">
+      <body className="bg-black text-white">
+        <header className=" px-5 md:px-10 py-4 md:py-5">
           <nav className="flex items-center md:justify-between ">
             <h1 className="flex-1">
               <Link href="/">
