@@ -4,7 +4,8 @@ import { VideoThumbnail } from "@/components/video-thumbnail";
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const { data: playlist } = await bold.playlists.get(params.id);
   const videos = playlist.videos;
   return {
@@ -25,7 +26,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function Page({ params }: any) {
+export default async function Page(props: any) {
+  const params = await props.params;
   const { data: playlist } = await bold.playlists.get(params.id);
   return (
     <div>

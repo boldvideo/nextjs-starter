@@ -4,7 +4,8 @@ import { VideoDetail } from "@/components/video-detail";
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const { data: video } = await bold.videos.get(params.id);
   return {
     title: video.title,
@@ -22,7 +23,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function VideoPage({ params }: any) {
+export default async function VideoPage(props: any) {
+  const params = await props.params;
   const { data: video } = await bold.videos.get(params.id);
 
   if (!video) return <p>loading</p>;
