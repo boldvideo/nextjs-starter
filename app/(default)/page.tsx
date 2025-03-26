@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { bold } from "client";
 import { VideoThumbnail } from "components/video-thumbnail";
@@ -22,12 +23,12 @@ export default async function Home() {
 
       {settings.featured_playlists.map((pl) => {
         return (
-          <>
+          <React.Fragment key={pl.id}>
             <div className="flex justify-between items-center mb-5">
               <h2 className="font-bold text-3xl">
                 <Link href={`/pl/${pl.id}`} className="flex items-center">
                   <span className="hover:text-primary">{pl.title}</span>
-                  <span className="font-normal text-base text-gray-600 ml-3 px-3 py-1 border-gray-200 hover:border-gray-600 hover:text-gray-800 hover:cursor-pointer border rounded-full">
+                  <span className="font-normal text-base text-white ml-3 px-3 py-1 border-gray-200 hover:border-gray-600 hover:text-gray-800 hover:cursor-pointer border rounded-full">
                     {pl.videos.length} Videos
                   </span>
                 </Link>
@@ -46,7 +47,7 @@ export default async function Home() {
                 </li>
               ))}
             </ul>
-          </>
+          </React.Fragment>
         );
       })}
     </div>

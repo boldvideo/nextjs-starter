@@ -51,10 +51,10 @@ export default async function RootLayout({
               </Link>
             </h1>
             <div className="hidden md:flex font-semibold text-lg px-3 gap-6">
-              {settings.menu_items.map((item) => (
+              {settings.menu_items.map((item, idx) => (
                 <Link
                   className="hover:text-primary"
-                  key={item.label}
+                  key={`${item.label}-${idx}`}
                   href={item.url}
                 >
                   {item.label}
