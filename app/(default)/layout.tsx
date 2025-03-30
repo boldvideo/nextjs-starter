@@ -3,6 +3,7 @@ import "./globals.css";
 
 import logo from "../../public/yourlogohere.png";
 import { bold } from "@/client";
+import type { Settings } from "@boldvideo/bold-js";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
 
@@ -14,11 +15,11 @@ export const metadata: Metadata = {
     title: "Bold Video x Next.js Starter Kit",
     description:
       "Bold Video Starter Kit: Supercharge videos, rapid encoding/transcription.",
-    url: "https://starter-demo.wearebold.af",
+    url: "https://starter-demo.bold.video",
     siteName: "Bold Video x Next.js Starter Kit",
     images: [
       {
-        url: "https://starter-demo.wearebold.af/og-static.png",
+        url: "https://starter-demo.bold.video/og-static.png",
         width: 1200,
         height: 630,
       },
@@ -33,8 +34,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let settings = { menu_items: [] };
-  
+  let settings = { menu_items: [] } as Partial<Settings> as Settings;
+
   try {
     const settingsResponse = await bold.settings();
     settings = settingsResponse.data;
