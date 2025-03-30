@@ -5,8 +5,8 @@ import { formatDuration } from "util/format-duration";
 
 export function VideoThumbnail({ video }: { video: any }) {
   return (
-    <div className="aspect-video group relative ">
-      <div className="aspect-video relative overflow-hidden">
+    <div className="aspect-video group relative">
+      <div className="aspect-video relative overflow-hidden rounded-lg">
         <Image
           src={video.thumbnail}
           alt={video.title}
@@ -14,7 +14,7 @@ export function VideoThumbnail({ video }: { video: any }) {
           className="object-cover"
           sizes="100vw, (max-width: 640px) 640px"
         />
-        <span className="bg-black text-white absolute px-2 py-1 font-semibold text-sm bottom-3 right-3 rounded">
+        <span className="bg-black text-white absolute px-2 py-1 font-semibold text-sm bottom-3 right-3 rounded-md">
           {formatDuration(video.duration)}
         </span>
       </div>
