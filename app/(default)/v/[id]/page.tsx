@@ -34,7 +34,7 @@ export default async function VideoPage({
 }: {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ t?: string }>;
-}): Promise<React.JSX.Element> {
+}) {
   let video: Video | null = null;
   let errorMessage: string | null = null;
 
@@ -76,5 +76,7 @@ export default async function VideoPage({
   // Parse start time from query params
   const startTime = searchParams.t ? parseInt(searchParams.t, 10) : undefined;
 
-  return <VideoDetail video={video} startTime={startTime} />;
+  return (
+    <VideoDetail video={video} startTime={startTime} className="max-w-7xl" />
+  );
 }
