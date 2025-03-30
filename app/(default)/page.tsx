@@ -1,7 +1,7 @@
 import React from "react";
 import { bold } from "@/client";
 import { VideoThumbnail } from "@/components/video-thumbnail";
-import { FeaturedPlaylist } from "@/components/FeaturedPlaylist";
+import { FeaturedPlaylist } from "@/components/featured-playlist";
 import type { Settings, Video, Playlist } from "@boldvideo/bold-js";
 
 // How often this page should revalidate (in seconds)
