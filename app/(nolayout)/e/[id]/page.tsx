@@ -1,11 +1,12 @@
 import { bold } from "@/client";
 // import { Player } from "components/embed-player";
-import { Player } from "components/player";
+import { Player } from "@/components/players";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const { data: video } = await bold.videos.get(params.id);
   return {
     title: video.title,
@@ -23,7 +24,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function EmbedPage({ params }: any) {
+export default async function EmbedPage(props: any) {
+  const params = await props.params;
   const { data: video } = await bold.videos.get(params.id);
 
   if (!video) return <p>loading</p>;
