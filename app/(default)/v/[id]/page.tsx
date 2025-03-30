@@ -29,14 +29,17 @@ export async function generateMetadata(props: {
 }
 
 export default async function VideoPage({
-  params,
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
-  params: { id: string };
-  searchParams: { t?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ t?: string }>;
 }): Promise<React.JSX.Element> {
   let video: Video | null = null;
   let errorMessage: string | null = null;
+
+  const params = await paramsPromise;
+  const searchParams = await searchParamsPromise;
 
   try {
     const response = await bold.videos.get(params.id);
