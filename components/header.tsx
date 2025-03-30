@@ -1,8 +1,6 @@
-"use client";
-
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
 import { SearchBar } from "./search-bar";
 import { SearchPreview } from "./search-preview";
 import { ThemeToggle } from "./theme-toggle";
@@ -14,17 +12,10 @@ interface HeaderProps {
 }
 
 export function Header({ logo, menuItems }: HeaderProps) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const query = searchParams?.get("q") || "";
-  const isSearchPage = pathname === "/s";
-
   return (
     <>
       <header
-        className={`px-5 md:px-10 py-4 border-b border-border transition-all ${
-          query && !isSearchPage ? "bg-primary/5" : ""
-        }`}
+        className={`px-5 md:px-10 py-4 border-b border-border transition-all`}
       >
         <div className="container mx-auto">
           <nav className="flex flex-col md:flex-row gap-4 md:gap-0">
@@ -58,26 +49,38 @@ export function Header({ logo, menuItems }: HeaderProps) {
 
               {/* Right Side - Search and Theme Toggle (Desktop Only) */}
               <div className="hidden md:flex items-center space-x-4 flex-1 justify-end max-w-md">
-                <SearchBar className="w-full max-w-xs" />
-                <ThemeToggle />
+                <Suspense>
+                  <SearchBar className="w-full max-w-xs" />
+                </Suspense>
+                <Suspense>
+                  <ThemeToggle />
+                </Suspense>
               </div>
 
               {/* Mobile Menu Button */}
               <div className="flex items-center gap-3 md:hidden">
-                <ThemeToggle />
-                <MobileMenu menuItems={menuItems} />
+                <Suspense>
+                  <ThemeToggle />
+                </Suspense>
+                <Suspense>
+                  <MobileMenu menuItems={menuItems} />
+                </Suspense>
               </div>
             </div>
 
             {/* Mobile Search Row */}
             <div className="md:hidden w-full">
-              <SearchBar className="w-full" isMobile={true} />
+              <Suspense>
+                <SearchBar className="w-full" isMobile={true} />
+              </Suspense>
             </div>
           </nav>
         </div>
       </header>
 
-      <SearchPreview />
+      <Suspense>
+        <SearchPreview />
+      </Suspense>
     </>
   );
 }
