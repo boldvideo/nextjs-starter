@@ -1,6 +1,6 @@
 import { bold } from "@/client";
 // import { Player } from "components/embed-player";
-import { Player } from "components/player";
+import { Player } from "@/components/players";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;

@@ -1,25 +1,43 @@
 "use client";
 
 import { fetcher } from "@/util/fetcher";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
-import { formatDuration } from "@/util/format-duration";
 
-type Monologue = {
-  elements: Cue[];
-  speaker: number;
-};
-type Cue = {
-  type: "text" | "punct";
-  value?: string;
-  ts?: number;
-  end_ts?: number;
-  confidence?: number;
-};
+// Transcript format types
+interface TranscriptWord {
+  confidence: number;
+  end: number;
+  speaker: string;
+  start: number;
+  word: string;
+}
 
-type Transcript = {
-  monologues: Monologue[];
-};
+interface TranscriptUtterance {
+  confidence: number;
+  end: number;
+  speaker: string;
+  start: number;
+  text: string;
+  words: TranscriptWord[];
+}
+
+interface TranscriptMetadata {
+  duration: number;
+  language: string;
+  source_model: string;
+  source_url: string;
+  source_vendor: string;
+  source_version: string;
+  speakers: Record<string, null>;
+  transcription_date: string;
+  version: string;
+}
+
+interface TranscriptData {
+  metadata: TranscriptMetadata;
+  utterances: TranscriptUtterance[];
+}
 
 export function Transcript({
   url,
@@ -28,126 +46,87 @@ export function Transcript({
 }: {
   url: string;
   onCueClick?: (time: number) => void;
-  playerRef: any;
+  playerRef: React.RefObject<HTMLVideoElement | null>;
 }) {
-  const { data, error } = useSWR(url, fetcher);
+  const { data, error, isLoading } = useSWR<TranscriptData>(url, fetcher);
+  const [activeUtteranceIndex, setActiveUtteranceIndex] = useState<number>(-1);
 
   useEffect(() => {
-    // crate flat word list
-    const words = data?.monologues
-      ? data.monologues.reduce((acc: any, block: Monologue) => {
-          return block.elements.reduce((acc2: any, el: Cue) => {
-            if (el.ts) acc2.push(el);
-            return acc2;
-          }, acc);
-        }, [])
-      : [];
+    if (!data || !playerRef.current) return;
+
+    // Store a reference to the player element
+    const player = playerRef.current;
 
     const onTimeUpdate = () => {
-      // `text` class is coming from the transcript type
-      const wordNodes = document.getElementsByClassName(
-        "text"
-      ) as HTMLCollectionOf<HTMLElement>;
-      const hl = document.getElementById("highlighter");
-      const bhl = document.getElementById("block-highlighter");
-      const activeIndex = words.findIndex((word: any) => {
-        return (
-          word.ts >= playerRef.current.currentTime &&
-          playerRef.current.currentTime <= word.end_ts
-        );
-      });
+      if (!player) return;
 
-      const active = wordNodes[activeIndex];
-      const parent = active?.parentElement;
-      if (hl && bhl && active && parent) {
-        hl.style.display = "inline-block";
-        hl.style.top = `${active.offsetTop - 4}px`;
-        hl.style.left = `${active.offsetLeft - 4}px`;
-        hl.style.width = `${active.offsetWidth + 8}px`;
-        hl.style.height = `${active.offsetHeight + 8}px`;
-        hl.textContent = words[activeIndex].value;
+      const currentTime = player.currentTime;
 
-        bhl.style.display = "inline-block";
-        bhl.style.top = `${parent.offsetTop - 4}px`;
-        bhl.style.left = `${parent.offsetLeft - 4}px`;
-        bhl.style.width = `${parent.offsetWidth + 8}px`;
-        bhl.style.height = `${parent.offsetHeight + 8}px`;
+      // Find the current utterance
+      const newActiveUtteranceIndex = data.utterances.findIndex(
+        (utterance) =>
+          currentTime >= utterance.start && currentTime <= utterance.end
+      );
+
+      if (newActiveUtteranceIndex !== activeUtteranceIndex) {
+        setActiveUtteranceIndex(newActiveUtteranceIndex);
       }
     };
 
-    if (playerRef && playerRef.current) {
-      playerRef.current.addEventListener("timeupdate", onTimeUpdate);
-    }
+    player.addEventListener("timeupdate", onTimeUpdate);
 
     return () => {
-      if (playerRef && playerRef.current) {
-        return playerRef.current.removeEventListener(
-          "timeupdate",
-          onTimeUpdate
-        );
-      }
+      player.removeEventListener("timeupdate", onTimeUpdate);
     };
-  }, [data, playerRef.current]);
+  }, [data, playerRef, activeUtteranceIndex]);
 
   const handleCueClick = (time: number) => {
-    if (onCueClick) onCueClick(time - 0.5);
+    if (onCueClick) onCueClick(time);
   };
 
   if (error) return null;
-  if (!data) return <p>loading</p>;
+  if (isLoading) return <p className="text-gray-500">Loading transcript...</p>;
+  if (!data || data.utterances.length === 0) return null;
 
-  if (data.monologues.length < 1) {
-    return null;
-  }
+  const formatTimestamp = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="relative">
-      <h2 className="font-bold text-2xl mb-10">
-        Transcript <span>(auto-generated)</span>
+      <h2 className="font-bold text-2xl mb-8">
+        Transcript{" "}
+        <span className="text-gray-500 text-base font-normal">
+          (auto-generated)
+        </span>
       </h2>
-      <span
-        id="highlighter"
-        className="absolute pl-1 pt-0.5 rounded-sm text-xl transition-all duration-75 w-12 text-white bg-primary z-20 hidden"
-      />
-      <span
-        id="block-highlighter"
-        className="absolute pl-1 pt-0.5 rounded-sm transition-all duration-75 bg-primary bg-opacity-20 z-10 hidden"
-      />
-      <div className="text-xl">
-        {data.monologues.map((block: any, id: number) => {
-          return (
-            <div
-              key={`s_${block.speaker}_id_${id}`}
-              className="mb-8 leading-normal"
-            >
-              {/*<div className="w-48"><strong>Speaker {block.speaker}:</strong></div>*/}
-              <div
-                className="mb-2"
-                onClick={() => handleCueClick(block.elements[0].ts)}
-              >
-                <strong className="cursor-pointer hover:text-primary">
-                  Speaker {block.speaker} [
-                  {formatDuration(block.elements[0].ts)}]
-                </strong>
-              </div>
-              <p className="paragraph">
-                {block.elements.map((el: any, id: number) => {
-                  return (
-                    <span
-                      key={`ts_${el.ts || `${el.value}-${id}`}`}
-                      className={`${el.type} cursor-pointer hover:text-primary`}
-                      data-ts={el.ts}
-                      data-end-ts={el.end_ts}
-                      onClick={() => handleCueClick(el.ts)}
-                    >
-                      {el.value}
-                    </span>
-                  );
-                })}
-              </p>
+      <div className="space-y-6">
+        {data.utterances.map((utterance, idx) => (
+          <div
+            id={`utterance-${idx}`}
+            key={`utterance-${idx}`}
+            className={`utterance border-l-4 ${
+              idx === activeUtteranceIndex
+                ? "border-primary"
+                : "border-muted-foreground"
+            } pl-5 py-2 cursor-pointer transition-colors duration-200`}
+            onClick={() => handleCueClick(utterance.start)}
+          >
+            <div className="mb-3 ml-2 flex items-center">
+              <span className="font-semibold text-base text-foreground">
+                Speaker {utterance.speaker}
+              </span>
+              <span className="text-sm bg-primary ml-2 px-2 py-1 rounded text-primary-foreground">
+                {formatTimestamp(utterance.start)}
+              </span>
             </div>
-          );
-        })}
+            <div className="paragraph p-2 rounded-md text-[17px] max-w-[42rem] leading-7 tracking-wide hover:bg-primary hover:text-primary-foreground">
+              {utterance.text}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

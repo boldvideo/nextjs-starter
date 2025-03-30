@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import formatRelative from "date-fns/formatRelative";
+import { formatRelative } from "date-fns/formatRelative";
 import { formatDuration } from "util/format-duration";
 
 export function VideoThumbnail({ video }: { video: any }) {
