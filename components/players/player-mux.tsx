@@ -1,8 +1,14 @@
 "use client";
-import MuxPlayer from "@mux/mux-player-react";
+import dynamic from "next/dynamic";
 import { bold } from "@/client";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import type { Video } from "@boldvideo/bold-js";
+
+// Import MuxPlayer with SSR disabled to prevent hydration errors
+const MuxPlayer = dynamic(
+  () => import("@mux/mux-player-react").then((mod) => mod.default),
+  { ssr: false }
+);
 
 // Define a type for the Mux Player Element since it's not exported directly
 type MuxPlayerRefElement = {
@@ -254,12 +260,21 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
               ? "fixed sm:bottom-4 sm:right-4 sm:top-auto top-0 w-full sm:w-1/3 lg:w-1/4 bg-black z-50 rounded-lg shadow-lg overflow-hidden"
               : "w-full h-full"
           }
+          aspect-video bg-gray-900 relative
         `}
         style={{
           // Make sure mini player has proper interactions
           pointerEvents: isOutOfView ? "auto" : "inherit",
         }}
       >
+        {video.thumbnail && (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${video.thumbnail})` }}
+            aria-hidden="true"
+          />
+        )}
+
         <MuxPlayer
           ref={(el) => {
             playerRef.current = el;
@@ -280,7 +295,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
           poster={video.thumbnail}
           autoPlay={autoPlay}
           thumbnailTime={startTime || 0}
-          className="w-full h-full"
+          className="w-full h-full max-w-7xl relative z-10"
           onTimeUpdate={handleTimeUpdate}
           onPlay={(e) => bold.trackEvent(video, e)}
           onPause={(e) => bold.trackEvent(video, e)}
@@ -292,9 +307,10 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
           defaultHiddenCaptions={false}
           accentColor={primaryColor || undefined}
         />
+
         {isOutOfView && (
           <button
-            className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 z-10 hover:bg-opacity-80"
+            className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 z-20 hover:bg-opacity-80"
             onClick={() => setIsOutOfView(false)}
             aria-label="Close floating player"
           >

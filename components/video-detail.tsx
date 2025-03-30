@@ -143,72 +143,74 @@ export function VideoDetail({
   }, [video]);
 
   return (
-    <div className="container mx-auto flex flex-col pb-60 gap-y-8">
-      <div
-        className={clsx(
-          "w-full lg:max-h-[75vh]",
-          hasChapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
-          "overflow-hidden"
-        )}
-      >
-        <div className="w-full bg-black flex-grow aspect-video col-span-9">
-          <Player
-            video={video}
-            autoPlay={true}
-            ref={playerRef}
-            startTime={startTime}
-          />
-        </div>
-        {hasChapters && (
-          <div className="relative bg-sidebar flex flex-col col-span-3 overflow-y-auto">
-            <div className="lg:absolute top-0 left-0 w-full h-full flex flex-col">
-              <h3 className="p-3 font-bold text-lg ">Chapters</h3>
-              <ol>
-                {chapters.map((chapter, idx) => (
-                  <li
-                    key={chapter.startTime}
-                    onClick={() =>
-                      handleCueClick(timestampToSeconds(chapter.startTime))
-                    }
-                  >
-                    <div className="group cursor-pointer flex space-x-3 p-3 font-semibold hover:bg-primary hover:text-primary-foreground">
-                      <div className="flex items-start">
-                        <div className="w-6 leading-5 pt-px text-xs font-normal tracking-tight">
-                          {idx + 1}
-                        </div>
-                      </div>
-                      <div className="relative w-20 h-12 aspect-video flex-shrink-0 overflow-hidden border border-ring group-hover:border-primary">
-                        <Image
-                          src={`https://image.mux.com/${
-                            video.playback_id
-                          }/thumbnail.png?width=400&height=200&fit_mode=smartcrop&time=${timestampToSeconds(
-                            chapter.startTime
-                          )}`}
-                          alt={chapter.title}
-                          fill={true}
-                          style={{ objectFit: "cover" }}
-                          className=""
-                        />
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="w-full leading-tight">
-                          {chapter.title}
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground group-hover:text-primary-foreground text-xs">
-                            {chapter.startTime}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
+    <div className="flex flex-col pb-60 gap-y-8">
+      <div className="bg-black w-full flex justify-center">
+        <div
+          className={clsx(
+            "w-full  lg:max-h-[75vh] max-w-[1600px]",
+            hasChapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
+            "overflow-hidden"
+          )}
+        >
+          <div className="aspect-video lg:aspect-auto w-full bg-black flex-grow col-span-9">
+            <Player
+              video={video}
+              autoPlay={true}
+              ref={playerRef}
+              startTime={startTime}
+            />
           </div>
-        )}
+          {hasChapters && (
+            <div className="relative bg-sidebar flex flex-col col-span-3 overflow-y-auto">
+              <div className="lg:absolute top-0 left-0 w-full h-full flex flex-col">
+                <h3 className="p-3 font-bold text-lg ">Chapters</h3>
+                <ol>
+                  {chapters.map((chapter, idx) => (
+                    <li
+                      key={chapter.startTime}
+                      onClick={() =>
+                        handleCueClick(timestampToSeconds(chapter.startTime))
+                      }
+                    >
+                      <div className="group cursor-pointer flex space-x-3 p-3 font-semibold hover:bg-primary hover:text-primary-foreground">
+                        <div className="flex items-start">
+                          <div className="w-6 leading-5 pt-px text-xs font-normal tracking-tight">
+                            {idx + 1}
+                          </div>
+                        </div>
+                        <div className="relative w-20 h-12 aspect-video flex-shrink-0 overflow-hidden border border-ring group-hover:border-primary">
+                          <Image
+                            src={`https://image.mux.com/${
+                              video.playback_id
+                            }/thumbnail.png?width=400&height=200&fit_mode=smartcrop&time=${timestampToSeconds(
+                              chapter.startTime
+                            )}`}
+                            alt={chapter.title}
+                            fill={true}
+                            style={{ objectFit: "cover" }}
+                            className=""
+                          />
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="w-full leading-tight">
+                            {chapter.title}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground group-hover:text-primary-foreground text-xs">
+                              {chapter.startTime}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="px-5 md:px-10">
+      <div className="container mx-auto px-5 md:px-10">
         <h1 className="text-3xl md:text-[42px] font-extrabold mb-4 leading-tight">
           {video.title}
         </h1>
