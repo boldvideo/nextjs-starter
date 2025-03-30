@@ -26,6 +26,7 @@ interface ExtendedVideo extends Video {
 interface VideoDetailProps {
   video: ExtendedVideo;
   startTime?: number;
+  className?: string;
 }
 
 /**
@@ -107,6 +108,7 @@ const timestampToSeconds = (timestamp: string): number => {
 export function VideoDetail({
   video,
   startTime,
+  className = "max-w-7xl",
 }: VideoDetailProps): React.JSX.Element {
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const [isTranscriptLoading, setIsTranscriptLoading] = useState(false);
@@ -158,6 +160,7 @@ export function VideoDetail({
               autoPlay={true}
               ref={playerRef}
               startTime={startTime}
+              className={className}
             />
           </div>
           {hasChapters && (

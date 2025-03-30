@@ -3,7 +3,15 @@ import Image from "next/image";
 import { formatRelative } from "date-fns/formatRelative";
 import { formatDuration } from "util/format-duration";
 
-export function VideoThumbnail({ video }: { video: any }) {
+interface VideoThumbnailProps {
+  video: any;
+  prefetch?: boolean;
+}
+
+export function VideoThumbnail({
+  video,
+  prefetch = false,
+}: VideoThumbnailProps) {
   return (
     <div className="aspect-video group relative">
       <div className="aspect-video relative overflow-hidden rounded-lg">
@@ -19,7 +27,7 @@ export function VideoThumbnail({ video }: { video: any }) {
         </span>
       </div>
       <h3 className="mt-4 font-semibold text-lg">
-        <Link href={`/v/${video.id}`}>
+        <Link href={`/v/${video.id}`} prefetch={prefetch}>
           <span className="absolute -inset-2.5 z-10"></span>
           <span>{video.title}</span>
         </Link>
