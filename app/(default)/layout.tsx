@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-import logo from "../../public/yourlogohere.png";
+import logo from "../../public/bold-logo.svg";
 import { bold } from "@/client";
 import type { Settings } from "@boldvideo/bold-js";
 import { ThemeProvider } from "@/components/theme-provider";

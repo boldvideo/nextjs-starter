@@ -18,6 +18,17 @@
 </p>
 Welcome to the Bold Video Starter Kit, the easiest way to get started with <a href="http://bold.video?utm_source=github.com&utm_medium=readme&utm_campaign=bold-js" target="_blank">Bold Video</a>. This project is based on Next.js and Tailwind CSS and offers a simple and effective way to create video applications using Bold.
 
+## Features
+
+- **Dual Player Support**: Choose between Mux Player and Vidstack for video playback
+- **Dark Mode**: Built-in light/dark theme toggle with system preference detection
+- **Search Functionality**: Fast, accessible search with keyboard shortcuts (⌘+K)
+- **Next.js 15**: Latest App Router architecture with React Server Components
+- **Tailwind CSS v4**: Modern styling with OKLCH color space for better color perception
+- **Responsive Design**: Optimized for all device sizes
+- **Accessibility**: ARIA attributes, semantic HTML, and keyboard navigation
+- **Error Handling**: Robust error handling for API requests
+
 ## Getting Started
 There are two ways to get started: automatic mode and manual mode.
 
@@ -58,10 +69,35 @@ To create new menu items, go to the [Main Menu Settings](https://app.boldvideo.i
 
 If you want to change the appearance of the links, you can find the code for the navigation in the following files:
 
-`app/layout.tsx`
+`app/(default)/layout.tsx`
+`components/header.tsx`
 `components/mobile-menu.tsx`
 
 You can modify these files to adjust the styling or layout of the navigation according to your preferences.
+
+### Switching Video Players
+
+The starter kit supports two video player implementations:
+
+1. **Mux Player**: Based on Mux's official player component
+2. **Vidstack Player**: Based on the Vidstack player library
+
+To switch between them, edit the default export in `components/players/index.ts`:
+
+```typescript
+// Default player export - change this line to switch the default player
+export { MuxPlayerComponent as Player } from "./player-mux";
+// Or use Vidstack instead:
+// export { VidstackPlayer as Player } from "./player-vidstack";
+```
+
+You can also import specific players directly in your components:
+
+```typescript
+import { MuxPlayer } from "@/components/players";
+// or
+import { VidstackPlayer } from "@/components/players";
+```
 
 ### Adding Videos and Playlists
 To add videos, go to the "Videos" page by following this link: https://app.boldvideo.io/videos and click the "New Video" Button. Only videos with the "Status" set to "public" will appear on the index page of the Starter Kit.
@@ -76,31 +112,49 @@ To feature playlists on the index page, add them to "Featured Playlists" under S
 
 
 ### Color Customization
-To customize the colors of your application, you can modify the `tailwind.config.js` file located in the root of the project. The file contains two custom colors, background and primary, which you can adjust according to your needs or brand guidelines.
+The starter kit uses Tailwind v4 with OKLCH color space for modern, perceptually uniform colors. The color theme includes both light and dark modes.
 
-```javascript
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        white: "#ffffff",
-        black: "#000000",
-        background: "#111827",
-        primary: "#FF206E",
-      },
-    },
-  },
-  plugins: [],
-};
+To customize the colors, modify the CSS variables in `app/(default)/globals.css`:
+
+```css
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --primary: oklch(0.78 0.11 175);
+  --primary-foreground: oklch(0.26 0.04 183);
+  /* additional color variables... */
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --primary: oklch(0.78 0.11 175);
+  /* additional dark mode color variables... */
+}
+```
+
+The OKLCH format allows for more vibrant and accessible colors across different displays.
 ```
 
 After updating the colors, your application will automatically reflect the new color scheme.
+
+### Search Functionality
+
+The starter kit includes a powerful search feature with:
+
+- Search bar in the header with keyboard shortcut (⌘+K)
+- Instant search results preview
+- Dedicated search results page at `/s?q=query`
+- Mobile-optimized search interface
+
+The search implementation is in:
+- `components/search-bar.tsx`: The search input component
+- `components/search-preview.tsx`: Quick results dropdown
+- `app/api/search/route.ts`: Backend API endpoint
+- `app/(default)/s/page.tsx`: Full search results page
+
+To customize the search experience, you can modify these files according to your preferences.
 
 ## Deployment
 To deploy your app on [Vercel](https://vercel.com), follow these steps:
