@@ -30,12 +30,14 @@ export async function generateMetadata(props: {
 }
 
 export default async function PlaylistPage({
-  params,
+  params: paramsPromise,
 }: {
-  params: { id: string };
-}): Promise<React.JSX.Element> {
+  params: Promise<{ id: string }>;
+}) {
   let playlist: Playlist | null = null;
   let errorMessage: string | null = null;
+
+  const params = await paramsPromise;
 
   try {
     const response = await bold.playlists.get(params.id);
