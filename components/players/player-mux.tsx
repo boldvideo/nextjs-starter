@@ -20,6 +20,12 @@ type MuxPlayerRefElement = {
   removeEventListener: HTMLVideoElement["removeEventListener"];
 };
 
+// Cache for parsed chapters to avoid repeatedly parsing the same file
+const chaptersCache = new Map<
+  string,
+  Array<{ startTime: number; value: string }>
+>();
+
 /**
  * Extended Video type with additional properties used in our application
  */
@@ -70,6 +76,8 @@ interface MuxPlayerComponentProps {
   currentTime?: number;
   /** Start time in seconds to begin playback from */
   startTime?: number;
+  /** Additional CSS classes to apply to the player */
+  className?: string;
 }
 
 /**
@@ -82,6 +90,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
     onTimeUpdate,
     currentTime,
     startTime,
+    className = "",
   }: MuxPlayerComponentProps,
   ref
 ) {
@@ -90,6 +99,11 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
   const playerRef = useRef<MuxPlayerRefElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
+  const [chapters, setChapters] = useState<Array<{
+    startTime: number;
+    value: string;
+  }> | null>(null);
+  const chaptersLoadedRef = useRef(false);
 
   // Get the primary color from CSS variables
   useEffect(() => {
@@ -123,15 +137,24 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
     };
   }, [isOutOfView, video]);
 
-  // Handle chapters if they exist
+  // Fetch and parse chapters
   useEffect(() => {
-    // Early return if player is not available or chapters URL doesn't exist
-    if (!playerRef.current || !video.chapters_url) return;
+    if (!video.chapters_url) return;
 
-    const chaptersUrl = video.chapters_url;
+    // Check the cache first
+    if (chaptersCache.has(video.chapters_url)) {
+      console.log("Using cached chapters");
+      setChapters(chaptersCache.get(video.chapters_url) || null);
+      return;
+    }
 
-    const loadChapters = async () => {
+    const fetchChapters = async () => {
       try {
+        const chaptersUrl = video.chapters_url;
+        // Video.chapters_url is guaranteed to be defined here because of the check above
+        if (!chaptersUrl) return;
+
+        console.log("Fetching chapters from:", chaptersUrl);
         const response = await fetch(chaptersUrl);
         const chaptersText = await response.text();
 
@@ -147,7 +170,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
           return;
         }
 
-        const chapters = lines
+        const parsedChapters = lines
           .map((block) => {
             // Split the block into lines
             const blockLines = block.split("\n");
@@ -187,38 +210,65 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
               chapter !== null
           );
 
-        if (chapters.length === 0) {
+        if (parsedChapters.length === 0) {
           console.warn("Failed to parse chapters from WEBVTT file");
           return;
         }
 
-        // Add chapters to the player once it's ready
-        const addChaptersToPlayer = () => {
-          const player = playerRef.current;
-          if (player && typeof player.addChapters === "function") {
-            player.addChapters(chapters);
-          } else {
-            console.error("Player doesn't support chapter addition");
-          }
-        };
+        console.log("Parsed chapters:", parsedChapters);
 
-        // Check if the player is ready to receive chapters
-        const player = playerRef.current;
-        if (player && player.readyState >= 1) {
-          addChaptersToPlayer();
-        } else if (player) {
-          player.addEventListener("loadedmetadata", addChaptersToPlayer, {
-            once: true,
-          });
+        // Store in cache
+        if (video.chapters_url) {
+          chaptersCache.set(video.chapters_url, parsedChapters);
         }
+
+        // Set state
+        setChapters(parsedChapters);
       } catch (error) {
         console.error("Error loading chapters:", error);
       }
     };
 
-    // Load chapters when the component mounts or the chapter URL changes
-    loadChapters();
+    fetchChapters();
   }, [video.chapters_url]);
+
+  // Apply chapters to player whenever chapters or player ref changes
+  useEffect(() => {
+    if (!chapters || !playerRef.current || chaptersLoadedRef.current) return;
+
+    const addChaptersToPlayer = () => {
+      const player = playerRef.current;
+      if (player && typeof player.addChapters === "function" && chapters) {
+        player.addChapters(chapters);
+        console.log("Successfully added chapters to player");
+        chaptersLoadedRef.current = true;
+      } else {
+        console.error("Player doesn't support chapter addition");
+      }
+    };
+
+    const player = playerRef.current;
+    if (player && player.readyState >= 1) {
+      addChaptersToPlayer();
+    } else if (player) {
+      console.log("Player not ready yet, adding event listeners");
+      const handleReady = () => {
+        console.log("Player ready event fired");
+        addChaptersToPlayer();
+      };
+
+      player.addEventListener("loadedmetadata", handleReady, { once: true });
+      player.addEventListener("canplay", handleReady, { once: true });
+
+      // Safety timeout
+      setTimeout(handleReady, 2000);
+    }
+  }, [chapters]);
+
+  // Reset chapters loaded flag when video changes
+  useEffect(() => {
+    chaptersLoadedRef.current = false;
+  }, [video.id]);
 
   // Handle initial time when the player loads
   useEffect(() => {
@@ -277,12 +327,25 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
 
         <MuxPlayer
           ref={(el) => {
+            // Store the reference
             playerRef.current = el;
+
             // Handle forwarded ref
             if (typeof ref === "function") {
               ref(el);
             } else if (ref) {
               (ref as React.MutableRefObject<any>).current = el;
+            }
+
+            // If we already have chapters parsed, try to add them immediately
+            if (el && chapters && !chaptersLoadedRef.current) {
+              setTimeout(() => {
+                if (el && typeof el.addChapters === "function" && chapters) {
+                  console.log("Adding chapters on ref assignment");
+                  el.addChapters(chapters);
+                  chaptersLoadedRef.current = true;
+                }
+              }, 100);
             }
           }}
           playbackId={video.playback_id}
@@ -295,15 +358,32 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
           poster={video.thumbnail}
           autoPlay={autoPlay}
           thumbnailTime={startTime || 0}
-          className="w-full h-full max-w-7xl relative z-10"
+          className={`w-full h-full relative z-10 ${className}`}
           onTimeUpdate={handleTimeUpdate}
           onPlay={(e) => bold.trackEvent(video, e)}
           onPause={(e) => bold.trackEvent(video, e)}
-          onLoadedMetadata={(e) => bold.trackEvent(video, e)}
+          onLoadedMetadata={(e) => {
+            bold.trackEvent(video, e);
+            console.log("MuxPlayer loadedmetadata event");
+
+            // One more attempt to add chapters on metadata loaded
+            if (!chaptersLoadedRef.current && playerRef.current && chapters) {
+              const player = playerRef.current;
+              if (typeof player.addChapters === "function") {
+                console.log("Adding chapters on metadata loaded");
+                player.addChapters(chapters);
+                chaptersLoadedRef.current = true;
+              }
+            }
+          }}
           playsInline
           currentTime={startTime || currentTime}
           playbackRate={video.playback_speed || 1}
-          storyboardSrc={`https://image.mux.com/${video.playback_id}/storyboard.vtt`}
+          storyboardSrc={
+            video.playback_id
+              ? `https://image.mux.com/${video.playback_id}/storyboard.vtt`
+              : undefined
+          }
           defaultHiddenCaptions={false}
           accentColor={primaryColor || undefined}
         />
