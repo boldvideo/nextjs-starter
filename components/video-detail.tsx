@@ -6,6 +6,9 @@ import { Player } from "@/components/players";
 import { Transcript } from "@/components/transcript";
 import { useRef, useState, useEffect, useCallback } from "react";
 import type { Video } from "@boldvideo/bold-js";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 
 /**
  * Extended Video type with additional properties used in our application
@@ -104,6 +107,51 @@ const timestampToSeconds = (timestamp: string): number => {
   return hours * 3600 + minutes * 60 + seconds;
 };
 
+interface FormattedDescriptionProps {
+  text: string;
+}
+
+function FormattedDescription({ text }: FormattedDescriptionProps) {
+  // Convert URLs to markdown links
+  const withLinks = text.replace(
+    /(https?:\/\/[^\s]+)/g,
+    (url) => `[${url}](${url})`
+  );
+
+  // Convert Twitter handles to links
+  const withTwitterHandles = withLinks.replace(
+    /(?:^|\s)@(\w+)/g,
+    (match, handle) => ` [@${handle}](https://twitter.com/${handle})`
+  );
+
+  // Convert Twitter-style mentions (/username) to links
+  const withSlashHandles = withTwitterHandles.replace(
+    /(?:^|\s)\/(\w+)/g,
+    (match, handle) => ` [/${handle}](https://twitter.com/${handle})`
+  );
+
+  // Preserve newlines by converting them to <br/> tags
+  const withLineBreaks = withSlashHandles.replace(/\n/g, "  \n");
+
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        a: ({ ...props }) => (
+          <a
+            {...props}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          />
+        ),
+      }}
+    >
+      {withLineBreaks}
+    </ReactMarkdown>
+  );
+}
+
 /**
  * Video detail page component showing a video player and metadata
  */
@@ -178,12 +226,12 @@ export function VideoDetail({
       >
         <div
           className={clsx(
-            "w-full lg:max-h-[50vh] max-w-[1600px]",
+            "w-full max-w-[1600px]",
             hasChapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
             "overflow-hidden"
           )}
         >
-          <div className="aspect-video w-full lg:h-full bg-black flex-grow col-span-9">
+          <div className="aspect-video lg:max-h-[50vh] 2xl:max-h-[50vh] lg:aspect-auto w-full lg:h-full bg-black flex-grow col-span-9">
             <Player
               video={video}
               autoPlay={true}
@@ -256,9 +304,9 @@ export function VideoDetail({
         <p className="text-muted-foreground text-xl mb-4">
           {formatRelative(new Date(video.published_at), new Date())}
         </p>
-        <p className="text-[21px] mb-12 prose prose-lg max-w-2xl">
-          {video.description}
-        </p>
+        <div className="text-[21px] mb-12 prose prose-lg max-w-2xl">
+          <FormattedDescription text={video.description || ""} />
+        </div>
 
         {/* This section is currently disabled (false &&) but kept for reference */}
         {false && video.chapters && (
