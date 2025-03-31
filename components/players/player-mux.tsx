@@ -78,6 +78,8 @@ interface MuxPlayerComponentProps {
   startTime?: number;
   /** Additional CSS classes to apply to the player */
   className?: string;
+  /** Whether the player is out of view and should be shown as a floating player */
+  isOutOfView?: boolean;
 }
 
 /**
@@ -91,11 +93,10 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
     currentTime,
     startTime,
     className = "",
+    isOutOfView = false,
   }: MuxPlayerComponentProps,
   ref
 ) {
-  const prevScrollY = useRef(0);
-  const [isOutOfView, setIsOutOfView] = useState<boolean>(false);
   const playerRef = useRef<MuxPlayerRefElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
@@ -116,34 +117,12 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
     }
   }, []);
 
-  // Handle scroll behavior for floating player
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > window.innerHeight * 0.7 && !isOutOfView) {
-        setIsOutOfView(true);
-      }
-      if (currentScrollY < window.innerHeight * 0.7 && isOutOfView) {
-        setIsOutOfView(false);
-      }
-
-      prevScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [isOutOfView, video]);
-
   // Fetch and parse chapters
   useEffect(() => {
     if (!video.chapters_url) return;
 
     // Check the cache first
     if (chaptersCache.has(video.chapters_url)) {
-      console.log("Using cached chapters");
       setChapters(chaptersCache.get(video.chapters_url) || null);
       return;
     }
@@ -154,19 +133,16 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
         // Video.chapters_url is guaranteed to be defined here because of the check above
         if (!chaptersUrl) return;
 
-        console.log("Fetching chapters from:", chaptersUrl);
         const response = await fetch(chaptersUrl);
         const chaptersText = await response.text();
 
         if (!chaptersText.includes("WEBVTT")) {
-          console.warn("Invalid WEBVTT format");
           return;
         }
 
         // Parse the WEBVTT file for chapters
         const lines = chaptersText.split("\n\n").slice(1); // Skip the WEBVTT header
         if (lines.length === 0) {
-          console.warn("No chapters found in WEBVTT file");
           return;
         }
 
@@ -211,11 +187,8 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
           );
 
         if (parsedChapters.length === 0) {
-          console.warn("Failed to parse chapters from WEBVTT file");
           return;
         }
-
-        console.log("Parsed chapters:", parsedChapters);
 
         // Store in cache
         if (video.chapters_url) {
@@ -240,10 +213,9 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
       const player = playerRef.current;
       if (player && typeof player.addChapters === "function" && chapters) {
         player.addChapters(chapters);
-        console.log("Successfully added chapters to player");
         chaptersLoadedRef.current = true;
       } else {
-        console.error("Player doesn't support chapter addition");
+        // Player doesn't support chapter addition
       }
     };
 
@@ -251,9 +223,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
     if (player && player.readyState >= 1) {
       addChaptersToPlayer();
     } else if (player) {
-      console.log("Player not ready yet, adding event listeners");
       const handleReady = () => {
-        console.log("Player ready event fired");
         addChaptersToPlayer();
       };
 
@@ -307,24 +277,16 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
         className={`
           ${
             isOutOfView
-              ? "fixed sm:bottom-4 sm:right-4 sm:top-auto top-0 w-full sm:w-1/3 lg:w-1/4 bg-black z-50 rounded-lg shadow-lg overflow-hidden"
-              : "w-full h-full"
+              ? "fixed sm:bottom-4 sm:right-4 sm:top-auto top-0 w-full sm:w-1/3 lg:w-1/4 bg-black z-50 rounded-lg shadow-lg"
+              : "relative w-full h-full flex items-center justify-center"
           }
-          aspect-video bg-gray-900 relative
+          aspect-video 
         `}
         style={{
           // Make sure mini player has proper interactions
           pointerEvents: isOutOfView ? "auto" : "inherit",
         }}
       >
-        {video.thumbnail && (
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${video.thumbnail})` }}
-            aria-hidden="true"
-          />
-        )}
-
         <MuxPlayer
           ref={(el) => {
             // Store the reference
@@ -341,7 +303,6 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
             if (el && chapters && !chaptersLoadedRef.current) {
               setTimeout(() => {
                 if (el && typeof el.addChapters === "function" && chapters) {
-                  console.log("Adding chapters on ref assignment");
                   el.addChapters(chapters);
                   chaptersLoadedRef.current = true;
                 }
@@ -391,7 +352,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
         {isOutOfView && (
           <button
             className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 z-20 hover:bg-opacity-80"
-            onClick={() => setIsOutOfView(false)}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             aria-label="Close floating player"
           >
             <svg

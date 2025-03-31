@@ -35,18 +35,17 @@ export default async function VideoPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<{ t?: string }>;
 }) {
-  let video: Video | null = null;
-  let errorMessage: string | null = null;
-
   const params = await paramsPromise;
   const searchParams = await searchParamsPromise;
+
+  let video: Video | null = null;
+  let errorMessage: string | null = null;
 
   try {
     const response = await bold.videos.get(params.id);
     video = response.data;
   } catch (error) {
     errorMessage = "Failed to load video. Please try again later.";
-    console.error("Failed to fetch video:", error);
   }
 
   // Handle error state

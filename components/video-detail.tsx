@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { formatRelative } from "date-fns";
 import { Player } from "@/components/players";
 import { Transcript } from "@/components/transcript";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import type { Video } from "@boldvideo/bold-js";
 
 /**
@@ -44,6 +44,8 @@ const parseChapters = (webvttString: string): Chapter[] => {
   if (!webvttString) return [];
   if (!webvttString.includes("WEBVTT")) return [];
   const lines = webvttString.split("\n\n").slice(1); // Skip the WEBVTT header and split chapters
+  if (lines.length < 2) return [];
+
   return lines.map((line) => {
     const [_identifier, timeRange, title] = line.split("\n");
     const [startTime] = timeRange.split(" --> ");
@@ -111,8 +113,32 @@ export function VideoDetail({
   className = "max-w-7xl",
 }: VideoDetailProps): React.JSX.Element {
   const playerRef = useRef<HTMLVideoElement | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
   const [isTranscriptLoading, setIsTranscriptLoading] = useState(false);
   const [hasTranscript, setHasTranscript] = useState(false);
+  const [isOutOfView, setIsOutOfView] = useState<boolean>(false);
+  const prevScrollY = useRef(0);
+
+  // Handle scroll behavior for floating player
+  const handleScroll = useCallback(() => {
+    const currentScrollY = window.scrollY;
+    if (currentScrollY > window.innerHeight * 0.7 && !isOutOfView) {
+      setIsOutOfView(true);
+    }
+    if (currentScrollY < window.innerHeight * 0.7 && isOutOfView) {
+      setIsOutOfView(false);
+    }
+
+    prevScrollY.current = currentScrollY;
+  }, [isOutOfView]);
+
+  // Set up scroll listener
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [handleScroll]);
 
   // Set initial time when component mounts
   useEffect(() => {
@@ -146,21 +172,25 @@ export function VideoDetail({
 
   return (
     <div className="flex flex-col pb-60 gap-y-8">
-      <div className="bg-black w-full flex justify-center">
+      <div
+        ref={playerContainerRef}
+        className="bg-black w-full flex justify-center"
+      >
         <div
           className={clsx(
-            "w-full  lg:max-h-[75vh] max-w-[1600px]",
+            "w-full lg:max-h-[50vh] max-w-[1600px]",
             hasChapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
             "overflow-hidden"
           )}
         >
-          <div className="aspect-video lg:aspect-auto w-full bg-black flex-grow col-span-9">
+          <div className="aspect-video w-full lg:h-full bg-black flex-grow col-span-9">
             <Player
               video={video}
               autoPlay={true}
               ref={playerRef}
               startTime={startTime}
               className={className}
+              isOutOfView={isOutOfView}
             />
           </div>
           {hasChapters && (
@@ -213,7 +243,13 @@ export function VideoDetail({
           )}
         </div>
       </div>
-      <div className="container mx-auto px-5 md:px-10">
+      {/* Add padding for content when player is floating on mobile */}
+      <div
+        className={clsx(
+          "container mx-auto px-5 md:px-10",
+          isOutOfView && "sm:pt-0 pt-[56.25vw]"
+        )}
+      >
         <h1 className="text-3xl md:text-[42px] font-extrabold mb-4 leading-tight">
           {video.title}
         </h1>

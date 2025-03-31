@@ -41,6 +41,8 @@ interface VidstackPlayerProps {
   currentTime?: number;
   /** Start time in seconds to begin playback from */
   startTime?: number;
+  /** Whether the player is out of view and should be shown as a floating player */
+  isOutOfView?: boolean;
 }
 
 /**
@@ -53,33 +55,10 @@ export const VidstackPlayer = forwardRef(function VidstackPlayer(
     onTimeUpdate,
     currentTime,
     startTime,
+    isOutOfView = false,
   }: VidstackPlayerProps,
   ref
 ) {
-  const prevScrollY = useRef(0);
-  const [isOutOfView, setIsOutOfView] = useState<boolean>(false);
-
-  // Handle scroll behavior for floating player
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > window.innerHeight * 0.7 && !isOutOfView) {
-        setIsOutOfView(true);
-      }
-      if (currentScrollY < window.innerHeight * 0.7 && isOutOfView) {
-        setIsOutOfView(false);
-      }
-
-      prevScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [isOutOfView, video]);
-
   const handleTimeUpdate = (
     video: ExtendedVideo,
     e: MediaTimeUpdateEventDetail
@@ -141,7 +120,7 @@ export const VidstackPlayer = forwardRef(function VidstackPlayer(
         {isOutOfView && (
           <button
             className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 z-10 hover:bg-opacity-80"
-            onClick={() => setIsOutOfView(false)}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             aria-label="Close floating player"
           >
             <svg
