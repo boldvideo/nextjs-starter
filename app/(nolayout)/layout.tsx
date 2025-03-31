@@ -1,5 +1,70 @@
 import { bold } from "@/client";
 import "./globals.css";
+import type { Settings } from "@boldvideo/bold-js";
+
+// Extend the Settings type to include additional properties
+interface ExtendedSettings extends Settings {
+  theme_config?: {
+    radius: string;
+    light: {
+      background: string;
+      foreground: string;
+      card: string;
+      popover: string;
+      card_foreground: string;
+      popover_foreground: string;
+      primary: string;
+      primary_foreground: string;
+      secondary: string;
+      secondary_foreground: string;
+      muted: string;
+      muted_foreground: string;
+      accent: string;
+      accent_foreground: string;
+      destructive: string;
+      border: string;
+      input: string;
+      ring: string;
+      sidebar: string;
+      sidebar_foreground: string;
+      sidebar_primary: string;
+      sidebar_primary_foreground: string;
+      sidebar_accent: string;
+      sidebar_accent_foreground: string;
+      sidebar_border: string;
+      sidebar_ring: string;
+    };
+    dark: {
+      background: string;
+      foreground: string;
+      card: string;
+      card_foreground: string;
+      popover: string;
+      popover_foreground: string;
+      primary: string;
+      primary_foreground: string;
+      secondary: string;
+      secondary_foreground: string;
+      muted: string;
+      muted_foreground: string;
+      accent: string;
+      accent_foreground: string;
+      destructive: string;
+      border: string;
+      input: string;
+      ring: string;
+      sidebar: string;
+      sidebar_foreground: string;
+      sidebar_primary: string;
+      sidebar_primary_foreground: string;
+      sidebar_accent: string;
+      sidebar_accent_foreground: string;
+      sidebar_border: string;
+      sidebar_ring: string;
+    };
+  };
+  logo_url?: string;
+}
 
 export const metadata = {
   title: "Bold Demo Site",
@@ -15,7 +80,7 @@ export default async function RootLayout({
 
   try {
     const { data: settings } = await bold.settings();
-    theme = settings.theme_config;
+    theme = (settings as ExtendedSettings).theme_config;
   } catch (error) {
     console.error("Failed to fetch settings:", error);
   }
