@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SearchBar } from "./search-bar";
 import { SearchPreview } from "./search-preview";
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 
 interface HeaderProps {

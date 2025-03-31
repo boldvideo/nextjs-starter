@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "uploads.eu1.boldvideo.io",
       },
+      {
+        protocol: "https",
+        hostname: "yo.fm",
+      },
     ],
   },
 };
