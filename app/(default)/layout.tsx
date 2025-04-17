@@ -3,6 +3,9 @@ import "./globals.css";
 
 import { bold } from "@/client";
 import type { Settings } from "@boldvideo/bold-js";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Header } from "@/components/header";
+import { SettingsProvider } from "@/components/providers/settings-provider";
 
 // Extend the Settings type to include additional properties
 interface ExtendedSettings extends Settings {
@@ -67,9 +70,6 @@ interface ExtendedSettings extends Settings {
   };
   logo_url?: string;
 }
-
-import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
   title: "Bold Video x Next.js Starter Kit",
@@ -184,11 +184,13 @@ export default async function RootLayout({
       </head>
       <body className="bg-background">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <Header
-            logo={settings.logo_url || "/bold-logo.svg"}
-            menuItems={settings.menu_items || []}
-          />
-          <main>{children}</main>
+          <SettingsProvider settings={settings}>
+            <Header
+              logo={settings.logo_url || "/bold-logo.svg"}
+              menuItems={settings.menu_items || []}
+            />
+            <main>{children}</main>
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

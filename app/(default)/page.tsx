@@ -8,7 +8,7 @@ import type { Settings, Video, Playlist } from "@boldvideo/bold-js";
 export const revalidate = 60;
 
 // Number of videos to display on the homepage
-const LATES_VIDEO_LIMIT = 8;
+const LATEST_VIDEO_LIMIT = 8;
 
 /**
  * Home page component that displays latest videos and featured playlists
@@ -20,8 +20,10 @@ export default async function Home(): Promise<React.JSX.Element> {
   let errorMessage: string | null = null;
 
   try {
-    const settingsResponse = await bold.settings();
+    const settingsResponse = await bold.settings(8);
+
     settings = settingsResponse.data;
+    console.log(settings.featured_playlists);
   } catch (error) {
     errorMessage = "Failed to load settings. Please try again later.";
     console.error("Failed to fetch settings:", error);
@@ -40,7 +42,7 @@ export default async function Home(): Promise<React.JSX.Element> {
   }
 
   try {
-    const videosResponse = await bold.videos.list(LATES_VIDEO_LIMIT);
+    const videosResponse = await bold.videos.list(LATEST_VIDEO_LIMIT);
     videos = videosResponse.data;
   } catch (error) {
     console.error("Failed to fetch videos:", error);
