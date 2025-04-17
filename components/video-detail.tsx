@@ -174,7 +174,9 @@ export function VideoDetail({
   const handleScroll = useCallback(() => {
     const currentScrollY = window.scrollY;
     if (currentScrollY > window.innerHeight * 0.7 && !isOutOfView) {
-      setIsOutOfView(true);
+      // setIsOutOfView(true);
+      // deactivated for now
+      setIsOutOfView(false);
     }
     if (currentScrollY < window.innerHeight * 0.7 && isOutOfView) {
       setIsOutOfView(false);
