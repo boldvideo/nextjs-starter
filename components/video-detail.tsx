@@ -6,9 +6,11 @@ import { Player } from "@/components/players";
 import { Transcript } from "@/components/transcript";
 import { useRef, useState, useEffect, useCallback } from "react";
 import type { Video } from "@boldvideo/bold-js";
+import { AIAssistant } from "@/components/ui/ai-assistant";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
+import { useSettings } from "./providers/settings-provider";
 
 /**
  * Extended Video type with additional properties used in our application
@@ -166,6 +168,7 @@ export function VideoDetail({
   const [hasTranscript, setHasTranscript] = useState(false);
   const [isOutOfView, setIsOutOfView] = useState<boolean>(false);
   const prevScrollY = useRef(0);
+  const settings = useSettings();
 
   // Handle scroll behavior for floating player
   const handleScroll = useCallback(() => {
@@ -345,6 +348,16 @@ export function VideoDetail({
           </div>
         ) : null}
       </div>
+
+      {hasTranscript && (
+        <AIAssistant
+          videoId={video.id}
+          name={settings.ai_name}
+          avatar={settings.ai_avatar}
+          subdomain={""}
+          onTimeClick={handleCueClick}
+        />
+      )}
     </div>
   );
 }

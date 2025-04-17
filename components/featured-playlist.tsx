@@ -33,7 +33,7 @@ export function FeaturedPlaylist({ playlist }: PlaylistProps) {
         </Link>
       </div>
       <ul className="mb-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10">
-        {playlist.videos.map((video) => (
+        {playlist.videos.slice(0, 8).map((video) => (
           <li key={video.id}>
             <VideoThumbnail video={video} />
           </li>
