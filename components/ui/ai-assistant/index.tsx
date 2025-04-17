@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Image from "next/image";
 import { X, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -159,6 +159,96 @@ export const AIAssistant = ({
     onAskQuestion: handleAIQuestion,
   });
 
+  /* ------------------------------------------------------------------ */
+  /* Layout helpers                                                     */
+  /* ------------------------------------------------------------------ */
+
+  // Sidebar width (user‑resizable)
+  const [width, setWidth] = useState<number>(384); // 24rem default (tailwind w‑96)
+
+  // Header height so we can offset the sidebar correctly
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
+
+  // Refs --------------------------------------------------------------
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Breakpoint helper (desktop = md and above) ------------------------
+  const [isDesktop, setIsDesktop] = useState<boolean>(true);
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const handle = (e: MediaQueryListEvent | MediaQueryList) =>
+      setIsDesktop(e.matches);
+    handle(mq);
+    mq.addEventListener("change", handle);
+    return () => mq.removeEventListener("change", handle as any);
+  }, []);
+
+  // Read header height on mount / resize
+  useLayoutEffect(() => {
+    const measure = () => {
+      const header = document.querySelector("header");
+      setHeaderHeight(header ? (header as HTMLElement).offsetHeight : 0);
+    };
+
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  // Maintain body margin only on desktop
+  useEffect(() => {
+    if (!isDesktop) return;
+    if (isOpen) {
+      document.body.style.transition = "margin-right 300ms ease-in-out";
+      document.body.style.marginRight = `${width}px`;
+    } else {
+      document.body.style.marginRight = "";
+    }
+  }, [isOpen, width, isDesktop]);
+
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  /**
+   * Drag handler to resize the sidebar width
+   */
+  const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebarRef.current
+      ? sidebarRef.current.offsetWidth
+      : width;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = startX - moveEvent.clientX;
+      const newWidth = Math.min(Math.max(startWidth + delta, 280), 640); // min 17.5rem, max 40rem
+
+      // Apply instantly via style for snappy feedback
+      if (sidebarRef.current) {
+        sidebarRef.current.style.width = `${newWidth}px`;
+      }
+      document.body.style.marginRight = `${newWidth}px`;
+    };
+
+    const onMouseUp = (upEvent: MouseEvent) => {
+      const delta = startX - upEvent.clientX;
+      const finalWidth = Math.min(Math.max(startWidth + delta, 280), 640);
+      setWidth(finalWidth); // single state update
+      setIsDragging(false);
+      // Restore margin transition for future open/close animations
+      document.body.style.transition = "margin-right 300ms ease-in-out";
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+
+    // Begin dragging: disable transitions
+    setIsDragging(true);
+    document.body.style.transition = "none";
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  };
+
   // Focus input when sidebar opens
   useEffect(() => {
     if (isOpen) {
@@ -178,6 +268,20 @@ export const AIAssistant = ({
       onTimeClick(time);
     }
   };
+
+  /** Auto‑scroll chat as it grows */
+  useEffect(() => {
+    if (!scrollContainerRef.current) return;
+    // Scroll behaviour: if near bottom (<= 80px) OR currently streaming, keep pinned.
+    const el = scrollContainerRef.current;
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 80;
+    if (isPending || isNearBottom) {
+      el.scrollTo({
+        top: el.scrollHeight,
+        behavior: isPending ? "auto" : "smooth",
+      });
+    }
+  }, [messages, isPending]);
 
   return (
     <div className={cn("ai-assistant", className)}>
@@ -204,17 +308,37 @@ export const AIAssistant = ({
 
       {/* Sidebar Content */}
       {isOpen && (
-        <div
+        <aside
+          ref={sidebarRef}
+          style={{
+            width: isDesktop ? width : "100vw", // mobile full width
+            top: 0,
+            height: "100vh",
+          }}
           className={cn(
-            "fixed top-0 right-0 w-96 h-full",
+            "fixed right-0",
             "bg-background text-foreground",
             "shadow-lg z-50",
             "flex flex-col",
-            "transition-transform duration-300 ease-in-out transform translate-x-0"
+            !isDragging && "transition-[width] duration-300 ease-in-out"
           )}
         >
+          {/* Drag Handle */}
+          {isDesktop && (
+            <div
+              onMouseDown={handleDrag}
+              onDoubleClick={() => setWidth(384)}
+              className="absolute -left-1 top-1/2 -translate-y-1/2 h-20 w-2 cursor-ew-resize bg-transparent group"
+            >
+              <span className="block h-full w-1 bg-border group-hover:bg-primary rounded-full mx-auto" />
+            </div>
+          )}
+
           {/* Header */}
-          <div className="flex justify-between items-center p-4 border-b border-background-muted">
+          <div
+            style={{ height: headerHeight ? `${headerHeight}px` : "auto" }}
+            className="flex justify-between items-center px-4 py-2 border-b border-background-muted"
+          >
             <h2 className="text-xl font-bold">Ask {name}</h2>
             <button
               onClick={toggleOpen}
@@ -225,7 +349,10 @@ export const AIAssistant = ({
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto p-4 no-scrollbar"
+          >
             {/* Welcome message */}
 
             <div className="mb-4">
@@ -305,7 +432,7 @@ export const AIAssistant = ({
               Mistakes can happen, we&apos;re all human after all. 😉
             </p>
           </div>
-        </div>
+        </aside>
       )}
     </div>
   );
