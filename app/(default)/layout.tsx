@@ -182,14 +182,14 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className="bg-background">
+      <body className="bg-background flex flex-col h-screen md:h-auto min-h-screen">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <SettingsProvider settings={settings}>
             <Header
               logo={settings.logo_url || "/bold-logo.svg"}
               menuItems={settings.menu_items || []}
             />
-            <main>{children}</main>
+            <main className="flex-1 min-h-0 flex flex-col">{children}</main>
           </SettingsProvider>
         </ThemeProvider>
       </body>

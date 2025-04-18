@@ -1,16 +1,14 @@
 import { bold } from "@/client";
 import { VideoThumbnail } from "@/components/video-thumbnail";
 import type { Playlist, Video } from "@boldvideo/bold-js";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 2;
+export const revalidate = 60;
 
-export async function generateMetadata(props: {
-  params: Promise<{ id: string }>;
-}) {
-  const params = await props.params;
+export async function generateMetadata({ params }: { params: { id: string } }) {
   const { data: playlist } = await bold.playlists.get(params.id);
-  const videos = playlist.videos;
+  const first = playlist.videos[0];
   return {
     title: playlist.title,
     description: playlist.description,
@@ -20,7 +18,7 @@ export async function generateMetadata(props: {
         {
           url: `https://demo.bold.video/og?t=${encodeURIComponent(
             `Playlist: ${playlist.title}`
-          )}&img=${encodeURIComponent(videos[0].thumbnail)}`,
+          )}&img=${encodeURIComponent(first.thumbnail)}`,
           width: 1200,
           height: 630,
         },
@@ -30,85 +28,39 @@ export async function generateMetadata(props: {
 }
 
 export default async function PlaylistPage({
-  params: paramsPromise,
+  params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  let playlist: Playlist | null = null;
-  let errorMessage: string | null = null;
+  const { data: playlist } = await bold.playlists.get(params.id);
 
-  const params = await paramsPromise;
+  if (!playlist) notFound(); // 404 route
 
-  try {
-    const response = await bold.playlists.get(params.id);
-    playlist = response.data;
-  } catch (error) {
-    errorMessage = "Failed to load playlist. Please try again later.";
-    console.error("Failed to fetch playlist:", error);
-  }
-
-  // Handle error state
-  if (errorMessage) {
-    return (
-      <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-8">
-          <h2 className="text-lg font-medium">Error</h2>
-          <p>{errorMessage}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle loading state
-  if (!playlist) {
-    return (
-      <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/4"></div>
-          <div className="h-4 bg-muted rounded w-2/3"></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-40 bg-muted rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const hasVideos = playlist.videos && playlist.videos.length > 0;
+  const hasVideos = playlist.videos.length > 0;
 
   return (
     <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
-      {/* Playlist Header */}
-      <div className="mb-8">
+      <header className="mb-8">
         <h2 className="font-bold text-3xl mb-5">{playlist.title}</h2>
         {playlist.description && (
           <p className="text-lg text-muted-foreground max-w-3xl">
             {playlist.description}
           </p>
         )}
-      </div>
+      </header>
 
-      {/* Videos Grid */}
-      {hasVideos && (
+      {hasVideos ? (
         <ul className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10">
-          {playlist.videos.map((video: Video) => (
-            <li key={video.id}>
-              <VideoThumbnail video={video} />
+          {playlist.videos.map((v) => (
+            <li key={v.id}>
+              <VideoThumbnail video={v} />
             </li>
           ))}
         </ul>
-      )}
-
-      {/* No Videos Message */}
-      {!hasVideos && (
-        <div className="py-12 px-4 flex flex-col items-center justify-center">
-          <p className="font-medium text-lg">No videos in this playlist</p>
-          <p className="text-sm mt-2 text-muted-foreground text-center max-w-xs">
-            This playlist is empty
-          </p>
-        </div>
+      ) : (
+        <p className="py-12 text-lg text-muted-foreground">
+          No videos in this playlist
+        </p>
       )}
     </div>
   );

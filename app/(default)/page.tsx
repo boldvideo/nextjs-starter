@@ -11,42 +11,37 @@ export const revalidate = 60;
 const LATEST_VIDEO_LIMIT = 8;
 
 /**
+ * Fetches initial data for the home page in parallel.
+ * @returns An object containing settings and videos, or nulls if fetches fail.
+ */
+async function getHomeData(): Promise<{
+  settings: Settings | null;
+  videos: Video[] | null;
+}> {
+  try {
+    const [settingsResponse, videosResponse] = await Promise.all([
+      bold.settings(8), // Assuming 8 is a relevant ID or parameter
+      bold.videos.list(LATEST_VIDEO_LIMIT),
+    ]);
+
+    // Basic check if responses are okay; adjust based on actual SDK response structure
+    const settings = settingsResponse?.data ?? null;
+    const videos = videosResponse?.data ?? null;
+
+    return { settings, videos };
+  } catch (error) {
+    console.error("Failed to fetch home page data:", error);
+    // Let the Next.js error boundary handle the UI
+    throw error; // Re-throw to trigger the error boundary
+  }
+}
+
+/**
  * Home page component that displays latest videos and featured playlists
  * @returns The rendered homepage
  */
 export default async function Home(): Promise<React.JSX.Element> {
-  let settings: Settings | null = null;
-  let videos: Video[] | null = null;
-  let errorMessage: string | null = null;
-
-  try {
-    const settingsResponse = await bold.settings(8);
-
-    settings = settingsResponse.data;
-    console.log(settings.featured_playlists);
-  } catch (error) {
-    errorMessage = "Failed to load settings. Please try again later.";
-    console.error("Failed to fetch settings:", error);
-  }
-
-  // Show error message if settings failed to load
-  if (errorMessage) {
-    return (
-      <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 mb-8">
-          <h2 className="text-lg font-medium">Error</h2>
-          <p>{errorMessage}</p>
-        </div>
-      </div>
-    );
-  }
-
-  try {
-    const videosResponse = await bold.videos.list(LATEST_VIDEO_LIMIT);
-    videos = videosResponse.data;
-  } catch (error) {
-    console.error("Failed to fetch videos:", error);
-  }
+  const { settings, videos } = await getHomeData();
 
   const hasVideos = videos && videos.length > 0;
   const hasPlaylists =
@@ -55,7 +50,7 @@ export default async function Home(): Promise<React.JSX.Element> {
   return (
     <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
       {/* Videos Section */}
-      {hasVideos && videos && (
+      {hasVideos && (
         <section>
           <h2 className="font-bold text-3xl mb-5" id="latest-videos">
             Latest Videos
@@ -64,7 +59,8 @@ export default async function Home(): Promise<React.JSX.Element> {
             className="mb-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10"
             aria-labelledby="latest-videos"
           >
-            {videos.map((video) => (
+            {/* Type assertion needed if videos could be null, but hasVideos guards it */}
+            {(videos as Video[]).map((video) => (
               <li key={video.id}>
                 <VideoThumbnail video={video} prefetch={true} />
               </li>
@@ -74,12 +70,20 @@ export default async function Home(): Promise<React.JSX.Element> {
       )}
 
       {/* Featured Playlists Section */}
-      {hasPlaylists && settings && (
+      {hasPlaylists && (
         <section>
-          {settings.featured_playlists.map((playlist) => (
-            <FeaturedPlaylist key={playlist.id} playlist={playlist} />
-          ))}
+          {/* Type assertion needed if settings could be null, but hasPlaylists guards it */}
+          {(settings as Settings).featured_playlists.map(
+            (playlist: Playlist) => (
+              <FeaturedPlaylist key={playlist.id} playlist={playlist} />
+            )
+          )}
         </section>
+      )}
+
+      {/* Optional: Add a message if neither section has content */}
+      {!hasVideos && !hasPlaylists && (
+        <p className="text-center text-gray-500">No content available yet.</p>
       )}
     </div>
   );

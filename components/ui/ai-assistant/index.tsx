@@ -1,9 +1,12 @@
+"use client";
 import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Image from "next/image";
 import { X, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAIAssistant, Message } from "./use-ai-assistant";
 import { useAIStream } from "./use-ai-stream";
+import { timestampToSeconds } from "@/lib/utils/time";
+import { useAIAssistantContext } from "./context";
 
 /**
  * Props for the AIAssistant component
@@ -21,31 +24,11 @@ interface AIAssistantProps {
   userName?: string;
   /** Optional additional CSS classes */
   className?: string;
-  /** Optional callback for timestamp clicks */
-  onTimeClick?: (time: number) => void;
   /** Optional endpoint override */
   endpoint?: string;
+  /** Whether the assistant should be embedded in the page layout rather than floating */
+  isEmbedded?: boolean;
 }
-
-/**
- * Converts a timestamp string to seconds
- */
-const timestampToSeconds = (timestamp: string): number => {
-  const parts = timestamp.split(":").map(Number);
-  let hours = 0,
-    minutes = 0,
-    seconds = 0;
-
-  if (parts.length === 3) {
-    [hours, minutes, seconds] = parts;
-  } else if (parts.length === 2) {
-    [minutes, seconds] = parts;
-  } else if (parts.length === 1) {
-    [seconds] = parts;
-  }
-
-  return hours * 3600 + minutes * 60 + seconds;
-};
 
 /**
  * Processes message content to make timestamps clickable and format text
@@ -136,9 +119,11 @@ export const AIAssistant = ({
   subdomain,
   userName,
   className,
-  onTimeClick,
   endpoint,
+  isEmbedded = false, // Default to floating mode
 }: AIAssistantProps) => {
+  const { onTimeClick } = useAIAssistantContext();
+
   const handleAIQuestion = useAIStream({
     videoId,
     subdomain,
@@ -159,15 +144,20 @@ export const AIAssistant = ({
     onAskQuestion: handleAIQuestion,
   });
 
+  // Ensure the assistant is open when embedded
+  useEffect(() => {
+    if (isEmbedded && !isOpen) {
+      // Force open state when embedded
+      toggleOpen();
+    }
+  }, [isEmbedded, isOpen, toggleOpen]);
+
   /* ------------------------------------------------------------------ */
   /* Layout helpers                                                     */
   /* ------------------------------------------------------------------ */
 
-  // Sidebar width (user‑resizable)
+  // Sidebar width (user‑resizable) - only relevant for floating mode
   const [width, setWidth] = useState<number>(384); // 24rem default (tailwind w‑96)
-
-  // Header height so we can offset the sidebar correctly
-  const [headerHeight, setHeaderHeight] = useState<number>(0);
 
   // Refs --------------------------------------------------------------
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -176,43 +166,24 @@ export const AIAssistant = ({
   // Breakpoint helper (desktop = md and above) ------------------------
   const [isDesktop, setIsDesktop] = useState<boolean>(true);
   useLayoutEffect(() => {
+    if (isEmbedded) return; // Skip for embedded mode
+
     const mq = window.matchMedia("(min-width: 768px)");
     const handle = (e: MediaQueryListEvent | MediaQueryList) =>
       setIsDesktop(e.matches);
     handle(mq);
     mq.addEventListener("change", handle);
     return () => mq.removeEventListener("change", handle as any);
-  }, []);
-
-  // Read header height on mount / resize
-  useLayoutEffect(() => {
-    const measure = () => {
-      const header = document.querySelector("header");
-      setHeaderHeight(header ? (header as HTMLElement).offsetHeight : 0);
-    };
-
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
-  // Maintain body margin only on desktop
-  useEffect(() => {
-    if (!isDesktop) return;
-    if (isOpen) {
-      document.body.style.transition = "margin-right 300ms ease-in-out";
-      document.body.style.marginRight = `${width}px`;
-    } else {
-      document.body.style.marginRight = "";
-    }
-  }, [isOpen, width, isDesktop]);
+  }, [isEmbedded]);
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
   /**
-   * Drag handler to resize the sidebar width
+   * Drag handler to resize the sidebar width (floating mode only)
    */
   const handleDrag = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isEmbedded) return; // Skip for embedded mode
+
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = sidebarRef.current
@@ -227,7 +198,6 @@ export const AIAssistant = ({
       if (sidebarRef.current) {
         sidebarRef.current.style.width = `${newWidth}px`;
       }
-      document.body.style.marginRight = `${newWidth}px`;
     };
 
     const onMouseUp = (upEvent: MouseEvent) => {
@@ -235,15 +205,12 @@ export const AIAssistant = ({
       const finalWidth = Math.min(Math.max(startWidth + delta, 280), 640);
       setWidth(finalWidth); // single state update
       setIsDragging(false);
-      // Restore margin transition for future open/close animations
-      document.body.style.transition = "margin-right 300ms ease-in-out";
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
 
     // Begin dragging: disable transitions
     setIsDragging(true);
-    document.body.style.transition = "none";
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
@@ -252,14 +219,13 @@ export const AIAssistant = ({
   // Focus input when sidebar opens
   useEffect(() => {
     if (isOpen) {
-      // Small delay to ensure the sidebar is rendered
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     }
   }, [isOpen]);
 
-  const handleTimeClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleTimestampInteraction = (e: React.MouseEvent<HTMLDivElement>) => {
     const button = (e.target as HTMLElement).closest("[data-time]");
     if (button && onTimeClick) {
       e.preventDefault();
@@ -272,7 +238,6 @@ export const AIAssistant = ({
   /** Auto‑scroll chat as it grows */
   useEffect(() => {
     if (!scrollContainerRef.current) return;
-    // Scroll behaviour: if near bottom (<= 80px) OR currently streaming, keep pinned.
     const el = scrollContainerRef.current;
     const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 80;
     if (isPending || isNearBottom) {
@@ -283,8 +248,112 @@ export const AIAssistant = ({
     }
   }, [messages, isPending]);
 
+  // For embedded mode, we use a simpler layout without the floating button or sidebar positioning
+  if (isEmbedded) {
+    return (
+      <div
+        className={cn(
+          isEmbedded
+            ? "flex flex-col flex-1 min-h-0 h-full overflow-hidden"
+            : "",
+          className
+        )}
+      >
+        {/* Messages Area */}
+        <div
+          ref={scrollContainerRef}
+          onClick={handleTimestampInteraction}
+          className="flex-1 min-h-0 overflow-y-auto"
+        >
+          {/* Welcome message */}
+          <div className="mb-4">
+            <div className="flex items-center mb-2">
+              <Image
+                src={avatar}
+                alt={name}
+                width={40}
+                height={40}
+                className="rounded-full mr-2"
+              />
+              <strong>{name}</strong>
+            </div>
+            <div className="rounded-lg p-3 bg-primary text-primary-foreground ml-4">
+              <p>
+                {userName ? `Hi ${userName}!` : "Hello there!"} I'm {name}, your
+                AI assistant. How can I help you with this video?
+              </p>
+            </div>
+          </div>
+
+          {/* Chat messages */}
+          {messages.map((message, index) => (
+            <div key={index} className="mb-4">
+              <div
+                className={cn(
+                  "rounded-lg p-3 prose prose-sm max-w-none prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit",
+                  message.role === "user"
+                    ? "bg-muted text-foreground"
+                    : "bg-primary text-primary-foreground ml-4"
+                )}
+              >
+                <div
+                  className=""
+                  dangerouslySetInnerHTML={{
+                    __html: message.content
+                      ? processMessageContent(message.content)
+                      : `<div class="flex items-center gap-2">
+                          <span class="flex gap-1">
+                            <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                            <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                            <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
+                          </span>
+                        </div>`,
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Input Area */}
+        <div className="py-4 bg-background">
+          <div className="relative">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  handleSubmit();
+                }
+              }}
+              placeholder="Ask me something about this video..."
+              className="w-full bg-muted text-foreground rounded-full py-2 px-4 pr-10"
+            />
+            {inputValue && (
+              <button
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/90"
+                onClick={handleSubmit}
+                disabled={isPending}
+              >
+                <Send size={20} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Floating/sidebar mode (original implementation)
   return (
-    <div className={cn("ai-assistant", className)}>
+    <div
+      className={cn(
+        isEmbedded ? "flex flex-col flex-1 min-h-0 h-full overflow-hidden" : "",
+        className
+      )}
+    >
       {/* Trigger Button */}
       <button
         onClick={toggleOpen}
@@ -311,13 +380,12 @@ export const AIAssistant = ({
         <aside
           ref={sidebarRef}
           style={{
-            width: isDesktop ? width : "100vw", // mobile full width
-            top: 0,
+            width: isDesktop ? width : "100%",
             height: "100vh",
           }}
           className={cn(
-            "fixed right-0",
-            "bg-background text-foreground",
+            "fixed right-0 top-0",
+            "bg-sidebar text-sidebar-foreground",
             "shadow-lg z-50",
             "flex flex-col",
             !isDragging && "transition-[width] duration-300 ease-in-out"
@@ -335,10 +403,7 @@ export const AIAssistant = ({
           )}
 
           {/* Header */}
-          <div
-            style={{ height: headerHeight ? `${headerHeight}px` : "auto" }}
-            className="flex justify-between items-center px-4 py-2 border-b border-background-muted"
-          >
+          <div className="flex justify-between items-center px-4 h-16 flex-shrink-0 border-b border-background-muted">
             <h2 className="text-xl font-bold">Ask {name}</h2>
             <button
               onClick={toggleOpen}
@@ -351,7 +416,8 @@ export const AIAssistant = ({
           {/* Messages Area */}
           <div
             ref={scrollContainerRef}
-            className="flex-1 overflow-y-auto p-4 no-scrollbar"
+            className="flex-1 min-h-0 overflow-y-auto"
+            onClick={handleTimestampInteraction}
           >
             {/* Welcome message */}
 
@@ -382,7 +448,6 @@ export const AIAssistant = ({
                       ? "bg-background-muted"
                       : "bg-primary text-background ml-4"
                   )}
-                  onClick={handleTimeClick}
                 >
                   <div
                     className="prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit"
@@ -403,7 +468,7 @@ export const AIAssistant = ({
             ))}
           </div>
           {/* Input Area */}
-          <div className="p-4 bg-background-muted">
+          <div className="p-4 bg-background-muted border-t border-background-muted">
             <div className="relative">
               <input
                 ref={inputRef}

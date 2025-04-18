@@ -10,12 +10,14 @@ interface SearchBarProps {
   className?: string;
   placeholder?: string;
   isMobile?: boolean;
+  autoFocus?: boolean;
 }
 
 export function SearchBar({
   className,
   placeholder = "Search videos...",
   isMobile = false,
+  autoFocus = false,
 }: SearchBarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -32,6 +34,13 @@ export function SearchBar({
   useEffect(() => {
     setInputValue(currentQuery);
   }, [currentQuery]);
+
+  // Autofocus when requested (e.g., mobile overlay open)
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus]);
 
   // Set up global keyboard shortcut (desktop only)
   useEffect(() => {
