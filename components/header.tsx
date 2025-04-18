@@ -20,16 +20,16 @@ export function Header({ logo, menuItems }: HeaderProps) {
     <>
       <header
         className={
-          `px-5 md:px-10 py-4 border-b border-border transition-all ` +
+          `px-5 lg:px-10 py-4 border-b border-border transition-all ` +
           (searchOpen ? "sticky top-0 z-50 bg-background/90 backdrop-blur" : "")
         }
       >
         <div className="container mx-auto">
-          <nav className="flex flex-col md:flex-row gap-4 md:gap-0">
+          <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
               {/* Logo */}
               <div className="flex items-center">
-                <Link href="/" className="mr-8 hidden md:block">
+                <Link href="/" className="mr-8 hidden lg:block">
                   <Image
                     src={logo}
                     alt="Logo"
@@ -41,7 +41,7 @@ export function Header({ logo, menuItems }: HeaderProps) {
                 </Link>
 
                 {/* Desktop Navigation Menu */}
-                <div className="hidden md:flex space-x-1">
+                <div className="hidden lg:flex space-x-1">
                   {menuItems.map((item, idx) => (
                     <Link
                       className="text-sm px-3 py-2 rounded-md hover:bg-primary hover:text-primary-foreground transition-colors"
@@ -55,7 +55,7 @@ export function Header({ logo, menuItems }: HeaderProps) {
               </div>
 
               {/* Right Side - Search and Theme Toggle (Desktop Only) */}
-              <div className="hidden md:flex items-center space-x-4 flex-1 justify-end max-w-md">
+              <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end max-w-md">
                 <Suspense>
                   <SearchBar className="w-full max-w-xs" />
                 </Suspense>
@@ -65,12 +65,12 @@ export function Header({ logo, menuItems }: HeaderProps) {
               </div>
 
               {/* Mobile Header Controls */}
-              <div className="grid grid-cols-3 items-center w-full md:hidden">
+              <div className="grid grid-cols-3 items-center w-full lg:hidden">
                 {/* Left: Hamburger Menu */}
                 <div className="flex justify-start">
                   {!searchOpen && (
                     <Suspense>
-                      <MobileMenu menuItems={menuItems} />
+                      <MobileMenu menuItems={menuItems} logo={logo} />
                     </Suspense>
                   )}
                 </div>

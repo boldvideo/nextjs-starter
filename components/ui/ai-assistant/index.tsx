@@ -421,7 +421,7 @@ export const AIAssistant = ({
           >
             {/* Welcome message */}
 
-            <div className="mb-4">
+            <div className="mb-4 px-4 pt-4">
               <div className="flex items-center mb-2">
                 <Image
                   src={avatar}
@@ -443,14 +443,14 @@ export const AIAssistant = ({
               <div key={index} className="mb-4">
                 <div
                   className={cn(
-                    "rounded-lg p-3",
+                    "rounded-lg p-3 mx-4 prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit",
                     message.role === "user"
-                      ? "bg-background-muted"
-                      : "bg-primary text-background ml-4"
+                      ? "bg-background mr-8 text-foreground"
+                      : "bg-primary text-primary-foreground ml-8"
                   )}
                 >
                   <div
-                    className="prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit"
+                    className=""
                     dangerouslySetInnerHTML={{
                       __html: message.content
                         ? processMessageContent(message.content)

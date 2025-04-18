@@ -27,7 +27,7 @@ export function MobileContentTabs({
   className,
 }: MobileContentTabsProps) {
   return (
-    <div className={cn("md:hidden", className)}>
+    <div className={cn("lg:hidden", className)}>
       {/* Tab Pills */}
       <div className="flex justify-around py-2 border-t border-b border-border bg-background sticky top-0 z-10">
         <button

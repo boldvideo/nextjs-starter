@@ -5,14 +5,14 @@ import { formatRelative } from "date-fns";
 import { Player } from "@/components/players";
 import { Transcript } from "@/components/transcript";
 import { useRef, useState, useEffect, useCallback } from "react";
-import type { Video } from "@boldvideo/bold-js";
+import type { Video, Settings } from "@boldvideo/bold-js";
 import { VideoDescription } from "./video-description";
 import { ChapterList } from "./chapter-list";
 import type React from "react";
 import { AIAssistantProvider } from "./ui/ai-assistant/context";
 import { MobileContentTabs } from "./mobile-content-tabs";
 import { AIAssistant } from "./ui/ai-assistant";
-import { useSettings } from "@/components/providers/settings-provider";
+
 // Define tab type for mobile navigation
 type TabId = "info" | "chapters" | "transcript" | "assistant";
 
@@ -38,6 +38,7 @@ interface VideoDetailProps {
   video: ExtendedVideo;
   startTime?: number;
   className?: string;
+  settings: Settings;
 }
 
 /**
@@ -47,6 +48,7 @@ export function VideoDetail({
   video,
   startTime,
   className = "max-w-7xl",
+  settings,
 }: VideoDetailProps): React.JSX.Element {
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,7 @@ export function VideoDetail({
   const [hasTranscript, setHasTranscript] = useState(false);
   const [isOutOfView, setIsOutOfView] = useState<boolean>(false);
   const prevScrollY = useRef(0);
-  const settings = useSettings();
+
   // Add state for mobile tab navigation
   const [activeTab, setActiveTab] = useState<TabId>("info");
 
@@ -110,7 +112,7 @@ export function VideoDetail({
 
   return (
     <AIAssistantProvider onTimeClick={handleTimeSelect}>
-      <div className="flex flex-col flex-1 min-h-0 md:pb-60 md:gap-y-8">
+      <div className="flex flex-col flex-1 min-h-0 lg:pb-60 lg:gap-y-8">
         {/* Player container - Always visible */}
         <div
           ref={playerContainerRef}
@@ -120,11 +122,11 @@ export function VideoDetail({
             className={clsx(
               "w-full max-w-[1600px]",
               // Only apply grid on desktop screens
-              video.chapters && "md:grid md:grid-cols-12 md:space-y-0",
+              video.chapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
               "overflow-hidden"
             )}
           >
-            <div className="aspect-video lg:max-h-[50vh] 2xl:max-h-[50vh] lg:aspect-auto w-full lg:h-full bg-black flex-grow md:col-span-9">
+            <div className="aspect-video lg:max-h-[50vh] 2xl:max-h-[50vh] lg:aspect-auto w-full lg:h-full bg-black flex-grow lg:col-span-9">
               <Player
                 video={video}
                 autoPlay={true}
@@ -137,7 +139,7 @@ export function VideoDetail({
 
             {/* Chapters only visible on desktop */}
             {hasChapters && (
-              <div className="hidden md:block md:col-span-3">
+              <div className="hidden lg:block lg:col-span-3">
                 <ChapterList
                   chaptersWebVTT={video.chapters}
                   playbackId={video.playback_id}
@@ -154,11 +156,11 @@ export function VideoDetail({
           onTabChange={setActiveTab}
           hasChapters={hasChapters}
           hasTranscript={hasTranscript}
-          className="mb-2"
+          className="mb-2 lg:hidden"
         />
 
         {/* Mobile Content - conditionally rendered based on active tab */}
-        <div className="md:hidden px-4 flex flex-col flex-1 min-h-0">
+        <div className="lg:hidden px-4 flex flex-col flex-1 min-h-0">
           {/* Info tab - show title, date, description */}
           {activeTab === "info" && (
             <div className="space-y-4">
@@ -195,7 +197,6 @@ export function VideoDetail({
           {/* AI Assistant tab */}
           {activeTab === "assistant" && (
             <div className="flex flex-col flex-1 min-h-0 bg-background">
-              {/* Messages + input handled inside component; ensure it stretches */}
               <AIAssistant
                 videoId={video.id}
                 name={settings.ai_name || "AI Assistant"}
@@ -209,33 +210,52 @@ export function VideoDetail({
         </div>
 
         {/* Desktop Content - only shown on larger screens */}
-        <div className="hidden md:block container mx-auto md:max-w-[1600px] px-5 md:px-10">
-          <h1 className="text-3xl md:text-4xl max-w-2xl font-extrabold mb-4 leading-tight">
-            {video.title}
-          </h1>
-          <p className="text-muted-foreground text-xl mb-4">
-            {formatRelative(new Date(video.published_at), new Date())}
-          </p>
-          <div className="mb-12 prose prose-lg dark:prose-invert max-w-2xl prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
-            <VideoDescription text={video.description || ""} />
+        <div className="hidden lg:flex lg:flex-row lg:gap-x-8 container mx-auto lg:max-w-[1600px] px-5 lg:px-10">
+          {/* Left Column: Metadata and Transcript */}
+          <div className="lg:w-2/3 flex-shrink-0">
+            <h1 className="text-3xl lg:text-4xl max-w-2xl font-extrabold mb-4 leading-tight">
+              {video.title}
+            </h1>
+            <p className="text-muted-foreground text-xl mb-4">
+              {formatRelative(new Date(video.published_at), new Date())}
+            </p>
+            <div className="mb-12 prose prose-lg dark:prose-invert max-w-2xl prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
+              <VideoDescription text={video.description || ""} />
+            </div>
+
+            {hasTranscript && video.transcript?.json?.url ? (
+              <div className="mb-12">
+                <Transcript
+                  url={video.transcript.json.url}
+                  onCueClick={handleTimeSelect}
+                  playerRef={playerRef}
+                />
+              </div>
+            ) : video.transcript ? (
+              <div className="mb-12">
+                <h2 className="font-bold text-2xl mb-6">Transcript</h2>
+                <p className="text-muted-foreground">
+                  No transcript available for this video.
+                </p>
+              </div>
+            ) : null}
           </div>
 
-          {hasTranscript && video.transcript?.json?.url ? (
-            <div className="mb-12">
-              <Transcript
-                url={video.transcript.json.url}
-                onCueClick={handleTimeSelect}
-                playerRef={playerRef}
+          {/* Right Column: AI Assistant (Desktop) */}
+          <div className="lg:w-1/3 flex-shrink-0">
+            {/* Render AIAssistant here for desktop, it will use the shared context */}
+            {settings && (
+              <AIAssistant
+                videoId={video.id}
+                name={settings.ai_name || "AI Assistant"}
+                avatar={settings.ai_avatar || "/default-avatar.png"}
+                subdomain={""}
+                // isEmbedded is false by default, so it will render in floating mode
+                // Adjust className as needed for desktop layout
+                className="h-[calc(100vh-200px)]" // Example height, adjust as necessary
               />
-            </div>
-          ) : video.transcript ? (
-            <div className="mb-12">
-              <h2 className="font-bold text-2xl mb-6">Transcript</h2>
-              <p className="text-muted-foreground">
-                No transcript available for this video.
-              </p>
-            </div>
-          ) : null}
+            )}
+          </div>
         </div>
       </div>
     </AIAssistantProvider>

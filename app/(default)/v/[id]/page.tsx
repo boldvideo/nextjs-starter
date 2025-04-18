@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { bold } from "@/client";
 import { VideoDetail } from "@/components/video-detail";
 import type { Video, Settings } from "@boldvideo/bold-js";
-import { AIAssistant } from "@/components/ui/ai-assistant";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -87,18 +86,12 @@ export default async function VideoPage({
 
   return (
     <>
-      <VideoDetail video={video} startTime={startTime} className="max-w-7xl" />
-      {/* Render AIAssistant only on desktop screens */}
-      {settings && (
-        <div className="hidden md:block">
-          <AIAssistant
-            videoId={video.id}
-            name={settings.ai_name || "AI Assistant"}
-            avatar={settings.ai_avatar || "/default-avatar.png"}
-            subdomain={""}
-          />
-        </div>
-      )}
+      <VideoDetail
+        video={video}
+        startTime={startTime}
+        settings={settings}
+        className="max-w-7xl"
+      />
     </>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-import logo from "../public/yourlogohere.png";
 import { ThemeToggle } from "./theme-toggle";
 
 type MenuItem = {
@@ -14,9 +15,12 @@ type MenuItem = {
   label: string;
 };
 
-type Props = { menuItems: Array<MenuItem> };
+type Props = {
+  menuItems: Array<MenuItem>;
+  logo: StaticImageData | string;
+};
 
-export function MobileMenu({ menuItems }: Props) {
+export function MobileMenu({ menuItems, logo }: Props) {
   const [isMobileMenu, setIsMobileMenu] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -41,7 +45,12 @@ export function MobileMenu({ menuItems }: Props) {
             className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
             onClick={() => setIsMobileMenu(false)}
           />
-          <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-background px-5 py-4 sm:max-w-sm sm:ring-1 sm:ring-border">
+          <div
+            className={cn(
+              "fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-background px-5 py-4 sm:max-w-sm sm:ring-1 sm:ring-border transition-transform duration-300 ease-in-out transform",
+              isMobileMenu ? "translate-x-0" : "-translate-x-full"
+            )}
+          >
             <div className="flex items-center justify-between">
               <Link
                 href="/"
@@ -52,6 +61,9 @@ export function MobileMenu({ menuItems }: Props) {
                   src={logo}
                   alt="Logo"
                   className="h-12 md:h-16 object-contain object-left"
+                  height={64}
+                  width={200}
+                  priority
                 />
               </Link>
               <button
@@ -70,11 +82,17 @@ export function MobileMenu({ menuItems }: Props) {
                     key={item.url}
                     href={item.url}
                     onClick={() => setIsMobileMenu(false)}
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-primary"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
                   >
                     {item.label}
                   </Link>
                 ))}
+              </div>
+              <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between border-t border-border pt-4">
+                <span className="text-sm font-medium text-foreground">
+                  Toggle Dark Mode
+                </span>
+                <ThemeToggle />
               </div>
             </div>
           </div>
@@ -82,4 +100,8 @@ export function MobileMenu({ menuItems }: Props) {
       ) : null}
     </>
   );
+}
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
