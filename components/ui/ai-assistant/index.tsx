@@ -279,8 +279,8 @@ export const AIAssistant = ({
             </div>
             <div className="rounded-lg p-3 bg-primary text-primary-foreground ml-4">
               <p>
-                {userName ? `Hi ${userName}!` : "Hello there!"} I'm {name}, your
-                AI assistant. How can I help you with this video?
+                {userName ? `Hi ${userName}!` : "Hello there!"} I&apos;m {name},
+                your AI assistant. How can I help you with this video?
               </p>
             </div>
           </div>

@@ -6,8 +6,21 @@ import { notFound } from "next/navigation";
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const { data: playlist } = await bold.playlists.get(params.id);
+export async function generateStaticParams() {
+  const { data: playlists } = await bold.playlists.list();
+
+  return playlists.map((playlist) => ({
+    id: playlist.id,
+  }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  const { data: playlist } = await bold.playlists.get(resolvedParams.id);
   const first = playlist.videos[0];
   return {
     title: playlist.title,
@@ -29,10 +42,13 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 
 export default async function PlaylistPage({
   params,
+  searchParams,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { data: playlist } = await bold.playlists.get(params.id);
+  const resolvedParams = await params;
+  const { data: playlist } = await bold.playlists.get(resolvedParams.id);
 
   if (!playlist) notFound(); // 404 route
 
