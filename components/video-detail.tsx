@@ -139,7 +139,7 @@ export function VideoDetail({
 
             {/* Chapters only visible on desktop */}
             {hasChapters && (
-              <div className="hidden lg:block lg:col-span-3">
+              <div className="hidden lg:block lg:col-span-3 bg-sidebar">
                 <ChapterList
                   chaptersWebVTT={video.chapters}
                   playbackId={video.playback_id}

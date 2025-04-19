@@ -48,7 +48,7 @@ export function MobileSearch({ onToggle }: MobileSearchProps) {
 
       {/* Overlay */}
       {isOpen && (
-        <div className="fixed inset-x-0 top-16 z-40 bg-background border-b border-border px-4 py-3 md:hidden">
+        <div className="fixed inset-x-0 top-16 z-40 bg-background border-b border-border px-4 py-3 lg:hidden">
           <SearchBar className="w-full" isMobile autoFocus />
         </div>
       )}
