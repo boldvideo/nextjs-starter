@@ -69,6 +69,9 @@ interface ExtendedSettings extends Settings {
     };
   };
   logo_url?: string;
+  logo_dark_url?: string;
+  favicon_url?: string;
+  social_graph_image_url?: string;
 }
 
 export const metadata: Metadata = {
@@ -182,7 +185,7 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className="bg-background flex flex-col h-screen md:h-auto min-h-screen">
+      <body className="bg-background flex flex-col h-screen lg:h-auto min-h-screen">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <SettingsProvider settings={settings}>
             <Header
