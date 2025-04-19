@@ -71,30 +71,83 @@ interface ExtendedSettings extends Settings {
   logo_url?: string;
   logo_dark_url?: string;
   favicon_url?: string;
-  social_graph_image_url?: string;
+  // Extend the nested meta_data object
+  meta_data: Settings["meta_data"] & {
+    social_graph_image_url?: string;
+  };
 }
 
-export const metadata: Metadata = {
+// Default metadata values
+const defaultMetadata = {
   title: "Bold Video x Next.js Starter Kit",
   description:
     "Bold Video Starter Kit: Supercharge videos, rapid encoding/transcription.",
-  openGraph: {
-    title: "Bold Video x Next.js Starter Kit",
-    description:
-      "Bold Video Starter Kit: Supercharge videos, rapid encoding/transcription.",
-    url: "https://starter-demo.bold.video",
-    siteName: "Bold Video x Next.js Starter Kit",
-    images: [
-      {
-        url: "https://starter-demo.bold.video/og-static.png",
-        width: 1200,
-        height: 630,
-      },
-    ],
-    locale: "en-US",
-    type: "website",
-  },
+  ogImage: "https://starter-demo.bold.video/og-static.png",
+  siteUrl: "https://starter-demo.bold.video",
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  let settings = {} as ExtendedSettings;
+
+  try {
+    const settingsResponse = await bold.settings();
+    settings = settingsResponse.data as ExtendedSettings;
+  } catch (error) {
+    console.error("Failed to fetch settings for metadata:", error);
+    // Use default metadata if fetch fails
+    return {
+      title: defaultMetadata.title,
+      description: defaultMetadata.description,
+      openGraph: {
+        title: defaultMetadata.title,
+        description: defaultMetadata.description,
+        url: defaultMetadata.siteUrl,
+        siteName: defaultMetadata.title,
+        images: [
+          {
+            url: defaultMetadata.ogImage,
+            width: 1200,
+            height: 630,
+          },
+        ],
+        locale: "en-US",
+        type: "website",
+      },
+    };
+  }
+
+  const meta = settings.meta_data;
+  const title = meta?.title
+    ? `${meta.title}${meta.title_suffix || ""}`
+    : defaultMetadata.title;
+  const description = meta?.description || defaultMetadata.description;
+  const ogImageUrl =
+    meta?.social_graph_image_url || meta?.image || defaultMetadata.ogImage;
+
+  return {
+    title: title,
+    description: description,
+    openGraph: {
+      title: title,
+      description: description,
+      url: defaultMetadata.siteUrl, // Assuming site URL is constant for now
+      siteName: title,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      locale: "en-US",
+      type: "website",
+    },
+    // Add dynamic icons
+    icons: {
+      icon: settings.favicon_url || "/favicon.ico", // Use fetched url or default
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -102,14 +155,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   // Initialize with a type assertion that handles all required fields from the base Settings type
+  // Settings are fetched here again for theme/layout purposes, separate from metadata generation.
   let settings = {} as ExtendedSettings;
-  settings.menu_items = [];
+  settings.menu_items = []; // Ensure menu_items is initialized
 
   try {
     const settingsResponse = await bold.settings();
     settings = settingsResponse.data as ExtendedSettings;
+    // Ensure meta_data is initialized if it comes back null/undefined but expected
+    if (!settings.meta_data) {
+      settings.meta_data = {} as ExtendedSettings["meta_data"];
+    }
   } catch (error) {
-    console.error("Failed to fetch settings:", error);
+    console.error("Failed to fetch settings for layout:", error);
+    // Initialize meta_data in case of error too
+    settings.meta_data = {} as ExtendedSettings["meta_data"];
   }
 
   const theme = settings.theme_config;
@@ -117,68 +177,140 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Favicon is now handled by generateMetadata */}
+        {/* {settings.favicon_url && (
+          <link rel="icon" href={settings.favicon_url} sizes="any" />
+        )} */}
         {theme && (
           <style
             dangerouslySetInnerHTML={{
               __html: `
               :root {
-                --radius: ${theme.radius};
-                
-                --background: ${theme.light.background};
-                --foreground: ${theme.light.foreground};
-                --card: ${theme.light.card};
-                --popover: ${theme.light.popover};
-                --card-foreground: ${theme.light.card_foreground};
-                --popover-foreground: ${theme.light.popover_foreground};
-                --primary: ${theme.light.primary};
-                --primary-foreground: ${theme.light.primary_foreground};
-                --secondary: ${theme.light.secondary};
-                --secondary-foreground: ${theme.light.secondary_foreground};
-                --muted: ${theme.light.muted};
-                --muted-foreground: ${theme.light.muted_foreground};
-                --accent: ${theme.light.accent};
-                --accent-foreground: ${theme.light.accent_foreground};
-                --destructive: ${theme.light.destructive};
-                --border: ${theme.light.border};
-                --input: ${theme.light.input};
-                --ring: ${theme.light.ring};
-                --sidebar: ${theme.light.sidebar};
-                --sidebar-foreground: ${theme.light.sidebar_foreground};
-                --sidebar-primary: ${theme.light.sidebar_primary};
-                --sidebar-primary-foreground: ${theme.light.sidebar_primary_foreground};
-                --sidebar-accent: ${theme.light.sidebar_accent};
-                --sidebar-accent-foreground: ${theme.light.sidebar_accent_foreground};
-                --sidebar-border: ${theme.light.sidebar_border};
-                --sidebar-ring: ${theme.light.sidebar_ring};
+                --radius: ${theme.radius || "0.5rem"}; /* Add fallback */
+
+                --background: ${theme.light.background || "hsl(0 0% 100%)"};
+                --foreground: ${
+                  theme.light.foreground || "hsl(222.2 84% 4.9%)"
+                };
+                --card: ${theme.light.card || "hsl(0 0% 100%)"};
+                --popover: ${theme.light.popover || "hsl(0 0% 100%)"};
+                --card-foreground: ${
+                  theme.light.card_foreground || "hsl(222.2 84% 4.9%)"
+                };
+                --popover-foreground: ${
+                  theme.light.popover_foreground || "hsl(222.2 84% 4.9%)"
+                };
+                --primary: ${theme.light.primary || "hsl(222.2 47.4% 11.2%)"};
+                --primary-foreground: ${
+                  theme.light.primary_foreground || "hsl(210 40% 98%)"
+                };
+                --secondary: ${theme.light.secondary || "hsl(210 40% 96.1%)"};
+                --secondary-foreground: ${
+                  theme.light.secondary_foreground || "hsl(222.2 47.4% 11.2%)"
+                };
+                --muted: ${theme.light.muted || "hsl(210 40% 96.1%)"};
+                --muted-foreground: ${
+                  theme.light.muted_foreground || "hsl(215.4 16.3% 46.9%)"
+                };
+                --accent: ${theme.light.accent || "hsl(210 40% 96.1%)"};
+                --accent-foreground: ${
+                  theme.light.accent_foreground || "hsl(222.2 47.4% 11.2%)"
+                };
+                --destructive: ${
+                  theme.light.destructive || "hsl(0 84.2% 60.2%)"
+                };
+                --border: ${theme.light.border || "hsl(214.3 31.8% 91.4%)"};
+                --input: ${theme.light.input || "hsl(214.3 31.8% 91.4%)"};
+                --ring: ${theme.light.ring || "hsl(222.2 84% 4.9%)"};
+                --sidebar: ${
+                  theme.light.sidebar || "hsl(0 0% 100%)"
+                }; /* Example fallback */
+                --sidebar-foreground: ${
+                  theme.light.sidebar_foreground || "hsl(222.2 84% 4.9%)"
+                }; /* Example fallback */
+                --sidebar-primary: ${
+                  theme.light.sidebar_primary || "hsl(222.2 47.4% 11.2%)"
+                }; /* Example fallback */
+                --sidebar-primary-foreground: ${
+                  theme.light.sidebar_primary_foreground || "hsl(210 40% 98%)"
+                }; /* Example fallback */
+                --sidebar-accent: ${
+                  theme.light.sidebar_accent || "hsl(210 40% 96.1%)"
+                }; /* Example fallback */
+                --sidebar-accent-foreground: ${
+                  theme.light.sidebar_accent_foreground ||
+                  "hsl(222.2 47.4% 11.2%)"
+                }; /* Example fallback */
+                --sidebar-border: ${
+                  theme.light.sidebar_border || "hsl(214.3 31.8% 91.4%)"
+                }; /* Example fallback */
+                --sidebar-ring: ${
+                  theme.light.sidebar_ring || "hsl(222.2 84% 4.9%)"
+                }; /* Example fallback */
               }
-              
+
               .dark {
-                --background: ${theme.dark.background};
-                --foreground: ${theme.dark.foreground};
-                --card: ${theme.dark.card};
-                --card-foreground: ${theme.dark.card_foreground};
-                --popover: ${theme.dark.popover};
-                --popover-foreground: ${theme.dark.popover_foreground};
-                --primary: ${theme.dark.primary};
-                --primary-foreground: ${theme.dark.primary_foreground};
-                --secondary: ${theme.dark.secondary};
-                --secondary-foreground: ${theme.dark.secondary_foreground};
-                --muted: ${theme.dark.muted};
-                --muted-foreground: ${theme.dark.muted_foreground};
-                --accent: ${theme.dark.accent};
-                --accent-foreground: ${theme.dark.accent_foreground};
-                --destructive: ${theme.dark.destructive};
-                --border: ${theme.dark.border};
-                --input: ${theme.dark.input};
-                --ring: ${theme.dark.ring};
-                --sidebar: ${theme.dark.sidebar};
-                --sidebar-foreground: ${theme.dark.sidebar_foreground};
-                --sidebar-primary: ${theme.dark.sidebar_primary};
-                --sidebar-primary-foreground: ${theme.dark.sidebar_primary_foreground};
-                --sidebar-accent: ${theme.dark.sidebar_accent};
-                --sidebar-accent-foreground: ${theme.dark.sidebar_accent_foreground};
-                --sidebar-border: ${theme.dark.sidebar_border};
-                --sidebar-ring: ${theme.dark.sidebar_ring};
+                 --background: ${
+                   theme.dark.background || "hsl(222.2 84% 4.9%)"
+                 };
+                --foreground: ${theme.dark.foreground || "hsl(210 40% 98%)"};
+                --card: ${theme.dark.card || "hsl(222.2 84% 4.9%)"};
+                --card-foreground: ${
+                  theme.dark.card_foreground || "hsl(210 40% 98%)"
+                };
+                --popover: ${theme.dark.popover || "hsl(222.2 84% 4.9%)"};
+                --popover-foreground: ${
+                  theme.dark.popover_foreground || "hsl(210 40% 98%)"
+                };
+                --primary: ${theme.dark.primary || "hsl(210 40% 98%)"};
+                --primary-foreground: ${
+                  theme.dark.primary_foreground || "hsl(222.2 47.4% 11.2%)"
+                };
+                --secondary: ${
+                  theme.dark.secondary || "hsl(217.2 32.6% 17.5%)"
+                };
+                --secondary-foreground: ${
+                  theme.dark.secondary_foreground || "hsl(210 40% 98%)"
+                };
+                --muted: ${theme.dark.muted || "hsl(217.2 32.6% 17.5%)"};
+                --muted-foreground: ${
+                  theme.dark.muted_foreground || "hsl(215 20.2% 65.1%)"
+                };
+                --accent: ${theme.dark.accent || "hsl(217.2 32.6% 17.5%)"};
+                --accent-foreground: ${
+                  theme.dark.accent_foreground || "hsl(210 40% 98%)"
+                };
+                --destructive: ${
+                  theme.dark.destructive || "hsl(0 62.8% 30.6%)"
+                };
+                --border: ${theme.dark.border || "hsl(217.2 32.6% 17.5%)"};
+                --input: ${theme.dark.input || "hsl(217.2 32.6% 17.5%)"};
+                --ring: ${theme.dark.ring || "hsl(212.7 26.8% 83.9%)"};
+                --sidebar: ${
+                  theme.dark.sidebar || "hsl(222.2 84% 4.9%)"
+                }; /* Example fallback */
+                --sidebar-foreground: ${
+                  theme.dark.sidebar_foreground || "hsl(210 40% 98%)"
+                }; /* Example fallback */
+                --sidebar-primary: ${
+                  theme.dark.sidebar_primary || "hsl(210 40% 98%)"
+                }; /* Example fallback */
+                --sidebar-primary-foreground: ${
+                  theme.dark.sidebar_primary_foreground ||
+                  "hsl(222.2 47.4% 11.2%)"
+                }; /* Example fallback */
+                --sidebar-accent: ${
+                  theme.dark.sidebar_accent || "hsl(217.2 32.6% 17.5%)"
+                }; /* Example fallback */
+                --sidebar-accent-foreground: ${
+                  theme.dark.sidebar_accent_foreground || "hsl(210 40% 98%)"
+                }; /* Example fallback */
+                --sidebar-border: ${
+                  theme.dark.sidebar_border || "hsl(217.2 32.6% 17.5%)"
+                }; /* Example fallback */
+                --sidebar-ring: ${
+                  theme.dark.sidebar_ring || "hsl(212.7 26.8% 83.9%)"
+                }; /* Example fallback */
               }
             `,
             }}
