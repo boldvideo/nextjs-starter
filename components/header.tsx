@@ -10,10 +10,11 @@ import { MobileSearch } from "@/components/mobile-search";
 
 interface HeaderProps {
   logo: any;
+  logoDark?: string;
   menuItems: Array<{ url: string; label: string }>;
 }
 
-export function Header({ logo, menuItems }: HeaderProps) {
+export function Header({ logo, logoDark, menuItems }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
@@ -30,14 +31,38 @@ export function Header({ logo, menuItems }: HeaderProps) {
               {/* Logo */}
               <div className="flex items-center">
                 <Link href="/" className="mr-8 hidden lg:block">
-                  <Image
-                    src={logo}
-                    alt="Logo"
-                    className="h-10 w-auto object-contain"
-                    height={40}
-                    width={160}
-                    priority
-                  />
+                  {logoDark ? (
+                    <>
+                      {/* Light Mode Logo */}
+                      <Image
+                        src={logo}
+                        alt="Logo"
+                        className="h-10 w-auto object-contain block dark:hidden"
+                        height={40}
+                        width={160}
+                        priority
+                      />
+                      {/* Dark Mode Logo */}
+                      <Image
+                        src={logoDark}
+                        alt="Logo"
+                        className="h-10 w-auto object-contain hidden dark:block"
+                        height={40}
+                        width={160}
+                        priority
+                      />
+                    </>
+                  ) : (
+                    // Default Logo if no dark variant
+                    <Image
+                      src={logo}
+                      alt="Logo"
+                      className="h-10 w-auto object-contain"
+                      height={40}
+                      width={160}
+                      priority
+                    />
+                  )}
                 </Link>
 
                 {/* Desktop Navigation Menu */}
@@ -70,7 +95,11 @@ export function Header({ logo, menuItems }: HeaderProps) {
                 <div className="flex justify-start">
                   {!searchOpen && (
                     <Suspense>
-                      <MobileMenu menuItems={menuItems} logo={logo} />
+                      <MobileMenu
+                        menuItems={menuItems}
+                        logo={logo}
+                        logoDark={logoDark}
+                      />
                     </Suspense>
                   )}
                 </div>
@@ -78,13 +107,35 @@ export function Header({ logo, menuItems }: HeaderProps) {
                 {/* Center: Logo */}
                 <div className="flex justify-center">
                   <Link href="/">
-                    <Image
-                      src={logo}
-                      alt="Logo"
-                      className="h-8 w-auto object-contain"
-                      height={32}
-                      width={128}
-                    />
+                    {logoDark ? (
+                      <>
+                        {/* Light Mode Logo */}
+                        <Image
+                          src={logo}
+                          alt="Logo"
+                          className="h-8 w-auto object-contain block dark:hidden"
+                          height={32}
+                          width={128}
+                        />
+                        {/* Dark Mode Logo */}
+                        <Image
+                          src={logoDark}
+                          alt="Logo"
+                          className="h-8 w-auto object-contain hidden dark:block"
+                          height={32}
+                          width={128}
+                        />
+                      </>
+                    ) : (
+                      // Default Logo if no dark variant
+                      <Image
+                        src={logo}
+                        alt="Logo"
+                        className="h-8 w-auto object-contain"
+                        height={32}
+                        width={128}
+                      />
+                    )}
                   </Link>
                 </div>
 

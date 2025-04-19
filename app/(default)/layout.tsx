@@ -322,6 +322,7 @@ export default async function RootLayout({
           <SettingsProvider settings={settings}>
             <Header
               logo={settings.logo_url || "/bold-logo.svg"}
+              logoDark={settings.logo_dark_url}
               menuItems={settings.menu_items || []}
             />
             <main className="flex-1 min-h-0 flex flex-col">{children}</main>

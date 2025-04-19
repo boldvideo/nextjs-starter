@@ -18,9 +18,10 @@ type MenuItem = {
 type Props = {
   menuItems: Array<MenuItem>;
   logo: StaticImageData | string;
+  logoDark?: StaticImageData | string;
 };
 
-export function MobileMenu({ menuItems, logo }: Props) {
+export function MobileMenu({ menuItems, logo, logoDark }: Props) {
   const [isMobileMenu, setIsMobileMenu] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -57,14 +58,38 @@ export function MobileMenu({ menuItems, logo }: Props) {
                 className=""
                 onClick={() => setIsMobileMenu(false)}
               >
-                <Image
-                  src={logo}
-                  alt="Logo"
-                  className="h-12 md:h-16 object-contain object-left"
-                  height={64}
-                  width={200}
-                  priority
-                />
+                {logoDark ? (
+                  <>
+                    {/* Light Mode Logo */}
+                    <Image
+                      src={logo}
+                      alt="Logo"
+                      className="h-12 md:h-16 object-contain object-left block dark:hidden"
+                      height={64}
+                      width={200}
+                      priority
+                    />
+                    {/* Dark Mode Logo */}
+                    <Image
+                      src={logoDark}
+                      alt="Logo"
+                      className="h-12 md:h-16 object-contain object-left hidden dark:block"
+                      height={64}
+                      width={200}
+                      priority
+                    />
+                  </>
+                ) : (
+                  // Default Logo if no dark variant
+                  <Image
+                    src={logo}
+                    alt="Logo"
+                    className="h-12 md:h-16 object-contain object-left"
+                    height={64}
+                    width={200}
+                    priority
+                  />
+                )}
               </Link>
               <button
                 type="button"
