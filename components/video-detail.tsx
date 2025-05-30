@@ -139,7 +139,7 @@ export function VideoDetail({
 
             {/* Chapters only visible on desktop */}
             {hasChapters && (
-              <div className="hidden lg:block lg:col-span-3 bg-sidebar">
+              <div className="hidden lg:block lg:col-span-3 bg-sidebar h-full overflow-y-auto">
                 <ChapterList
                   chaptersWebVTT={video.chapters}
                   playbackId={video.playback_id}
@@ -219,8 +219,30 @@ export function VideoDetail({
             <p className="text-muted-foreground text-xl mb-4">
               {formatRelative(new Date(video.published_at), new Date())}
             </p>
-            <div className="mb-12 prose prose-lg dark:prose-invert max-w-2xl prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
+            <div className="mb-8 prose prose-lg dark:prose-invert max-w-2xl prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
               <VideoDescription text={video.description || ""} />
+            </div>
+            <div className="max-w-2xl mb-12 rounded-md border border-card-foreground/10 bg-card text-card-foreground p-4">
+              <h2 className="text-lg font-bold">
+                Freemius: Built for selling WordPress products
+              </h2>
+              <div className="mt-2">
+                <p>
+                  From checkout to subscriptions, licensing, and
+                  analytics—Freemius handles the business side so you can focus
+                  on building. Grow your plugin or theme with a platform
+                  designed specifically for solo devs and small teams.
+                </p>
+              </div>
+              <a
+                className="mt-4 flex flex-1 bg-foreground text-background rounded-md px-4 py-2 items-center justify-center underline-none"
+                data-size="lg"
+                data-fill="solid"
+                data-color="primary"
+                href="/contact/sales?ref=headless-seo"
+              >
+                Request a demo
+              </a>
             </div>
 
             {hasTranscript && video.transcript?.json?.url ? (
