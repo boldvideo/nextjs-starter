@@ -106,7 +106,7 @@ export function VideoDetail({
     setHasTranscript(
       !!video.transcript &&
         !!video.transcript.json &&
-        !!video.transcript.json.url
+        !!video.transcript.json.url,
     );
   }, [video]);
 
@@ -123,7 +123,7 @@ export function VideoDetail({
               "w-full max-w-[1600px]",
               // Only apply grid on desktop screens
               video.chapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
-              "overflow-hidden"
+              "overflow-hidden",
             )}
           >
             <div className="aspect-video lg:max-h-[50vh] 2xl:max-h-[50vh] lg:aspect-auto w-full lg:h-full bg-black flex-grow lg:col-span-9">
@@ -222,7 +222,7 @@ export function VideoDetail({
             <div className="mb-8 prose prose-lg dark:prose-invert max-w-2xl prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
               <VideoDescription text={video.description || ""} />
             </div>
-            <div className="max-w-2xl mb-12 rounded-md border border-card-foreground/10 bg-card text-card-foreground p-4">
+            <div className="hidden max-w-2xl mb-12 rounded-md border border-card-foreground/10 bg-card text-card-foreground p-4">
               <h2 className="text-lg font-bold">
                 Freemius: Built for selling WordPress products
               </h2>
