@@ -82,7 +82,9 @@ const defaultMetadata = {
   title: "Bold Video x Next.js Starter Kit",
   description:
     "Bold Video Starter Kit: Supercharge videos, rapid encoding/transcription.",
-  ogImage: "https://starter-demo.bold.video/og-static.png",
+  ogImage: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
+    "Bold Video x Next.js Starter Kit",
+  )}`,
   siteUrl: "https://starter-demo.bold.video",
 };
 
@@ -122,7 +124,10 @@ export async function generateMetadata(): Promise<Metadata> {
     : defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
   const ogImageUrl =
-    meta?.social_graph_image_url || meta?.image || defaultMetadata.ogImage;
+    meta?.social_graph_image_url ||
+    `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(title)}${
+      meta?.image ? `&img=${encodeURIComponent(meta.image)}` : ""
+    }`;
 
   return {
     title: title,
