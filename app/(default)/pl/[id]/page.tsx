@@ -27,11 +27,12 @@ export async function generateMetadata({
     description: playlist.description,
     openGraph: {
       title: playlist.title,
+      description: playlist.description,
       images: [
         {
-          url: `https://demo.bold.video/og?t=${encodeURIComponent(
-            `Playlist: ${playlist.title}`
-          )}&img=${encodeURIComponent(first.thumbnail)}`,
+          url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
+            playlist.title,
+          )}${first ? `&img=${encodeURIComponent(first.thumbnail)}` : ""}`,
           width: 1200,
           height: 630,
         },

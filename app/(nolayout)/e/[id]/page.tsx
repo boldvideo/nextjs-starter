@@ -2,6 +2,7 @@ import { bold } from "@/client";
 // import { Player } from "components/embed-player";
 import { Player } from "@/components/players";
 import type { Video } from "@boldvideo/bold-js";
+import { formatDuration } from "util/format-duration";
 
 /**
  * Extended Video type with additional properties used in our application
@@ -23,11 +24,14 @@ export async function generateMetadata(props: {
     description: video.description,
     openGraph: {
       title: video.title,
+      description: video.description,
       images: [
         {
-          url: `https://demo.bold.video/og?t=${encodeURIComponent(
-            video.title
-          )}&img=${encodeURIComponent(video.thumbnail)}`,
+          url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
+            video.title,
+          )}&img=${encodeURIComponent(video.thumbnail)}&l=${encodeURIComponent(
+            formatDuration(video.duration),
+          )}`,
           width: 1200,
           height: 630,
         },
