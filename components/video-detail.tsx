@@ -62,6 +62,9 @@ export function VideoDetail({
 
   // Check if the video has chapters
   const hasChapters = Boolean(video.chapters);
+  
+  // Check if AI assistant should be shown (requires both has_ai flag and transcript)
+  const showAIAssistant = Boolean(settings.has_ai && hasTranscript);
 
   // Handle scroll behavior for floating player
   const handleScroll = useCallback(() => {
@@ -156,6 +159,7 @@ export function VideoDetail({
           onTabChange={setActiveTab}
           hasChapters={hasChapters}
           hasTranscript={hasTranscript}
+          showAIAssistant={showAIAssistant}
           className="mb-2 lg:hidden"
         />
 
@@ -195,7 +199,7 @@ export function VideoDetail({
             )}
 
           {/* AI Assistant tab */}
-          {activeTab === "assistant" && (
+          {activeTab === "assistant" && showAIAssistant && (
             <div className="flex flex-col flex-1 min-h-0 bg-background">
               <AIAssistant
                 videoId={video.id}
@@ -264,9 +268,9 @@ export function VideoDetail({
           </div>
 
           {/* Right Column: AI Assistant (Desktop) */}
-          <div className="lg:w-1/3 flex-shrink-0">
-            {/* Render AIAssistant here for desktop, it will use the shared context */}
-            {settings && (
+          {showAIAssistant && (
+            <div className="lg:w-1/3 flex-shrink-0">
+              {/* Render AIAssistant here for desktop, it will use the shared context */}
               <AIAssistant
                 videoId={video.id}
                 name={settings.ai_name || "AI Assistant"}
@@ -276,8 +280,8 @@ export function VideoDetail({
                 // Adjust className as needed for desktop layout
                 className="h-[calc(100vh-200px)]" // Example height, adjust as necessary
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </AIAssistantProvider>

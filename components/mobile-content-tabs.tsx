@@ -12,6 +12,7 @@ interface MobileContentTabsProps {
   onTabChange: (tab: TabId) => void;
   hasChapters: boolean;
   hasTranscript: boolean;
+  showAIAssistant?: boolean;
   className?: string;
 }
 
@@ -24,6 +25,7 @@ export function MobileContentTabs({
   onTabChange,
   hasChapters,
   hasTranscript,
+  showAIAssistant = false,
   className,
 }: MobileContentTabsProps) {
   return (
@@ -76,19 +78,21 @@ export function MobileContentTabs({
           </button>
         )}
 
-        <button
-          onClick={() => onTabChange("assistant")}
-          className={cn(
-            "flex items-center gap-1 px-3 py-2 rounded-full transition-colors",
-            activeTab === "assistant"
-              ? "text-primary bg-primary/10"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-          aria-pressed={activeTab === "assistant"}
-        >
-          <MessageSquare size={20} />
-          <span className="text-xs">Ask AI</span>
-        </button>
+        {showAIAssistant && (
+          <button
+            onClick={() => onTabChange("assistant")}
+            className={cn(
+              "flex items-center gap-1 px-3 py-2 rounded-full transition-colors",
+              activeTab === "assistant"
+                ? "text-primary bg-primary/10"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+            aria-pressed={activeTab === "assistant"}
+          >
+            <MessageSquare size={20} />
+            <span className="text-xs">Ask AI</span>
+          </button>
+        )}
       </div>
     </div>
   );
