@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { bold } from "@/client";
 import { VideoDetail } from "@/components/video-detail";
 import type { Video, Settings } from "@boldvideo/bold-js";
+import { formatDuration } from "util/format-duration";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -19,11 +20,14 @@ export async function generateMetadata({
     description: data.description,
     openGraph: {
       title: data.title,
+      description: data.description,
       images: [
         {
-          url: `https://demo.bold.video/og?t=${encodeURIComponent(
-            data.title
-          )}&img=${encodeURIComponent(data.thumbnail)}`,
+          url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
+            data.title,
+          )}&img=${encodeURIComponent(data.thumbnail)}&l=${encodeURIComponent(
+            formatDuration(data.duration),
+          )}`,
           width: 1200,
           height: 630,
         },
