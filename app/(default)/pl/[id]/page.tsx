@@ -56,7 +56,7 @@ export default async function PlaylistPage({
   const hasVideos = playlist.videos.length > 0;
 
   return (
-    <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
+    <div className="p-5 md:p-10 max-w-screen-2xl">
       <header className="mb-8">
         <h2 className="font-bold text-3xl mb-5">{playlist.title}</h2>
         {playlist.description && (
