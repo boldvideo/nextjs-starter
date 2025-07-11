@@ -29,7 +29,6 @@ interface ExtendedVideo extends Video {
   };
   ai_avatar?: string;
   ai_name?: string;
-  teaser?: string | null;
 }
 
 /**
