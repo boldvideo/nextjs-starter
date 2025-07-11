@@ -50,7 +50,7 @@ export default async function Home(): Promise<React.JSX.Element> {
   return (
     <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
       {/* Videos Section */}
-      {hasVideos && (
+      {false && hasVideos && (
         <section>
           <h2 className="font-bold text-3xl mb-5" id="latest-videos">
             Latest Videos
@@ -76,7 +76,7 @@ export default async function Home(): Promise<React.JSX.Element> {
           {(settings as Settings).featured_playlists.map(
             (playlist: Playlist) => (
               <FeaturedPlaylist key={playlist.id} playlist={playlist} />
-            )
+            ),
           )}
         </section>
       )}
