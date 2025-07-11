@@ -330,7 +330,9 @@ export default async function RootLayout({
               logoDark={settings.logo_dark_url}
               menuItems={settings.menu_items || []}
             />
-            <main className="flex-1 min-h-0 flex flex-col">{children}</main>
+            <main className="flex-1 min-h-0 flex flex-col items-center">
+              {children}
+            </main>
           </SettingsProvider>
         </ThemeProvider>
       </body>
