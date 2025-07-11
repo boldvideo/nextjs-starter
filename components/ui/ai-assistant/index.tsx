@@ -22,6 +22,8 @@ interface AIAssistantProps {
   subdomain: string;
   /** Optional user's name for personalized greeting */
   userName?: string;
+  /** Optional AI greeting message */
+  greeting?: string;
   /** Optional additional CSS classes */
   className?: string;
   /** Optional endpoint override */
@@ -118,6 +120,7 @@ export const AIAssistant = ({
   avatar,
   subdomain,
   userName,
+  greeting,
   className,
   endpoint,
   isEmbedded = false, // Default to floating mode
@@ -279,8 +282,9 @@ export const AIAssistant = ({
             </div>
             <div className="rounded-lg p-3 bg-primary text-primary-foreground ml-4">
               <p>
-                {userName ? `Hi ${userName}!` : "Hello there!"} I&apos;m {name},
-                your AI assistant. How can I help you with this video?
+                {greeting && greeting.trim() !== "" 
+                  ? greeting 
+                  : `${userName ? `Hi ${userName}!` : "Hello there!"} I'm ${name}, your AI assistant. How can I help you with this video?`}
               </p>
             </div>
           </div>
@@ -433,8 +437,9 @@ export const AIAssistant = ({
                 <strong>{name}</strong>
               </div>
               <p>
-                {userName ? `Hi ${userName}!` : "Hello there!"} I&apos;m {name},
-                your AI assistant. How can I help you with this video?
+                {greeting && greeting.trim() !== "" 
+                  ? greeting 
+                  : `${userName ? `Hi ${userName}!` : "Hello there!"} I'm ${name}, your AI assistant. How can I help you with this video?`}
               </p>
             </div>
 
@@ -493,8 +498,8 @@ export const AIAssistant = ({
                 </button>
               )}
             </div>
-            <p className="text-xs text-foreground-muted mt-2">
-              Mistakes can happen, we&apos;re all human after all. 😉
+            <p className="text-xs text-gray-500 mt-2">
+              Note: our AI chat can make mistakes.
             </p>
           </div>
         </aside>

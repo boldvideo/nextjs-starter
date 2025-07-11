@@ -205,6 +205,7 @@ export function VideoDetail({
                 videoId={video.id}
                 name={settings.ai_name || "AI Assistant"}
                 avatar={settings.ai_avatar || "/placeholder-avatar.png"}
+                greeting={settings.ai_greeting}
                 subdomain=""
                 isEmbedded={true}
                 className="flex-1"
@@ -275,6 +276,7 @@ export function VideoDetail({
                 videoId={video.id}
                 name={settings.ai_name || "AI Assistant"}
                 avatar={settings.ai_avatar || "/default-avatar.png"}
+                greeting={settings.ai_greeting}
                 subdomain={""}
                 // isEmbedded is false by default, so it will render in floating mode
                 // Adjust className as needed for desktop layout
