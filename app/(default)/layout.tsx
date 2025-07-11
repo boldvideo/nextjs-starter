@@ -71,6 +71,7 @@ interface ExtendedSettings extends Settings {
   logo_url?: string;
   logo_dark_url?: string;
   favicon_url?: string;
+  ai_greeting?: string;
   // Extend the nested meta_data object
   meta_data: Settings["meta_data"] & {
     social_graph_image_url?: string;
