@@ -29,6 +29,7 @@ interface ExtendedVideo extends Video {
   };
   ai_avatar?: string;
   ai_name?: string;
+  teaser?: string;
 }
 
 /**
@@ -170,7 +171,9 @@ export function VideoDetail({
             <div className="space-y-4">
               <h1 className="text-2xl font-bold">{video.title}</h1>
               <p className="text-muted-foreground">
-                {formatRelative(new Date(video.published_at), new Date())}
+                {video.teaser && video.teaser.trim() !== "" 
+                  ? video.teaser 
+                  : formatRelative(new Date(video.published_at), new Date())}
               </p>
               <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
                 <VideoDescription text={video.description || ""} />
@@ -222,7 +225,9 @@ export function VideoDetail({
               {video.title}
             </h1>
             <p className="text-muted-foreground text-xl mb-4">
-              {formatRelative(new Date(video.published_at), new Date())}
+              {video.teaser && video.teaser.trim() !== "" 
+                ? video.teaser 
+                : formatRelative(new Date(video.published_at), new Date())}
             </p>
             <div className="mb-8 prose prose-lg dark:prose-invert max-w-2xl prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
               <VideoDescription text={video.description || ""} />
