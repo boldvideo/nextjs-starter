@@ -1,5 +1,6 @@
 import { bold } from "@/client";
 import { VideoThumbnail } from "@/components/video-thumbnail";
+import { SponsorBox } from "@/components/sponsor-box";
 import type { Playlist, Video } from "@boldvideo/bold-js";
 import { notFound } from "next/navigation";
 
@@ -55,14 +56,27 @@ export default async function PlaylistPage({
 
   const hasVideos = playlist.videos.length > 0;
 
+  const isSponsoredBy = (sponsor: string): boolean => {
+    console.log(`Checking if playlist is sponsored by ${sponsor}`);
+    return playlist.description?.toLowerCase().includes(sponsor) || false;
+  };
+
   return (
     <div className="p-5 md:p-10 max-w-screen-2xl w-full">
       <header className="mb-8">
         <h2 className="font-bold text-3xl mb-5">{playlist.title}</h2>
         {playlist.description && (
-          <p className="text-lg text-muted-foreground max-w-3xl">
-            {playlist.description}
-          </p>
+          <>
+            {isSponsoredBy("webflow") ? (
+              <SponsorBox sponsor="webflow" />
+            ) : isSponsoredBy("lemonsqueezy") ? (
+              <SponsorBox sponsor="lemonsqueezy" />
+            ) : (
+              <p className="text-lg text-muted-foreground max-w-3xl">
+                {playlist.description}
+              </p>
+            )}
+          </>
         )}
       </header>
 
