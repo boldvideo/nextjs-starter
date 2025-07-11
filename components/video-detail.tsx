@@ -33,13 +33,20 @@ interface ExtendedVideo extends Video {
 }
 
 /**
+ * Extended Settings to include ai_greeting
+ */
+interface ExtendedSettings extends Settings {
+  ai_greeting?: string;
+}
+
+/**
  * Props for the VideoDetail component
  */
 interface VideoDetailProps {
   video: ExtendedVideo;
   startTime?: number;
   className?: string;
-  settings: Settings;
+  settings: ExtendedSettings;
 }
 
 /**
