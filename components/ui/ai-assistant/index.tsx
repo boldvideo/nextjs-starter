@@ -3,10 +3,11 @@ import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Image from "next/image";
 import { X, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAIAssistant, Message } from "./use-ai-assistant";
+import { useAIAssistant } from "./use-ai-assistant";
 import { useAIStream } from "./use-ai-stream";
 import { timestampToSeconds } from "@/lib/utils/time";
 import { useAIAssistantContext } from "./context";
+import type { Message, SuggestedAction } from "./types";
 
 /**
  * Props for the AIAssistant component
@@ -146,6 +147,7 @@ export const AIAssistant = ({
   } = useAIAssistant({
     onAskQuestion: handleAIQuestion,
   });
+
 
   // Ensure the assistant is open when embedded
   useEffect(() => {
@@ -314,6 +316,20 @@ export const AIAssistant = ({
                         </div>`,
                   }}
                 />
+                {message.suggested_actions && message.suggested_actions.length > 0 && index === messages.length - 1 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {message.suggested_actions.map((action, actionIndex) => (
+                      <button
+                        key={actionIndex}
+                        onClick={() => handleSubmit(action.value)}
+                        className="px-3 py-1 text-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-full transition-colors"
+                        disabled={isPending}
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -338,7 +354,7 @@ export const AIAssistant = ({
             {inputValue && (
               <button
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/90"
-                onClick={handleSubmit}
+                onClick={() => handleSubmit()}
                 disabled={isPending}
               >
                 <Send size={20} />
@@ -468,6 +484,20 @@ export const AIAssistant = ({
                           </div>`,
                     }}
                   />
+                  {message.suggested_actions && message.suggested_actions.length > 0 && index === messages.length - 1 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {message.suggested_actions.map((action, actionIndex) => (
+                        <button
+                          key={actionIndex}
+                          onClick={() => handleSubmit(action.value)}
+                          className="px-3 py-1 text-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-full transition-colors"
+                          disabled={isPending}
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -491,7 +521,7 @@ export const AIAssistant = ({
               {inputValue && (
                 <button
                   className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/90"
-                  onClick={handleSubmit}
+                  onClick={() => handleSubmit()}
                   disabled={isPending}
                 >
                   <Send size={20} />

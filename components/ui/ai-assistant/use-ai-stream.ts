@@ -1,5 +1,6 @@
-import { Message } from "../../../lib/ai-question";
 import { useCallback } from "react";
+import { useAIAssistantContext } from "./context";
+import type { Message } from "./types";
 
 interface UseAIStreamOptions {
   /** Video ID to get AI responses for */
@@ -25,6 +26,8 @@ export function useAIStream({
   endpoint = "/api/ask",
   config,
 }: UseAIStreamOptions) {
+  const { setMessages } = useAIAssistantContext();
+  
   const handleAIQuestion = useCallback(
     async (
       question: string,
@@ -96,6 +99,22 @@ export function useAIStream({
                   case "error":
                     throw new Error(data.content);
                   case "done":
+                    // Handle suggested actions from the done event
+                    if (data.suggested_actions && data.suggested_actions.length > 0) {
+                      setMessages((prev) => {
+                        const lastMessage = prev[prev.length - 1];
+                        if (!lastMessage || lastMessage.role !== "assistant") return prev;
+                        
+                        const previousMessages = prev.slice(0, -1);
+                        return [
+                          ...previousMessages,
+                          {
+                            ...lastMessage,
+                            suggested_actions: data.suggested_actions,
+                          },
+                        ];
+                      });
+                    }
                     return;
                   default:
                     console.warn("Unknown message type:", data.type);
@@ -114,7 +133,7 @@ export function useAIStream({
         throw error;
       }
     },
-    [videoId, subdomain, endpoint, config]
+    [videoId, subdomain, endpoint, config, setMessages]
   );
 
   return handleAIQuestion;
