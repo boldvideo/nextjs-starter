@@ -72,11 +72,13 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
     [setMessages, setIsPending] // Depend on setters from context
   );
 
-  const handleSubmit = async () => {
-    if (!inputValue.trim() || isPending) return;
+  const handleSubmit = async (overrideQuestion?: string) => {
+    const question = overrideQuestion || inputValue.trim();
+    if (!question || isPending) return;
 
-    const question = inputValue.trim();
-    setInputValue(""); // Use setter from context
+    if (!overrideQuestion) {
+      setInputValue(""); // Only clear input if not an override
+    }
     setIsPending(true); // Use setter from context
 
     // Add user message
