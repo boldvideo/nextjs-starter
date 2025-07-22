@@ -12,9 +12,23 @@ import type React from "react";
 import { AIAssistantProvider } from "./ui/ai-assistant/context";
 import { MobileContentTabs } from "./mobile-content-tabs";
 import { AIAssistant } from "./ui/ai-assistant";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Define tab type for mobile navigation
 type TabId = "info" | "chapters" | "transcript" | "assistant";
+
+/**
+ * CTA type for call-to-action data
+ */
+interface CTA {
+  id: string;
+  name: string;
+  description: string;
+  title: string;
+  button_text?: string;
+  button_url?: string;
+}
 
 /**
  * Extended Video type with additional properties used in our application
@@ -29,6 +43,7 @@ interface ExtendedVideo extends Video {
   };
   ai_avatar?: string;
   ai_name?: string;
+  cta?: CTA | null;
 }
 
 /**
@@ -182,6 +197,40 @@ export function VideoDetail({
               <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
                 <VideoDescription text={video.description || ""} />
               </div>
+              {video.cta && (
+                <div className="rounded-md border border-card-foreground/10 bg-card text-card-foreground p-4">
+                  <h2 className="text-base font-bold">
+                    {video.cta.title}
+                  </h2>
+                  <div className="mt-2 prose prose-sm dark:prose-invert prose-p:my-2">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: ({ ...props }) => (
+                          <a
+                            {...props}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          />
+                        ),
+                      }}
+                    >
+                      {video.cta.description}
+                    </ReactMarkdown>
+                  </div>
+                  {video.cta.button_text && video.cta.button_url && (
+                    <a
+                      className="mt-4 flex flex-1 bg-foreground text-background rounded-md px-4 py-2 items-center justify-center underline-none hover:opacity-90 transition-opacity"
+                      href={video.cta.button_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {video.cta.button_text}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -234,28 +283,40 @@ export function VideoDetail({
             <div className="mb-8 prose prose-lg dark:prose-invert max-w-2xl prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
               <VideoDescription text={video.description || ""} />
             </div>
-            <div className="hidden max-w-2xl mb-12 rounded-md border border-card-foreground/10 bg-card text-card-foreground p-4">
-              <h2 className="text-lg font-bold">
-                Freemius: Built for selling WordPress products
-              </h2>
-              <div className="mt-2">
-                <p>
-                  From checkout to subscriptions, licensing, and
-                  analytics—Freemius handles the business side so you can focus
-                  on building. Grow your plugin or theme with a platform
-                  designed specifically for solo devs and small teams.
-                </p>
+            {video.cta && (
+              <div className="max-w-2xl mb-12 rounded-md border border-card-foreground/10 bg-card text-card-foreground p-4">
+                <h2 className="text-lg font-bold">
+                  {video.cta.title}
+                </h2>
+                <div className="mt-2 prose prose-sm dark:prose-invert prose-p:my-2">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      a: ({ ...props }) => (
+                        <a
+                          {...props}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        />
+                      ),
+                    }}
+                  >
+                    {video.cta.description}
+                  </ReactMarkdown>
+                </div>
+                {video.cta.button_text && video.cta.button_url && (
+                  <a
+                    className="mt-4 flex flex-1 bg-foreground text-background rounded-md px-4 py-2 items-center justify-center underline-none hover:opacity-90 transition-opacity"
+                    href={video.cta.button_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {video.cta.button_text}
+                  </a>
+                )}
               </div>
-              <a
-                className="mt-4 flex flex-1 bg-foreground text-background rounded-md px-4 py-2 items-center justify-center underline-none"
-                data-size="lg"
-                data-fill="solid"
-                data-color="primary"
-                href="/contact/sales?ref=headless-seo"
-              >
-                Request a demo
-              </a>
-            </div>
+            )}
 
             {hasTranscript && video.transcript?.json?.url ? (
               <div className="mb-12">
