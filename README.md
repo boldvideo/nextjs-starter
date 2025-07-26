@@ -23,6 +23,7 @@ Welcome to the Bold Video Starter Kit, the easiest way to get started with <a hr
 - **Dual Player Support**: Choose between Mux Player and Vidstack for video playback
 - **Dark Mode**: Built-in light/dark theme toggle with system preference detection
 - **Search Functionality**: Fast, accessible search with keyboard shortcuts (⌘+K)
+- **Authentication (Optional)**: OAuth support with Google/WorkOS, domain restrictions, and session management
 - **Next.js 15**: Latest App Router architecture with React Server Components
 - **Tailwind CSS v4**: Modern styling with OKLCH color space for better color perception
 - **Responsive Design**: Optimized for all device sizes
@@ -155,6 +156,71 @@ The search implementation is in:
 - `app/(default)/s/page.tsx`: Full search results page
 
 To customize the search experience, you can modify these files according to your preferences.
+
+### Authentication (Optional)
+
+The starter kit includes optional authentication support using [Auth.js](https://authjs.dev/), allowing you to protect your video portal with OAuth providers like Google or WorkOS.
+
+#### Features
+- **Disabled by default**: No authentication required out of the box
+- **Multiple providers**: Support for Google OAuth and WorkOS
+- **Domain restrictions**: Limit access to specific email domains
+- **Session management**: Secure JWT-based sessions
+- **User menu**: Profile dropdown with sign-out functionality
+
+#### Setting up Authentication
+
+1. **Enable authentication** by setting environment variables in your `.env.local`:
+
+```env
+# Enable authentication
+NEXT_PUBLIC_AUTH_ENABLED=true
+
+# Choose your provider (google or workos)
+NEXT_PUBLIC_AUTH_PROVIDER=google
+
+# Generate auth secret with: npx auth secret
+AUTH_SECRET=your-generated-secret
+```
+
+2. **Configure your OAuth provider**:
+
+For Google OAuth:
+```env
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+```
+
+For WorkOS:
+```env
+WORKOS_CLIENT_ID=your-workos-client-id
+WORKOS_API_KEY=your-workos-api-key
+```
+
+3. **Optional: Restrict to specific domains**:
+```env
+# Comma-separated list of allowed email domains
+NEXT_PUBLIC_AUTH_ALLOWED_DOMAINS=company.com,example.org
+```
+
+#### Setting up Google OAuth
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable Google+ API
+4. Create OAuth 2.0 credentials
+5. Add authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (development)
+   - `https://your-domain.com/api/auth/callback/google` (production)
+
+#### Authentication Files
+
+The authentication implementation is in:
+- `auth.ts`: Main Auth.js configuration
+- `config/auth.ts`: Authentication utilities
+- `components/auth/user-menu.tsx`: User dropdown menu
+- `components/auth/sign-in.tsx`: Sign-in page component
+- `middleware.ts`: Route protection logic
 
 ## Deployment
 To deploy your app on [Vercel](https://vercel.com), follow these steps:

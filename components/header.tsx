@@ -7,14 +7,18 @@ import { SearchPreview } from "./search-preview";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import { MobileSearch } from "@/components/mobile-search";
+import UserMenu from "@/components/auth/user-menu";
+import { isAuthEnabled } from "@/config/auth";
+import type { Session } from "next-auth";
 
 interface HeaderProps {
   logo: any;
   logoDark?: string;
   menuItems: Array<{ url: string; label: string }>;
+  session?: Session | null;
 }
 
-export function Header({ logo, logoDark, menuItems }: HeaderProps) {
+export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
@@ -79,7 +83,7 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                 </div>
               </div>
 
-              {/* Right Side - Search and Theme Toggle (Desktop Only) */}
+              {/* Right Side - Search, Theme Toggle, and User Menu (Desktop Only) */}
               <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end max-w-md">
                 <Suspense>
                   <SearchBar className="w-full max-w-xs" />
@@ -87,6 +91,11 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                 <Suspense>
                   <ThemeToggle />
                 </Suspense>
+                {isAuthEnabled() && session !== undefined && (
+                  <Suspense>
+                    <UserMenu session={session} />
+                  </Suspense>
+                )}
               </div>
 
               {/* Mobile Header Controls */}

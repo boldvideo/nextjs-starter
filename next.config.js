@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "yo.fm",
       },
+      {
+        protocol: "https",
+        hostname: "**.googleusercontent.com",
+      },
     ],
   },
 };
