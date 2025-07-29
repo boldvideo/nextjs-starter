@@ -37,15 +37,29 @@ interface AIAssistantProps {
  * Processes message content to make timestamps clickable and format text
  */
 const processMessageContent = (content: string) => {
+  // First, let's handle markdown links to avoid conflicts with timestamp processing
+  // This improved regex handles links even when wrapped in brackets like [[text](url)]
+  let processedContent = content;
+  
+  // Replace markdown links, preserving outer brackets if they exist
+  processedContent = processedContent.replace(
+    /(\[)?\[([^\]]+)\]\(([^)]+)\)(\])?/g,
+    (match, openBracket, text, url, closeBracket) => {
+      const link = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-80">${text}</a>`;
+      return (openBracket || '') + link + (closeBracket || '');
+    }
+  );
+
+  // Now process timestamps
   const timestampRegex =
     /\[(\d{2}:)?(\d{2}:)?(\d{2})(?:-(\d{2}:)?(\d{2}:)?(\d{2}))?\]/g;
   let lastIndex = 0;
   const parts = [];
   let match;
 
-  while ((match = timestampRegex.exec(content)) !== null) {
+  while ((match = timestampRegex.exec(processedContent)) !== null) {
     if (match.index > lastIndex) {
-      parts.push(content.slice(lastIndex, match.index));
+      parts.push(processedContent.slice(lastIndex, match.index));
     }
 
     const fullMatch = match[0];
@@ -70,16 +84,15 @@ const processMessageContent = (content: string) => {
     lastIndex = match.index + fullMatch.length;
   }
 
-  if (lastIndex < content.length) {
-    parts.push(content.slice(lastIndex));
+  if (lastIndex < processedContent.length) {
+    parts.push(processedContent.slice(lastIndex));
   }
 
-  const processedContent = parts.join("");
+  processedContent = parts.join("");
 
   const finalContent = processedContent
     .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>')
     .replace(/__([^_]+)__/g, '<strong class="font-bold">$1</strong>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-80">$1</a>')
     .split("\n")
     .join("<br />");
 
