@@ -45,7 +45,7 @@ const processMessageContent = (content: string) => {
   processedContent = processedContent.replace(
     /(\[)?\[([^\]]+)\]\(([^)]+)\)(\])?/g,
     (match, openBracket, text, url, closeBracket) => {
-      const link = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-80">${text}</a>`;
+      const link = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 hover:opacity-90">${text}</a>`;
       return (openBracket || '') + link + (closeBracket || '');
     }
   );
