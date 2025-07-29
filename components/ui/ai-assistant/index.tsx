@@ -79,6 +79,7 @@ const processMessageContent = (content: string) => {
   const finalContent = processedContent
     .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>')
     .replace(/__([^_]+)__/g, '<strong class="font-bold">$1</strong>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline hover:opacity-80">$1</a>')
     .split("\n")
     .join("<br />");
 
