@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Configure max duration for Vercel functions (60 seconds)
+export const maxDuration = 60;
+
 // Handle GET requests
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -70,13 +73,20 @@ async function processAsk(query: string | null, request: NextRequest) {
 
     const endpoint = endpointUrl.toString();
 
+    // Add AbortController for timeout (50 seconds to leave buffer for Vercel's 60s limit)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 50000);
+
     const response = await fetch(endpoint, {
       headers: {
         "Content-Type": "application/json",
         Authorization: apiKey,
       },
       cache: "no-store",
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
