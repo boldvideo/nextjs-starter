@@ -42,6 +42,7 @@ export function SearchPreview() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isSearchPage = pathname === "/s";
+  const isAskPage = pathname === "/ask";
 
   // Get the current query from the URL
   const query = searchParams?.get("q") || "";
@@ -107,8 +108,8 @@ export function SearchPreview() {
       : hit.segments.slice(0, 2);
   };
 
-  // Don't show search preview on search page
-  if (isSearchPage) return null;
+  // Don't show search preview on search or ask pages
+  if (isSearchPage || isAskPage) return null;
 
   // Don't show if no query
   if (!query) return null;
