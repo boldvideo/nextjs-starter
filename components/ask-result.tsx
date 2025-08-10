@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Loader2, Play, Sparkles, AlertCircle, ChevronRight } from "lucide-react";
 import { AskResponse, formatAskTime, timeStringToSeconds } from "@/lib/ask";
+import { CitationVideoPlayer } from "@/components/citation-video-player";
 import { cn } from "@/lib/utils";
 
 interface AskResultProps {
@@ -15,6 +16,20 @@ export function AskResult({ query }: AskResultProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [highlightedCitation, setHighlightedCitation] = useState<string | null>(null);
+  const [expandedCitations, setExpandedCitations] = useState<Set<string>>(new Set());
+
+  // Toggle citation video expansion
+  const toggleCitationExpansion = useCallback((citationLabel: string) => {
+    setExpandedCitations(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(citationLabel)) {
+        newSet.delete(citationLabel);
+      } else {
+        newSet.add(citationLabel);
+      }
+      return newSet;
+    });
+  }, []);
 
   // Parse the answer text to create clickable citation links - ALWAYS define hooks
   const renderAnswerWithCitations = useCallback((text: string) => {
@@ -36,14 +51,15 @@ export function AskResult({ query }: AskResultProps) {
         <button
           key={`citation-${citationLabel}-${match.index}`}
           onClick={() => {
-            setHighlightedCitation(citationLabel);
-            // Find the citation element and scroll to it
-            const element = document.getElementById(`citation-${citationLabel}`);
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            // Remove highlight after animation
-            setTimeout(() => setHighlightedCitation(null), 2000);
+            // Toggle the video expansion for this citation
+            toggleCitationExpansion(citationLabel);
+            // Scroll to citation after a brief delay to allow expansion
+            setTimeout(() => {
+              const element = document.getElementById(`citation-${citationLabel}`);
+              if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 100);
           }}
           className="text-primary hover:text-primary/80 font-medium transition-colors"
         >
@@ -60,7 +76,7 @@ export function AskResult({ query }: AskResultProps) {
     }
     
     return parts;
-  }, []);
+  }, [toggleCitationExpansion]);
 
   // Helper function to parse both bold text and citations
   const parseBoldAndCitations = useCallback((text: string) => {
@@ -88,12 +104,13 @@ export function AskResult({ query }: AskResultProps) {
           <button
             key={`citation-${citationLabel}-${match.index}`}
             onClick={() => {
-              setHighlightedCitation(citationLabel);
-              const element = document.getElementById(`citation-${citationLabel}`);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-              setTimeout(() => setHighlightedCitation(null), 2000);
+              toggleCitationExpansion(citationLabel);
+              setTimeout(() => {
+                const element = document.getElementById(`citation-${citationLabel}`);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 100);
             }}
             className="text-primary hover:text-primary/80 font-medium transition-colors"
           >
@@ -111,7 +128,7 @@ export function AskResult({ query }: AskResultProps) {
     }
     
     return parts.length > 0 ? parts : text;
-  }, []);
+  }, [toggleCitationExpansion]);
 
   // Function to parse markdown-like formatting to React elements
   const parseMarkdown = useCallback((text: string) => {
@@ -277,40 +294,29 @@ export function AskResult({ query }: AskResultProps) {
           <div>{answer.text ? parseMarkdown(answer.text) : "No answer text available"}</div>
         </div>
 
-        {/* Citations */}
+        {/* Citations with Inline Video Players */}
         {answer.citations && answer.citations.length > 0 && (
           <div className="mt-6 pt-6 border-t border-border">
             <h3 className="text-sm font-medium mb-3 text-muted-foreground">Sources</h3>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {answer.citations.map((citation) => {
-                const videoUrl = `/v/${citation.video_id}?t=${timeStringToSeconds(citation.start_time)}`;
-                const isHighlighted = highlightedCitation === citation.label;
+                const isExpanded = expandedCitations.has(citation.label);
                 return (
-                  <Link
+                  <div
                     key={citation.label}
                     id={`citation-${citation.label}`}
-                    href={videoUrl}
-                    className={cn(
-                      "flex items-center gap-3 p-3 rounded-md transition-all group",
-                      isHighlighted
-                        ? "bg-primary/10 ring-2 ring-primary animate-pulse-once"
-                        : "hover:bg-sidebar"
-                    )}
+                    className="rounded-lg overflow-hidden"
                   >
-                    <div className="flex items-center gap-2 bg-accent text-accent-foreground text-sm px-3 py-1.5 rounded-full">
-                      <Play size={14} className="ml-0.5" />
-                      <span>{formatAskTime(citation.start_time)}</span>
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-sm font-medium inline-flex items-center gap-1">
-                        [{citation.label}]
-                        <span className="text-muted-foreground">
-                          Video segment • Speaker {citation.speaker}
-                        </span>
-                      </span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  </Link>
+                    <CitationVideoPlayer
+                      videoId={citation.video_id}
+                      startTime={timeStringToSeconds(citation.start_time)}
+                      endTime={citation.end_time ? timeStringToSeconds(citation.end_time) : undefined}
+                      label={citation.label}
+                      speaker={citation.speaker}
+                      isExpanded={isExpanded}
+                      onToggle={() => toggleCitationExpansion(citation.label)}
+                    />
+                  </div>
                 );
               })}
             </div>
