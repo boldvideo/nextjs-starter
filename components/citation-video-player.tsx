@@ -1,14 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Play, Pause, X, Loader2, ChevronDown, ChevronUp } from "lucide-react";
-import { Player } from "@/components/players";
-import { bold } from "@/client";
+import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
-import type { Video } from "@boldvideo/bold-js";
+
+// Import MuxPlayer dynamically to avoid SSR issues
+const MuxPlayer = dynamic(
+  () => import("@mux/mux-player-react").then((mod) => mod.default),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="aspect-video flex items-center justify-center bg-muted">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    ),
+  }
+);
 
 interface CitationVideoPlayerProps {
   videoId: string;
+  playbackId: string; // Now required from the API
+  videoTitle?: string;
   startTime: number; // in seconds
   endTime?: number;
   label: string;
@@ -19,6 +32,8 @@ interface CitationVideoPlayerProps {
 
 export function CitationVideoPlayer({
   videoId,
+  playbackId,
+  videoTitle,
   startTime,
   endTime,
   label,
@@ -26,36 +41,23 @@ export function CitationVideoPlayer({
   isExpanded,
   onToggle,
 }: CitationVideoPlayerProps) {
-  const [video, setVideo] = useState<Video | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const playerRef = useRef<any>(null);
+  const [hasStarted, setHasStarted] = useState(false);
 
-  // Load video data when expanded
+  // Auto-play when expanded and set start time
   useEffect(() => {
-    if (!isExpanded || video) return;
-
-    const loadVideo = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const { data } = await bold.videos.get(videoId);
-        if (data) {
-          setVideo(data);
-        } else {
-          setError("Video not found");
-        }
-      } catch (err) {
-        console.error("[Citation Video] Error loading video:", err);
-        setError("Failed to load video");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadVideo();
-  }, [isExpanded, videoId, video]);
+    if (isExpanded && playerRef.current && !hasStarted) {
+      // Set the start time
+      playerRef.current.currentTime = startTime;
+      // Play the video
+      playerRef.current.play().catch((err: any) => {
+        console.warn("[Citation Video] Autoplay failed:", err);
+      });
+      setHasStarted(true);
+    } else if (!isExpanded) {
+      setHasStarted(false);
+    }
+  }, [isExpanded, startTime, hasStarted]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -104,41 +106,36 @@ export function CitationVideoPlayer({
           "mt-3 rounded-lg overflow-hidden bg-black",
           "animate-in slide-in-from-top-2 duration-300"
         )}>
-          {isLoading ? (
-            <div className="aspect-video flex items-center justify-center bg-muted">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : error ? (
-            <div className="aspect-video flex items-center justify-center bg-muted">
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          ) : video ? (
-            <div className="relative">
-              <Player
-                video={video}
-                startTime={startTime}
-                autoPlay={true}
-                className="w-full aspect-video"
-                onTimeUpdate={(e) => {
-                  // Auto-pause at end time if specified
-                  if (endTime && e.target) {
-                    const currentTime = (e.target as HTMLVideoElement).currentTime;
-                    if (currentTime >= endTime) {
-                      (e.target as HTMLVideoElement).pause();
-                    }
+          <div className="relative aspect-video">
+            <MuxPlayer
+              ref={playerRef}
+              playbackId={playbackId}
+              startTime={startTime}
+              streamType="on-demand"
+              autoPlay={false} // We control this manually
+              muted={false}
+              style={{ width: "100%", height: "100%" }}
+              onTimeUpdate={(e: any) => {
+                // Auto-pause at end time if specified
+                if (endTime && e.target) {
+                  const currentTime = e.target.currentTime;
+                  if (currentTime >= endTime) {
+                    e.target.pause();
                   }
-                }}
-              />
-              
-              {/* Video Info Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
-                <p className="text-white text-sm font-medium">{video.title || "Untitled Video"}</p>
-                <p className="text-white/70 text-xs">
-                  Segment: {formatTime(startTime)} - {endTime ? formatTime(endTime) : "end"}
-                </p>
-              </div>
+                }
+              }}
+            />
+            
+            {/* Video Info Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent pointer-events-none">
+              {videoTitle && (
+                <p className="text-white text-sm font-medium mb-1">{videoTitle}</p>
+              )}
+              <p className="text-white/70 text-xs">
+                Segment: {formatTime(startTime)} - {endTime ? formatTime(endTime) : "end"}
+              </p>
             </div>
-          ) : null}
+          </div>
         </div>
       )}
     </div>

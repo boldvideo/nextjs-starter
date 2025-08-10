@@ -3,6 +3,8 @@
 export type AskCitation = {
   label: string;
   video_id: string;
+  mux_playback_id?: string;
+  video_title?: string;
   start_time: string;
   end_time: string;
   speaker: string;
@@ -22,6 +24,8 @@ export type AskChunk = {
   id: string;
   text: string;
   video_id: string;
+  mux_playback_id?: string;
+  video_title?: string;
   speaker: string;
   timestamp_start_ms: number;
   timestamp_end_ms: number;

@@ -309,6 +309,8 @@ export function AskResult({ query }: AskResultProps) {
                   >
                     <CitationVideoPlayer
                       videoId={citation.video_id}
+                      playbackId={citation.mux_playback_id || ""}
+                      videoTitle={citation.video_title}
                       startTime={timeStringToSeconds(citation.start_time)}
                       endTime={citation.end_time ? timeStringToSeconds(citation.end_time) : undefined}
                       label={citation.label}
