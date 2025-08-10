@@ -132,61 +132,65 @@ export function AskResult({ query }: AskResultProps) {
 
   // Function to parse markdown-like formatting to React elements
   const parseMarkdown = useCallback((text: string) => {
-    // Split by numbered list items
-    const lines = text.split('\n');
+    // Split by double newlines to separate paragraphs
+    const blocks = text.split(/\n\n+/);
     const elements = [];
-    let currentList = [];
-    let inList = false;
     
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+    for (let blockIdx = 0; blockIdx < blocks.length; blockIdx++) {
+      const block = blocks[blockIdx].trim();
+      if (!block) continue;
       
-      // Check for numbered list items (e.g., "1. ", "2. ")
-      const listMatch = line.match(/^(\d+)\.\s+(.+)/);
-      if (listMatch) {
-        if (!inList) {
-          inList = true;
-          currentList = [];
-        }
-        const content = listMatch[2];
-        // Parse bold text and citations within the list item
-        const parsedContent = parseBoldAndCitations(content);
-        currentList.push(
-          <li key={`list-${i}`} className="mb-3">
-            {parsedContent}
-          </li>
-        );
-      } else {
-        // If we were in a list, add it to elements
-        if (inList && currentList.length > 0) {
-          elements.push(
-            <ol key={`ol-${i}`} className="list-decimal list-inside space-y-2 mb-4">
-              {currentList}
-            </ol>
-          );
-          currentList = [];
-          inList = false;
+      // Check if this block contains numbered list items
+      const lines = block.split('\n');
+      const firstLineIsListItem = /^\d+\.\s+/.test(lines[0]);
+      
+      if (firstLineIsListItem) {
+        // Process as a numbered list
+        const listItems = [];
+        for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+          const line = lines[lineIdx];
+          const listMatch = line.match(/^(\d+)\.\s+(.+)/);
+          if (listMatch) {
+            const content = listMatch[2];
+            // Parse bold text and citations within the list item
+            const parsedContent = parseBoldAndCitations(content);
+            listItems.push(
+              <li key={`list-${blockIdx}-${lineIdx}`} className="mb-3">
+                {parsedContent}
+              </li>
+            );
+          } else if (line.trim()) {
+            // Handle continuation lines that are part of the same list item
+            // This is likely a wrapped line from the same list item
+            const parsedContent = parseBoldAndCitations(line.trim());
+            if (listItems.length > 0) {
+              // Append to the last list item
+              const lastItem = listItems[listItems.length - 1];
+              listItems[listItems.length - 1] = (
+                <li key={`list-${blockIdx}-${lineIdx}`} className="mb-3">
+                  {lastItem.props.children} {parsedContent}
+                </li>
+              );
+            }
+          }
         }
         
-        // Process regular paragraph
-        if (line.trim()) {
-          const parsedContent = parseBoldAndCitations(line);
+        if (listItems.length > 0) {
           elements.push(
-            <p key={`p-${i}`} className="mb-4">
-              {parsedContent}
-            </p>
+            <ol key={`ol-${blockIdx}`} className="list-decimal list-inside space-y-2 mb-4">
+              {listItems}
+            </ol>
           );
         }
+      } else {
+        // Process as a regular paragraph
+        const parsedContent = parseBoldAndCitations(block);
+        elements.push(
+          <p key={`p-${blockIdx}`} className="mb-4">
+            {parsedContent}
+          </p>
+        );
       }
-    }
-    
-    // Add any remaining list items
-    if (inList && currentList.length > 0) {
-      elements.push(
-        <ol key="ol-final" className="list-decimal list-inside space-y-2 mb-4">
-          {currentList}
-        </ol>
-      );
     }
     
     return elements;

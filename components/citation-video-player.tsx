@@ -79,7 +79,7 @@ export function CitationVideoPlayer({
           <div className="flex items-center gap-2 text-sm">
             <Play size={14} />
             <span className="font-medium">[{label}]</span>
-            {speaker && <span className="text-muted-foreground">• Speaker {speaker}</span>}
+            {videoTitle && <span className="text-muted-foreground">• {videoTitle}</span>}
             <span className="text-muted-foreground">
               • {formatTime(startTime)}{endTime ? ` - ${formatTime(endTime)}` : ""}
             </span>
