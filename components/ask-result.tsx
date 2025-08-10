@@ -237,7 +237,7 @@ export function AskResult({ query }: AskResultProps) {
           Ask a question about your videos and get an AI-powered answer with citations
         </p>
         <p className="text-sm text-muted-foreground mt-2">
-          Try asking "What are the best practices for team management?"
+          Try asking &ldquo;What are the best practices for team management?&rdquo;
         </p>
       </div>
     );
