@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { Loader2, Play, Sparkles, AlertCircle, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import { Loader2, Play, Sparkles, AlertCircle, ChevronRight, RefreshCw } from "lucide-react";
 import { AskResponse, formatAskTime, timeStringToSeconds } from "@/lib/ask";
 import { CitationVideoPlayer } from "@/components/citation-video-player";
+import { useSettings } from "@/components/providers/settings-provider";
 import { cn } from "@/lib/utils";
 
 interface AskResultProps {
@@ -17,6 +19,27 @@ export function AskResult({ query }: AskResultProps) {
   const [error, setError] = useState<string | null>(null);
   const [highlightedCitation, setHighlightedCitation] = useState<string | null>(null);
   const [expandedCitations, setExpandedCitations] = useState<Set<string>>(new Set());
+  const [loadingMessage, setLoadingMessage] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
+  const loadingStartTime = useRef<number | null>(null);
+  const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Get settings for AI assistant info
+  const settings = useSettings() as any;
+  const aiName = settings?.ai_name || "AI Assistant";
+  const aiAvatar = settings?.ai_avatar || "/placeholder-avatar.png";
+  
+  // Loading messages that progress through stages
+  const loadingMessages = [
+    "Searching through your video library...",
+    "Reading transcript segments...",
+    "Understanding the context...",
+    "Analyzing relevant content...",
+    "Finding the best insights...",
+    "Synthesizing information...",
+    "Crafting your personalized answer...",
+    "Almost there...",
+  ];
 
   // Toggle citation video expansion
   const toggleCitationExpansion = useCallback((citationLabel: string) => {
@@ -196,15 +219,46 @@ export function AskResult({ query }: AskResultProps) {
     return elements;
   }, [parseBoldAndCitations]);
 
+  // Start rotating loading messages
+  useEffect(() => {
+    if (isLoading) {
+      loadingStartTime.current = Date.now();
+      setLoadingMessage(0);
+      
+      // Change message every 2.5 seconds
+      messageIntervalRef.current = setInterval(() => {
+        setLoadingMessage(prev => (prev + 1) % loadingMessages.length);
+      }, 2500);
+    } else {
+      if (messageIntervalRef.current) {
+        clearInterval(messageIntervalRef.current);
+        messageIntervalRef.current = null;
+      }
+      loadingStartTime.current = null;
+    }
+    
+    return () => {
+      if (messageIntervalRef.current) {
+        clearInterval(messageIntervalRef.current);
+      }
+    };
+  }, [isLoading, loadingMessages.length]);
+
   useEffect(() => {
     if (!query) {
       setResponse(null);
+      setRetryCount(0);
       return;
     }
 
-    const fetchAnswer = async () => {
+    const fetchAnswer = async (attemptNumber = 0) => {
       setIsLoading(true);
       setError(null);
+
+      // Calculate timeout with exponential backoff
+      const timeout = attemptNumber === 0 ? 30000 : Math.min(30000 * Math.pow(1.5, attemptNumber), 60000);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       try {
         const res = await fetch("/api/ask-global", {
@@ -213,18 +267,40 @@ export function AskResult({ query }: AskResultProps) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ q: query }),
+          signal: controller.signal,
         });
 
+        clearTimeout(timeoutId);
+
         if (!res.ok) {
+          if (res.status === 504 || res.status === 502) {
+            throw new Error("timeout");
+          }
           throw new Error(`Failed to get answer: ${res.status}`);
         }
 
         const data = await res.json();
         console.log("[Ask Result] Raw API Response:", data);
         setResponse(data);
-      } catch (err) {
+        setRetryCount(0);
+      } catch (err: any) {
         console.error("[Ask Result] Error:", err);
-        setError(err instanceof Error ? err.message : "Failed to get answer");
+        
+        // Handle timeout or network errors with retry
+        if (err.name === 'AbortError' || err.message === 'timeout' || err.message.includes('504')) {
+          if (attemptNumber < 2) {
+            setRetryCount(attemptNumber + 1);
+            // Retry with exponential backoff
+            setTimeout(() => {
+              fetchAnswer(attemptNumber + 1);
+            }, 1000 * Math.pow(2, attemptNumber));
+            return;
+          } else {
+            setError("This is taking longer than expected. The AI might be processing a complex query. Please try again with a simpler question.");
+          }
+        } else {
+          setError(err instanceof Error ? err.message : "Failed to get answer");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -249,20 +325,103 @@ export function AskResult({ query }: AskResultProps) {
 
   if (isLoading) {
     return (
-      <div className="py-16 flex flex-col items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary/60 mb-4" />
-        <p className="text-lg text-muted-foreground">Analyzing your videos...</p>
-        <p className="text-sm text-muted-foreground mt-2">This may take 10-15 seconds</p>
+      <div className="py-12 flex flex-col items-center justify-center space-y-6">
+        {/* AI Avatar with thinking animation */}
+        <div className="relative">
+          <div className="relative w-20 h-20 rounded-full overflow-hidden ring-4 ring-primary/20 animate-pulse">
+            <Image
+              src={aiAvatar}
+              alt={aiName}
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-1">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        </div>
+        
+        {/* AI Name */}
+        <div className="text-center space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">{aiName} is thinking...</p>
+          
+          {/* Rotating message with fade animation */}
+          <div className="h-6 relative">
+            <p className="text-lg text-foreground transition-all duration-500 animate-in fade-in">
+              {loadingMessages[loadingMessage]}
+            </p>
+          </div>
+          
+          {/* Retry indicator */}
+          {retryCount > 0 && (
+            <p className="text-sm text-amber-600 dark:text-amber-400 animate-in fade-in">
+              Taking a bit longer than usual... hang tight! (Attempt {retryCount + 1}/3)
+            </p>
+          )}
+          
+          {/* Progress dots */}
+          <div className="flex items-center justify-center gap-1.5 mt-4">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "w-2 h-2 rounded-full bg-primary/30 transition-all duration-500",
+                  i <= loadingMessage % 3 && "bg-primary scale-125"
+                )}
+                style={{
+                  animationDelay: `${i * 200}ms`,
+                }}
+              />
+            ))}
+          </div>
+          
+          {/* Time estimate */}
+          <p className="text-xs text-muted-foreground mt-2">
+            This usually takes 10-20 seconds
+          </p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="py-12 text-center">
-        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-        <p className="text-lg text-destructive font-medium">Error getting answer</p>
-        <p className="text-sm text-muted-foreground mt-2">{error}</p>
+      <div className="py-12 text-center space-y-4">
+        <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden ring-4 ring-destructive/20">
+          <Image
+            src={aiAvatar}
+            alt={aiName}
+            fill
+            className="object-cover opacity-50"
+          />
+        </div>
+        <AlertCircle className="w-8 h-8 mx-auto text-destructive" />
+        <div className="space-y-2">
+          <p className="text-lg font-medium text-destructive">Oops, something went wrong</p>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">{error}</p>
+        </div>
+        
+        {/* Retry button */}
+        <button
+          onClick={() => {
+            setError(null);
+            setRetryCount(0);
+            // Trigger re-fetch by updating a dependency
+            window.location.href = `/ask?q=${encodeURIComponent(query || '')}`;
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Try Again
+        </button>
+        
+        {/* Show the original question */}
+        {query && (
+          <div className="mt-6 p-4 bg-muted/50 rounded-lg max-w-md mx-auto">
+            <p className="text-xs text-muted-foreground mb-1">Your question:</p>
+            <p className="text-sm">{query}</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -292,77 +451,93 @@ export function AskResult({ query }: AskResultProps) {
         </div>
       </div>
 
-      {/* Answer */}
-      <div className="bg-background border border-border rounded-lg p-6">
-        <div className="prose prose-neutral dark:prose-invert max-w-none">
-          <div>{answer.text ? parseMarkdown(answer.text) : "No answer text available"}</div>
-        </div>
-
-        {/* Citations with Inline Video Players */}
-        {answer.citations && answer.citations.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-border">
-            <h3 className="text-sm font-medium mb-3 text-muted-foreground">Sources</h3>
-            <div className="space-y-3">
-              {answer.citations.map((citation) => {
-                const isExpanded = expandedCitations.has(citation.label);
-                return (
-                  <div
-                    key={citation.label}
-                    id={`citation-${citation.label}`}
-                    className="rounded-lg overflow-hidden"
-                  >
-                    <CitationVideoPlayer
-                      videoId={citation.video_id}
-                      playbackId={citation.mux_playback_id || ""}
-                      videoTitle={citation.video_title}
-                      startTime={timeStringToSeconds(citation.start_time)}
-                      endTime={citation.end_time ? timeStringToSeconds(citation.end_time) : undefined}
-                      label={citation.label}
-                      speaker={citation.speaker}
-                      isExpanded={isExpanded}
-                      onToggle={() => toggleCitationExpansion(citation.label)}
-                    />
-                  </div>
-                );
-              })}
+      {/* Answer with AI Assistant */}
+      <div className="bg-background border border-border rounded-lg">
+        {/* AI Assistant Header */}
+        <div className="flex items-center gap-3 p-4 border-b border-border">
+          <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-primary/20">
+            <Image
+              src={aiAvatar}
+              alt={aiName}
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium text-sm">{aiName}</p>
+            <p className="text-xs text-muted-foreground">AI Assistant</p>
+          </div>
+          {answer.confidence && (
+            <div className={cn(
+              "px-2 py-1 rounded-full text-xs font-medium",
+              answer.confidence === "high" && "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+              answer.confidence === "medium" && "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+              answer.confidence === "low" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            )}>
+              {answer.confidence} confidence
             </div>
+          )}
+        </div>
+        
+        {/* Answer Content */}
+        <div className="p-6">
+          <div className="prose prose-neutral dark:prose-invert max-w-none">
+            <div>{answer.text ? parseMarkdown(answer.text) : "No answer text available"}</div>
           </div>
-        )}
-
-        {/* Confidence & Processing Info */}
-        <div className="mt-6 pt-6 border-t border-border flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <span>Confidence:</span>
-              <span
-                className={cn(
-                  "font-medium capitalize",
-                  answer.confidence === "high" && "text-green-600 dark:text-green-400",
-                  answer.confidence === "medium" && "text-yellow-600 dark:text-yellow-400",
-                  answer.confidence === "low" && "text-red-600 dark:text-red-400"
-                )}
-              >
-                {answer.confidence}
-              </span>
-            </span>
-            {answer.model_used && (
-              <span className="text-xs">Model: {answer.model_used}</span>
-            )}
-          </div>
-          <span className="text-xs">
-            Processed in {(processing_time_ms / 1000).toFixed(1)}s
-          </span>
         </div>
 
-        {/* Limitations */}
-        {answer.limitations && (
-          <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/50 rounded-md">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              <strong>Note:</strong> {answer.limitations}
-            </p>
+          {/* Citations with Inline Video Players */}
+          {answer.citations && answer.citations.length > 0 && (
+            <div className="px-6 pb-6">
+              <h3 className="text-sm font-medium mb-3 text-muted-foreground">Sources</h3>
+              <div className="space-y-3">
+                {answer.citations.map((citation) => {
+                  const isExpanded = expandedCitations.has(citation.label);
+                  return (
+                    <div
+                      key={citation.label}
+                      id={`citation-${citation.label}`}
+                      className="rounded-lg overflow-hidden"
+                    >
+                      <CitationVideoPlayer
+                        videoId={citation.video_id}
+                        playbackId={citation.mux_playback_id || ""}
+                        videoTitle={citation.video_title}
+                        startTime={timeStringToSeconds(citation.start_time)}
+                        endTime={citation.end_time ? timeStringToSeconds(citation.end_time) : undefined}
+                        label={citation.label}
+                        speaker={citation.speaker}
+                        isExpanded={isExpanded}
+                        onToggle={() => toggleCitationExpansion(citation.label)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Processing Info Footer */}
+          <div className="px-6 py-3 bg-muted/50 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-3">
+              {answer.model_used && (
+                <span>Powered by {answer.model_used}</span>
+              )}
+            </div>
+            <span>
+              Analyzed in {(processing_time_ms / 1000).toFixed(1)}s
+            </span>
           </div>
-        )}
-      </div>
+        </div>
+
+      {/* Limitations */}
+      {answer.limitations && (
+        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/50 rounded-md">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            <strong>Note:</strong> {answer.limitations}
+          </p>
+        </div>
+      )}
 
       {/* Related Questions */}
       {expanded_queries && expanded_queries.length > 0 && (
