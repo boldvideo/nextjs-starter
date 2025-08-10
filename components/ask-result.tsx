@@ -22,7 +22,6 @@ export function AskResult({ query }: AskResultProps) {
   const [highlightedCitation, setHighlightedCitation] = useState<string | null>(null);
   const [expandedCitations, setExpandedCitations] = useState<Set<string>>(new Set());
   const [loadingMessage, setLoadingMessage] = useState(0);
-  const [retryCount, setRetryCount] = useState(0);
   const loadingStartTime = useRef<number | null>(null);
   const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -110,18 +109,16 @@ export function AskResult({ query }: AskResultProps) {
   useEffect(() => {
     if (!query) {
       setResponse(null);
-      setRetryCount(0);
       return;
     }
 
-    const fetchAnswer = async (attemptNumber = 0) => {
+    const fetchAnswer = async () => {
       setIsLoading(true);
       setError(null);
 
-      // Calculate timeout with exponential backoff - start with 45 seconds for first attempt
-      const timeout = attemptNumber === 0 ? 45000 : Math.min(45000 * Math.pow(1.5, attemptNumber), 90000);
+      // Simple timeout - 45 seconds
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
 
       try {
         const res = await fetch("/api/ask-global", {
@@ -136,31 +133,17 @@ export function AskResult({ query }: AskResultProps) {
         clearTimeout(timeoutId);
 
         if (!res.ok) {
-          if (res.status === 504 || res.status === 502) {
-            throw new Error("timeout");
-          }
           throw new Error(`Failed to get answer: ${res.status}`);
         }
 
         const data = await res.json();
         console.log("[Ask Result] Raw API Response:", data);
         setResponse(data);
-        setRetryCount(0);
       } catch (err: any) {
         console.error("[Ask Result] Error:", err);
         
-        // Handle timeout or network errors with retry
-        if (err.name === 'AbortError' || err.message === 'timeout' || err.message.includes('504')) {
-          if (attemptNumber < 2) {
-            setRetryCount(attemptNumber + 1);
-            // Retry with exponential backoff
-            setTimeout(() => {
-              fetchAnswer(attemptNumber + 1);
-            }, 1000 * Math.pow(2, attemptNumber));
-            return;
-          } else {
-            setError("This is taking longer than expected. The AI might be processing a complex query. Please try again with a simpler question.");
-          }
+        if (err.name === 'AbortError') {
+          setError("This is taking longer than expected. Please try again.");
         } else {
           setError(err instanceof Error ? err.message : "Failed to get answer");
         }
@@ -215,13 +198,6 @@ export function AskResult({ query }: AskResultProps) {
             </p>
           </div>
           
-          {/* Retry indicator */}
-          {retryCount > 0 && (
-            <p className="text-sm text-amber-600 dark:text-amber-400 animate-in fade-in">
-              Taking a bit longer than usual... hang tight! (Attempt {retryCount + 1}/3)
-            </p>
-          )}
-          
           {/* Progress dots */}
           <div className="flex items-center justify-center gap-1.5 mt-4">
             {[...Array(3)].map((_, i) => (
@@ -268,7 +244,6 @@ export function AskResult({ query }: AskResultProps) {
         <button
           onClick={() => {
             setError(null);
-            setRetryCount(0);
             // Trigger re-fetch by updating a dependency
             window.location.href = `/ask?q=${encodeURIComponent(query || '')}`;
           }}
