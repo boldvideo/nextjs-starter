@@ -80,7 +80,7 @@ export function AskResult({ query }: AskResultProps) {
       );
     }
     return text;
-  }, [parseBoldAndCitations]);
+  }, [toggleCitationExpansion]);
 
   // Start rotating loading messages
   useEffect(() => {
