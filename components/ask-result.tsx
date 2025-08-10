@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, Play, Sparkles, AlertCircle, ChevronRight, RefreshCw } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { AskResponse, formatAskTime, timeStringToSeconds } from "@/lib/ask";
 import { CitationVideoPlayer } from "@/components/citation-video-player";
 import { useSettings } from "@/components/providers/settings-provider";
@@ -54,29 +56,16 @@ export function AskResult({ query }: AskResultProps) {
     });
   }, []);
 
-  // Parse the answer text to create clickable citation links - ALWAYS define hooks
-  const renderAnswerWithCitations = useCallback((text: string) => {
-    // Regular expression to find citation patterns like [S1], [S2], etc.
-    const citationPattern = /\[([S]\d+)\]/g;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    while ((match = citationPattern.exec(text)) !== null) {
-      // Add text before citation
-      if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index));
-      }
-      
-      // Add clickable citation
-      const citationLabel = match[1];
-      parts.push(
+  // Custom renderer for citations in markdown
+  const renderCitation = useCallback((text: string) => {
+    // Check if this looks like a citation pattern [S1], [S2], etc.
+    const citationMatch = text.match(/^\[([S]\d+)\]$/);
+    if (citationMatch) {
+      const citationLabel = citationMatch[1];
+      return (
         <button
-          key={`citation-${citationLabel}-${match.index}`}
           onClick={() => {
-            // Toggle the video expansion for this citation
             toggleCitationExpansion(citationLabel);
-            // Scroll to citation after a brief delay to allow expansion
             setTimeout(() => {
               const element = document.getElementById(`citation-${citationLabel}`);
               if (element) {
@@ -89,134 +78,8 @@ export function AskResult({ query }: AskResultProps) {
           [{citationLabel}]
         </button>
       );
-      
-      lastIndex = match.index + match[0].length;
     }
-    
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
-    }
-    
-    return parts;
-  }, [toggleCitationExpansion]);
-
-  // Helper function to parse both bold text and citations
-  const parseBoldAndCitations = useCallback((text: string) => {
-    const parts = [];
-    let currentIndex = 0;
-    
-    // Combined regex to find both bold text and citations
-    const combinedPattern = /(\*\*(.+?)\*\*|\[([S]\d+)\])/g;
-    let match;
-    
-    while ((match = combinedPattern.exec(text)) !== null) {
-      // Add text before the match
-      if (match.index > currentIndex) {
-        parts.push(text.substring(currentIndex, match.index));
-      }
-      
-      // Check if it's bold text or citation
-      if (match[0].startsWith('**')) {
-        // Bold text
-        parts.push(<strong key={`bold-${match.index}`}>{match[2]}</strong>);
-      } else if (match[0].startsWith('[')) {
-        // Citation
-        const citationLabel = match[3];
-        parts.push(
-          <button
-            key={`citation-${citationLabel}-${match.index}`}
-            onClick={() => {
-              toggleCitationExpansion(citationLabel);
-              setTimeout(() => {
-                const element = document.getElementById(`citation-${citationLabel}`);
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }, 100);
-            }}
-            className="text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            [{citationLabel}]
-          </button>
-        );
-      }
-      
-      currentIndex = match.index + match[0].length;
-    }
-    
-    // Add remaining text
-    if (currentIndex < text.length) {
-      parts.push(text.substring(currentIndex));
-    }
-    
-    return parts.length > 0 ? parts : text;
-  }, [toggleCitationExpansion]);
-
-  // Function to parse markdown-like formatting to React elements
-  const parseMarkdown = useCallback((text: string) => {
-    // Split by double newlines to separate paragraphs
-    const blocks = text.split(/\n\n+/);
-    const elements = [];
-    
-    for (let blockIdx = 0; blockIdx < blocks.length; blockIdx++) {
-      const block = blocks[blockIdx].trim();
-      if (!block) continue;
-      
-      // Check if this block contains numbered list items
-      const lines = block.split('\n');
-      const firstLineIsListItem = /^\d+\.\s+/.test(lines[0]);
-      
-      if (firstLineIsListItem) {
-        // Process as a numbered list
-        const listItems = [];
-        for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-          const line = lines[lineIdx];
-          const listMatch = line.match(/^(\d+)\.\s+(.+)/);
-          if (listMatch) {
-            const content = listMatch[2];
-            // Parse bold text and citations within the list item
-            const parsedContent = parseBoldAndCitations(content);
-            listItems.push(
-              <li key={`list-${blockIdx}-${lineIdx}`} className="mb-3">
-                {parsedContent}
-              </li>
-            );
-          } else if (line.trim()) {
-            // Handle continuation lines that are part of the same list item
-            // This is likely a wrapped line from the same list item
-            const parsedContent = parseBoldAndCitations(line.trim());
-            if (listItems.length > 0) {
-              // Append to the last list item
-              const lastItem = listItems[listItems.length - 1];
-              listItems[listItems.length - 1] = (
-                <li key={`list-${blockIdx}-${lineIdx}`} className="mb-3">
-                  {lastItem.props.children} {parsedContent}
-                </li>
-              );
-            }
-          }
-        }
-        
-        if (listItems.length > 0) {
-          elements.push(
-            <ol key={`ol-${blockIdx}`} className="list-decimal list-inside space-y-2 mb-4">
-              {listItems}
-            </ol>
-          );
-        }
-      } else {
-        // Process as a regular paragraph
-        const parsedContent = parseBoldAndCitations(block);
-        elements.push(
-          <p key={`p-${blockIdx}`} className="mb-4">
-            {parsedContent}
-          </p>
-        );
-      }
-    }
-    
-    return elements;
+    return text;
   }, [parseBoldAndCitations]);
 
   // Start rotating loading messages
@@ -255,8 +118,8 @@ export function AskResult({ query }: AskResultProps) {
       setIsLoading(true);
       setError(null);
 
-      // Calculate timeout with exponential backoff
-      const timeout = attemptNumber === 0 ? 30000 : Math.min(30000 * Math.pow(1.5, attemptNumber), 60000);
+      // Calculate timeout with exponential backoff - start with 45 seconds for first attempt
+      const timeout = attemptNumber === 0 ? 45000 : Math.min(45000 * Math.pow(1.5, attemptNumber), 90000);
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -482,7 +345,66 @@ export function AskResult({ query }: AskResultProps) {
         {/* Answer Content */}
         <div className="p-6">
           <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <div>{answer.text ? parseMarkdown(answer.text) : "No answer text available"}</div>
+            {answer.text ? (
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // Custom renderer for links/text that might be citations
+                  p: ({ children, ...props }) => {
+                    // Process children to handle citations
+                    const processedChildren = Array.isArray(children) 
+                      ? children.map((child, idx) => {
+                          if (typeof child === 'string') {
+                            // Split by citation pattern and render
+                            const parts = child.split(/(\[[S]\d+\])/g);
+                            return parts.map((part, partIdx) => {
+                              if (part.match(/^\[[S]\d+\]$/)) {
+                                return renderCitation(part);
+                              }
+                              return part;
+                            });
+                          }
+                          return child;
+                        })
+                      : children;
+                    
+                    return <p {...props}>{processedChildren}</p>;
+                  },
+                  li: ({ children, ...props }) => {
+                    // Process list items for citations
+                    const processedChildren = Array.isArray(children) 
+                      ? children.map((child, idx) => {
+                          if (typeof child === 'string') {
+                            const parts = child.split(/(\[[S]\d+\])/g);
+                            return parts.map((part, partIdx) => {
+                              if (part.match(/^\[[S]\d+\]$/)) {
+                                return renderCitation(part);
+                              }
+                              return part;
+                            });
+                          }
+                          return child;
+                        })
+                      : children;
+                    
+                    return <li {...props}>{processedChildren}</li>;
+                  },
+                  // Ensure links open in new tab
+                  a: ({ ...props }) => (
+                    <a
+                      {...props}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    />
+                  ),
+                }}
+              >
+                {answer.text}
+              </ReactMarkdown>
+            ) : (
+              "No answer text available"
+            )}
           </div>
         </div>
 
