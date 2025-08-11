@@ -1,12 +1,9 @@
 "use client";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { SearchBar } from "./search-bar";
-import { SearchPreview } from "./search-preview";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
-import { MobileSearch } from "@/components/mobile-search";
 
 interface HeaderProps {
   logo: any;
@@ -15,16 +12,9 @@ interface HeaderProps {
 }
 
 export function Header({ logo, logoDark, menuItems }: HeaderProps) {
-  const [searchOpen, setSearchOpen] = useState(false);
-
   return (
     <>
-      <header
-        className={
-          `px-5 lg:px-10 py-4 border-b border-border transition-all ` +
-          (searchOpen ? "sticky top-0 z-50 bg-background/90 backdrop-blur" : "")
-        }
-      >
+      <header className="px-5 lg:px-10 py-4 border-b border-border transition-all">
         <div className="container mx-auto">
           <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
@@ -79,33 +69,28 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                 </div>
               </div>
 
-              {/* Right Side - Search and Theme Toggle (Desktop Only) */}
-              <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end max-w-md">
-                <Suspense>
-                  <SearchBar className="w-full max-w-xs" />
-                </Suspense>
+              {/* Right Side - Theme Toggle (Desktop Only) */}
+              <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end">
                 <Suspense>
                   <ThemeToggle />
                 </Suspense>
               </div>
 
               {/* Mobile Header Controls */}
-              <div className="grid grid-cols-3 items-center w-full lg:hidden">
+              <div className="grid grid-cols-2 items-center w-full lg:hidden">
                 {/* Left: Hamburger Menu */}
                 <div className="flex justify-start">
-                  {!searchOpen && (
-                    <Suspense>
-                      <MobileMenu
-                        menuItems={menuItems}
-                        logo={logo}
-                        logoDark={logoDark}
-                      />
-                    </Suspense>
-                  )}
+                  <Suspense>
+                    <MobileMenu
+                      menuItems={menuItems}
+                      logo={logo}
+                      logoDark={logoDark}
+                    />
+                  </Suspense>
                 </div>
 
-                {/* Center: Logo */}
-                <div className="flex justify-center">
+                {/* Right: Logo */}
+                <div className="flex justify-end">
                   <Link href="/">
                     {logoDark ? (
                       <>
@@ -138,22 +123,11 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                     )}
                   </Link>
                 </div>
-
-                {/* Right: Search icon / Close icon */}
-                <div className="flex justify-end">
-                  <Suspense>
-                    <MobileSearch onToggle={setSearchOpen} />
-                  </Suspense>
-                </div>
               </div>
             </div>
           </nav>
         </div>
       </header>
-
-      <Suspense>
-        <SearchPreview />
-      </Suspense>
     </>
   );
 }
