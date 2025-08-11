@@ -53,7 +53,7 @@ export default function Home() {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder={placeholder}
-              className="flex-1 px-6 py-5 text-lg bg-transparent outline-none placeholder:text-muted-foreground/60 transition-all"
+              className="flex-1 px-6 py-5 text-lg bg-transparent outline-none placeholder:text-muted-foreground/50 transition-all"
               aria-label="Ask a question"
             />
             
