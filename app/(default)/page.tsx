@@ -33,7 +33,7 @@ export default function Home() {
             Get 1,000 hours of coaching in 60 seconds.
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground">
-            FounderWell's best advice is distilled from years of calls and is now just one question away.
+            FounderWell&apos;s best advice is distilled from years of calls and is now just one question away.
           </p>
         </div>
 
