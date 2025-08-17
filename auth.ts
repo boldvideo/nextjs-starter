@@ -10,36 +10,62 @@ const providers: NextAuthConfig["providers"] = [];
 if (isAuthEnabled()) {
   const provider = getAuthProvider();
 
-  if (provider === "google" && process.env.GOOGLE_CLIENT_ID) {
-    providers.push(
-      Google({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      })
-    );
+  if (provider === "google" && process.env.AUTH_GOOGLE_ID) {
+    providers.push(Google);
   }
 
-  if (provider === "workos" && process.env.WORKOS_CLIENT_ID) {
+  if (provider === "workos" && process.env.AUTH_WORKOS_ID) {
+    // const workosConfig: any = {
+    //   connection: process.env.AUTH_WORKOS_CONNECTION!,
+    // };
+    // const workosConfig: any = {
+    //   client: {
+    //     token_endpoint_auth_method: "client_secret_post",
+    //   },
+    // };
+    //
+    // // Add organization if configured
+    // if (process.env.AUTH_WORKOS_ORG) {
+    //   workosConfig.authorization = {
+    //     params: {
+    //       organization: process.env.AUTH_WORKOS_ORG,
+    //     },
+    //   };
+    // }
+
     providers.push(
       WorkOS({
-        clientId: process.env.WORKOS_CLIENT_ID,
-        clientSecret: process.env.WORKOS_API_KEY!,
-        client: {
-          token_endpoint_auth_method: "client_secret_post",
-        },
-      })
+        connection: process.env.AUTH_WORKOS_CONNECTION!,
+      }),
     );
   }
 }
+
+// Determine the base URL for auth
+// function getAuthUrl() {
+//   if (process.env.AUTH_URL) {
+//     return process.env.AUTH_URL;
+//   }
+//   if (process.env.NEXTAUTH_URL) {
+//     return process.env.NEXTAUTH_URL;
+//   }
+//   if (process.env.VERCEL_URL) {
+//     return `https://${process.env.VERCEL_URL}`;
+//   }
+//   // Fallback for local development
+//   return "http://localhost:3000";
+// }
 
 export const config = {
   providers,
   debug: process.env.NODE_ENV === "development",
   secret: process.env.AUTH_SECRET,
-  pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error",
-  },
+  trustHost: true, // Allow Auth.js to work with ngrok and other proxies
+  basePath: "/auth", // Updated to match new route location
+  // pages: {
+  //   signIn: "/auth/signin",
+  //   error: "/auth/error",
+  // },
   callbacks: {
     authorized({ request, auth }) {
       // If auth is disabled, always return true
@@ -71,3 +97,4 @@ export const config = {
 } satisfies NextAuthConfig;
 
 export const { handlers, signIn, signOut, auth } = NextAuth(config);
+

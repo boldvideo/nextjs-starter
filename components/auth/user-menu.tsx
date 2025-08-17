@@ -28,11 +28,23 @@ export default function UserMenu({ session }: UserMenuProps) {
     };
   }, []);
 
-  if (!session?.user) {
+  // In development mode, show mock user if no session
+  let displaySession = session;
+  if (process.env.NODE_ENV === "development" && !session) {
+    displaySession = {
+      user: {
+        name: "Developer",
+        email: "developer@example.com",
+      },
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    } as Session;
+  }
+
+  if (!displaySession?.user) {
     return null;
   }
 
-  const userInitial = session.user.name?.[0]?.toUpperCase() || session.user.email?.[0]?.toUpperCase() || "U";
+  const userInitial = displaySession.user.name?.[0]?.toUpperCase() || displaySession.user.email?.[0]?.toUpperCase() || "U";
 
   return (
     <div className="relative" ref={menuRef}>
@@ -42,10 +54,10 @@ export default function UserMenu({ session }: UserMenuProps) {
         className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
         aria-label="User menu"
       >
-        {session.user.image ? (
+        {displaySession.user.image ? (
           <Image
-            src={session.user.image}
-            alt={session.user.name || "User"}
+            src={displaySession.user.image}
+            alt={displaySession.user.name || "User"}
             className="w-8 h-8 rounded-full"
             width={32}
             height={32}
@@ -62,10 +74,10 @@ export default function UserMenu({ session }: UserMenuProps) {
             {/* User Info */}
             <div className="px-3 py-2 border-b border-border">
               <p className="text-sm font-medium truncate">
-                {session.user.name || "User"}
+                {displaySession.user.name || "User"}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {session.user.email}
+                {displaySession.user.email}
               </p>
             </div>
 

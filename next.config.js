@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Allow ngrok and other dev origins (optional, suppresses warning)
+  allowedDevOrigins: ["bold.eu.ngrok.io", "*.ngrok.io", "*.ngrok-free.app"],
   images: {
     remotePatterns: [
       {

@@ -348,7 +348,9 @@ export default async function RootLayout({
             </ThemeProvider>
           </SessionProvider>
         ) : (
-          <SignIn />
+          <SettingsProvider settings={settings}>
+            <SignIn />
+          </SettingsProvider>
         )}
       </body>
     </html>

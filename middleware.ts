@@ -18,6 +18,8 @@ export const config = {
   // - static files
   // - auth routes
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // "/((?!api/auth|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!auth|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
+

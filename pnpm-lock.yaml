@@ -1873,8 +1873,8 @@ packages:
     resolution: {integrity: sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==}
     engines: {node: '>=0.10.0'}
 
-  oauth4webapi@3.6.0:
-    resolution: {integrity: sha512-OwXPTXjKPOldTpAa19oksrX9TYHA0rt+VcUFTkJ7QKwgmevPpNm9Cn5vFZUtIo96FiU6AfPuUUGzoXqgOzibWg==}
+  oauth4webapi@3.6.2:
+    resolution: {integrity: sha512-hwWLiyBYuqhVdcIUJMJVKdEvz+DCweOcbSfqDyIv9PuUwrNfqrzfHP2bypZgZdbYOS67QYqnAnvZa2BJwBBrHw==}
 
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -2397,7 +2397,7 @@ snapshots:
     dependencies:
       '@panva/hkdf': 1.2.1
       jose: 6.0.12
-      oauth4webapi: 3.6.0
+      oauth4webapi: 3.6.2
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
 
@@ -4462,7 +4462,7 @@ snapshots:
 
   normalize-range@0.1.2: {}
 
-  oauth4webapi@3.6.0: {}
+  oauth4webapi@3.6.2: {}
 
   object-assign@4.1.1: {}
 
