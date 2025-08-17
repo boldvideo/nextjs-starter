@@ -20,6 +20,11 @@ interface HeaderProps {
 
 export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  
+  // Check if we should use larger header size for wide/short logos
+  const useLargeHeader = process.env.NEXT_PUBLIC_LARGE_HEADER === "true";
+  const desktopLogoClass = useLargeHeader ? "h-20" : "h-10";
+  const mobileLogoClass = useLargeHeader ? "h-16" : "h-8";
 
   return (
     <>
@@ -41,7 +46,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                       <Image
                         src={logo}
                         alt="Logo"
-                        className="h-10 w-auto object-contain block dark:hidden"
+                        className={`${desktopLogoClass} w-auto object-contain block dark:hidden`}
                         height={40}
                         width={160}
                         priority
@@ -50,7 +55,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                       <Image
                         src={logoDark}
                         alt="Logo"
-                        className="h-10 w-auto object-contain hidden dark:block"
+                        className={`${desktopLogoClass} w-auto object-contain hidden dark:block`}
                         height={40}
                         width={160}
                         priority
@@ -61,7 +66,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                     <Image
                       src={logo}
                       alt="Logo"
-                      className="h-10 w-auto object-contain"
+                      className={`${desktopLogoClass} w-auto object-contain`}
                       height={40}
                       width={160}
                       priority
@@ -122,7 +127,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                         <Image
                           src={logo}
                           alt="Logo"
-                          className="h-8 w-auto object-contain block dark:hidden"
+                          className={`${mobileLogoClass} w-auto object-contain block dark:hidden`}
                           height={32}
                           width={128}
                         />
@@ -130,7 +135,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                         <Image
                           src={logoDark}
                           alt="Logo"
-                          className="h-8 w-auto object-contain hidden dark:block"
+                          className={`${mobileLogoClass} w-auto object-contain hidden dark:block`}
                           height={32}
                           width={128}
                         />
@@ -140,7 +145,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                       <Image
                         src={logo}
                         alt="Logo"
-                        className="h-8 w-auto object-contain"
+                        className={`${mobileLogoClass} w-auto object-contain`}
                         height={32}
                         width={128}
                       />
@@ -148,11 +153,16 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                   </Link>
                 </div>
 
-                {/* Right: Search icon / Close icon */}
-                <div className="flex justify-end">
+                {/* Right: Search icon / Close icon / User Menu */}
+                <div className="flex justify-end items-center space-x-2">
                   <Suspense>
                     <MobileSearch onToggle={setSearchOpen} />
                   </Suspense>
+                  {isAuthEnabled() && session !== undefined && (
+                    <Suspense>
+                      <UserMenu session={session} />
+                    </Suspense>
+                  )}
                 </div>
               </div>
             </div>
