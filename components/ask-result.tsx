@@ -6,8 +6,18 @@ import Image from "next/image";
 import { Loader2, Play, Sparkles, AlertCircle, ChevronRight, RefreshCw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { AskResponse, formatAskTime, timeStringToSeconds } from "@/lib/ask";
+import { 
+  AskResponse, 
+  formatAskTime, 
+  timeStringToSeconds,
+  isClarificationResponse,
+  isSynthesizedResponse,
+  isErrorResponse,
+  ClarificationResponse,
+  SynthesizedResponse
+} from "@/lib/ask";
 import { CitationVideoPlayer } from "@/components/citation-video-player";
+import { AskClarification } from "@/components/ask-clarification";
 import { useSettings } from "@/components/providers/settings-provider";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +32,8 @@ export function AskResult({ query }: AskResultProps) {
   const [highlightedCitation, setHighlightedCitation] = useState<string | null>(null);
   const [expandedCitations, setExpandedCitations] = useState<Set<string>>(new Set());
   const [loadingMessage, setLoadingMessage] = useState(0);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [clarificationCount, setClarificationCount] = useState(0);
   const loadingStartTime = useRef<number | null>(null);
   const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -112,6 +124,11 @@ export function AskResult({ query }: AskResultProps) {
       return;
     }
 
+    // Only fetch on initial mount or when query changes (not conversationId)
+    if (conversationId) {
+      return; // Skip fetching if we already have a conversation going
+    }
+
     const fetchAnswer = async () => {
       setIsLoading(true);
       setError(null);
@@ -139,6 +156,13 @@ export function AskResult({ query }: AskResultProps) {
         const data = await res.json();
         console.log("[Ask Result] Raw API Response:", data);
         setResponse(data);
+        
+        // Store conversation ID if present
+        if (isClarificationResponse(data) || isSynthesizedResponse(data)) {
+          if (data.conversation_id) {
+            setConversationId(data.conversation_id);
+          }
+        }
       } catch (err: any) {
         console.error("[Ask Result] Error:", err);
         
@@ -153,7 +177,58 @@ export function AskResult({ query }: AskResultProps) {
     };
 
     fetchAnswer();
-  }, [query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]); // Intentionally not including conversationId to prevent re-fetching
+
+  // Handle clarification submission
+  const handleClarificationSubmit = async (clarification: string, convId: string) => {
+    setIsLoading(true);
+    setError(null);
+    setClarificationCount(prev => prev + 1);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+    try {
+      const res = await fetch("/api/ask-global", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          q: clarification,
+          conversation_id: convId
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        throw new Error(`Failed to get answer: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("[Ask Result] Clarification Response:", data);
+      setResponse(data);
+      
+      // Update conversation ID if needed
+      if ((isClarificationResponse(data) || isSynthesizedResponse(data)) && data.conversation_id) {
+        setConversationId(data.conversation_id);
+      }
+    } catch (err: any) {
+      console.error("[Ask Result] Clarification Error:", err);
+      
+      if (err.name === 'AbortError') {
+        setError("This is taking longer than expected. Please try again.");
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to process clarification");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   if (!query) {
     return (
@@ -264,17 +339,50 @@ export function AskResult({ query }: AskResultProps) {
     );
   }
 
-  if (!response || !response.success || !response.answer) {
-    return (
-      <div className="py-12 text-center">
-        <p className="text-lg text-muted-foreground">
-          No answer available. Please try rephrasing your question.
-        </p>
-      </div>
-    );
+  // Handle different response types
+  if (response) {
+    // Handle clarification response
+    if (isClarificationResponse(response)) {
+      return (
+        <AskClarification
+          response={response}
+          onSubmit={handleClarificationSubmit}
+          isLoading={isLoading}
+        />
+      );
+    }
+
+    // Handle error response
+    if (isErrorResponse(response)) {
+      return (
+        <div className="py-12 text-center space-y-4">
+          <AlertCircle className="w-8 h-8 mx-auto text-destructive" />
+          <div className="space-y-2">
+            <p className="text-lg font-medium text-destructive">Error</p>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              {response.error}
+              {response.details && `: ${response.details}`}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Handle synthesized response
+    if (!isSynthesizedResponse(response)) {
+      return (
+        <div className="py-12 text-center">
+          <p className="text-lg text-muted-foreground">
+            No answer available. Please try rephrasing your question.
+          </p>
+        </div>
+      );
+    }
+  } else {
+    return null;
   }
 
-  const { answer, expanded_queries, processing_time_ms } = response;
+  const { answer, expanded_queries, processing_time_ms, assumptions_made } = response as SynthesizedResponse;
 
   return (
     <div className="space-y-6">
@@ -282,9 +390,26 @@ export function AskResult({ query }: AskResultProps) {
       <div className="bg-sidebar p-6 rounded-lg">
         <div className="flex items-start gap-3">
           <Sparkles className="w-5 h-5 mt-0.5 text-primary flex-shrink-0" />
-          <div>
+          <div className="flex-1">
             <p className="text-sm text-muted-foreground mb-1">Your question</p>
             <p className="text-lg font-medium">{query}</p>
+            
+            {/* Show assumptions subtly if any were made */}
+            {assumptions_made && assumptions_made.length > 0 && (
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Context:</span>
+                <div className="flex flex-wrap gap-1">
+                  {assumptions_made.map((assumption, idx) => (
+                    <span
+                      key={idx}
+                      className="text-xs px-1.5 py-0.5 bg-muted/50 text-muted-foreground rounded"
+                    >
+                      {assumption}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

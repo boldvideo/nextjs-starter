@@ -7,17 +7,44 @@ export const maxDuration = 60;
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get("q") || searchParams.get("query");
+  const conversationId = searchParams.get("conversation_id");
+  const mode = searchParams.get("mode") || "enhanced";
+  const synthesize = searchParams.get("synthesize") || "true";
+  const limit = searchParams.get("limit");
+  const videoId = searchParams.get("video_id");
+  const language = searchParams.get("language");
+  const semanticRatio = searchParams.get("semantic_ratio");
+  const maxPerVideo = searchParams.get("max_per_video");
 
-  return processAsk(query, request);
+  return processAsk({
+    query,
+    conversationId,
+    mode,
+    synthesize,
+    limit,
+    videoId,
+    language,
+    semanticRatio,
+    maxPerVideo
+  });
 }
 
 // Handle POST requests
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const query = body.query || body.q;
-
-    return processAsk(query, request);
+    
+    return processAsk({
+      query: body.query || body.q,
+      conversationId: body.conversation_id,
+      mode: body.mode || "enhanced",
+      synthesize: body.synthesize !== undefined ? body.synthesize : "true",
+      limit: body.limit,
+      videoId: body.video_id,
+      language: body.language,
+      semanticRatio: body.semantic_ratio,
+      maxPerVideo: body.max_per_video
+    });
   } catch (error) {
     console.error("[Ask Global API] POST parsing error:", error);
     return NextResponse.json(
@@ -27,11 +54,25 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Common ask processing function
-async function processAsk(query: string | null, request: NextRequest) {
+// Common ask processing function with all parameters
+interface ProcessAskParams {
+  query: string | null;
+  conversationId?: string | null;
+  mode?: string;
+  synthesize?: string;
+  limit?: string | null;
+  videoId?: string | null;
+  language?: string | null;
+  semanticRatio?: string | null;
+  maxPerVideo?: string | null;
+}
+
+async function processAsk(params: ProcessAskParams) {
+  const { query, conversationId, mode = "enhanced", synthesize = "true" } = params;
+  
   if (!query) {
     return NextResponse.json(
-      { error: "Missing query parameter" },
+      { error: "Missing required parameter: q" },
       { status: 400 }
     );
   }
@@ -67,11 +108,34 @@ async function processAsk(query: string | null, request: NextRequest) {
     // Check if baseUrl already includes /api/v1
     const urlPath = baseUrl.includes('/api/v1') ? '/ask' : '/api/v1/ask';
     
-    // Safely construct the URL
+    // Safely construct the URL with all parameters
     const endpointUrl = new URL(baseUrl + urlPath);
     endpointUrl.searchParams.append("q", query);
+    endpointUrl.searchParams.append("mode", mode);
+    endpointUrl.searchParams.append("synthesize", synthesize);
+    
+    // Add optional parameters if provided
+    if (params.conversationId) {
+      endpointUrl.searchParams.append("conversation_id", params.conversationId);
+    }
+    if (params.limit) {
+      endpointUrl.searchParams.append("limit", params.limit);
+    }
+    if (params.videoId) {
+      endpointUrl.searchParams.append("video_id", params.videoId);
+    }
+    if (params.language) {
+      endpointUrl.searchParams.append("language", params.language);
+    }
+    if (params.semanticRatio) {
+      endpointUrl.searchParams.append("semantic_ratio", params.semanticRatio);
+    }
+    if (params.maxPerVideo) {
+      endpointUrl.searchParams.append("max_per_video", params.maxPerVideo);
+    }
 
     const endpoint = endpointUrl.toString();
+    console.log("[Ask Global API] Calling endpoint:", endpoint.replace(query, "***"));
 
     // Add AbortController for timeout (50 seconds to leave buffer for Vercel's 60s limit)
     const controller = new AbortController();

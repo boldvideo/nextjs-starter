@@ -16,7 +16,7 @@ export type AskAnswer = {
   text: string;
   citations: AskCitation[];
   confidence: "high" | "medium" | "low";
-  limitations: string | null;
+  limitations?: string | null;
   model_used: string;
 };
 
@@ -32,7 +32,7 @@ export type AskChunk = {
   duration_ms: number | null;
   highlighted_text: string;
   rrf_score: number;
-  appearance_count: number;
+  appearance_count?: number;
 };
 
 export type AskRetrieval = {
@@ -40,15 +40,53 @@ export type AskRetrieval = {
   chunks: AskChunk[];
 };
 
-export type AskResponse = {
-  mode: string;
-  success: boolean;
+// Clarification response type
+export type ClarificationResponse = {
+  success: true;
+  mode: "clarification";
+  needs_clarification: true;
+  clarifying_questions: string[];
+  missing_dimensions: string[];
+  original_query: string;
+  conversation_id: string;
+};
+
+// Synthesized answer response type
+export type SynthesizedResponse = {
+  success: true;
+  mode: "synthesized";
   query: string;
-  processing_time_ms: number;
+  expanded_queries: string[];
+  assumptions_made?: string[];
+  conversation_id: string;
   answer: AskAnswer;
+  retrieval: AskRetrieval;
+  processing_time_ms: number;
+};
+
+// Retrieval only response type
+export type RetrievalOnlyResponse = {
+  success: true;
+  mode: "retrieval_only";
+  query: string;
   expanded_queries: string[];
   retrieval: AskRetrieval;
+  processing_time_ms: number;
 };
+
+// Error response type
+export type ErrorResponse = {
+  success: false;
+  error: string;
+  details?: string;
+};
+
+// Union type for all possible responses
+export type AskResponse = 
+  | ClarificationResponse 
+  | SynthesizedResponse 
+  | RetrievalOnlyResponse
+  | ErrorResponse;
 
 // Helper function to format time from seconds or time string
 export function formatAskTime(time: string | number): string {
@@ -72,4 +110,35 @@ export function timeStringToSeconds(timeStr: string): number {
     return minutes * 60 + seconds;
   }
   return 0;
+}
+
+// Type guards for response discrimination
+export function isClarificationResponse(
+  response: AskResponse
+): response is ClarificationResponse {
+  return response.success === true && 
+         response.mode === "clarification" && 
+         "needs_clarification" in response;
+}
+
+export function isSynthesizedResponse(
+  response: AskResponse
+): response is SynthesizedResponse {
+  return response.success === true && 
+         response.mode === "synthesized" && 
+         "answer" in response;
+}
+
+export function isRetrievalOnlyResponse(
+  response: AskResponse
+): response is RetrievalOnlyResponse {
+  return response.success === true && 
+         response.mode === "retrieval_only" && 
+         !("answer" in response);
+}
+
+export function isErrorResponse(
+  response: AskResponse
+): response is ErrorResponse {
+  return response.success === false;
 }
