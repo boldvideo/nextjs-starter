@@ -226,53 +226,7 @@ export function AskResult({ query }: AskResultProps) {
     }
   };
 
-  // Process response and update messages when response changes
-  useEffect(() => {
-    if (!response) return;
-
-    if (isClarificationResponse(response)) {
-      // Replace loading message with clarification
-      setMessages(prev => {
-        const newMessages = [...prev];
-        newMessages[newMessages.length - 1] = {
-          role: "assistant",
-          content: <AskClarificationInline 
-            response={response} 
-            onSubmit={handleClarificationSubmit}
-            isLoading={isLoading}
-          />,
-          type: "clarification"
-        };
-        return newMessages;
-      });
-    } else if (isSynthesizedResponse(response)) {
-      // Replace loading message with answer
-      const answerContent = renderAnswer(response);
-      setMessages(prev => {
-        const newMessages = [...prev];
-        newMessages[newMessages.length - 1] = {
-          role: "assistant",
-          content: answerContent,
-          type: "answer"
-        };
-        return newMessages;
-      });
-    } else if (isErrorResponse(response)) {
-      // Replace loading message with error
-      setMessages(prev => {
-        const newMessages = [...prev];
-        newMessages[newMessages.length - 1] = {
-          role: "assistant",
-          content: `Error: ${response.error}${response.details ? ` - ${response.details}` : ''}`,
-          type: "error"
-        };
-        return newMessages;
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [response]);
-
-  const renderAnswer = (response: SynthesizedResponse) => {
+  const renderAnswer = useCallback((response: SynthesizedResponse) => {
     const { answer, expanded_queries } = response;
     
     return (
@@ -289,9 +243,9 @@ export function AskResult({ query }: AskResultProps) {
                         const parts = child.split(/(\[[S]\d+\])/g);
                         return parts.map((part, partIdx) => {
                           if (part.match(/^\[[S]\d+\]$/)) {
-                            return renderCitation(part);
+                            return <span key={`${idx}-${partIdx}`}>{renderCitation(part)}</span>;
                           }
-                          return part;
+                          return <span key={`${idx}-${partIdx}`}>{part}</span>;
                         });
                       }
                       return child;
@@ -362,7 +316,53 @@ export function AskResult({ query }: AskResultProps) {
         )}
       </div>
     );
-  };
+  }, [expandedCitations, toggleCitationExpansion, renderCitation]);
+
+  // Process response and update messages when response changes
+  useEffect(() => {
+    if (!response) return;
+
+    if (isClarificationResponse(response)) {
+      // Replace loading message with clarification
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[newMessages.length - 1] = {
+          role: "assistant",
+          content: <AskClarificationInline 
+            response={response} 
+            onSubmit={handleClarificationSubmit}
+            isLoading={isLoading}
+          />,
+          type: "clarification"
+        };
+        return newMessages;
+      });
+    } else if (isSynthesizedResponse(response)) {
+      // Replace loading message with answer
+      const answerContent = renderAnswer(response);
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[newMessages.length - 1] = {
+          role: "assistant",
+          content: answerContent,
+          type: "answer"
+        };
+        return newMessages;
+      });
+    } else if (isErrorResponse(response)) {
+      // Replace loading message with error
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[newMessages.length - 1] = {
+          role: "assistant",
+          content: `Error: ${response.error}${response.details ? ` - ${response.details}` : ''}`,
+          type: "error"
+        };
+        return newMessages;
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [response, renderAnswer, handleClarificationSubmit, isLoading]);
 
   if (!query) {
     return (
