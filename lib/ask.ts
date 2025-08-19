@@ -57,7 +57,6 @@ export type SynthesizedResponse = {
   mode: "synthesized";
   query: string;
   expanded_queries: string[];
-  assumptions_made?: string[];
   conversation_id: string;
   answer: AskAnswer;
   retrieval: AskRetrieval;

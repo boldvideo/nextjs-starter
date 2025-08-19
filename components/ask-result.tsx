@@ -382,7 +382,7 @@ export function AskResult({ query }: AskResultProps) {
     return null;
   }
 
-  const { answer, expanded_queries, processing_time_ms, assumptions_made } = response as SynthesizedResponse;
+  const { answer, expanded_queries, processing_time_ms } = response as SynthesizedResponse;
 
   return (
     <div className="space-y-6">
@@ -390,26 +390,9 @@ export function AskResult({ query }: AskResultProps) {
       <div className="bg-sidebar p-6 rounded-lg">
         <div className="flex items-start gap-3">
           <Sparkles className="w-5 h-5 mt-0.5 text-primary flex-shrink-0" />
-          <div className="flex-1">
+          <div>
             <p className="text-sm text-muted-foreground mb-1">Your question</p>
             <p className="text-lg font-medium">{query}</p>
-            
-            {/* Show assumptions subtly if any were made */}
-            {assumptions_made && assumptions_made.length > 0 && (
-              <div className="mt-3 flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Context:</span>
-                <div className="flex flex-wrap gap-1">
-                  {assumptions_made.map((assumption, idx) => (
-                    <span
-                      key={idx}
-                      className="text-xs px-1.5 py-0.5 bg-muted/50 text-muted-foreground rounded"
-                    >
-                      {assumption}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
