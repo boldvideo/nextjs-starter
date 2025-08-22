@@ -21,17 +21,8 @@ export function ClarificationCard({
   aiName = "AI",
   aiAvatar = "/placeholder-avatar.png"
 }: ClarificationCardProps) {
-  // Store conversation ID in a way that the parent can access it
-  React.useEffect(() => {
-    // The parent will handle the submission through the main input
-    if (onSubmit && response.conversation_id) {
-      // Store the conversation ID so the parent knows we're in clarification mode
-      window.__clarificationConversationId = response.conversation_id;
-    }
-    return () => {
-      delete window.__clarificationConversationId;
-    };
-  }, [response.conversation_id, onSubmit]);
+  // The parent component handles clarification through the main input
+  // No need to store conversation ID here
 
   return (
     <div className="flex gap-3 w-full">

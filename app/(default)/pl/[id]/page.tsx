@@ -8,11 +8,17 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  const { data: playlists } = await bold.playlists.list();
-
-  return playlists.map((playlist) => ({
-    id: playlist.id,
-  }));
+  try {
+    const { data: playlists } = await bold.playlists.list();
+    
+    return playlists.map((playlist) => ({
+      id: playlist.id,
+    }));
+  } catch (error) {
+    console.warn("Could not fetch playlists for static generation:", error);
+    // Return empty array to skip static generation if API is not available
+    return [];
+  }
 }
 
 export async function generateMetadata({
