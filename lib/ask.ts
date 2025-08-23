@@ -3,7 +3,7 @@
 export type AskCitation = {
   label: string;
   video_id: string;
-  mux_playback_id?: string;
+  playback_id: string;  // API sends this according to docs
   video_title?: string;
   start_time: string;
   end_time: string;
@@ -24,7 +24,7 @@ export type AskChunk = {
   id: string;
   text: string;
   video_id: string;
-  mux_playback_id?: string;
+  playback_id?: string;
   video_title?: string;
   speaker: string;
   timestamp_start_ms: number;
@@ -102,7 +102,11 @@ export function formatAskTime(time: string | number): string {
 }
 
 // Helper to convert time string to seconds for video player links
-export function timeStringToSeconds(timeStr: string): number {
+export function timeStringToSeconds(timeStr: string | undefined | null): number {
+  if (!timeStr) {
+    return 0;
+  }
+  
   const parts = timeStr.split(":");
   if (parts.length === 2) {
     const [minutes, seconds] = parts.map(Number);

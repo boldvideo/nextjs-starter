@@ -45,6 +45,14 @@ export default function Home() {
       
       if (!trimmedQuery || isStreaming) return;
       
+      console.log('[Home] Form submitted:', {
+        query: trimmedQuery,
+        isWaitingForClarification,
+        conversationId,
+        hasStarted,
+        messageCount: messages.length
+      });
+      
       // Mark that chat has started
       if (!hasStarted) {
         setHasStarted(true);
@@ -55,13 +63,15 @@ export default function Home() {
       
       // If we're waiting for clarification, submit it as a clarification answer
       if (isWaitingForClarification) {
+        console.log('[Home] Submitting as clarification');
         submitClarification(trimmedQuery);
       } else {
         // Otherwise, stream as a new question
+        console.log('[Home] Streaming as new question');
         await streamQuestion(trimmedQuery);
       }
     },
-    [query, isStreaming, hasStarted, isWaitingForClarification, streamQuestion, submitClarification]
+    [query, isStreaming, hasStarted, isWaitingForClarification, streamQuestion, submitClarification, conversationId, messages.length]
   );
 
   const handleStop = useCallback(() => {

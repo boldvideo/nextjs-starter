@@ -46,12 +46,23 @@ export function CitationVideoPlayer({
 
   // Auto-play when expanded and set start time
   useEffect(() => {
+    console.log('[CitationVideoPlayer] Effect triggered:', {
+      isExpanded,
+      hasStarted,
+      playbackId,
+      startTime,
+      videoTitle,
+      label,
+      playerRef: playerRef.current
+    });
+    
     if (isExpanded && playerRef.current && !hasStarted) {
+      console.log('[CitationVideoPlayer] Attempting to play video at time:', startTime);
       // Set the start time
       playerRef.current.currentTime = startTime;
       // Play the video
       playerRef.current.play().catch((err: any) => {
-        console.warn("[Citation Video] Autoplay failed:", err);
+        console.error("[CitationVideoPlayer] Autoplay failed:", err);
       });
       setHasStarted(true);
     } else if (!isExpanded) {

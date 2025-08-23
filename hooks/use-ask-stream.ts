@@ -102,6 +102,13 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
     query: string, 
     useConversationId: boolean = true
   ) => {
+    console.log('[useAskStream] streamQuestion called:', {
+      query,
+      useConversationId,
+      currentConversationId: conversationId,
+      willSendConversationId: useConversationId ? conversationId : undefined
+    });
+
     // Abort any existing stream
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -130,6 +137,9 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
       const reader = stream.getReader();
       let hasStartedStreaming = false;
+      let accumulatedText = "";
+      let accumulatedCitations: any[] = [];
+      let expandedQueries: string[] = [];
       
       while (true) {
         // Check if aborted
@@ -143,19 +153,67 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
         switch (message.type) {
           case "chunk":
+            accumulatedText += message.content;
             if (!hasStartedStreaming) {
-              // Replace loading message with first chunk
-              addAssistantMessage(message.content, "text");
+              // Start with answer type to show citations progressively
+              addAssistantMessage(
+                message.content, 
+                "answer",
+                { 
+                  synthesizedResponse: {
+                    success: true,
+                    mode: "synthesized",
+                    query,
+                    expanded_queries: expandedQueries,
+                    conversation_id: conversationId || "",
+                    answer: {
+                      text: accumulatedText,
+                      citations: accumulatedCitations,
+                      confidence: "medium",
+                      model_used: "unknown"
+                    },
+                    retrieval: {
+                      total: accumulatedCitations.length,
+                      chunks: []
+                    },
+                    processing_time_ms: 0
+                  }
+                }
+              );
               hasStartedStreaming = true;
             } else {
-              // Append subsequent chunks
-              addAssistantMessage(message.content, "text");
+              // Update with accumulated data
+              addAssistantMessage(
+                message.content, 
+                "answer",
+                { 
+                  synthesizedResponse: {
+                    success: true,
+                    mode: "synthesized",
+                    query,
+                    expanded_queries: expandedQueries,
+                    conversation_id: conversationId || "",
+                    answer: {
+                      text: accumulatedText,
+                      citations: accumulatedCitations,
+                      confidence: "medium",
+                      model_used: "unknown"
+                    },
+                    retrieval: {
+                      total: accumulatedCitations.length,
+                      chunks: []
+                    },
+                    processing_time_ms: 0
+                  }
+                }
+              );
             }
             break;
 
           case "clarification":
             // Update conversation ID
             if (message.content.conversation_id) {
+              console.log('[useAskStream] Setting conversation ID from clarification:', message.content.conversation_id);
               setConversationId(message.content.conversation_id);
             }
             
@@ -175,20 +233,33 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
           case "complete":
             // Update conversation ID
             if (message.content.conversation_id) {
+              console.log('[useAskStream] Setting conversation ID from complete:', message.content.conversation_id);
               setConversationId(message.content.conversation_id);
+            } else {
+              console.log('[useAskStream] No conversation ID in complete message');
             }
             
             // Clear clarification waiting state
             setIsWaitingForClarification(false);
             
-            // Update the message type to "answer" and store metadata
+            // Final update with complete data
+            const finalResponse = {
+              ...message.content,
+              answer: {
+                ...message.content.answer,
+                text: accumulatedText || message.content.answer.text,
+                citations: message.content.answer.citations || accumulatedCitations
+              },
+              expanded_queries: message.content.expanded_queries || expandedQueries
+            };
+            
             addAssistantMessage(
-              message.content.answer.text,
+              "",
               "answer",
-              { synthesizedResponse: message.content }
+              { synthesizedResponse: finalResponse }
             );
             
-            options.onComplete?.(message.content);
+            options.onComplete?.(finalResponse);
             break;
 
           case "error":

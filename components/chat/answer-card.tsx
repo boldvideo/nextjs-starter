@@ -94,16 +94,20 @@ export function AnswerCard({
                 p: ({ children, ...props }) => {
                   const processedChildren = Array.isArray(children) 
                     ? children.map((child, idx) => {
-                        if (typeof child === 'string') {
+                        if (typeof child === 'string' && child) {
                           const parts = child.split(/(\[[S]\d+\])/g);
-                          return parts.map((part, partIdx) => {
-                            if (part.match(/^\[[S]\d+\]$/)) {
-                              return <span key={`${idx}-${partIdx}`}>{renderCitation(part)}</span>;
-                            }
-                            return <span key={`${idx}-${partIdx}`}>{part}</span>;
-                          });
+                          return (
+                            <React.Fragment key={idx}>
+                              {parts.map((part, partIdx) => {
+                                if (part.match(/^\[[S]\d+\]$/)) {
+                                  return <span key={`${idx}-${partIdx}`}>{renderCitation(part)}</span>;
+                                }
+                                return <span key={`${idx}-${partIdx}`}>{part}</span>;
+                              })}
+                            </React.Fragment>
+                          );
                         }
-                        return child;
+                        return <React.Fragment key={idx}>{child}</React.Fragment>;
                       })
                     : children;
                   
@@ -125,7 +129,15 @@ export function AnswerCard({
                 ),
               }}
             >
-              {answer.text}
+              {(() => {
+                // Remove the "Sources:" section if it exists in the answer text
+                const text = answer.text;
+                const sourcesIndex = text.lastIndexOf('\n\nSources:');
+                if (sourcesIndex !== -1) {
+                  return text.substring(0, sourcesIndex).trim();
+                }
+                return text;
+              })()}
             </ReactMarkdown>
 
           </div>
@@ -141,17 +153,22 @@ export function AnswerCard({
               </div>
               
               <div className="space-y-2">
-                {answer.citations.map((citation) => {
+                {answer.citations.map((citation, index) => {
+                  console.log('[AnswerCard] Citation:', citation);
+                  console.log('[AnswerCard] playback_id:', citation.playback_id);
+                  console.log('[AnswerCard] start_time:', citation.start_time, '→ seconds:', timeStringToSeconds(citation.start_time));
+                  console.log('[AnswerCard] end_time:', citation.end_time, '→ seconds:', citation.end_time ? timeStringToSeconds(citation.end_time) : undefined);
+                  
                   const isExpanded = expandedCitations.has(citation.label);
                   return (
                     <div
-                      key={citation.label}
+                      key={`${citation.label}-${citation.video_id}-${index}`}
                       id={`citation-${citation.label}`}
                       className="rounded-lg overflow-hidden transition-all"
                     >
                       <CitationVideoPlayer
                         videoId={citation.video_id}
-                        playbackId={citation.mux_playback_id || ""}
+                        playbackId={citation.playback_id}
                         videoTitle={citation.video_title}
                         startTime={timeStringToSeconds(citation.start_time)}
                         endTime={citation.end_time ? timeStringToSeconds(citation.end_time) : undefined}

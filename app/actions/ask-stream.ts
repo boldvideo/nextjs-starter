@@ -42,19 +42,27 @@ export async function streamAskAction({
       }
 
       try {
-        // Construct URL (use regular /ask endpoint which supports SSE)
+        // Construct URL based on whether we have a conversation ID
         const baseUrl = apiHost.startsWith("http") ? apiHost : `https://${apiHost}`;
-        const urlPath = baseUrl.includes('/api/v1') ? '/ask' : '/api/v1/ask';
-        const endpoint = baseUrl + urlPath;
-
-        // Build request body
-        const requestBody: any = {
-          q: query
-        };
+        const apiPath = baseUrl.includes('/api/v1') ? '' : '/api/v1';
         
-        if (conversationId) {
-          requestBody.conversation_id = conversationId;
-        }
+        // If we have a conversationId, append it to the URL path (continue conversation)
+        // Otherwise, use the base /ask endpoint (start new conversation)
+        const endpoint = conversationId 
+          ? `${baseUrl}${apiPath}/ask/${conversationId}`
+          : `${baseUrl}${apiPath}/ask`;
+
+        console.log('[ask-stream] Request details:', {
+          endpoint,
+          conversationId,
+          isNewConversation: !conversationId,
+          query
+        });
+
+        // Build request body using the new API format
+        const requestBody = {
+          message: query
+        };
 
         const response = await fetch(endpoint, {
           method: "POST",
@@ -137,6 +145,7 @@ export async function streamAskAction({
                     // Store conversation ID from initial message
                     if (data.id) {
                       currentConversationId = data.id;
+                      console.log('[ask-stream] Conversation created with ID:', data.id);
                     }
                     break;
                     
@@ -156,6 +165,7 @@ export async function streamAskAction({
                     }
                     if (data.citations) {
                       citations = data.citations;
+                      console.log('[ask-stream] Received citations:', citations);
                     }
                     // Don't close here, wait for "complete" event
                     break;
@@ -176,20 +186,6 @@ export async function streamAskAction({
                     });
                     controller.close();
                     return; // Stop streaming when clarification is needed
-                    
-                  case "citation":
-                    // Accumulate citations
-                    if (data.citation) {
-                      citations.push(data.citation);
-                    }
-                    break;
-                    
-                  case "expanded_query":
-                    // Accumulate expanded queries
-                    if (data.query) {
-                      expandedQueries.push(data.query);
-                    }
-                    break;
                     
                   case "complete":
                     // Stream has ended, send the complete response
@@ -290,22 +286,25 @@ export async function askAction({
 
   try {
     const baseUrl = apiHost.startsWith("http") ? apiHost : `https://${apiHost}`;
-    const urlPath = baseUrl.includes('/api/v1') ? '/ask' : '/api/v1/ask';
-    const endpointUrl = new URL(baseUrl + urlPath);
+    const apiPath = baseUrl.includes('/api/v1') ? '' : '/api/v1';
     
-    endpointUrl.searchParams.append("q", query);
-    endpointUrl.searchParams.append("mode", mode);
-    endpointUrl.searchParams.append("synthesize", String(synthesize));
-    
-    if (conversationId) {
-      endpointUrl.searchParams.append("conversation_id", conversationId);
-    }
+    // Use conversation ID in path if available, otherwise use base endpoint
+    const endpoint = conversationId 
+      ? `${baseUrl}${apiPath}/ask/${conversationId}`
+      : `${baseUrl}${apiPath}/ask`;
 
-    const response = await fetch(endpointUrl.toString(), {
+    // Build request body using the new API format
+    const requestBody = {
+      message: query
+    };
+
+    const response = await fetch(endpoint, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: apiKey,
       },
+      body: JSON.stringify(requestBody),
       cache: "no-store",
     });
 

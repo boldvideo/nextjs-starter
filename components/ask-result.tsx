@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { AlertCircle, RefreshCw, Sparkles } from "lucide-react";
@@ -162,7 +162,7 @@ export function AskResult({ query }: AskResultProps) {
   }, [query]); // Intentionally not including conversationId to prevent re-fetching
 
   // Handle clarification submission
-  const handleClarificationSubmit = async (clarification: string, convId: string) => {
+  const handleClarificationSubmit = useCallback(async (clarification: string, convId: string) => {
     // Add user's clarification to messages
     setMessages(prev => [...prev, { role: "user", content: clarification }]);
     
@@ -224,7 +224,7 @@ export function AskResult({ query }: AskResultProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const renderAnswer = useCallback((response: SynthesizedResponse) => {
     const { answer, expanded_queries } = response;
@@ -239,16 +239,20 @@ export function AskResult({ query }: AskResultProps) {
               p: ({ children, ...props }) => {
                 const processedChildren = Array.isArray(children) 
                   ? children.map((child, idx) => {
-                      if (typeof child === 'string') {
+                      if (typeof child === 'string' && child) {
                         const parts = child.split(/(\[[S]\d+\])/g);
-                        return parts.map((part, partIdx) => {
-                          if (part.match(/^\[[S]\d+\]$/)) {
-                            return <span key={`${idx}-${partIdx}`}>{renderCitation(part)}</span>;
-                          }
-                          return <span key={`${idx}-${partIdx}`}>{part}</span>;
-                        });
+                        return (
+                          <React.Fragment key={idx}>
+                            {parts.map((part, partIdx) => {
+                              if (part.match(/^\[[S]\d+\]$/)) {
+                                return <span key={`${idx}-${partIdx}`}>{renderCitation(part)}</span>;
+                              }
+                              return <span key={`${idx}-${partIdx}`}>{part}</span>;
+                            })}
+                          </React.Fragment>
+                        );
                       }
-                      return child;
+                      return <React.Fragment key={idx}>{child}</React.Fragment>;
                     })
                   : children;
                 
@@ -282,7 +286,7 @@ export function AskResult({ query }: AskResultProps) {
                 >
                   <CitationVideoPlayer
                     videoId={citation.video_id}
-                    playbackId={citation.mux_playback_id || ""}
+                    playbackId={citation.playback_id || ""}
                     videoTitle={citation.video_title}
                     startTime={timeStringToSeconds(citation.start_time)}
                     endTime={citation.end_time ? timeStringToSeconds(citation.end_time) : undefined}
