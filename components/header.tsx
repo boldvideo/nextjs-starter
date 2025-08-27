@@ -8,7 +8,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import { MobileSearch } from "@/components/mobile-search";
 import UserMenu from "@/components/auth/user-menu";
-import { isAuthEnabled } from "@/config/auth";
 import type { Session } from "next-auth";
 
 interface HeaderProps {
@@ -96,7 +95,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                 <Suspense>
                   <ThemeToggle />
                 </Suspense>
-                {isAuthEnabled() && session !== undefined && (
+                {session !== undefined && (
                   <Suspense>
                     <UserMenu session={session} />
                   </Suspense>
@@ -158,7 +157,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                   <Suspense>
                     <MobileSearch onToggle={setSearchOpen} />
                   </Suspense>
-                  {isAuthEnabled() && session !== undefined && (
+                  {session !== undefined && (
                     <Suspense>
                       <UserMenu session={session} />
                     </Suspense>

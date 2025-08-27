@@ -2,8 +2,14 @@ import SignIn from "@/components/auth/sign-in";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { isAuthEnabled } from "@/config/auth";
+import { bold } from "@/client";
+import type { Settings } from "@boldvideo/bold-js";
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   // If auth is disabled, redirect to home
   if (!isAuthEnabled()) {
     redirect("/");
@@ -15,5 +21,14 @@ export default async function SignInPage() {
     redirect("/");
   }
 
-  return <SignIn />;
+  // Fetch settings for logo
+  let settings = {} as Settings;
+  try {
+    const settingsResponse = await bold.settings();
+    settings = settingsResponse.data;
+  } catch (error) {
+    console.error("Failed to fetch settings:", error);
+  }
+
+  return <SignIn searchParams={searchParams} settings={settings} />;
 }

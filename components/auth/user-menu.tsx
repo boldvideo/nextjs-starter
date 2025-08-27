@@ -3,7 +3,7 @@
 import { signOut } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
 import type { Session } from "next-auth";
-import { LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Image from "next/image";
 
 interface UserMenuProps {
@@ -28,23 +28,14 @@ export default function UserMenu({ session }: UserMenuProps) {
     };
   }, []);
 
-  // In development mode, show mock user if no session
-  let displaySession = session;
-  if (process.env.NODE_ENV === "development" && !session) {
-    displaySession = {
-      user: {
-        name: "Developer",
-        email: "developer@example.com",
-      },
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    } as Session;
-  }
-
-  if (!displaySession?.user) {
+  // Only show menu if there's a valid session
+  if (!session?.user) {
     return null;
   }
 
-  const userInitial = displaySession.user.name?.[0]?.toUpperCase() || displaySession.user.email?.[0]?.toUpperCase() || "U";
+  const userInitial = session.user.name?.[0]?.toUpperCase() || 
+                      session.user.email?.[0]?.toUpperCase() || 
+                      "U";
 
   return (
     <div className="relative" ref={menuRef}>
@@ -54,10 +45,10 @@ export default function UserMenu({ session }: UserMenuProps) {
         className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
         aria-label="User menu"
       >
-        {displaySession.user.image ? (
+        {session.user.image ? (
           <Image
-            src={displaySession.user.image}
-            alt={displaySession.user.name || "User"}
+            src={session.user.image}
+            alt={session.user.name || "User"}
             className="w-8 h-8 rounded-full"
             width={32}
             height={32}
@@ -74,10 +65,10 @@ export default function UserMenu({ session }: UserMenuProps) {
             {/* User Info */}
             <div className="px-3 py-2 border-b border-border">
               <p className="text-sm font-medium truncate">
-                {displaySession.user.name || "User"}
+                {session.user.name || "User"}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {displaySession.user.email}
+                {session.user.email}
               </p>
             </div>
 

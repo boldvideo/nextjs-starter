@@ -349,7 +349,7 @@ export default async function RootLayout({
           </SessionProvider>
         ) : (
           <SettingsProvider settings={settings}>
-            <SignIn />
+            <SignIn settings={settings} />
           </SettingsProvider>
         )}
       </body>

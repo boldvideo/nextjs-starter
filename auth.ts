@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import WorkOS from "next-auth/providers/workos";
 import type { NextAuthConfig } from "next-auth";
-import { isAuthEnabled, getAuthProvider, isEmailAllowed } from "@/config/auth";
+import { isAuthEnabled, getAuthProvider, isEmailAllowed, isBoldTeamEmail } from "@/config/auth";
 
 // Build providers array based on configuration
 const providers: NextAuthConfig["providers"] = [];
@@ -10,62 +10,39 @@ const providers: NextAuthConfig["providers"] = [];
 if (isAuthEnabled()) {
   const provider = getAuthProvider();
 
-  if (provider === "google" && process.env.AUTH_GOOGLE_ID) {
+  // Always add Google if configured (for Bold team access)
+  if (process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) {
     providers.push(Google);
   }
 
+  // Add WorkOS for customer organization access
   if (provider === "workos" && process.env.AUTH_WORKOS_ID) {
-    // const workosConfig: any = {
-    //   connection: process.env.AUTH_WORKOS_CONNECTION!,
-    // };
-    // const workosConfig: any = {
-    //   client: {
-    //     token_endpoint_auth_method: "client_secret_post",
-    //   },
-    // };
-    //
-    // // Add organization if configured
-    // if (process.env.AUTH_WORKOS_ORG) {
-    //   workosConfig.authorization = {
-    //     params: {
-    //       organization: process.env.AUTH_WORKOS_ORG,
-    //     },
-    //   };
-    // }
-
-    providers.push(
-      WorkOS({
-        connection: process.env.AUTH_WORKOS_CONNECTION!,
-      }),
+    // WorkOS requires passing the connection ID according to AuthJS docs
+    if (!process.env.AUTH_WORKOS_CONNECTION) {
+      console.error(
+        "WorkOS authentication is enabled but AUTH_WORKOS_CONNECTION is not set. Please configure it in your .env file."
+      );
+    } else {
+      providers.push(WorkOS({ connection: process.env.AUTH_WORKOS_CONNECTION }));
+    }
+  } else if (provider === "google" && !process.env.AUTH_GOOGLE_ID) {
+    // If Google is the primary provider but not configured, warn
+    console.error(
+      "Google authentication is enabled but AUTH_GOOGLE_ID is not set. Please configure it in your .env file."
     );
   }
 }
 
-// Determine the base URL for auth
-// function getAuthUrl() {
-//   if (process.env.AUTH_URL) {
-//     return process.env.AUTH_URL;
-//   }
-//   if (process.env.NEXTAUTH_URL) {
-//     return process.env.NEXTAUTH_URL;
-//   }
-//   if (process.env.VERCEL_URL) {
-//     return `https://${process.env.VERCEL_URL}`;
-//   }
-//   // Fallback for local development
-//   return "http://localhost:3000";
-// }
 
 export const config = {
   providers,
   debug: process.env.NODE_ENV === "development",
   secret: process.env.AUTH_SECRET,
   trustHost: true, // Allow Auth.js to work with ngrok and other proxies
-  basePath: "/auth", // Updated to match new route location
-  // pages: {
-  //   signIn: "/auth/signin",
-  //   error: "/auth/error",
-  // },
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/signin?error=true",
+  },
   callbacks: {
     authorized({ request, auth }) {
       // If auth is disabled, always return true
@@ -82,12 +59,27 @@ export const config = {
         return true;
       }
 
-      // Check email domain restrictions
-      if (user.email) {
+      // Check if user has an email
+      if (!user.email) {
+        return false;
+      }
+
+      // Allow Bold team members (via Google OAuth)
+      if (account?.provider === "google" && isBoldTeamEmail(user.email)) {
+        return true;
+      }
+
+      // For WorkOS, check domain restrictions
+      if (account?.provider === "workos") {
         return isEmailAllowed(user.email);
       }
 
-      // Deny if no email
+      // For Google (non-Bold team), check domain restrictions
+      if (account?.provider === "google") {
+        return isEmailAllowed(user.email);
+      }
+
+      // Default deny
       return false;
     },
   },
