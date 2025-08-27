@@ -8,7 +8,7 @@ import type { Settings } from "@boldvideo/bold-js";
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   // If auth is disabled, redirect to home
   if (!isAuthEnabled()) {
@@ -21,6 +21,9 @@ export default async function SignInPage({
     redirect("/");
   }
 
+  // Await searchParams (Next.js 15 change)
+  const params = await searchParams;
+
   // Fetch settings for logo
   let settings = {} as Settings;
   try {
@@ -30,5 +33,5 @@ export default async function SignInPage({
     console.error("Failed to fetch settings:", error);
   }
 
-  return <SignIn searchParams={searchParams} settings={settings} />;
+  return <SignIn searchParams={params} settings={settings} />;
 }
