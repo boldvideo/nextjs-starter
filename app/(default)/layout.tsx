@@ -6,6 +6,10 @@ import type { Settings } from "@boldvideo/bold-js";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Header } from "@/components/header";
 import { SettingsProvider } from "@/components/providers/settings-provider";
+import { auth } from "@/auth";
+import { SessionProvider } from "next-auth/react";
+import { isAuthEnabled } from "@/config/auth";
+import SignIn from "@/components/auth/sign-in";
 
 // Extend the Settings type to include additional properties
 interface ExtendedSettings extends Settings {
@@ -160,6 +164,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Get auth session if auth is enabled
+  const session = isAuthEnabled() ? await auth() : null;
   // Initialize with a type assertion that handles all required fields from the base Settings type
   // Settings are fetched here again for theme/layout purposes, separate from metadata generation.
   let settings = {} as ExtendedSettings;
@@ -179,6 +185,9 @@ export default async function RootLayout({
   }
 
   const theme = settings.theme_config;
+
+  // Check if user should see content
+  const showContent = !isAuthEnabled() || session;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -324,16 +333,25 @@ export default async function RootLayout({
         )}
       </head>
       <body className="bg-background flex flex-col h-screen lg:h-auto min-h-screen">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        {showContent ? (
+          <SessionProvider session={session}>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+              <SettingsProvider settings={settings}>
+                <Header
+                  logo={settings.logo_url || "/bold-logo.svg"}
+                  logoDark={settings.logo_dark_url}
+                  menuItems={settings.menu_items || []}
+                  session={session}
+                />
+                <main className="flex-1 min-h-0 flex flex-col">{children}</main>
+              </SettingsProvider>
+            </ThemeProvider>
+          </SessionProvider>
+        ) : (
           <SettingsProvider settings={settings}>
-            <Header
-              logo={settings.logo_url || "/bold-logo.svg"}
-              logoDark={settings.logo_dark_url}
-              menuItems={settings.menu_items || []}
-            />
-            <main className="flex-1 min-h-0 flex flex-col">{children}</main>
+            <SignIn settings={settings} />
           </SettingsProvider>
-        </ThemeProvider>
+        )}
       </body>
     </html>
   );
