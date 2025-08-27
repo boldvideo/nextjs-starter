@@ -4,12 +4,18 @@ import Image from "next/image";
 import { headers } from "next/headers";
 import type { Settings } from "@boldvideo/bold-js";
 
-interface SignInProps {
-  searchParams?: { [key: string]: string | string[] | undefined };
-  settings?: Settings;
+// Extend Settings with logo properties
+interface ExtendedSettings extends Settings {
+  logo_url?: string;
+  logo_dark_url?: string;
 }
 
-export default function SignIn({ searchParams, settings }: SignInProps) {
+interface SignInProps {
+  searchParams?: { [key: string]: string | string[] | undefined };
+  settings?: ExtendedSettings;
+}
+
+export default async function SignIn({ searchParams, settings }: SignInProps) {
   const authConfig = getAuthConfig();
   const hasDual = authConfig.hasDualProviders;
   const primaryProvider = authConfig.provider === "dual" ? "workos" : authConfig.provider;
@@ -26,7 +32,7 @@ export default function SignIn({ searchParams, settings }: SignInProps) {
   } else {
     // Try to get from current URL when used in protected routes
     try {
-      const headersList = headers();
+      const headersList = await headers();
       const fullUrl = headersList.get('referer') || '';
       const url = new URL(fullUrl);
       const params = url.searchParams;

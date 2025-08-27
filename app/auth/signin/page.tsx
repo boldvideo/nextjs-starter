@@ -5,6 +5,12 @@ import { isAuthEnabled } from "@/config/auth";
 import { bold } from "@/client";
 import type { Settings } from "@boldvideo/bold-js";
 
+// Extend Settings with logo properties
+interface ExtendedSettings extends Settings {
+  logo_url?: string;
+  logo_dark_url?: string;
+}
+
 export default async function SignInPage({
   searchParams,
 }: {
@@ -25,10 +31,10 @@ export default async function SignInPage({
   const params = await searchParams;
 
   // Fetch settings for logo
-  let settings = {} as Settings;
+  let settings = {} as ExtendedSettings;
   try {
     const settingsResponse = await bold.settings();
-    settings = settingsResponse.data;
+    settings = settingsResponse.data as ExtendedSettings;
   } catch (error) {
     console.error("Failed to fetch settings:", error);
   }
