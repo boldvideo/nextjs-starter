@@ -159,7 +159,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
               // Create placeholder citations for any [1], [2], etc. found in text
               const citationMatches = accumulatedText.match(/\[\d+\]/g);
               const placeholderCitations = citationMatches ? 
-                [...new Set(citationMatches)].map(match => {
+                Array.from(new Set(citationMatches)).map(match => {
                   const num = parseInt(match.replace(/[\[\]]/g, ''));
                   return {
                     id: `placeholder_${num}`,
@@ -207,7 +207,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
               // Check for new citation references in accumulated text
               const citationMatches = accumulatedText.match(/\[\d+\]/g);
               const placeholderCitations = citationMatches && accumulatedCitations.length === 0 ? 
-                [...new Set(citationMatches)].map(match => {
+                Array.from(new Set(citationMatches)).map(match => {
                   const num = parseInt(match.replace(/[\[\]]/g, ''));
                   return {
                     id: `placeholder_${num}`,
