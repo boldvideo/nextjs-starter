@@ -6,6 +6,7 @@ import type { Settings } from "@boldvideo/bold-js";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Header } from "@/components/header";
 import { SettingsProvider } from "@/components/providers/settings-provider";
+import { getPortalConfig } from "@/lib/portal-config";
 
 // Extend the Settings type to include additional properties
 interface ExtendedSettings extends Settings {
@@ -179,6 +180,10 @@ export default async function RootLayout({
   }
 
   const theme = settings.theme_config;
+  
+  // Get portal configuration to determine if we should show header
+  const config = getPortalConfig(settings);
+  const showHeader = config.homepage.layout !== 'none';
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -326,11 +331,13 @@ export default async function RootLayout({
       <body className="bg-background flex flex-col h-screen lg:h-auto min-h-screen">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <SettingsProvider settings={settings}>
-            <Header
-              logo={settings.logo_url || "/bold-logo.svg"}
-              logoDark={settings.logo_dark_url}
-              menuItems={settings.menu_items || []}
-            />
+            {showHeader && (
+              <Header
+                logo={settings.logo_url || "/bold-logo.svg"}
+                logoDark={settings.logo_dark_url}
+                menuItems={settings.menu_items || []}
+              />
+            )}
             <main className="flex-1 min-h-0 flex flex-col items-center">
               {children}
             </main>
