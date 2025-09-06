@@ -1,15 +1,19 @@
 // Types for the ask API response
 
 export type AskCitation = {
-  label: string;
+  // API v2.0 citation format
+  id: string;  // Unique identifier like "vid1_5000"
+  relevance_score: number;  // 0.0 to 1.0
+  relevance_rank: number;  // 1 = most relevant, 2 = second most, etc.
   video_id: string;
-  playback_id: string;  // API sends this according to docs
-  video_title?: string;
-  start_time: string;
-  end_time: string;
-  speaker: string;
+  playback_id: string;
+  video_title: string;
+  timestamp_start: string;  // "00:05" format
+  timestamp_end: string;    // "07:45" format
   start_ms: number;
   end_ms: number;
+  speaker: string;
+  transcript_excerpt: string;
 };
 
 export type AskAnswer = {

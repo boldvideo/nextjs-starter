@@ -164,8 +164,20 @@ export async function streamAskAction({
                       accumulatedAnswer = data.content;
                     }
                     if (data.citations) {
-                      citations = data.citations;
-                      console.log('[ask-stream] Received citations:', citations);
+                      // Process citations - API v2.0 format
+                      citations = data.citations.map((c: any, idx: number) => ({
+                        ...c,
+                        // Ensure we have all required v2.0 fields
+                        id: c.id || `${c.video_id}_${c.start_ms || 0}`,
+                        relevance_score: c.relevance_score ?? 0.5,
+                        relevance_rank: c.relevance_rank ?? (idx + 1),
+                        timestamp_start: c.timestamp_start || "00:00",
+                        timestamp_end: c.timestamp_end || "",
+                        video_title: c.video_title || "Untitled",
+                        speaker: c.speaker || "Speaker",
+                        transcript_excerpt: c.transcript_excerpt || ""
+                      }));
+                      console.log('[ask-stream] Processed citations:', citations);
                     }
                     // Don't close here, wait for "complete" event
                     break;

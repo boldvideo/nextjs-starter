@@ -28,6 +28,7 @@ interface CitationVideoPlayerProps {
   speaker?: string;
   isExpanded: boolean;
   onToggle: () => void;
+  transcriptExcerpt?: string;
 }
 
 export function CitationVideoPlayer({
@@ -40,6 +41,7 @@ export function CitationVideoPlayer({
   speaker,
   isExpanded,
   onToggle,
+  transcriptExcerpt,
 }: CitationVideoPlayerProps) {
   const playerRef = useRef<any>(null);
   const [hasStarted, setHasStarted] = useState(false);

@@ -5,9 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { SynthesizedResponse, timeStringToSeconds } from "@/lib/ask";
-import { CitationVideoPlayer } from "@/components/citation-video-player";
-import { ChevronDown, ChevronUp, Sparkles, Clock, MessageSquare } from "lucide-react";
+import { SynthesizedResponse, AskCitation } from "@/lib/ask";
+import { CitationModal } from "./citation-modal";
+import { ChevronDown, ChevronUp, PlayCircle, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AnswerCardProps {
@@ -21,47 +21,115 @@ export function AnswerCard({
   aiName = "AI",
   aiAvatar = "/placeholder-avatar.png"
 }: AnswerCardProps) {
-  const [expandedCitations, setExpandedCitations] = useState<Set<string>>(new Set());
+  const [selectedCitation, setSelectedCitation] = useState<AskCitation | null>(null);
   const [showRelatedQuestions, setShowRelatedQuestions] = useState(false);
   const { answer, expanded_queries } = response;
 
-  // Toggle citation expansion
-  const toggleCitationExpansion = useCallback((citationLabel: string) => {
-    setExpandedCitations(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(citationLabel)) {
-        newSet.delete(citationLabel);
-      } else {
-        newSet.add(citationLabel);
+  // Create a map of citation numbers for sparse arrays
+  const citationMap = React.useMemo(() => {
+    if (!answer.citations) return new Map();
+    
+    // The API sends citations in order they appear in text
+    // But the numbers in text might be sparse (e.g., [1], [7], [6])
+    // We need to map based on order of appearance
+    const map = new Map<number, AskCitation>();
+    
+    // Find all citation numbers in the text in order of appearance
+    const citationMatches = [...answer.text.matchAll(/\[(\d+)\]/g)];
+    const uniqueNumbers = [...new Set(citationMatches.map(m => parseInt(m[1])))];
+    
+    console.log('[AnswerCard] Citation numbers in text:', uniqueNumbers);
+    console.log('[AnswerCard] Citations from API:', answer.citations.length);
+    
+    // Map each unique citation number to its corresponding citation
+    // Assuming citations are provided in the same order they appear
+    uniqueNumbers.forEach((num, index) => {
+      if (index < answer.citations.length) {
+        map.set(num, answer.citations[index]);
+        console.log(`[AnswerCard] Mapping [${num}] to citation:`, answer.citations[index].video_title);
       }
-      return newSet;
     });
-  }, []);
+    
+    return map;
+  }, [answer.text, answer.citations]);
 
-  // Render citation links in markdown
-  const renderCitation = useCallback((text: string) => {
-    const citationMatch = text.match(/^\[([S]\d+)\]$/);
-    if (citationMatch) {
-      const citationLabel = citationMatch[1];
-      return (
-        <button
-          onClick={() => {
-            toggleCitationExpansion(citationLabel);
-            setTimeout(() => {
-              const element = document.getElementById(`citation-${citationLabel}`);
-              if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }
-            }, 100);
-          }}
-          className="text-primary hover:text-primary/80 font-medium transition-colors text-xs align-super"
-        >
-          [{citationLabel}]
-        </button>
+  // Pre-process the markdown text to replace citations with placeholders
+  const preprocessedText = React.useMemo(() => {
+    if (!answer.text || !answer.citations) return answer.text;
+    
+    let processedText = answer.text;
+    
+    // Replace each citation number with a placeholder
+    citationMap.forEach((citation, num) => {
+      const pattern = new RegExp(`\\[${num}\\]`, 'g');
+      processedText = processedText.replace(
+        pattern,
+        `@@CITATION_${num}_${citation.id}@@`
       );
+    });
+    
+    return processedText;
+  }, [answer.text, answer.citations, citationMap]);
+  
+  // Custom component to render citation placeholders
+  const renderTextWithCitations = useCallback((text: string) => {
+    if (!text || typeof text !== 'string') return text;
+    
+    // Pattern to match our citation placeholders
+    const pattern = /@@CITATION_(\d+)_([^@]+)@@/g;
+    const parts: (string | React.ReactNode)[] = [];
+    let lastIndex = 0;
+    let match;
+    
+    while ((match = pattern.exec(text)) !== null) {
+      // Add text before citation
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      
+      const citationNum = parseInt(match[1]);
+      const citationId = match[2];
+      // Find citation by ID (more reliable than index)
+      const citation = answer.citations?.find(c => c.id === citationId);
+      
+      if (citation) {
+        // Format timestamp for display
+        const formatTimestamp = (start: string, end: string) => {
+          if (start === "00:00" || !start) return "";
+          return end && end !== start ? `${start}-${end}` : start;
+        };
+        
+        const timestamp = formatTimestamp(citation.timestamp_start, citation.timestamp_end);
+        
+        parts.push(
+          <button
+            key={`cite-${citationId}-${match.index}`}
+            onClick={() => setSelectedCitation(citation)}
+            className="inline-flex items-center gap-1 text-primary hover:text-primary/80 transition-colors mx-1"
+            title={`Click to watch video segment`}
+          >
+            <PlayCircle className="w-3.5 h-3.5" />
+            <span className="underline decoration-dotted underline-offset-2">
+              {citation.video_title}
+              {timestamp && <span className="text-muted-foreground ml-1">({timestamp})</span>}
+            </span>
+          </button>
+        );
+      } else {
+        // Citation not found, show original number
+        parts.push(`[${citationNum}]`);
+      }
+      
+      lastIndex = match.index + match[0].length;
     }
-    return text;
-  }, [toggleCitationExpansion]);
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+    
+    return parts.length > 1 ? <>{parts}</> : text;
+  }, [answer.citations]);
 
   return (
     <div className="flex gap-3 w-full">
@@ -92,26 +160,40 @@ export function AnswerCard({
               remarkPlugins={[remarkGfm]}
               components={{
                 p: ({ children, ...props }) => {
-                  const processedChildren = Array.isArray(children) 
-                    ? children.map((child, idx) => {
-                        if (typeof child === 'string' && child) {
-                          const parts = child.split(/(\[[S]\d+\])/g);
-                          return (
-                            <React.Fragment key={idx}>
-                              {parts.map((part, partIdx) => {
-                                if (part.match(/^\[[S]\d+\]$/)) {
-                                  return <span key={`${idx}-${partIdx}`}>{renderCitation(part)}</span>;
-                                }
-                                return <span key={`${idx}-${partIdx}`}>{part}</span>;
-                              })}
-                            </React.Fragment>
-                          );
-                        }
-                        return <React.Fragment key={idx}>{child}</React.Fragment>;
-                      })
-                    : children;
-                  
+                  const processedChildren = React.Children.map(children, (child, idx) => {
+                    if (typeof child === 'string') {
+                      return renderTextWithCitations(child);
+                    }
+                    return child;
+                  });
                   return <p {...props}>{processedChildren}</p>;
+                },
+                li: ({ children, ...props }) => {
+                  const processedChildren = React.Children.map(children, (child) => {
+                    if (typeof child === 'string') {
+                      return renderTextWithCitations(child);
+                    }
+                    return child;
+                  });
+                  return <li {...props}>{processedChildren}</li>;
+                },
+                strong: ({ children, ...props }) => {
+                  const processedChildren = React.Children.map(children, (child) => {
+                    if (typeof child === 'string') {
+                      return renderTextWithCitations(child);
+                    }
+                    return child;
+                  });
+                  return <strong {...props}>{processedChildren}</strong>;
+                },
+                em: ({ children, ...props }) => {
+                  const processedChildren = React.Children.map(children, (child) => {
+                    if (typeof child === 'string') {
+                      return renderTextWithCitations(child);
+                    }
+                    return child;
+                  });
+                  return <em {...props}>{processedChildren}</em>;
                 },
                 a: ({ ...props }) => (
                   <a
@@ -130,59 +212,16 @@ export function AnswerCard({
               }}
             >
               {(() => {
-                // Remove the "Sources:" section if it exists in the answer text
-                const text = answer.text;
-                const sourcesIndex = text.lastIndexOf('\n\nSources:');
+                // Remove the "Sources:" section if it exists
+                const sourcesIndex = preprocessedText.lastIndexOf('\n\nSources:');
                 if (sourcesIndex !== -1) {
-                  return text.substring(0, sourcesIndex).trim();
+                  return preprocessedText.substring(0, sourcesIndex).trim();
                 }
-                return text;
+                return preprocessedText;
               })()}
             </ReactMarkdown>
 
           </div>
-
-          {/* Citations - Only show if there are citations */}
-          {answer.citations && answer.citations.length > 0 ? (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 ml-3">
-                <Clock className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Sources ({answer.citations.length})
-                </span>
-              </div>
-              
-              <div className="space-y-2">
-                {answer.citations.map((citation, index) => {
-                  console.log('[AnswerCard] Citation:', citation);
-                  console.log('[AnswerCard] playback_id:', citation.playback_id);
-                  console.log('[AnswerCard] start_time:', citation.start_time, '→ seconds:', timeStringToSeconds(citation.start_time));
-                  console.log('[AnswerCard] end_time:', citation.end_time, '→ seconds:', citation.end_time ? timeStringToSeconds(citation.end_time) : undefined);
-                  
-                  const isExpanded = expandedCitations.has(citation.label);
-                  return (
-                    <div
-                      key={`${citation.label}-${citation.video_id}-${index}`}
-                      id={`citation-${citation.label}`}
-                      className="rounded-lg overflow-hidden transition-all"
-                    >
-                      <CitationVideoPlayer
-                        videoId={citation.video_id}
-                        playbackId={citation.playback_id}
-                        videoTitle={citation.video_title}
-                        startTime={timeStringToSeconds(citation.start_time)}
-                        endTime={citation.end_time ? timeStringToSeconds(citation.end_time) : undefined}
-                        label={citation.label}
-                        speaker={citation.speaker}
-                        isExpanded={isExpanded}
-                        onToggle={() => toggleCitationExpansion(citation.label)}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
 
           {/* Related Questions */}
           {expanded_queries && expanded_queries.length > 0 && (
@@ -226,6 +265,13 @@ export function AnswerCard({
           )}
         </div>
       </div>
+      
+      {/* Citation Modal */}
+      <CitationModal
+        citation={selectedCitation}
+        isOpen={!!selectedCitation}
+        onClose={() => setSelectedCitation(null)}
+      />
     </div>
   );
 }

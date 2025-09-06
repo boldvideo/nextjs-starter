@@ -156,6 +156,27 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             accumulatedText += message.content;
             if (!hasStartedStreaming) {
               // Start with answer type to show citations progressively
+              // Create placeholder citations for any [1], [2], etc. found in text
+              const citationMatches = accumulatedText.match(/\[\d+\]/g);
+              const placeholderCitations = citationMatches ? 
+                [...new Set(citationMatches)].map(match => {
+                  const num = parseInt(match.replace(/[\[\]]/g, ''));
+                  return {
+                    id: `placeholder_${num}`,
+                    relevance_score: 0.5,
+                    relevance_rank: num,
+                    video_id: `pending_${num}`,
+                    playback_id: "",
+                    video_title: "Loading...",
+                    timestamp_start: "00:00",
+                    timestamp_end: "00:00",
+                    start_ms: 0,
+                    end_ms: 0,
+                    speaker: "Loading...",
+                    transcript_excerpt: "Citation details loading..."
+                  };
+                }) : [];
+              
               addAssistantMessage(
                 message.content, 
                 "answer",
@@ -168,12 +189,12 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                     conversation_id: conversationId || "",
                     answer: {
                       text: accumulatedText,
-                      citations: accumulatedCitations,
+                      citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
                       confidence: "medium",
                       model_used: "unknown"
                     },
                     retrieval: {
-                      total: accumulatedCitations.length,
+                      total: accumulatedCitations.length || placeholderCitations.length,
                       chunks: []
                     },
                     processing_time_ms: 0
@@ -183,6 +204,27 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
               hasStartedStreaming = true;
             } else {
               // Update with accumulated data
+              // Check for new citation references in accumulated text
+              const citationMatches = accumulatedText.match(/\[\d+\]/g);
+              const placeholderCitations = citationMatches && accumulatedCitations.length === 0 ? 
+                [...new Set(citationMatches)].map(match => {
+                  const num = parseInt(match.replace(/[\[\]]/g, ''));
+                  return {
+                    id: `placeholder_${num}`,
+                    relevance_score: 0.5,
+                    relevance_rank: num,
+                    video_id: `pending_${num}`,
+                    playback_id: "",
+                    video_title: "Loading...",
+                    timestamp_start: "00:00",
+                    timestamp_end: "00:00",
+                    start_ms: 0,
+                    end_ms: 0,
+                    speaker: "Loading...",
+                    transcript_excerpt: "Citation details loading..."
+                  };
+                }) : [];
+              
               addAssistantMessage(
                 message.content, 
                 "answer",
@@ -195,12 +237,12 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                     conversation_id: conversationId || "",
                     answer: {
                       text: accumulatedText,
-                      citations: accumulatedCitations,
+                      citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
                       confidence: "medium",
                       model_used: "unknown"
                     },
                     retrieval: {
-                      total: accumulatedCitations.length,
+                      total: accumulatedCitations.length || placeholderCitations.length,
                       chunks: []
                     },
                     processing_time_ms: 0
@@ -242,13 +284,27 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             // Clear clarification waiting state
             setIsWaitingForClarification(false);
             
+            // Process citations to ensure proper format
+            const processedCitations = (message.content.answer.citations || accumulatedCitations).map((c: any, idx: number) => ({
+              ...c,
+              // Ensure all v2.0 fields are present
+              id: c.id || `${c.video_id}_${c.start_ms || 0}`,
+              relevance_score: c.relevance_score ?? 0.5,
+              relevance_rank: c.relevance_rank ?? (idx + 1),
+              timestamp_start: c.timestamp_start || "00:00",
+              timestamp_end: c.timestamp_end || "",
+              video_title: c.video_title || "Untitled",
+              speaker: c.speaker || "Speaker",
+              transcript_excerpt: c.transcript_excerpt || ""
+            }));
+            
             // Final update with complete data
             const finalResponse = {
               ...message.content,
               answer: {
                 ...message.content.answer,
                 text: accumulatedText || message.content.answer.text,
-                citations: message.content.answer.citations || accumulatedCitations
+                citations: processedCitations
               },
               expanded_queries: message.content.expanded_queries || expandedQueries
             };
