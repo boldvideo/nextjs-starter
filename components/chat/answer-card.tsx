@@ -35,8 +35,8 @@ export function AnswerCard({
     const map = new Map<number, AskCitation>();
     
     // Find all citation numbers in the text in order of appearance
-    const citationMatches = [...answer.text.matchAll(/\[(\d+)\]/g)];
-    const uniqueNumbers = [...new Set(citationMatches.map(m => parseInt(m[1])))];
+    const citationMatches = Array.from(answer.text.matchAll(/\[(\d+)\]/g));
+    const uniqueNumbers = Array.from(new Set(citationMatches.map(m => parseInt(m[1]))));
     
     console.log('[AnswerCard] Citation numbers in text:', uniqueNumbers);
     console.log('[AnswerCard] Citations from API:', answer.citations.length);
