@@ -70,7 +70,7 @@ export function CitationVideoPlayer({
     } else if (!isExpanded) {
       setHasStarted(false);
     }
-  }, [isExpanded, startTime, hasStarted]);
+  }, [isExpanded, startTime, hasStarted, playbackId, videoTitle, label]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

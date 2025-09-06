@@ -276,24 +276,26 @@ export function AskResult({ query }: AskResultProps) {
         {answer.citations && answer.citations.length > 0 && (
           <div className="space-y-3 pt-4 border-t border-border">
             <h4 className="text-sm font-medium text-muted-foreground">Sources</h4>
-            {answer.citations.map((citation) => {
-              const isExpanded = expandedCitations.has(citation.label);
+            {answer.citations.map((citation, index) => {
+              const citationId = citation.id;
+              const displayLabel = `${index + 1}`;
+              const isExpanded = expandedCitations.has(citationId);
               return (
                 <div
-                  key={citation.label}
-                  id={`citation-${citation.label}`}
+                  key={citationId}
+                  id={`citation-${citationId}`}
                   className="rounded-lg overflow-hidden"
                 >
                   <CitationVideoPlayer
                     videoId={citation.video_id}
                     playbackId={citation.playback_id || ""}
                     videoTitle={citation.video_title}
-                    startTime={timeStringToSeconds(citation.start_time)}
-                    endTime={citation.end_time ? timeStringToSeconds(citation.end_time) : undefined}
-                    label={citation.label}
+                    startTime={timeStringToSeconds(citation.timestamp_start)}
+                    endTime={citation.timestamp_end ? timeStringToSeconds(citation.timestamp_end) : undefined}
+                    label={displayLabel}
                     speaker={citation.speaker}
                     isExpanded={isExpanded}
-                    onToggle={() => toggleCitationExpansion(citation.label)}
+                    onToggle={() => toggleCitationExpansion(citationId)}
                   />
                 </div>
               );
