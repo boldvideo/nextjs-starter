@@ -44,7 +44,7 @@ interface ExtendedVideo extends Video {
   ai_avatar?: string;
   ai_name?: string;
   cta?: CTA | null;
-  uuid?: string; // UUID for accounts that migrated from hashid
+  internal_id?: string; // UUID for videos
 }
 
 /**
@@ -261,7 +261,7 @@ export function VideoDetail({
           {activeTab === "assistant" && showAIAssistant && (
             <div className="flex flex-col flex-1 min-h-0 bg-background">
               <AIAssistant
-                videoId={video.uuid!}
+                videoId={video.internal_id!}
                 name={settings.ai_name || "AI Assistant"}
                 avatar={settings.ai_avatar || "/placeholder-avatar.png"}
                 greeting={settings.ai_greeting}
@@ -344,7 +344,7 @@ export function VideoDetail({
             <div className="lg:w-1/3 flex-shrink-0">
               {/* Render AIAssistant here for desktop, it will use the shared context */}
               <AIAssistant
-                videoId={video.uuid!}
+                videoId={video.internal_id!}
                 name={settings.ai_name || "AI Assistant"}
                 avatar={settings.ai_avatar || "/default-avatar.png"}
                 greeting={settings.ai_greeting}

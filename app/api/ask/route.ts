@@ -25,10 +25,11 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     if (!validateBody(body)) {
+      console.error("[API /ask] Invalid body:", JSON.stringify(body));
       return new Response(
         JSON.stringify({
           type: "error",
-          content: "Invalid request format",
+          content: `Invalid request format. Missing or invalid: ${!body.question ? 'question ' : ''}${!body.videoId ? 'videoId ' : ''}${!body.subdomain && body.subdomain !== '' ? 'subdomain' : ''}`,
         }),
         {
           status: 400,
