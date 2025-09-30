@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     return new ImageResponse(
       (
         <div tw="relative flex bg-black w-full h-full ">
-          {hasImage ? <img src={searchParams.get('img') as string} tw="w-full" /> : null}
+          {hasImage ? <img src={searchParams.get('img') as string} tw="w-full" alt="Video thumbnail" /> : null}
           <div tw="absolute inset-x-10 px-5 py-5 border-8 border-black bottom-10 flex flex-col bg-white">
             <h1 tw="text-5xl font-bold">{searchParams.get('t')?.slice(0, 100)}</h1>
           </div>

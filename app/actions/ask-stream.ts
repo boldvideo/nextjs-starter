@@ -2,10 +2,12 @@
 
 import { 
   AskResponse,
+  AskCitation,
   ClarificationResponse,
   SynthesizedResponse,
   ErrorResponse 
 } from "@/lib/ask";
+import { processCitations } from "@/lib/citation-helpers";
 
 export type StreamMessage = 
   | { type: "chunk"; content: string }
@@ -52,12 +54,7 @@ export async function streamAskAction({
           ? `${baseUrl}${apiPath}/ask/${conversationId}`
           : `${baseUrl}${apiPath}/ask`;
 
-        console.log('[ask-stream] Request details:', {
-          endpoint,
-          conversationId,
-          isNewConversation: !conversationId,
-          query
-        });
+        // Prepare request to BOLD API
 
         // Build request body using the new API format
         const requestBody = {
@@ -118,7 +115,7 @@ export async function streamAskAction({
         const decoder = new TextDecoder();
         let buffer = "";
         let accumulatedAnswer = "";
-        let citations: any[] = [];
+        let citations: AskCitation[] = [];
         let expandedQueries: string[] = [];
         let currentConversationId = conversationId;
 
@@ -145,7 +142,7 @@ export async function streamAskAction({
                     // Store conversation ID from initial message
                     if (data.id) {
                       currentConversationId = data.id;
-                      console.log('[ask-stream] Conversation created with ID:', data.id);
+                      // Conversation created with ID
                     }
                     break;
                     
@@ -165,19 +162,8 @@ export async function streamAskAction({
                     }
                     if (data.citations) {
                       // Process citations - API v2.0 format
-                      citations = data.citations.map((c: any, idx: number) => ({
-                        ...c,
-                        // Ensure we have all required v2.0 fields
-                        id: c.id || `${c.video_id}_${c.start_ms || 0}`,
-                        relevance_score: c.relevance_score ?? 0.5,
-                        relevance_rank: c.relevance_rank ?? (idx + 1),
-                        timestamp_start: c.timestamp_start || "00:00",
-                        timestamp_end: c.timestamp_end || "",
-                        video_title: c.video_title || "Untitled",
-                        speaker: c.speaker || "Speaker",
-                        transcript_excerpt: c.transcript_excerpt || ""
-                      }));
-                      console.log('[ask-stream] Processed citations:', citations);
+                      citations = processCitations(data.citations);
+                      // Citations processed
                     }
                     // Don't close here, wait for "complete" event
                     break;
@@ -231,10 +217,10 @@ export async function streamAskAction({
                     return;
                     
                   default:
-                    console.log("Unknown stream event type:", data.type);
+                    // Unknown stream event type
                 }
               } catch (e) {
-                console.error("Failed to parse SSE data:", dataStr, e);
+                // Failed to parse SSE data
               }
             }
           }
@@ -266,7 +252,7 @@ export async function streamAskAction({
         }
         controller.close();
       } catch (error) {
-        console.error("Stream error:", error);
+        // Stream error occurred
         controller.enqueue({ 
           type: "error", 
           content: error instanceof Error ? error.message : "Failed to stream response" 

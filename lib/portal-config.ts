@@ -86,26 +86,34 @@ export interface PortalConfig {
  * Normalizes settings to handle both old and new API structures
  * Provides backward compatibility for existing deployments
  */
-export function normalizeSettings(settings: any): PortalSettings {
+export function normalizeSettings(settings: Settings | PortalSettings | null): PortalSettings {
   if (!settings) return {} as PortalSettings;
+  
+  // Type guard to check if it's a PortalSettings with account property
+  const portalSettings = settings as PortalSettings;
   
   // If new account.ai structure exists, use it
   // Otherwise, create it from legacy fields
-  if (!settings.account?.ai && (settings.has_ai || settings.ai_name)) {
-    settings.account = {
-      ...settings.account,
-      ai: {
-        enabled: settings.has_ai ?? false,
-        name: settings.ai_name || 'AI Assistant',
-        avatar_url: settings.ai_avatar || '/placeholder-avatar.png',
-        greeting: settings.ai_greeting || 'Hello! How can I help you today?'
-      }
+  const legacySettings = settings as Settings;
+  if (!portalSettings.account?.ai && (legacySettings.has_ai || legacySettings.ai_name)) {
+    // Ensure account exists with required fields
+    if (!portalSettings.account) {
+      portalSettings.account = {
+        name: 'BOLD Portal',
+        slug: 'portal'
+      };
+    }
+    portalSettings.account.ai = {
+      enabled: legacySettings.has_ai ?? false,
+      name: legacySettings.ai_name || 'AI Assistant',
+      avatar_url: legacySettings.ai_avatar || '/placeholder-avatar.png',
+      greeting: 'Hello! How can I help you today?' // Default greeting - Settings type doesn't have this field
     };
   }
   
   // Ensure portal configuration exists with defaults
-  if (!settings.portal) {
-    settings.portal = {
+  if (!portalSettings.portal) {
+    portalSettings.portal = {
       layout: {
         type: 'library',
         videos_limit: 12,
@@ -122,7 +130,7 @@ export function normalizeSettings(settings: any): PortalSettings {
     };
   }
   
-  return settings as PortalSettings;
+  return portalSettings;
 }
 
 /**

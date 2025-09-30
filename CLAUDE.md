@@ -111,3 +111,110 @@ The search functionality consists of two main components that work together to p
 - `BACKEND_URL`: BOLD API endpoint (defaults to `https://api.boldvideo.io`)
 - `NEXT_PUBLIC_BOLD_API_KEY`: API key for authentication
 
+## Portal Configuration System
+
+The portal now supports configurable layouts driven by the settings API payload. This allows each customer to have a different homepage experience without code changes.
+
+### Settings API Structure
+
+The settings endpoint returns a payload with the following key structures:
+
+```typescript
+{
+  account: {
+    ai: {
+      enabled: boolean,
+      name: string,
+      avatar_url: string,  // May be relative path like "uploads/..."
+      greeting: string
+    },
+    name: string,
+    slug: string
+  },
+  portal: {
+    layout: {
+      type: 'none' | 'library' | 'assistant',
+      videos_limit: number,
+      show_playlists: boolean,
+      assistant_config: {
+        headline?: string,
+        subheadline?: string,
+        suggestions?: string[]
+      }
+    },
+    navigation: {
+      show_search: boolean,
+      show_ai_search: boolean
+    }
+  },
+  // Legacy fields for backward compatibility
+  has_ai: boolean,
+  ai_name: string,
+  ai_avatar: string,
+  ai_greeting: string
+}
+```
+
+### Homepage Layouts
+
+The homepage (`app/(default)/page.tsx`) dynamically renders based on `portal.layout.type`:
+
+1. **`library`** (default) - Shows latest videos and featured playlists
+   - Components: `components/home/library-homepage.tsx`
+   - Fetches videos based on `portal.layout.videos_limit`
+   - Shows playlists if `portal.layout.show_playlists` is true
+
+2. **`assistant`** - AI chat interface (like FounderWell demo)
+   - Component: `components/home/assistant-homepage.tsx`
+   - Shows AI avatar, name, and greeting from settings
+   - Centered layout with chat input
+   - Redirects to `/chat` route when a question is submitted
+   - Uses suggestions from `portal.layout.assistant_config.suggestions`
+
+3. **`none`** - Minimal page for deep-link only access
+   - Component: `components/home/empty-homepage.tsx`
+   - Shows only the account name
+   - Header/navigation is hidden for this layout
+
+### Chat System
+
+- **`/chat` route** - Universal chat page for ongoing conversations
+  - Component: `app/(default)/chat/page.tsx`
+  - Accepts initial query via `?q=` parameter
+  - Uses streaming AI responses with clarification loop support
+  - Input stays at bottom during conversation
+
+- **Chat Input Component** - Reusable input field
+  - Component: `components/chat/chat-input.tsx`
+  - Used in both assistant homepage and chat route
+  - Supports suggestions, streaming state, auto-focus
+
+### Portal Configuration Helper
+
+The `lib/portal-config.ts` file provides:
+- `normalizeSettings()` - Handles backward compatibility with legacy fields
+- `getPortalConfig()` - Returns normalized configuration with smart defaults
+- `ensureAbsoluteUrl()` - Converts relative avatar URLs to absolute URLs
+
+### Smart Behavior Rules
+
+1. **Header Visibility**: Hidden when `portal.layout.type` is `none`
+2. **AI Toggle in Search**: Only shows when AI is enabled AND not on assistant homepage
+3. **Avatar URLs**: Automatically prefixed with `https://uploads.eu1.boldvideo.io/` if relative
+4. **Backward Compatibility**: Falls back to legacy fields (`has_ai`, `ai_name`, etc.) if new structure not present
+
+### Development Override
+
+For local development, you can override the homepage layout:
+```bash
+PORTAL_LAYOUT_OVERRIDE=assistant pn run dev
+```
+
+### Implementation Notes
+
+- Settings are fetched once in the root layout and passed via context
+- Homepage layout is determined server-side for optimal performance
+- Videos are only fetched when needed (library layout)
+- All layouts are responsive and accessible
+- The system is designed to be extended with more layout types in the future
+

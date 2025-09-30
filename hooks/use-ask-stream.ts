@@ -6,9 +6,11 @@ import { streamAskAction, StreamMessage } from "@/app/actions/ask-stream";
 import { 
   ClarificationResponse, 
   SynthesizedResponse,
+  AskCitation,
   isClarificationResponse,
   isSynthesizedResponse 
 } from "@/lib/ask";
+import { createPlaceholderCitations, processCitations } from "@/lib/citation-helpers";
 
 export interface ChatMessage {
   id: string;
@@ -102,12 +104,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
     query: string, 
     useConversationId: boolean = true
   ) => {
-    console.log('[useAskStream] streamQuestion called:', {
-      query,
-      useConversationId,
-      currentConversationId: conversationId,
-      willSendConversationId: useConversationId ? conversationId : undefined
-    });
+    // Stream handling begins
 
     // Abort any existing stream
     if (abortControllerRef.current) {
@@ -138,7 +135,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       const reader = stream.getReader();
       let hasStartedStreaming = false;
       let accumulatedText = "";
-      let accumulatedCitations: any[] = [];
+      let accumulatedCitations: AskCitation[] = [];
       let expandedQueries: string[] = [];
       
       while (true) {
@@ -157,25 +154,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             if (!hasStartedStreaming) {
               // Start with answer type to show citations progressively
               // Create placeholder citations for any [1], [2], etc. found in text
-              const citationMatches = accumulatedText.match(/\[\d+\]/g);
-              const placeholderCitations = citationMatches ? 
-                Array.from(new Set(citationMatches)).map(match => {
-                  const num = parseInt(match.replace(/[\[\]]/g, ''));
-                  return {
-                    id: `placeholder_${num}`,
-                    relevance_score: 0.5,
-                    relevance_rank: num,
-                    video_id: `pending_${num}`,
-                    playback_id: "",
-                    video_title: "Loading...",
-                    timestamp_start: "00:00",
-                    timestamp_end: "00:00",
-                    start_ms: 0,
-                    end_ms: 0,
-                    speaker: "Loading...",
-                    transcript_excerpt: "Citation details loading..."
-                  };
-                }) : [];
+              const placeholderCitations = createPlaceholderCitations(accumulatedText);
               
               addAssistantMessage(
                 message.content, 
@@ -205,25 +184,8 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             } else {
               // Update with accumulated data
               // Check for new citation references in accumulated text
-              const citationMatches = accumulatedText.match(/\[\d+\]/g);
-              const placeholderCitations = citationMatches && accumulatedCitations.length === 0 ? 
-                Array.from(new Set(citationMatches)).map(match => {
-                  const num = parseInt(match.replace(/[\[\]]/g, ''));
-                  return {
-                    id: `placeholder_${num}`,
-                    relevance_score: 0.5,
-                    relevance_rank: num,
-                    video_id: `pending_${num}`,
-                    playback_id: "",
-                    video_title: "Loading...",
-                    timestamp_start: "00:00",
-                    timestamp_end: "00:00",
-                    start_ms: 0,
-                    end_ms: 0,
-                    speaker: "Loading...",
-                    transcript_excerpt: "Citation details loading..."
-                  };
-                }) : [];
+              const placeholderCitations = accumulatedCitations.length === 0 ? 
+                createPlaceholderCitations(accumulatedText) : [];
               
               addAssistantMessage(
                 message.content, 
@@ -255,7 +217,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
           case "clarification":
             // Update conversation ID
             if (message.content.conversation_id) {
-              console.log('[useAskStream] Setting conversation ID from clarification:', message.content.conversation_id);
+              // Setting conversation ID from clarification
               setConversationId(message.content.conversation_id);
             }
             
@@ -275,28 +237,17 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
           case "complete":
             // Update conversation ID
             if (message.content.conversation_id) {
-              console.log('[useAskStream] Setting conversation ID from complete:', message.content.conversation_id);
+              // Setting conversation ID from complete
               setConversationId(message.content.conversation_id);
-            } else {
-              console.log('[useAskStream] No conversation ID in complete message');
             }
             
             // Clear clarification waiting state
             setIsWaitingForClarification(false);
             
             // Process citations to ensure proper format
-            const processedCitations = (message.content.answer.citations || accumulatedCitations).map((c: any, idx: number) => ({
-              ...c,
-              // Ensure all v2.0 fields are present
-              id: c.id || `${c.video_id}_${c.start_ms || 0}`,
-              relevance_score: c.relevance_score ?? 0.5,
-              relevance_rank: c.relevance_rank ?? (idx + 1),
-              timestamp_start: c.timestamp_start || "00:00",
-              timestamp_end: c.timestamp_end || "",
-              video_title: c.video_title || "Untitled",
-              speaker: c.speaker || "Speaker",
-              transcript_excerpt: c.transcript_excerpt || ""
-            }));
+            const processedCitations = processCitations(
+              message.content.answer.citations || accumulatedCitations
+            );
             
             // Final update with complete data
             const finalResponse = {
@@ -330,7 +281,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       
       reader.releaseLock();
     } catch (error) {
-      console.error("Stream error:", error);
+      // Handle stream error
       const errorMessage = error instanceof Error ? error.message : "Failed to stream response";
       
       addAssistantMessage(

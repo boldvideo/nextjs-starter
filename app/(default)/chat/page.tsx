@@ -15,7 +15,7 @@ export default function ChatPage() {
   const searchParams = useSearchParams();
   
   // Get AI settings from provider
-  const settings = useSettings() as any;
+  const settings = useSettings();
   const config = getPortalConfig(settings);
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
@@ -36,7 +36,7 @@ export default function ChatPage() {
       setQuery("");
     },
     onError: (error) => {
-      console.error("Stream error:", error);
+      // Error is handled internally by the hook
     }
   });
 
@@ -58,23 +58,14 @@ export default function ChatPage() {
       
       if (!trimmedQuery || isStreaming) return;
       
-      console.log('[ChatPage] Form submitted:', {
-        query: trimmedQuery,
-        isWaitingForClarification,
-        conversationId,
-        messageCount: messages.length
-      });
-      
       // Clear input immediately for better UX
       setQuery("");
       
       // If we're waiting for clarification, submit it as a clarification answer
       if (isWaitingForClarification) {
-        console.log('[ChatPage] Submitting as clarification');
         submitClarification(trimmedQuery);
       } else {
         // Otherwise, stream as a new question
-        console.log('[ChatPage] Streaming as new question');
         await streamQuestion(trimmedQuery);
       }
     },
