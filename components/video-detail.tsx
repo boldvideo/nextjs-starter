@@ -47,10 +47,11 @@ interface ExtendedVideo extends Video {
 }
 
 /**
- * Extended Settings to include ai_greeting
+ * Extended Settings to include ai_greeting and slug
  */
 interface ExtendedSettings extends Settings {
   ai_greeting?: string;
+  slug?: string;
 }
 
 /**
@@ -159,6 +160,7 @@ export function VideoDetail({
                 startTime={startTime}
                 className={className}
                 isOutOfView={isOutOfView}
+                envKey={settings.slug}
               />
             </div>
 

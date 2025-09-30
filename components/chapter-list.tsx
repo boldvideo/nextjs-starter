@@ -57,61 +57,61 @@ export function ChapterList({
 }: ChapterListProps): React.JSX.Element | null {
   const chapters = parseChapters(chaptersWebVTT);
 
+  console.log("ChapterList - chaptersWebVTT:", chaptersWebVTT);
+  console.log("ChapterList - parsed chapters:", chapters);
+
   if (!chapters || chapters.length === 0) {
     return null; // Don't render anything if no chapters
   }
 
   return (
-    <div className="relative bg-sidebar flex flex-col col-span-3">
-      <div className="lg:absolute top-0 left-0 w-full h-full flex flex-col">
-        <h3 className="p-3 font-bold text-lg">Chapters</h3>
-        <ol>
-          {chapters.map((chapter, idx) => (
+    <div className="bg-sidebar flex flex-col col-span-3 h-full overflow-hidden">
+      <h3 className="p-3 font-bold text-base border-b border-border">Chapters</h3>
+      <ol className="overflow-y-auto">
+        {chapters.map((chapter, idx) => (
             <li
-              key={chapter.startTimeSeconds} // Use seconds for a more unique key
+              key={chapter.startTimeSeconds}
               onClick={() => onChapterClick(chapter.startTimeSeconds)}
-              className="group cursor-pointer flex space-x-3 p-3 font-semibold hover:bg-primary hover:text-primary-foreground"
+              className="group cursor-pointer p-2.5 hover:bg-accent transition-colors border-b border-border last:border-b-0"
               role="button"
-              tabIndex={0} // Make it focusable
+              tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   onChapterClick(chapter.startTimeSeconds);
                 }
               }}
             >
-              <div className="flex items-start">
-                <div className="w-6 leading-5 pt-px text-xs font-normal tracking-tight">
-                  {idx + 1}
-                </div>
-              </div>
-              <div className="relative w-20 h-12 aspect-video flex-shrink-0 overflow-hidden border border-ring group-hover:border-primary">
-                <Image
-                  // Consider adding a placeholder/fallback image
-                  src={`https://image.mux.com/${playbackId}/thumbnail.png?width=200&height=100&fit_mode=smartcrop&time=${chapter.startTimeSeconds}`}
-                  alt={`Thumbnail for chapter: ${chapter.title}`}
-                  fill={true}
-                  sizes="80px" // Provide sizes attribute for optimization
-                  style={{ objectFit: "cover" }}
-                  className=""
-                  // Optional: Add error handling for images
-                  onError={(e) => {
-                    // Handle image loading errors, e.g., show a default thumbnail
-                    (e.target as HTMLImageElement).style.display = "none"; // Hide broken image
-                  }}
-                />
-              </div>
-              <div className="flex flex-col">
-                <div className="w-full leading-tight">{chapter.title}</div>
-                <div>
-                  <span className="text-muted-foreground group-hover:text-primary-foreground text-xs">
+              <div className="flex gap-2.5">
+                <div className="relative w-24 h-14 flex-shrink-0 overflow-hidden rounded">
+                  <Image
+                    src={`https://image.mux.com/${playbackId}/thumbnail.png?width=200&height=112&fit_mode=smartcrop&time=${chapter.startTimeSeconds}`}
+                    alt={`Thumbnail for chapter: ${chapter.title}`}
+                    fill={true}
+                    sizes="96px"
+                    style={{ objectFit: "cover" }}
+                    className="group-hover:brightness-110 transition-all duration-200"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                  {/* Chapter number badge */}
+                  <div className="absolute top-1 left-1 bg-black/80 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded">
+                    {idx + 1}
+                  </div>
+                  {/* Timestamp badge */}
+                  <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
                     {chapter.startTime}
-                  </span>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                    {chapter.title}
+                  </div>
                 </div>
               </div>
             </li>
           ))}
         </ol>
-      </div>
     </div>
   );
 }

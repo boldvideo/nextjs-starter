@@ -80,6 +80,8 @@ interface MuxPlayerComponentProps {
   className?: string;
   /** Whether the player is out of view and should be shown as a floating player */
   isOutOfView?: boolean;
+  /** Environment key for analytics tracking (slug or UUID) */
+  envKey?: string;
 }
 
 /**
@@ -94,6 +96,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
     startTime,
     className = "",
     isOutOfView = false,
+    envKey,
   }: MuxPlayerComponentProps,
   ref
 ) {
@@ -313,6 +316,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
           metadata={{
             video_id: video.id,
             video_title: video.title,
+            ...(envKey && { env_key: envKey }),
           }}
           streamType="on-demand"
           title={video.title}

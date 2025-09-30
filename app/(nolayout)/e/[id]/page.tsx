@@ -51,11 +51,14 @@ export default async function EmbedPage({
   const searchParams = await searchParamsPromise;
 
   try {
-    const { data } = await bold.videos.get(params.id);
+    const [{ data: video }, { data: settings }] = await Promise.all([
+      bold.videos.get(params.id),
+      bold.settings(),
+    ]);
     // Cast to ExtendedVideo to access chapters_url property
-    const video = data as ExtendedVideo;
+    const extendedVideo = video as ExtendedVideo;
 
-    if (!video) {
+    if (!extendedVideo) {
       return (
         <div className="bg-black m-0 p-0 w-screen h-screen overflow-hidden flex items-center justify-center">
           <p className="text-white">Loading video...</p>
@@ -69,11 +72,12 @@ export default async function EmbedPage({
     return (
       <div className="bg-black m-0 p-0 w-screen h-screen overflow-hidden">
         <Player
-          key={`video-${video.id}`}
-          video={video}
+          key={`video-${extendedVideo.id}`}
+          video={extendedVideo}
           autoPlay={false}
           startTime={startTime}
-          className="max-w-none" // Removes any max-width constraint in the embed view
+          className="max-w-none"
+          envKey={settings?.slug}
         />
       </div>
     );

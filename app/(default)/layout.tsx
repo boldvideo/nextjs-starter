@@ -4,7 +4,7 @@ import "./globals.css";
 import { bold } from "@/client";
 import type { Settings } from "@boldvideo/bold-js";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Header } from "@/components/header";
+import { ConditionalHeader } from "@/components/conditional-header";
 import { SettingsProvider } from "@/components/providers/settings-provider";
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
@@ -13,6 +13,8 @@ import SignIn from "@/components/auth/sign-in";
 
 // Extend the Settings type to include additional properties
 interface ExtendedSettings extends Settings {
+  channel_name?: string;
+  name?: string;
   theme_config?: {
     radius: string;
     light: {
@@ -126,7 +128,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const meta = settings.meta_data;
   const title = meta?.title
     ? `${meta.title}${meta.title_suffix || ""}`
-    : defaultMetadata.title;
+    : settings.channel_name || settings.name || defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
   const ogImageUrl =
     meta?.social_graph_image_url ||
@@ -337,7 +339,7 @@ export default async function RootLayout({
           <SessionProvider session={session}>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <SettingsProvider settings={settings}>
-                <Header
+                <ConditionalHeader
                   logo={settings.logo_url || "/bold-logo.svg"}
                   logoDark={settings.logo_dark_url}
                   menuItems={settings.menu_items || []}

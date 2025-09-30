@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { SearchBar } from "./search-bar";
 import { SearchPreview } from "./search-preview";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import { MobileSearch } from "@/components/mobile-search";
 import UserMenu from "@/components/auth/user-menu";
@@ -87,13 +86,10 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                 </div>
               </div>
 
-              {/* Right Side - Search, Theme Toggle, and User Menu (Desktop Only) */}
+              {/* Right Side - Search and User Menu (Desktop Only) */}
               <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end max-w-md">
                 <Suspense>
                   <SearchBar className="w-full max-w-xs" />
-                </Suspense>
-                <Suspense>
-                  <ThemeToggle />
                 </Suspense>
                 {session !== undefined && (
                   <Suspense>
