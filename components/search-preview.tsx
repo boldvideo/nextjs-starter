@@ -140,7 +140,7 @@ export function SearchPreview() {
                   <div className="flex flex-col sm:flex-row items-start gap-4">
                     <div className="relative flex-shrink-0 w-full sm:w-auto">
                       <Link
-                        href={`/v/${hit.short_id || hit.internal_id}`}
+                        href={`/v/${hit.internal_id}`}
                         className="block group"
                       >
                         {hit.thumbnail ? (
@@ -163,7 +163,7 @@ export function SearchPreview() {
                     </div>
                     <div className="flex-1 min-w-0 w-full">
                       <Link
-                        href={`/v/${hit.short_id || hit.internal_id}`}
+                        href={`/v/${hit.internal_id}`}
                         className="block group"
                       >
                         <h3 className="text-xl font-semibold mb-2 group-hover:text-primary">
@@ -182,9 +182,7 @@ export function SearchPreview() {
                             {getVisibleSegments(hit).map((segment, idx) => (
                               <Link
                                 key={`${hit.internal_id}-segment-${idx}`}
-                                href={`/v/${
-                                  hit.short_id || hit.internal_id
-                                }?t=${Math.floor(segment.start_time)}`}
+                                href={`/v/${hit.internal_id}?t=${Math.floor(segment.start_time)}`}
                                 className="block py-1.5 hover:bg-sidebar-accent rounded-md -mx-2 px-2"
                               >
                                 <div className="flex items-start gap-2.5">
