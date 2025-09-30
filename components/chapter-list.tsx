@@ -57,9 +57,6 @@ export function ChapterList({
 }: ChapterListProps): React.JSX.Element | null {
   const chapters = parseChapters(chaptersWebVTT);
 
-  console.log("ChapterList - chaptersWebVTT:", chaptersWebVTT);
-  console.log("ChapterList - parsed chapters:", chapters);
-
   if (!chapters || chapters.length === 0) {
     return null; // Don't render anything if no chapters
   }
