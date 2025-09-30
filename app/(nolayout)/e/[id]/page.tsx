@@ -1,7 +1,7 @@
 import { bold } from "@/client";
 // import { Player } from "components/embed-player";
 import { Player } from "@/components/players";
-import type { Video } from "@boldvideo/bold-js";
+import type { Video, Settings } from "@boldvideo/bold-js";
 import { formatDuration } from "util/format-duration";
 
 /**
@@ -9,6 +9,13 @@ import { formatDuration } from "util/format-duration";
  */
 interface ExtendedVideo extends Video {
   chapters_url?: string;
+}
+
+/**
+ * Extended Settings type
+ */
+interface ExtendedSettings extends Settings {
+  slug?: string;
 }
 
 export const dynamic = "force-dynamic";
@@ -55,8 +62,9 @@ export default async function EmbedPage({
       bold.videos.get(params.id),
       bold.settings(),
     ]);
-    // Cast to ExtendedVideo to access chapters_url property
+    // Cast to Extended types
     const extendedVideo = video as ExtendedVideo;
+    const extendedSettings = settings as ExtendedSettings;
 
     if (!extendedVideo) {
       return (
@@ -77,7 +85,7 @@ export default async function EmbedPage({
           autoPlay={false}
           startTime={startTime}
           className="max-w-none"
-          envKey={settings?.slug}
+          envKey={extendedSettings?.slug}
         />
       </div>
     );
