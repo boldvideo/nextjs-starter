@@ -17,7 +17,7 @@ function SearchResult({ hit }: { hit: SearchHit }) {
       <div className="flex flex-col sm:flex-row items-start gap-6">
         <div className="relative flex-shrink-0 w-full sm:w-auto mb-3 sm:mb-0">
           <Link
-            href={`/v/${hit.internal_id}`}
+            href={`/v/${hit.video_id}`}
             className="block group"
           >
             {hit.thumbnail ? (
@@ -40,7 +40,7 @@ function SearchResult({ hit }: { hit: SearchHit }) {
         </div>
         <div className="flex-1 min-w-0 w-full">
           <Link
-            href={`/v/${hit.internal_id}`}
+            href={`/v/${hit.video_id}`}
             className="block group"
           >
             <h3 className="text-2xl font-semibold mb-3 group-hover:text-primary">
@@ -57,8 +57,8 @@ function SearchResult({ hit }: { hit: SearchHit }) {
             <div className="space-y-2">
               {hit.segments.map((segment, idx) => (
                 <Link
-                  key={`${hit.internal_id}-segment-${idx}`}
-                  href={`/v/${hit.internal_id}?t=${Math.floor(
+                  key={`${hit.video_id}-segment-${idx}`}
+                  href={`/v/${hit.video_id}?t=${Math.floor(
                     segment.start_time
                   )}`}
                   className="block py-2 hover:bg-accent rounded-md -mx-2 px-2"
@@ -204,7 +204,7 @@ export function SearchResults() {
               </p>
               <div className="space-y-6">
                 {results.map((hit, index) => (
-                  <SearchResult key={`${hit.internal_id}-${index}`} hit={hit} />
+                  <SearchResult key={`${hit.video_id}-${index}`} hit={hit} />
                 ))}
               </div>
             </>

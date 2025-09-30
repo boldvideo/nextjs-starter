@@ -2,7 +2,7 @@
 
 // Types for the search API response
 export type SearchHit = {
-  internal_id: string;
+  video_id: string;
   short_id: string;
   title: string;
   thumbnail: string | null;

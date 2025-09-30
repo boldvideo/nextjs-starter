@@ -102,7 +102,7 @@ export function SearchPreview() {
 
   const getVisibleSegments = (hit: SearchHit) => {
     if (!hit.segments) return [];
-    return expandedVideos[hit.internal_id]
+    return expandedVideos[hit.video_id]
       ? hit.segments
       : hit.segments.slice(0, 2);
   };
@@ -134,13 +134,13 @@ export function SearchPreview() {
             <div className="space-y-4">
               {displayedResults.map((hit, index) => (
                 <div
-                  key={`${hit.internal_id}-${index}`}
+                  key={`${hit.video_id}-${index}`}
                   className="p-4 rounded-lg hover:bg-background transition-colors"
                 >
                   <div className="flex flex-col sm:flex-row items-start gap-4">
                     <div className="relative flex-shrink-0 w-full sm:w-auto">
                       <Link
-                        href={`/v/${hit.internal_id}`}
+                        href={`/v/${hit.video_id}`}
                         className="block group"
                       >
                         {hit.thumbnail ? (
@@ -163,7 +163,7 @@ export function SearchPreview() {
                     </div>
                     <div className="flex-1 min-w-0 w-full">
                       <Link
-                        href={`/v/${hit.internal_id}`}
+                        href={`/v/${hit.video_id}`}
                         className="block group"
                       >
                         <h3 className="text-xl font-semibold mb-2 group-hover:text-primary">
@@ -181,8 +181,8 @@ export function SearchPreview() {
                           <div className="space-y-1.5">
                             {getVisibleSegments(hit).map((segment, idx) => (
                               <Link
-                                key={`${hit.internal_id}-segment-${idx}`}
-                                href={`/v/${hit.internal_id}?t=${Math.floor(segment.start_time)}`}
+                                key={`${hit.video_id}-segment-${idx}`}
+                                href={`/v/${hit.video_id}?t=${Math.floor(segment.start_time)}`}
                                 className="block py-1.5 hover:bg-sidebar-accent rounded-md -mx-2 px-2"
                               >
                                 <div className="flex items-start gap-2.5">
@@ -204,10 +204,10 @@ export function SearchPreview() {
 
                           {hit.segments.length > 2 && (
                             <button
-                              onClick={() => toggleExpand(hit.internal_id)}
+                              onClick={() => toggleExpand(hit.video_id)}
                               className="text-xs flex items-center gap-1 text-primary hover:text-primary font-medium"
                             >
-                              {expandedVideos[hit.internal_id] ? (
+                              {expandedVideos[hit.video_id] ? (
                                 <>
                                   <ChevronUp size={14} />
                                   <span>Show less</span>
