@@ -37,7 +37,7 @@ if (isAuthEnabled()) {
 export const config = {
   providers,
   debug: process.env.NODE_ENV === "development",
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || (!isAuthEnabled() ? 'not-used-auth-disabled' : undefined),
   trustHost: true, // Allow Auth.js to work with ngrok and other proxies
   pages: {
     signIn: "/auth/signin",
