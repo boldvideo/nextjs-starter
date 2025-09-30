@@ -14,12 +14,11 @@ export default auth((req) => {
 
 export const config = {
   // Matcher configuration - protect all routes except:
-  // - api routes (except auth)
+  // - api routes
   // - static files
   // - auth routes
   matcher: [
-    // "/((?!api/auth|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-    "/((?!auth|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
 
