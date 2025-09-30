@@ -62,9 +62,9 @@ export function ChapterList({
   }
 
   return (
-    <div className="bg-sidebar flex flex-col col-span-3 h-full overflow-hidden">
-      <h3 className="p-3 font-bold text-base border-b border-border">Chapters</h3>
-      <ol className="overflow-y-auto">
+    <div className="bg-sidebar flex flex-col h-full">
+      <h3 className="p-3 font-bold text-base border-b border-border flex-shrink-0">Chapters</h3>
+      <ol className="overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-6">
         {chapters.map((chapter, idx) => (
             <li
               key={chapter.startTimeSeconds}

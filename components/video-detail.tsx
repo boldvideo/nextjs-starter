@@ -142,17 +142,17 @@ export function VideoDetail({
         {/* Player container - Always visible */}
         <div
           ref={playerContainerRef}
-          className="bg-black w-full flex justify-center"
+          className="bg-black w-screen flex justify-center"
         >
           <div
             className={clsx(
               "w-full max-w-[1600px]",
               // Only apply grid on desktop screens
-              video.chapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
-              "overflow-hidden",
+              video.chapters && "lg:grid lg:grid-cols-12 lg:items-start",
             )}
+            style={{ gap: 0 }}
           >
-            <div className="aspect-video lg:max-h-[50vh] 2xl:max-h-[50vh] lg:aspect-auto w-full lg:h-full bg-black flex-grow lg:col-span-9">
+            <div className="aspect-video w-full bg-black lg:col-span-9">
               <Player
                 video={video}
                 autoPlay={true}
@@ -166,7 +166,7 @@ export function VideoDetail({
 
             {/* Chapters only visible on desktop */}
             {hasChapters && (
-              <div className="hidden lg:block lg:col-span-3 bg-sidebar h-full overflow-y-auto">
+              <div className="hidden lg:flex lg:col-span-3 bg-sidebar overflow-hidden" style={{ aspectRatio: '9/16' }}>
                 <ChapterList
                   chaptersWebVTT={video.chapters}
                   playbackId={video.playback_id}
