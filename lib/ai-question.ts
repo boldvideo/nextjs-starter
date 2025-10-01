@@ -35,34 +35,20 @@ export async function streamAIQuestion(
   const apiUrl = apiHost.startsWith("http") ? apiHost : `https://${apiHost}`;
   const endpoint = `${apiUrl}/videos/${videoId}/ask`;
 
-  console.log("[AI Question] Request details:", {
-    endpoint,
-    videoId,
-    tenant,
-    questionLength: question.length,
-    hasConversation: !!conversation,
-  });
-
   try {
-    const requestBody = {
-      q: question,
-      vid: videoId,
-      subd: tenant,
-      c: conversation,
-    };
-
-    console.log("[AI Question] Request body:", JSON.stringify(requestBody, null, 2));
-
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: apiKey,
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        q: question,
+        vid: videoId,
+        subd: tenant,
+        c: conversation,
+      }),
     });
-
-    console.log("[AI Question] Response status:", response.status, response.statusText);
 
     if (!response.ok) {
       const errorText = await response.text();
