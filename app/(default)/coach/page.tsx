@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getPortalConfig } from "@/lib/portal-config";
 
-export default function ChatPage() {
+export default function CoachPage() {
   const [query, setQuery] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Get AI settings from provider
   const settings = useSettings();
   const config = getPortalConfig(settings);
@@ -42,7 +42,7 @@ export default function ChatPage() {
 
   // Handle initial query from URL params
   const hasInitializedRef = useRef(false);
-  
+
   useEffect(() => {
     const initialQuery = searchParams?.get("q");
     if (initialQuery && !hasInitializedRef.current && messages.length === 0) {
@@ -55,12 +55,12 @@ export default function ChatPage() {
     async (e?: React.FormEvent) => {
       e?.preventDefault();
       const trimmedQuery = query.trim();
-      
+
       if (!trimmedQuery || isStreaming) return;
-      
+
       // Clear input immediately for better UX
       setQuery("");
-      
+
       // If we're waiting for clarification, submit it as a clarification answer
       if (isWaitingForClarification) {
         submitClarification(trimmedQuery);

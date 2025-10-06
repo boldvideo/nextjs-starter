@@ -25,8 +25,8 @@ export function AssistantHomepage({ settings, config }: AssistantHomepageProps) 
       
       setIsSubmitting(true);
       
-      // Navigate to chat page with query parameter
-      router.push(`/chat?q=${encodeURIComponent(trimmedQuery)}`);
+      // Navigate to coach page with query parameter
+      router.push(`/coach?q=${encodeURIComponent(trimmedQuery)}`);
     },
     [query, isSubmitting, router]
   );
