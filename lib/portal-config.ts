@@ -1,57 +1,7 @@
 import type { Settings } from "@boldvideo/bold-js";
 
-// Extended settings interface with new portal configuration
-export interface PortalSettings extends Omit<Settings, 'ai_name' | 'ai_avatar' | 'ai_greeting' | 'has_ai'> {
-  // New account structure
-  account?: {
-    ai?: {
-      enabled: boolean;
-      name: string;
-      avatar_url: string;
-      greeting: string;
-    };
-    name: string;
-    slug: string;
-  };
-  
-  // New portal configuration
-  portal?: {
-    layout?: {
-      type?: 'none' | 'library' | 'assistant';
-      videos_limit?: number;
-      show_playlists?: boolean;
-      assistant_config?: {
-        headline?: string;
-        subheadline?: string;
-        suggestions?: string[];
-      };
-    };
-    navigation?: {
-      show_search?: boolean;
-      show_ai_search?: boolean;
-    };
-    display?: {
-      show_transcripts?: boolean;
-      show_chapters?: boolean;
-    };
-    theme?: {
-      background?: string | null;
-      foreground?: string | null;
-      primary?: string | null;
-      font_header?: string;
-      font_body?: string;
-      logo_url?: string | null;
-      logo_width?: number | null;
-      logo_height?: number | null;
-    };
-  };
-  
-  // Legacy AI fields for backward compatibility
-  has_ai?: boolean;
-  ai_name?: string;
-  ai_avatar?: string;
-  ai_greeting?: string;
-}
+// Re-export Settings type from SDK (0.6.0+)
+export type PortalSettings = Settings;
 
 // Configuration with smart defaults
 export interface PortalConfig {
@@ -75,6 +25,7 @@ export interface PortalConfig {
   navigation: {
     showSearch: boolean;
     showAiToggle: boolean;
+    showHeader: boolean;
   };
   display: {
     showTranscripts: boolean;
@@ -83,54 +34,11 @@ export interface PortalConfig {
 }
 
 /**
- * Normalizes settings to handle both old and new API structures
- * Provides backward compatibility for existing deployments
+ * Normalizes settings from API
+ * With SDK 0.6.0+, the API returns complete Settings structure
  */
-export function normalizeSettings(settings: Settings | PortalSettings | null): PortalSettings {
-  if (!settings) return {} as PortalSettings;
-  
-  // Type guard to check if it's a PortalSettings with account property
-  const portalSettings = settings as PortalSettings;
-  
-  // If new account.ai structure exists, use it
-  // Otherwise, create it from legacy fields
-  const legacySettings = settings as Settings;
-  if (!portalSettings.account?.ai && (legacySettings.has_ai || legacySettings.ai_name)) {
-    // Ensure account exists with required fields
-    if (!portalSettings.account) {
-      portalSettings.account = {
-        name: 'BOLD Portal',
-        slug: 'portal'
-      };
-    }
-    portalSettings.account.ai = {
-      enabled: legacySettings.has_ai ?? false,
-      name: legacySettings.ai_name || 'AI Assistant',
-      avatar_url: legacySettings.ai_avatar || '/placeholder-avatar.png',
-      greeting: 'Hello! How can I help you today?' // Default greeting - Settings type doesn't have this field
-    };
-  }
-  
-  // Ensure portal configuration exists with defaults
-  if (!portalSettings.portal) {
-    portalSettings.portal = {
-      layout: {
-        type: 'library',
-        videos_limit: 12,
-        show_playlists: true
-      },
-      navigation: {
-        show_search: true,
-        show_ai_search: false
-      },
-      display: {
-        show_transcripts: true,
-        show_chapters: true
-      }
-    };
-  }
-  
-  return portalSettings;
+export function normalizeSettings(settings: Settings | null): Settings | null {
+  return settings;
 }
 
 /**
@@ -162,32 +70,64 @@ function ensureAbsoluteUrl(url: string | undefined): string {
  * Gets the effective portal configuration with smart defaults
  * Handles environment variable overrides for development
  */
-export function getPortalConfig(rawSettings: any): PortalConfig {
+export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   const settings = normalizeSettings(rawSettings);
-  
+
+  if (!settings) {
+    // Return safe defaults if no settings
+    return {
+      ai: {
+        enabled: false,
+        name: 'AI Assistant',
+        avatar: '/placeholder-avatar.png',
+        greeting: 'Hello! How can I help you today?',
+        showInHeader: false
+      },
+      homepage: {
+        layout: 'library',
+        videosLimit: 12,
+        showPlaylists: true
+      },
+      navigation: {
+        showSearch: true,
+        showAiToggle: false,
+        showHeader: true
+      },
+      display: {
+        showTranscripts: true,
+        showChapters: true
+      }
+    };
+  }
+
   // Check for environment variable overrides (server-side only)
-  const layoutOverride = typeof process !== 'undefined' 
+  const layoutOverride = typeof process !== 'undefined'
     ? process.env.PORTAL_LAYOUT_OVERRIDE as 'none' | 'library' | 'assistant' | undefined
     : undefined;
-  
-  // Determine AI configuration
+
+  // Determine AI configuration (with backward compatibility for legacy fields)
   const aiEnabled = settings.account?.ai?.enabled ?? settings.has_ai ?? false;
   const aiName = settings.account?.ai?.name ?? settings.ai_name ?? 'AI Assistant';
   const aiAvatarRaw = settings.account?.ai?.avatar_url ?? settings.ai_avatar;
   const aiAvatar = ensureAbsoluteUrl(aiAvatarRaw);
   const aiGreeting = settings.account?.ai?.greeting ?? settings.ai_greeting ?? 'Hello! How can I help you today?';
-  
+
   // Determine homepage layout
-  const homepageLayout = layoutOverride ?? settings.portal?.layout?.type ?? 'library';
-  
+  const homepageLayout = (layoutOverride ?? settings.portal?.layout?.type ?? 'library') as 'none' | 'library' | 'assistant';
+
   // Smart derivation: Show AI toggle in header if:
   // 1. AI is enabled
   // 2. AI is NOT the primary homepage (to avoid duplication)
   // 3. Portal settings allow it
-  const showAiInHeader = aiEnabled && 
+  const showAiInHeader = aiEnabled &&
                          homepageLayout !== 'assistant' &&
                          (settings.portal?.navigation?.show_ai_search ?? false);
-  
+
+  // Smart header visibility:
+  // 1. Use explicit show_header setting from API (SDK 0.6.0+)
+  // 2. Default to true (show header)
+  const showHeader = settings.portal?.navigation?.show_header ?? true;
+
   return {
     ai: {
       enabled: aiEnabled,
@@ -201,9 +141,9 @@ export function getPortalConfig(rawSettings: any): PortalConfig {
       videosLimit: settings.portal?.layout?.videos_limit ?? 12,
       showPlaylists: settings.portal?.layout?.show_playlists ?? true,
       assistantConfig: homepageLayout === 'assistant' ? {
-        headline: settings.portal?.layout?.assistant_config?.headline ?? 
+        headline: settings.portal?.layout?.assistant_config?.headline ??
                  'Get 1,000 hours of coaching in 60 seconds.',
-        subheadline: settings.portal?.layout?.assistant_config?.subheadline ?? 
+        subheadline: settings.portal?.layout?.assistant_config?.subheadline ??
                     'Our AI assistant is here to help you.',
         suggestions: settings.portal?.layout?.assistant_config?.suggestions ?? [
           'How can I improve my product?',
@@ -214,7 +154,8 @@ export function getPortalConfig(rawSettings: any): PortalConfig {
     },
     navigation: {
       showSearch: settings.portal?.navigation?.show_search ?? true,
-      showAiToggle: showAiInHeader
+      showAiToggle: showAiInHeader,
+      showHeader: showHeader
     },
     display: {
       showTranscripts: settings.portal?.display?.show_transcripts ?? true,
