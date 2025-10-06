@@ -33,24 +33,11 @@ interface CTA {
 /**
  * Extended Video type with additional properties used in our application
  */
-interface ExtendedVideo extends Video {
-  chapters?: string;
+interface ExtendedVideo extends Omit<Video, 'cta'> {
   chapters_url?: string;
-  transcript?: {
-    json?: {
-      url: string;
-    };
-  };
   ai_avatar?: string;
   ai_name?: string;
   cta?: CTA | null;
-}
-
-/**
- * Extended Settings to include ai_greeting
- */
-interface ExtendedSettings extends Settings {
-  ai_greeting?: string;
 }
 
 /**
@@ -60,7 +47,7 @@ interface VideoDetailProps {
   video: ExtendedVideo;
   startTime?: number;
   className?: string;
-  settings: ExtendedSettings;
+  settings: Settings;
 }
 
 /**
