@@ -95,6 +95,40 @@ export function VideoDetail({
     };
   }, [handleScroll]);
 
+  // iOS WebView document width fix - monitor and reset
+  useEffect(() => {
+    let initialViewportWidth = window.innerWidth;
+    
+    const resetDocumentWidth = () => {
+      // Reset any padding or transforms on body
+      document.body.style.paddingRight = '';
+      document.body.style.paddingLeft = '';
+      document.body.style.transform = '';
+      document.body.style.overflow = '';
+      
+      // Reset scroll position if it's been pushed horizontally
+      if (window.scrollX !== 0) {
+        window.scrollTo(0, window.scrollY);
+      }
+      
+
+    };
+    
+    // Monitor on every interaction
+    const handleInteraction = () => {
+      // Use a small delay to let any scroll-locking complete first
+      setTimeout(resetDocumentWidth, 10);
+    };
+    
+    window.addEventListener('touchend', handleInteraction);
+    window.addEventListener('click', handleInteraction);
+    
+    return () => {
+      window.removeEventListener('touchend', handleInteraction);
+      window.removeEventListener('click', handleInteraction);
+    };
+  }, []);
+
   // Set initial time when component mounts
   useEffect(() => {
     if (startTime && playerRef.current) {
