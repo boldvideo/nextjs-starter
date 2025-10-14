@@ -33,7 +33,7 @@ interface CTA {
 /**
  * Extended Video type with additional properties used in our application
  */
-interface ExtendedVideo extends Omit<Video, 'cta'> {
+interface ExtendedVideo extends Omit<Video, "cta"> {
   chapters_url?: string;
   ai_avatar?: string;
   ai_name?: string;
@@ -71,7 +71,7 @@ export function VideoDetail({
 
   // Check if the video has chapters
   const hasChapters = Boolean(video.chapters);
-  
+
   // Check if AI assistant should be shown (requires both has_ai flag and transcript)
   const showAIAssistant = Boolean(settings.has_ai && hasTranscript);
 
@@ -118,7 +118,7 @@ export function VideoDetail({
     setHasTranscript(
       !!video.transcript &&
         !!video.transcript.json &&
-        !!video.transcript.json.url,
+        !!video.transcript.json.url
     );
   }, [video]);
 
@@ -135,10 +135,10 @@ export function VideoDetail({
               "w-full max-w-[1600px]",
               // Only apply grid on desktop screens
               video.chapters && "lg:grid lg:grid-cols-12 lg:space-y-0",
-              "overflow-hidden",
+              "overflow-hidden"
             )}
           >
-            <div className="lg:max-h-[50vh] 2xl:max-h-[50vh] max-w-sceen lg:h-full bg-black flex-grow lg:col-span-9">
+            <div className="aspect-video lg:max-h-[50vh] 2xl:max-h-[50vh] lg:aspect-auto max-w-[100vw] w-full lg:h-full bg-black flex-grow lg:col-span-9">
               <Player
                 video={video}
                 autoPlay={true}
@@ -179,16 +179,24 @@ export function VideoDetail({
             <div className="space-y-4">
               <h1 className="text-2xl font-bold">{video.title}</h1>
               <p className="text-muted-foreground">
+<<<<<<< HEAD
                 {formatRelative(new Date(video.published_at), new Date())}
+||||||| parent of 8ddb2f6 (Fix video scaling issue with max-width constraint)
+                {video.teaser && video.teaser.trim() !== "" 
+                  ? video.teaser 
+                  : formatRelative(new Date(video.published_at), new Date())}
+=======
+                {video.teaser && video.teaser.trim() !== ""
+                  ? video.teaser
+                  : formatRelative(new Date(video.published_at), new Date())}
+>>>>>>> 8ddb2f6 (Fix video scaling issue with max-width constraint)
               </p>
               <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
                 <VideoDescription text={video.description || ""} />
               </div>
               {video.cta && (
                 <div className="rounded-md border border-card-foreground/10 bg-card text-card-foreground p-4">
-                  <h2 className="text-base font-bold">
-                    {video.cta.title}
-                  </h2>
+                  <h2 className="text-base font-bold">{video.cta.title}</h2>
                   <div className="mt-2 prose prose-sm dark:prose-invert prose-p:my-2">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
@@ -265,16 +273,24 @@ export function VideoDetail({
               {video.title}
             </h1>
             <p className="text-muted-foreground text-xl mb-4">
+<<<<<<< HEAD
               {formatRelative(new Date(video.published_at), new Date())}
+||||||| parent of 8ddb2f6 (Fix video scaling issue with max-width constraint)
+              {video.teaser && video.teaser.trim() !== "" 
+                ? video.teaser 
+                : formatRelative(new Date(video.published_at), new Date())}
+=======
+              {video.teaser && video.teaser.trim() !== ""
+                ? video.teaser
+                : formatRelative(new Date(video.published_at), new Date())}
+>>>>>>> 8ddb2f6 (Fix video scaling issue with max-width constraint)
             </p>
             <div className="mb-8 prose prose-lg dark:prose-invert max-w-2xl prose-p:my-4 prose-a:text-primary prose-a:hover:underline">
               <VideoDescription text={video.description || ""} />
             </div>
             {video.cta && (
               <div className="max-w-2xl mb-12 rounded-md border border-card-foreground/10 bg-card text-card-foreground p-4">
-                <h2 className="text-lg font-bold">
-                  {video.cta.title}
-                </h2>
+                <h2 className="text-lg font-bold">{video.cta.title}</h2>
                 <div className="mt-2 prose prose-sm dark:prose-invert prose-p:my-2">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
