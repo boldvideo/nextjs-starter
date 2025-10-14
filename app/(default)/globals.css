@@ -109,17 +109,6 @@
   mark {
     @apply bg-primary text-primary-foreground font-medium rounded px-1;
   }
-  
-  /* Fix iOS WebView scroll lock accumulation issue */
-  html, body {
-    overflow-x: hidden !important;
-  }
-  
-  body[style*="padding"] {
-    padding-right: 0 !important;
-    padding-left: 0 !important;
-    transform: none !important;
-  }
 }
 
 @layer utilities {

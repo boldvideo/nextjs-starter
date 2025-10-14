@@ -108,7 +108,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Favicon is now handled by generateMetadata */}
         {/* {settings.favicon_url && (
           <link rel="icon" href={settings.favicon_url} sizes="any" />
