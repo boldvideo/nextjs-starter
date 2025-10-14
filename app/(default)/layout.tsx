@@ -58,7 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
     : defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
   const ogImageUrl =
-    meta?.social_graph_image_url ||
+    (meta as any)?.social_graph_image_url ||
     `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(title)}${
       meta?.image ? `&img=${encodeURIComponent(meta.image)}` : ""
     }`;
