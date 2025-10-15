@@ -70,7 +70,7 @@ export default async function PlaylistPage({
         <ul className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10">
           {playlist.videos.map((v) => (
             <li key={v.id}>
-              <VideoThumbnail video={v} />
+              <VideoThumbnail video={v} playlistId={playlist.id} />
             </li>
           ))}
         </ul>

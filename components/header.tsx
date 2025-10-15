@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SearchBar } from "./search-bar";
 import { SearchPreview } from "./search-preview";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { MobileMenu } from "./mobile-menu";
+import { PlaylistToggle } from "./playlist-toggle";
 import { MobileSearch } from "@/components/mobile-search";
 import UserMenu from "@/components/auth/user-menu";
 import type { Session } from "next-auth";
@@ -15,9 +15,11 @@ interface HeaderProps {
   logoDark?: string;
   menuItems: Array<{ url: string; label: string }>;
   session?: Session | null;
+  onPlaylistToggle?: () => void;
+  className?: string;
 }
 
-export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
+export function Header({ logo, logoDark, menuItems, session, onPlaylistToggle, className }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   
   // Check if we should use larger header size for wide/short logos
@@ -29,11 +31,11 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
     <>
       <header
         className={
-          `px-5 lg:px-10 py-4 border-b border-border transition-all ` +
+          `px-5 lg:px-10 py-4 border-b border-border transition-all ${className || ""} ` +
           (searchOpen ? "sticky top-0 z-50 bg-background/90 backdrop-blur" : "")
         }
       >
-        <div className="container mx-auto">
+        <div className="w-full">
           <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
               {/* Logo */}
@@ -73,18 +75,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                   )}
                 </Link>
 
-                {/* Desktop Navigation Menu */}
-                <div className="hidden lg:flex space-x-1">
-                  {menuItems.map((item, idx) => (
-                    <Link
-                      className="text-sm px-3 py-2 rounded-md hover:bg-primary hover:text-primary-foreground transition-colors"
-                      key={`${item.label}-${idx}`}
-                      href={item.url}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
+
               </div>
 
               {/* Right Side - Search, Theme Toggle, and User Menu (Desktop Only) */}
@@ -106,13 +97,9 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
               <div className="grid grid-cols-3 items-center w-full lg:hidden">
                 {/* Left: Hamburger Menu */}
                 <div className="flex justify-start">
-                  {!searchOpen && (
+                  {!searchOpen && onPlaylistToggle && (
                     <Suspense>
-                      <MobileMenu
-                        menuItems={menuItems}
-                        logo={logo}
-                        logoDark={logoDark}
-                      />
+                      <PlaylistToggle onToggle={onPlaylistToggle} />
                     </Suspense>
                   )}
                 </div>
