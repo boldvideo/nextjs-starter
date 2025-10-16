@@ -8,6 +8,7 @@ import type { Playlist, Video } from "@boldvideo/bold-js";
 import { X, List, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDuration } from "util/format-duration";
+import { ContinuousPlayToggle } from "./continuous-play-toggle";
 
 interface PlaylistSidebarProps {
   playlist: Playlist;
@@ -80,7 +81,7 @@ export function PlaylistSidebar({
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-border">
           <div className="flex-1 min-w-0">
-            <Link 
+            <Link
               href={`/pl/${playlist.id}`}
               className="group flex items-center gap-2 hover:text-primary transition-colors"
             >
@@ -94,6 +95,10 @@ export function PlaylistSidebar({
               {currentIndex >= 0 && ` • ${currentIndex + 1} of ${playlist.videos.length}`}
             </p>
           </div>
+
+          {/* Continuous Play Toggle */}
+          <ContinuousPlayToggle className="flex-shrink-0 ml-2" />
+
           {/* Close button - hidden on desktop */}
           <button
             onClick={() => setIsOpen(false)}

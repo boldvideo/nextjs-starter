@@ -76,7 +76,7 @@ export function VideoDetail({
   const prevScrollY = useRef(0);
   
   // Get playlist state from context
-  const { isOpen, setIsOpen, setHasPlaylist } = usePlaylist();
+  const { isOpen, setIsOpen, setHasPlaylist, isContinuousPlay } = usePlaylist();
 
   // Update playlist availability when component mounts/updates
   useEffect(() => {
@@ -171,6 +171,13 @@ export function VideoDetail({
     }
   }, [nextVideo, handleVideoChange]);
 
+  const handleVideoEnded = useCallback(() => {
+    // Only auto-advance if continuous play is enabled and there's a next video
+    if (isContinuousPlay && hasNextVideo && nextVideo) {
+      handleVideoChange(nextVideo);
+    }
+  }, [isContinuousPlay, hasNextVideo, nextVideo, handleVideoChange]);
+
   // Update video state when initialVideo prop changes
   useEffect(() => {
     setVideo(initialVideo);
@@ -220,6 +227,7 @@ export function VideoDetail({
                 startTime={startTime}
                 className={className}
                 isOutOfView={isOutOfView}
+                onEnded={handleVideoEnded}
               />
             </div>
 

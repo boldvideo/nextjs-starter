@@ -80,6 +80,8 @@ interface MuxPlayerComponentProps {
   className?: string;
   /** Whether the player is out of view and should be shown as a floating player */
   isOutOfView?: boolean;
+  /** Callback for when the video ends */
+  onEnded?: (e: Event) => void;
 }
 
 /**
@@ -94,6 +96,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
     startTime,
     className = "",
     isOutOfView = false,
+    onEnded,
   }: MuxPlayerComponentProps,
   ref
 ) {
@@ -270,6 +273,11 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
     if (onTimeUpdate) onTimeUpdate(e);
   };
 
+  const handleEnded = (e: Event) => {
+    bold.trackEvent(video, e);
+    if (onEnded) onEnded(e);
+  };
+
   return (
     <>
       <div
@@ -313,6 +321,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
           onTimeUpdate={handleTimeUpdate}
           onPlay={(e) => bold.trackEvent(video, e)}
           onPause={(e) => bold.trackEvent(video, e)}
+          onEnded={handleEnded}
           onLoadedMetadata={(e) => {
             bold.trackEvent(video, e);
             console.log("MuxPlayer loadedmetadata event");
@@ -353,6 +362,7 @@ export const MuxPlayerComponent = memo(MuxPlayerComponentBase, (prevProps, nextP
     prevProps.video.id === nextProps.video.id &&
     prevProps.startTime === nextProps.startTime &&
     prevProps.autoPlay === nextProps.autoPlay &&
-    prevProps.currentTime === nextProps.currentTime
+    prevProps.currentTime === nextProps.currentTime &&
+    prevProps.onEnded === nextProps.onEnded
   );
 });
