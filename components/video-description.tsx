@@ -25,20 +25,22 @@ export function VideoDescription({ text }: VideoDescriptionProps) {
   );
 
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
-        a: ({ ...props }) => (
-          <a
-            {...props}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          />
-        ),
-      }}
-    >
-      {withSlashHandles}
-    </ReactMarkdown>
+    <div className="min-h-[100px]">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a: ({ ...props }) => (
+            <a
+              {...props}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            />
+          ),
+        }}
+      >
+        {withSlashHandles}
+      </ReactMarkdown>
+    </div>
   );
 }
