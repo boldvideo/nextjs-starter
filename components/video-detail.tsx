@@ -20,6 +20,7 @@ import remarkGfm from "remark-gfm";
 import { PlaylistSidebar } from "./playlist-sidebar";
 import { usePlaylist } from "@/components/providers/playlist-provider";
 import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
  * CTA type for call-to-action data
@@ -150,6 +151,26 @@ export function VideoDetail({
     }
   }, [playlist, router]);
 
+  // Playlist navigation logic
+  const currentVideoIndex = playlist?.videos.findIndex(v => v.id === video.id) ?? -1;
+  const hasPreviousVideo = playlist && currentVideoIndex > 0;
+  const hasNextVideo = playlist && currentVideoIndex >= 0 && currentVideoIndex < playlist.videos.length - 1;
+  const previousVideo = hasPreviousVideo ? playlist.videos[currentVideoIndex - 1] : null;
+  const nextVideo = hasNextVideo ? playlist.videos[currentVideoIndex + 1] : null;
+
+  // Handle playlist navigation
+  const handlePreviousVideo = useCallback(() => {
+    if (previousVideo) {
+      handleVideoChange(previousVideo);
+    }
+  }, [previousVideo, handleVideoChange]);
+
+  const handleNextVideo = useCallback(() => {
+    if (nextVideo) {
+      handleVideoChange(nextVideo);
+    }
+  }, [nextVideo, handleVideoChange]);
+
   // Update video state when initialVideo prop changes
   useEffect(() => {
     setVideo(initialVideo);
@@ -204,9 +225,48 @@ export function VideoDetail({
 
             {/* Content Div - Fills remaining vertical space */}
             <div className={`flex flex-col flex-1 h-full overflow-hidden mt-6 min-h-[600px] pb-8 transition-opacity duration-300 ${isVideoLoading ? 'opacity-50' : 'opacity-100'}`}>
-              {/* Title */}
+              {/* Title with Playlist Navigation */}
               <div className="mb-2">
-                <h1 className="text-3xl font-bold line-clamp-2 leading-tight">{video.title}</h1>
+                {playlist ? (
+                  <div className="flex items-center gap-2 lg:gap-0">
+                    {/* Previous button - Mobile only */}
+                    <button
+                      onClick={handlePreviousVideo}
+                      disabled={!hasPreviousVideo}
+                      className={cn(
+                        "flex-shrink-0 p-2 rounded-full transition-colors lg:hidden",
+                        hasPreviousVideo 
+                          ? "text-foreground hover:bg-accent" 
+                          : "text-muted-foreground/50 cursor-not-allowed"
+                      )}
+                      aria-label="Previous video"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    
+                    {/* Title */}
+                    <h1 className="text-2xl lg:text-3xl font-bold line-clamp-2 leading-tight flex-1 min-w-0">
+                      {video.title}
+                    </h1>
+                    
+                    {/* Next button - Mobile only */}
+                    <button
+                      onClick={handleNextVideo}
+                      disabled={!hasNextVideo}
+                      className={cn(
+                        "flex-shrink-0 p-2 rounded-full transition-colors lg:hidden",
+                        hasNextVideo 
+                          ? "text-foreground hover:bg-accent" 
+                          : "text-muted-foreground/50 cursor-not-allowed"
+                      )}
+                      aria-label="Next video"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                ) : (
+                  <h1 className="text-2xl lg:text-3xl font-bold line-clamp-2 leading-tight">{video.title}</h1>
+                )}
               </div>
 
               {/* Metadata */}
