@@ -1,7 +1,10 @@
 import { bold } from "@/client";
-import { VideoThumbnail } from "@/components/video-thumbnail";
+import { PlaylistVideoList } from "@/components/playlist-video-list";
+import { PlaylistMetadataSidebar } from "@/components/playlist-metadata-sidebar";
 import type { Playlist, Video } from "@boldvideo/bold-js";
 import { notFound } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -51,34 +54,43 @@ export default async function PlaylistPage({
   const resolvedParams = await params;
   const { data: playlist } = await bold.playlists.get(resolvedParams.id);
 
-  if (!playlist) notFound(); // 404 route
-
-  const hasVideos = playlist.videos.length > 0;
+  if (!playlist) notFound();
 
   return (
-    <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
-      <header className="mb-8">
-        <h2 className="font-bold text-3xl mb-5">{playlist.title}</h2>
-        {playlist.description && (
-          <p className="text-lg text-muted-foreground max-w-3xl">
-            {playlist.description}
-          </p>
-        )}
-      </header>
+    <div className="p-5 md:p-10 pb-20 md:pb-24 max-w-screen-2xl mx-auto">
+      {/* Header + Sidebar Layout */}
+      <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto mb-8">
+        {/* Header Content */}
+        <div className="flex-1 min-w-0 max-w-3xl">
+          <header>
+            <h1 className="font-bold text-3xl mb-5">{playlist.title}</h1>
+            {playlist.description && (
+              <div className="text-lg text-muted-foreground prose prose-lg prose-neutral dark:prose-invert max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {playlist.description}
+                </ReactMarkdown>
+              </div>
+            )}
+          </header>
+        </div>
 
-      {hasVideos ? (
-        <ul className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10">
-          {playlist.videos.map((v) => (
-            <li key={v.id}>
-              <VideoThumbnail video={v} playlistId={playlist.id} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="py-12 text-lg text-muted-foreground">
-          No videos in this playlist
-        </p>
-      )}
+        {/* Sidebar - Metadata - Hidden on mobile */}
+        <aside className="hidden lg:block w-80 flex-shrink-0">
+          <div className="sticky top-6">
+            <PlaylistMetadataSidebar playlist={playlist} />
+          </div>
+        </aside>
+      </div>
+
+      {/* Video List - Full Width */}
+      <div className="max-w-6xl mx-auto">
+        <div className="max-w-3xl">
+          <PlaylistVideoList
+            videos={playlist.videos}
+            playlistId={playlist.id}
+          />
+        </div>
+      </div>
     </div>
   );
 }

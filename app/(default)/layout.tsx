@@ -258,7 +258,7 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className="bg-background flex flex-col h-screen">
+      <body className="bg-background flex flex-col min-h-screen">
         {showContent ? (
           <SessionProvider session={session}>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
