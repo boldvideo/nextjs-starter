@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import type { Playlist, Video } from "@boldvideo/bold-js";
-import { X, List } from "lucide-react";
+import { X, List, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDuration } from "util/format-duration";
 
@@ -79,8 +80,16 @@ export function PlaylistSidebar({
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-border">
           <div className="flex-1 min-w-0">
-            <h2 className="font-bold text-lg truncate">{playlist.title}</h2>
-            <p className="text-sm text-muted-foreground">
+            <Link 
+              href={`/pl/${playlist.id}`}
+              className="group flex items-center gap-2 hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -ml-6 group-hover:ml-0" />
+              <h2 className="font-bold text-lg truncate group-hover:translate-x-1 transition-transform duration-200">
+                {playlist.title}
+              </h2>
+            </Link>
+            <p className="text-sm text-muted-foreground mt-1">
               {playlist.videos.length} videos
               {currentIndex >= 0 && ` • ${currentIndex + 1} of ${playlist.videos.length}`}
             </p>
