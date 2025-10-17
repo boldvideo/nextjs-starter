@@ -13,9 +13,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { data } = await bold.videos.get(id, {
-    next: { revalidate: 30, tags: [`video:${id}`] }
-  });
+  const { data } = await bold.videos.get(id);
   return {
     title: data.title,
     description: data.description,
@@ -49,17 +47,13 @@ async function getVideoPageData(videoId: string): Promise<{
     // Fetch settings and video in parallel
     const [settingsData, videoResponse] = await Promise.all([
       bold
-        .settings({ 
-          next: { revalidate: 300, tags: ['settings'] } 
-        })
+        .settings()
         .then((response) => response?.data ?? null)
         .catch((error) => {
           console.warn("Unable to load Bold settings for video page:", error);
           return null;
         }),
-      bold.videos.get(videoId, {
-        next: { revalidate: 30, tags: [`video:${videoId}`] }
-      }),
+      bold.videos.get(videoId),
     ]);
 
     const settings = settingsData ?? null;
