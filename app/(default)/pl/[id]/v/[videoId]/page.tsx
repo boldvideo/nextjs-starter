@@ -4,8 +4,7 @@ import { VideoDetail } from "@/components/video-detail";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
 import { formatDuration } from "util/format-duration";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 60;
+export const revalidate = 30;
 
 export async function generateStaticParams() {
   // Generate static paths for all playlist/video combinations
@@ -34,8 +33,12 @@ export async function generateMetadata({
 
   try {
     const [playlistResponse, videoResponse] = await Promise.all([
-      bold.playlists.get(playlistId),
-      bold.videos.get(videoId),
+      bold.playlists.get(playlistId, {
+        next: { revalidate: 60, tags: [`playlist:${playlistId}`] }
+      }),
+      bold.videos.get(videoId, {
+        next: { revalidate: 30, tags: [`video:${videoId}`] }
+      }),
     ]);
 
     const playlist = playlistResponse?.data;
@@ -85,10 +88,16 @@ async function getPlaylistVideoData(
 }> {
   try {
     const [playlistResponse, videoResponse, settingsData] = await Promise.all([
-      bold.playlists.get(playlistId),
-      bold.videos.get(videoId),
+      bold.playlists.get(playlistId, {
+        next: { revalidate: 60, tags: [`playlist:${playlistId}`] }
+      }),
+      bold.videos.get(videoId, {
+        next: { revalidate: 30, tags: [`video:${videoId}`] }
+      }),
       bold
-        .settings()
+        .settings({ 
+          next: { revalidate: 300, tags: ['settings'] } 
+        })
         .then((response) => response?.data ?? null)
         .catch((error) => {
           console.warn("Unable to load Bold settings for playlist video page:", error);
