@@ -6,77 +6,10 @@ import type { Settings } from "@boldvideo/bold-js";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Header } from "@/components/header";
 import { SettingsProvider } from "@/components/providers/settings-provider";
-
-// Extend the Settings type to include additional properties
-interface ExtendedSettings extends Settings {
-  theme_config?: {
-    radius: string;
-    light: {
-      background: string;
-      foreground: string;
-      card: string;
-      popover: string;
-      card_foreground: string;
-      popover_foreground: string;
-      primary: string;
-      primary_foreground: string;
-      secondary: string;
-      secondary_foreground: string;
-      muted: string;
-      muted_foreground: string;
-      accent: string;
-      accent_foreground: string;
-      destructive: string;
-      border: string;
-      input: string;
-      ring: string;
-      sidebar: string;
-      sidebar_foreground: string;
-      sidebar_primary: string;
-      sidebar_primary_foreground: string;
-      sidebar_accent: string;
-      sidebar_accent_foreground: string;
-      sidebar_border: string;
-      sidebar_ring: string;
-    };
-    dark: {
-      background: string;
-      foreground: string;
-      card: string;
-      card_foreground: string;
-      popover: string;
-      popover_foreground: string;
-      primary: string;
-      primary_foreground: string;
-      secondary: string;
-      secondary_foreground: string;
-      muted: string;
-      muted_foreground: string;
-      accent: string;
-      accent_foreground: string;
-      destructive: string;
-      border: string;
-      input: string;
-      ring: string;
-      sidebar: string;
-      sidebar_foreground: string;
-      sidebar_primary: string;
-      sidebar_primary_foreground: string;
-      sidebar_accent: string;
-      sidebar_accent_foreground: string;
-      sidebar_border: string;
-      sidebar_ring: string;
-    };
-  };
-  logo_url?: string;
-  logo_dark_url?: string;
-  favicon_url?: string;
-  ai_greeting?: string;
-  // Extend the nested meta_data object
-  meta_data: Settings["meta_data"] & {
-    social_graph_image_url?: string;
-  };
-}
+import { auth } from "@/auth";
+import { SessionProvider } from "next-auth/react";
+import { isAuthEnabled } from "@/config/auth";
+import SignIn from "@/components/auth/sign-in";
 
 // Default metadata values
 const defaultMetadata = {
@@ -90,11 +23,11 @@ const defaultMetadata = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  let settings = {} as ExtendedSettings;
+  let settings: Settings | null = null;
 
   try {
     const settingsResponse = await bold.settings();
-    settings = settingsResponse.data as ExtendedSettings;
+    settings = settingsResponse.data;
   } catch (error) {
     console.error("Failed to fetch settings for metadata:", error);
     // Use default metadata if fetch fails
@@ -119,13 +52,13 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
-  const meta = settings.meta_data;
+  const meta = settings?.meta_data;
   const title = meta?.title
     ? `${meta.title}${meta.title_suffix || ""}`
     : defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
   const ogImageUrl =
-    meta?.social_graph_image_url ||
+    (meta as any)?.social_graph_image_url ||
     `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(title)}${
       meta?.image ? `&img=${encodeURIComponent(meta.image)}` : ""
     }`;
@@ -150,7 +83,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     // Add dynamic icons
     icons: {
-      icon: settings.favicon_url || "/favicon.ico", // Use fetched url or default
+      icon: settings?.favicon_url || "/favicon.ico", // Use fetched url or default
     },
   };
 }
@@ -160,25 +93,21 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Initialize with a type assertion that handles all required fields from the base Settings type
-  // Settings are fetched here again for theme/layout purposes, separate from metadata generation.
-  let settings = {} as ExtendedSettings;
-  settings.menu_items = []; // Ensure menu_items is initialized
+  // Get auth session if auth is enabled
+  const session = isAuthEnabled() ? await auth() : null;
+  let settings: Settings | null = null;
 
   try {
     const settingsResponse = await bold.settings();
-    settings = settingsResponse.data as ExtendedSettings;
-    // Ensure meta_data is initialized if it comes back null/undefined but expected
-    if (!settings.meta_data) {
-      settings.meta_data = {} as ExtendedSettings["meta_data"];
-    }
+    settings = settingsResponse.data;
   } catch (error) {
     console.error("Failed to fetch settings for layout:", error);
-    // Initialize meta_data in case of error too
-    settings.meta_data = {} as ExtendedSettings["meta_data"];
   }
 
-  const theme = settings.theme_config;
+  const theme = settings?.theme_config;
+
+  // Check if user should see content
+  const showContent = !isAuthEnabled() || session;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -201,57 +130,60 @@ export default async function RootLayout({
                 --card: ${theme.light.card || "hsl(0 0% 100%)"};
                 --popover: ${theme.light.popover || "hsl(0 0% 100%)"};
                 --card-foreground: ${
-                  theme.light.card_foreground || "hsl(222.2 84% 4.9%)"
+                  theme.light["card-foreground"] || "hsl(222.2 84% 4.9%)"
                 };
                 --popover-foreground: ${
-                  theme.light.popover_foreground || "hsl(222.2 84% 4.9%)"
+                  theme.light["popover-foreground"] || "hsl(222.2 84% 4.9%)"
                 };
                 --primary: ${theme.light.primary || "hsl(222.2 47.4% 11.2%)"};
                 --primary-foreground: ${
-                  theme.light.primary_foreground || "hsl(210 40% 98%)"
+                  theme.light["primary-foreground"] || "hsl(210 40% 98%)"
                 };
                 --secondary: ${theme.light.secondary || "hsl(210 40% 96.1%)"};
                 --secondary-foreground: ${
-                  theme.light.secondary_foreground || "hsl(222.2 47.4% 11.2%)"
+                  theme.light["secondary-foreground"] || "hsl(222.2 47.4% 11.2%)"
                 };
                 --muted: ${theme.light.muted || "hsl(210 40% 96.1%)"};
                 --muted-foreground: ${
-                  theme.light.muted_foreground || "hsl(215.4 16.3% 46.9%)"
+                  theme.light["muted-foreground"] || "hsl(215.4 16.3% 46.9%)"
                 };
-                --accent: ${theme.light.accent || "hsl(210 40% 96.1%)"};
+                --accent: ${(theme.light as any).accent || "hsl(210 40% 96.1%)"};
                 --accent-foreground: ${
-                  theme.light.accent_foreground || "hsl(222.2 47.4% 11.2%)"
+                  (theme.light as any)["accent-foreground"] || "hsl(222.2 47.4% 11.2%)"
                 };
                 --destructive: ${
                   theme.light.destructive || "hsl(0 84.2% 60.2%)"
+                };
+                --destructive-foreground: ${
+                  theme.light["destructive-foreground"] || "hsl(0 0% 100%)"
                 };
                 --border: ${theme.light.border || "hsl(214.3 31.8% 91.4%)"};
                 --input: ${theme.light.input || "hsl(214.3 31.8% 91.4%)"};
                 --ring: ${theme.light.ring || "hsl(222.2 84% 4.9%)"};
                 --sidebar: ${
-                  theme.light.sidebar || "hsl(0 0% 100%)"
+                  (theme.light as any).sidebar || "hsl(0 0% 100%)"
                 }; /* Example fallback */
                 --sidebar-foreground: ${
-                  theme.light.sidebar_foreground || "hsl(222.2 84% 4.9%)"
+                  (theme.light as any)["sidebar-foreground"] || "hsl(222.2 84% 4.9%)"
                 }; /* Example fallback */
                 --sidebar-primary: ${
-                  theme.light.sidebar_primary || "hsl(222.2 47.4% 11.2%)"
+                  (theme.light as any)["sidebar-primary"] || "hsl(222.2 47.4% 11.2%)"
                 }; /* Example fallback */
                 --sidebar-primary-foreground: ${
-                  theme.light.sidebar_primary_foreground || "hsl(210 40% 98%)"
+                  (theme.light as any)["sidebar-primary-foreground"] || "hsl(210 40% 98%)"
                 }; /* Example fallback */
                 --sidebar-accent: ${
-                  theme.light.sidebar_accent || "hsl(210 40% 96.1%)"
+                  (theme.light as any)["sidebar-accent"] || "hsl(210 40% 96.1%)"
                 }; /* Example fallback */
                 --sidebar-accent-foreground: ${
-                  theme.light.sidebar_accent_foreground ||
+                  (theme.light as any)["sidebar-accent-foreground"] ||
                   "hsl(222.2 47.4% 11.2%)"
                 }; /* Example fallback */
                 --sidebar-border: ${
-                  theme.light.sidebar_border || "hsl(214.3 31.8% 91.4%)"
+                  (theme.light as any)["sidebar-border"] || "hsl(214.3 31.8% 91.4%)"
                 }; /* Example fallback */
                 --sidebar-ring: ${
-                  theme.light.sidebar_ring || "hsl(222.2 84% 4.9%)"
+                  (theme.light as any)["sidebar-ring"] || "hsl(222.2 84% 4.9%)"
                 }; /* Example fallback */
               }
 
@@ -262,60 +194,63 @@ export default async function RootLayout({
                 --foreground: ${theme.dark.foreground || "hsl(210 40% 98%)"};
                 --card: ${theme.dark.card || "hsl(222.2 84% 4.9%)"};
                 --card-foreground: ${
-                  theme.dark.card_foreground || "hsl(210 40% 98%)"
+                  theme.dark["card-foreground"] || "hsl(210 40% 98%)"
                 };
                 --popover: ${theme.dark.popover || "hsl(222.2 84% 4.9%)"};
                 --popover-foreground: ${
-                  theme.dark.popover_foreground || "hsl(210 40% 98%)"
+                  theme.dark["popover-foreground"] || "hsl(210 40% 98%)"
                 };
                 --primary: ${theme.dark.primary || "hsl(210 40% 98%)"};
                 --primary-foreground: ${
-                  theme.dark.primary_foreground || "hsl(222.2 47.4% 11.2%)"
+                  theme.dark["primary-foreground"] || "hsl(222.2 47.4% 11.2%)"
                 };
                 --secondary: ${
                   theme.dark.secondary || "hsl(217.2 32.6% 17.5%)"
                 };
                 --secondary-foreground: ${
-                  theme.dark.secondary_foreground || "hsl(210 40% 98%)"
+                  theme.dark["secondary-foreground"] || "hsl(210 40% 98%)"
                 };
                 --muted: ${theme.dark.muted || "hsl(217.2 32.6% 17.5%)"};
                 --muted-foreground: ${
-                  theme.dark.muted_foreground || "hsl(215 20.2% 65.1%)"
+                  theme.dark["muted-foreground"] || "hsl(215 20.2% 65.1%)"
                 };
-                --accent: ${theme.dark.accent || "hsl(217.2 32.6% 17.5%)"};
+                --accent: ${(theme.dark as any).accent || "hsl(217.2 32.6% 17.5%)"};
                 --accent-foreground: ${
-                  theme.dark.accent_foreground || "hsl(210 40% 98%)"
+                  (theme.dark as any)["accent-foreground"] || "hsl(210 40% 98%)"
                 };
                 --destructive: ${
                   theme.dark.destructive || "hsl(0 62.8% 30.6%)"
+                };
+                --destructive-foreground: ${
+                  theme.dark["destructive-foreground"] || "hsl(0 0% 100%)"
                 };
                 --border: ${theme.dark.border || "hsl(217.2 32.6% 17.5%)"};
                 --input: ${theme.dark.input || "hsl(217.2 32.6% 17.5%)"};
                 --ring: ${theme.dark.ring || "hsl(212.7 26.8% 83.9%)"};
                 --sidebar: ${
-                  theme.dark.sidebar || "hsl(222.2 84% 4.9%)"
+                  (theme.dark as any).sidebar || "hsl(222.2 84% 4.9%)"
                 }; /* Example fallback */
                 --sidebar-foreground: ${
-                  theme.dark.sidebar_foreground || "hsl(210 40% 98%)"
+                  (theme.dark as any)["sidebar-foreground"] || "hsl(210 40% 98%)"
                 }; /* Example fallback */
                 --sidebar-primary: ${
-                  theme.dark.sidebar_primary || "hsl(210 40% 98%)"
+                  (theme.dark as any)["sidebar-primary"] || "hsl(210 40% 98%)"
                 }; /* Example fallback */
                 --sidebar-primary-foreground: ${
-                  theme.dark.sidebar_primary_foreground ||
+                  (theme.dark as any)["sidebar-primary-foreground"] ||
                   "hsl(222.2 47.4% 11.2%)"
                 }; /* Example fallback */
                 --sidebar-accent: ${
-                  theme.dark.sidebar_accent || "hsl(217.2 32.6% 17.5%)"
+                  (theme.dark as any)["sidebar-accent"] || "hsl(217.2 32.6% 17.5%)"
                 }; /* Example fallback */
                 --sidebar-accent-foreground: ${
-                  theme.dark.sidebar_accent_foreground || "hsl(210 40% 98%)"
+                  (theme.dark as any)["sidebar-accent-foreground"] || "hsl(210 40% 98%)"
                 }; /* Example fallback */
                 --sidebar-border: ${
-                  theme.dark.sidebar_border || "hsl(217.2 32.6% 17.5%)"
+                  (theme.dark as any)["sidebar-border"] || "hsl(217.2 32.6% 17.5%)"
                 }; /* Example fallback */
                 --sidebar-ring: ${
-                  theme.dark.sidebar_ring || "hsl(212.7 26.8% 83.9%)"
+                  (theme.dark as any)["sidebar-ring"] || "hsl(212.7 26.8% 83.9%)"
                 }; /* Example fallback */
               }
             `,
@@ -324,18 +259,25 @@ export default async function RootLayout({
         )}
       </head>
       <body className="bg-background flex flex-col h-screen lg:h-auto min-h-screen">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+        {showContent ? (
+          <SessionProvider session={session}>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+              <SettingsProvider settings={settings}>
+                <Header
+                  logo={settings?.logo_url || "/bold-logo.svg"}
+                  logoDark={settings?.logo_dark_url}
+                  menuItems={settings?.menu_items || []}
+                  session={session}
+                />
+                <main className="flex-1 min-h-0 flex flex-col">{children}</main>
+              </SettingsProvider>
+            </ThemeProvider>
+          </SessionProvider>
+        ) : (
           <SettingsProvider settings={settings}>
-            <Header
-              logo={settings.logo_url || "/bold-logo.svg"}
-              logoDark={settings.logo_dark_url}
-              menuItems={settings.menu_items || []}
-            />
-            <main className="flex-1 min-h-0 flex flex-col items-center">
-              {children}
-            </main>
+            <SignIn settings={settings} />
           </SettingsProvider>
-        </ThemeProvider>
+        )}
       </body>
     </html>
   );
