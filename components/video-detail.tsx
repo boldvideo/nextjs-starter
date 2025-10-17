@@ -280,7 +280,7 @@ export function VideoDetail({
               </div>
 
               {/* Metadata */}
-              <div className="flex items-center gap-4 text-base text-muted-foreground mb-6">
+              <div className="flex items-center gap-4 text-base text-muted-foreground mb-4">
                 <span>
                   {video.published_at &&
                     formatRelative(new Date(video.published_at), new Date())}
@@ -301,7 +301,7 @@ export function VideoDetail({
                   />
 
                   {/* Tab Content - Fills remaining space */}
-                  <div className="flex-1 mt-6 min-h-0">
+                  <div className="flex-1 min-h-0">
                     {/* Description Tab */}
                     {activeTab === "description" && (
                       <div className="space-y-6 h-full overflow-y-auto">
