@@ -22,7 +22,7 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
           logoDark={settings?.logo_dark_url}
           menuItems={settings?.menu_items || []}
           session={session}
-          className="h-18"
+          className="h-18 hidden md:flex"
         />
       )}
       <main className="flex-1 relative h-full overflow-y-scroll flex">{children}</main>
