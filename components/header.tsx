@@ -1,12 +1,9 @@
 "use client";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { SearchBar } from "./search-bar";
-import { SearchPreview } from "./search-preview";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
-import { MobileSearch } from "@/components/mobile-search";
 import UserMenu from "@/components/auth/user-menu";
 import type { Session } from "next-auth";
 
@@ -19,8 +16,6 @@ interface HeaderProps {
 }
 
 export function Header({ logo, logoDark, menuItems, session, className }: HeaderProps) {
-  const [searchOpen, setSearchOpen] = useState(false);
-  
   // Check if we should use larger header size for wide/short logos
   const useLargeHeader = process.env.NEXT_PUBLIC_LARGE_HEADER === "true";
   const desktopLogoClass = useLargeHeader ? "h-20" : "h-10";
@@ -28,13 +23,8 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
 
   return (
     <>
-      <header
-        className={
-          `px-5 lg:px-10 py-4 border-b border-border transition-all ${className || ""} ` +
-          (searchOpen ? "sticky top-0 z-50 bg-background/90 backdrop-blur" : "")
-        }
-      >
-        <div className="w-full">
+      <header className={`px-5 lg:px-10 py-4 border-b border-border transition-all ${className || ""}`}>
+        <div className="container mx-auto">
           <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
               {/* Logo */}
@@ -88,11 +78,8 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
                 </div>
               </div>
 
-              {/* Right Side - Search, Theme Toggle, and User Menu (Desktop Only) */}
-              <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end max-w-md">
-                <Suspense>
-                  <SearchBar className="w-full max-w-xs" />
-                </Suspense>
+              {/* Right Side - Theme Toggle and User Menu (Desktop Only) */}
+              <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end">
                 <Suspense>
                   <ThemeToggle />
                 </Suspense>
@@ -104,18 +91,20 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
               </div>
 
               {/* Mobile Header Controls */}
-              <div className="grid grid-cols-3 items-center w-full lg:hidden">
+              <div className="grid grid-cols-2 items-center w-full lg:hidden">
                 {/* Left: Hamburger Menu */}
                 <div className="flex justify-start">
-                  {!searchOpen && (
-                    <Suspense>
-                      <MobileMenu menuItems={menuItems} logo={logo} logoDark={logoDark} />
-                    </Suspense>
-                  )}
+                  <Suspense>
+                    <MobileMenu
+                      menuItems={menuItems}
+                      logo={logo}
+                      logoDark={logoDark}
+                    />
+                  </Suspense>
                 </div>
 
-                {/* Center: Logo */}
-                <div className="flex justify-center">
+                {/* Right: Logo and User Menu */}
+                <div className="flex justify-end items-center space-x-2">
                   <Link href="/">
                     {logoDark ? (
                       <>
@@ -147,13 +136,6 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
                       />
                     )}
                   </Link>
-                </div>
-
-                {/* Right: Search icon / Close icon / User Menu */}
-                <div className="flex justify-end items-center space-x-2">
-                  <Suspense>
-                    <MobileSearch onToggle={setSearchOpen} />
-                  </Suspense>
                   {session !== undefined && (
                     <Suspense>
                       <UserMenu session={session} />
@@ -165,10 +147,6 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
           </nav>
         </div>
       </header>
-
-      <Suspense>
-        <SearchPreview />
-      </Suspense>
     </>
   );
 }

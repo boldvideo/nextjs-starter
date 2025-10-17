@@ -100,7 +100,6 @@ export function PlaylistSidebar({
                 <li key={video.id}>
                   <Link
                     href={`/pl/${playlist.id}/v/${video.id}`}
-                    prefetch={true}
                     onClick={() => setIsOpen(false)}
                     className={cn(
                       "w-full flex gap-3 p-3 hover:bg-accent transition-colors text-left cursor-pointer relative",

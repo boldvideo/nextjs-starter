@@ -6,6 +6,7 @@ import type { Settings } from "@boldvideo/bold-js";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LayoutWithPlaylist } from "@/components/layout-with-playlist";
 import { SettingsProvider } from "@/components/providers/settings-provider";
+import { getPortalConfig } from "@/lib/portal-config";
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 import { isAuthEnabled } from "@/config/auth";
@@ -106,12 +107,17 @@ export default async function RootLayout({
 
   const theme = settings?.theme_config;
 
+  // Get portal configuration to determine if we should show header
+  const config = getPortalConfig(settings);
+  const showHeader = config.navigation.showHeader;
+
   // Check if user should see content
   const showContent = !isAuthEnabled() || session;
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Favicon is now handled by generateMetadata */}
         {/* {settings.favicon_url && (
           <link rel="icon" href={settings.favicon_url} sizes="any" />
@@ -263,7 +269,11 @@ export default async function RootLayout({
           <SessionProvider session={session}>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <SettingsProvider settings={settings}>
-                <LayoutWithPlaylist settings={settings} session={session}>
+                <LayoutWithPlaylist
+                  settings={settings}
+                  session={session}
+                  showHeader={showHeader}
+                >
                   {children}
                 </LayoutWithPlaylist>
               </SettingsProvider>
@@ -271,7 +281,7 @@ export default async function RootLayout({
           </SessionProvider>
         ) : (
           <SettingsProvider settings={settings}>
-            <SignIn settings={settings || undefined} />
+            <SignIn settings={settings ?? undefined} />
           </SettingsProvider>
         )}
       </body>

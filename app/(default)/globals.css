@@ -119,4 +119,17 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none; /* Safari and Chrome */
   }
+  
+  @keyframes pulse-once {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+  
+  .animate-pulse-once {
+    animation: pulse-once 1s cubic-bezier(0.4, 0, 0.6, 1) 2;
+  }
 }

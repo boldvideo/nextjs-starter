@@ -187,7 +187,6 @@ export function VideoDetail({
             isOutOfView={isOutOfView}
             onEnded={handleVideoEnded}
           />
-
         </div>
 
         {/* Content Wrapper - Centered with max-width and padding */}
@@ -201,7 +200,6 @@ export function VideoDetail({
                 {hasPreviousVideo && previousVideo ? (
                   <Link
                     href={`/pl/${playlist.id}/v/${previousVideo.id}`}
-                    prefetch={true}
                     className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
                     aria-label="Previous video"
                     title="Previous video"
@@ -230,7 +228,6 @@ export function VideoDetail({
                 {hasNextVideo && nextVideo ? (
                   <Link
                     href={`/pl/${playlist.id}/v/${nextVideo.id}`}
-                    prefetch={true}
                     className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
                     aria-label="Next video"
                     title="Next video"

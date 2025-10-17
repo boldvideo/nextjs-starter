@@ -1,32 +1,35 @@
 import React from "react";
 import { bold } from "@/client";
-import { VideoThumbnail } from "@/components/video-thumbnail";
-import { FeaturedPlaylist } from "@/components/featured-playlist";
-import type { Settings, Video, Playlist } from "@boldvideo/bold-js";
+import type { Video } from "@boldvideo/bold-js";
+import { getPortalConfig, PortalSettings } from "@/lib/portal-config";
+import { LibraryHomepage } from "@/components/home/library-homepage";
+import { AssistantHomepage } from "@/components/home/assistant-homepage";
+import { EmptyHomepage } from "@/components/home/empty-homepage";
 
 // How often this page should revalidate (in seconds)
 export const revalidate = 60;
-
-// Number of videos to display on the homepage
-const LATEST_VIDEO_LIMIT = 8;
 
 /**
  * Fetches initial data for the home page in parallel.
  * @returns An object containing settings and videos, or nulls if fetches fail.
  */
 async function getHomeData(): Promise<{
-  settings: Settings | null;
+  settings: PortalSettings | null;
   videos: Video[] | null;
 }> {
   try {
-    const [settingsResponse, videosResponse] = await Promise.all([
-      bold.settings(8), // Assuming 8 is a relevant ID or parameter
-      bold.videos.list(LATEST_VIDEO_LIMIT),
-    ]);
-
-    // Basic check if responses are okay; adjust based on actual SDK response structure
+    const settingsResponse = await bold.settings(8);
     const settings = settingsResponse?.data ?? null;
-    const videos = videosResponse?.data ?? null;
+    
+    // Get portal configuration
+    const config = getPortalConfig(settings);
+    
+    // Only fetch videos if we're showing the library layout
+    let videos: Video[] | null = null;
+    if (config.homepage.layout === 'library') {
+      const videosResponse = await bold.videos.list(config.homepage.videosLimit);
+      videos = videosResponse?.data ?? null;
+    }
 
     return { settings, videos };
   } catch (error) {
@@ -37,54 +40,26 @@ async function getHomeData(): Promise<{
 }
 
 /**
- * Home page component that displays latest videos and featured playlists
- * @returns The rendered homepage
+ * Home page component that renders different layouts based on portal configuration
+ * @returns The rendered homepage based on portal settings
  */
 export default async function Home(): Promise<React.JSX.Element> {
   const { settings, videos } = await getHomeData();
-
-  const hasVideos = videos && videos.length > 0;
-  const hasPlaylists =
-    settings?.featured_playlists && settings.featured_playlists.length > 0;
-
-  return (
-    <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
-      {/* Videos Section */}
-      {hasVideos && (
-        <section>
-          <h2 className="font-bold text-3xl mb-5" id="latest-videos">
-            Latest Videos
-          </h2>
-          <ul
-            className="mb-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10"
-            aria-labelledby="latest-videos"
-          >
-            {/* Type assertion needed if videos could be null, but hasVideos guards it */}
-            {(videos as Video[]).map((video) => (
-              <li key={video.id}>
-                <VideoThumbnail video={video} prefetch={true} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* Featured Playlists Section */}
-      {hasPlaylists && (
-        <section>
-          {/* Type assertion needed if settings could be null, but hasPlaylists guards it */}
-          {(settings as Settings).featured_playlists.map(
-            (playlist: Playlist) => (
-              <FeaturedPlaylist key={playlist.id} playlist={playlist} />
-            )
-          )}
-        </section>
-      )}
-
-      {/* Optional: Add a message if neither section has content */}
-      {!hasVideos && !hasPlaylists && (
-        <p className="text-center text-gray-500">No content available yet.</p>
-      )}
-    </div>
-  );
+  const config = getPortalConfig(settings);
+  
+  // Render appropriate homepage based on configuration
+  switch (config.homepage.layout) {
+    case 'assistant':
+      return <AssistantHomepage settings={settings} config={config} />;
+    
+    case 'library':
+      return <LibraryHomepage settings={settings} videos={videos} />;
+    
+    case 'none':
+      return <EmptyHomepage settings={settings} />;
+    
+    default:
+      // Default to library layout
+      return <LibraryHomepage settings={settings} videos={videos} />;
+  }
 }

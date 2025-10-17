@@ -10,27 +10,30 @@ interface LayoutWithPlaylistProps {
   children: ReactNode;
   settings: Settings | null;
   session: Session | null;
+  showHeader?: boolean;
 }
 
-function LayoutContent({ children, settings, session }: LayoutWithPlaylistProps) {
+function LayoutContent({ children, settings, session, showHeader = true }: LayoutWithPlaylistProps) {
   return (
     <>
-      <Header
-        logo={settings?.logo_url || "/bold-logo.svg"}
-        logoDark={settings?.logo_dark_url}
-        menuItems={settings?.menu_items || []}
-        session={session}
-        className="h-18"
-      />
+      {showHeader && (
+        <Header
+          logo={settings?.logo_url || "/bold-logo.svg"}
+          logoDark={settings?.logo_dark_url}
+          menuItems={settings?.menu_items || []}
+          session={session}
+          className="h-18 hidden md:flex"
+        />
+      )}
       <main className="flex-1 relative h-full overflow-y-scroll flex">{children}</main>
     </>
   );
 }
 
-export function LayoutWithPlaylist({ children, settings, session }: LayoutWithPlaylistProps) {
+export function LayoutWithPlaylist({ children, settings, session, showHeader = true }: LayoutWithPlaylistProps) {
   return (
     <PlaylistProvider>
-      <LayoutContent settings={settings} session={session}>
+      <LayoutContent settings={settings} session={session} showHeader={showHeader}>
         {children}
       </LayoutContent>
     </PlaylistProvider>
