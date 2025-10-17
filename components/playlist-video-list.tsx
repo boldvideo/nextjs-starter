@@ -4,14 +4,6 @@ import type { Video } from "@boldvideo/bold-js";
 import { formatDuration } from "util/format-duration";
 import { cn } from "@/lib/utils";
 
-/**
- * Extract video ID from potential "videos/xxx" format
- * Video IDs from playlist API may come prefixed with "videos/"
- */
-function extractVideoId(videoIdOrPath: string): string {
-  return videoIdOrPath.replace(/^videos\//, '');
-}
-
 interface PlaylistVideoListProps {
   videos: Video[];
   playlistId: string;
@@ -35,12 +27,10 @@ export function PlaylistVideoList({
 
   return (
     <ul className={cn("space-y-2", className)}>
-      {videos.map((video) => {
-        const videoId = extractVideoId(video.id);
-        return (
-          <li key={video.id}>
-            <Link
-              href={`/pl/${playlistId}/v/${videoId}`}
+      {videos.map((video) => (
+        <li key={video.id}>
+          <Link
+            href={`/pl/${playlistId}/v/${video.id}`}
             className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-2 sm:p-3 hover:bg-accent transition-colors rounded-lg group"
           >
             {/* Thumbnail */}
@@ -70,8 +60,7 @@ export function PlaylistVideoList({
             </div>
           </Link>
         </li>
-        );
-      })}
+      ))}
     </ul>
   );
 }

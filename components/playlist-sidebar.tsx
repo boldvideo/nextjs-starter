@@ -14,24 +14,14 @@ interface PlaylistSidebarProps {
   playlist: Playlist;
   currentVideoId: string;
   className?: string;
-  onVideoChange?: (video: Video) => void;
   isOpen?: boolean;
   onToggle?: (open: boolean) => void;
-}
-
-/**
- * Extract video ID from potential "videos/xxx" format
- * Video IDs from playlist API may come prefixed with "videos/"
- */
-function extractVideoId(videoIdOrPath: string): string {
-  return videoIdOrPath.replace(/^videos\//, '');
 }
 
 export function PlaylistSidebar({
   playlist,
   currentVideoId,
   className,
-  onVideoChange,
   isOpen: externalIsOpen,
   onToggle,
 }: PlaylistSidebarProps) {
@@ -41,30 +31,10 @@ export function PlaylistSidebar({
   // Use external state if provided, otherwise use internal
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = onToggle || setInternalIsOpen;
-  const router = useRouter();
 
   const currentIndex = playlist.videos.findIndex(
-    (v) => extractVideoId(v.id) === extractVideoId(currentVideoId)
+    (v) => v.id === currentVideoId
   );
-
-  const handleVideoClick = (e: React.MouseEvent, video: Video) => {
-    // Allow default link behavior for cmd/ctrl+click, middle-click, etc.
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) {
-      return;
-    }
-
-    // Prevent default navigation for normal clicks
-    e.preventDefault();
-    setIsOpen(false); // Close mobile drawer
-
-    if (onVideoChange) {
-      // Use callback for client-side switching
-      onVideoChange(video);
-    } else {
-      // Fallback to navigation for standalone usage
-      router.push(`/pl/${playlist.id}/v/${extractVideoId(video.id)}`);
-    }
-  };
 
   return (
     <>
@@ -126,13 +96,12 @@ export function PlaylistSidebar({
         <div className="flex-1 overflow-y-auto no-scrollbar">
           <ul className="divide-y divide-border">
             {playlist.videos.map((video, index) => {
-              const videoId = extractVideoId(video.id);
-              const isCurrent = videoId === extractVideoId(currentVideoId);
+              const isCurrent = video.id === currentVideoId;
               return (
                 <li key={video.id}>
                   <Link
-                    href={`/pl/${playlist.id}/v/${videoId}`}
-                    onClick={(e) => handleVideoClick(e, video)}
+                    href={`/pl/${playlist.id}/v/${video.id}`}
+                    onClick={() => setIsOpen(false)}
                     className={cn(
                       "w-full flex gap-3 p-3 hover:bg-accent transition-colors text-left cursor-pointer",
                       isCurrent && "bg-primary/10 border-l-4 border-l-primary"
