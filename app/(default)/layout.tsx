@@ -275,7 +275,7 @@ export default async function RootLayout({
           </SessionProvider>
         ) : (
           <SettingsProvider settings={settings}>
-            <SignIn settings={settings} />
+            <SignIn settings={settings ?? undefined} />
           </SettingsProvider>
         )}
       </body>
