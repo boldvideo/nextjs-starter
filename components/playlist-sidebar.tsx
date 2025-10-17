@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Playlist, Video } from "@boldvideo/bold-js";
@@ -103,7 +102,7 @@ export function PlaylistSidebar({
                     href={`/pl/${playlist.id}/v/${video.id}`}
                     onClick={() => setIsOpen(false)}
                     className={cn(
-                      "w-full flex gap-3 p-3 hover:bg-accent transition-colors text-left cursor-pointer",
+                      "w-full flex gap-3 p-3 hover:bg-accent transition-colors text-left cursor-pointer relative",
                       isCurrent && "bg-primary/10 border-l-4 border-l-primary"
                     )}
                   >
