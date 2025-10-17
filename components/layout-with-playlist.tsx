@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { Header } from "@/components/header";
-import { PlaylistProvider, usePlaylist } from "@/components/providers/playlist-provider";
+import { PlaylistProvider } from "@/components/providers/playlist-provider";
 import type { Session } from "next-auth";
 import type { Settings } from "@boldvideo/bold-js";
 
@@ -13,8 +13,6 @@ interface LayoutWithPlaylistProps {
 }
 
 function LayoutContent({ children, settings, session }: LayoutWithPlaylistProps) {
-  const { toggle, hasPlaylist } = usePlaylist();
-
   return (
     <>
       <Header
@@ -22,7 +20,6 @@ function LayoutContent({ children, settings, session }: LayoutWithPlaylistProps)
         logoDark={settings?.logo_dark_url}
         menuItems={settings?.menu_items || []}
         session={session}
-        onPlaylistToggle={hasPlaylist ? toggle : undefined}
         className="h-18"
       />
       <main className="flex-1 relative h-full overflow-y-scroll flex">{children}</main>

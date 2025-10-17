@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SearchBar } from "./search-bar";
 import { SearchPreview } from "./search-preview";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { PlaylistToggle } from "./playlist-toggle";
+import { MobileMenu } from "./mobile-menu";
 import { MobileSearch } from "@/components/mobile-search";
 import UserMenu from "@/components/auth/user-menu";
 import type { Session } from "next-auth";
@@ -15,11 +15,10 @@ interface HeaderProps {
   logoDark?: string;
   menuItems: Array<{ url: string; label: string }>;
   session?: Session | null;
-  onPlaylistToggle?: () => void;
   className?: string;
 }
 
-export function Header({ logo, logoDark, menuItems, session, onPlaylistToggle, className }: HeaderProps) {
+export function Header({ logo, logoDark, menuItems, session, className }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   
   // Check if we should use larger header size for wide/short logos
@@ -108,9 +107,9 @@ export function Header({ logo, logoDark, menuItems, session, onPlaylistToggle, c
               <div className="grid grid-cols-3 items-center w-full lg:hidden">
                 {/* Left: Hamburger Menu */}
                 <div className="flex justify-start">
-                  {!searchOpen && onPlaylistToggle && (
+                  {!searchOpen && (
                     <Suspense>
-                      <PlaylistToggle onToggle={onPlaylistToggle} />
+                      <MobileMenu menuItems={menuItems} logo={logo} logoDark={logoDark} />
                     </Suspense>
                   )}
                 </div>

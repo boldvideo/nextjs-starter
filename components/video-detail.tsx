@@ -226,7 +226,7 @@ export function VideoDetail({
             </div>
 
             {/* Content Div - Fills remaining vertical space */}
-            <div className={`flex flex-col flex-1 h-full overflow-hidden mt-6 min-h-[600px] pb-8 transition-opacity duration-300 ${isVideoLoading ? 'opacity-50' : 'opacity-100'}`}>
+            <div className={`flex flex-col flex-1 h-full overflow-hidden mt-6 min-h-[600px] pb-24 lg:pb-8 transition-opacity duration-300 ${isVideoLoading ? 'opacity-50' : 'opacity-100'}`}>
               {/* Mobile Playlist Controls - Only visible on mobile when in playlist */}
               {playlist && (
                 <div className="lg:hidden flex items-center justify-between mb-4">

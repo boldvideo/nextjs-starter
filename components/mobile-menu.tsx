@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
-import { List, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -37,8 +37,8 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
         className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
         onClick={() => setIsMobileMenu(true)}
       >
-        <span className="sr-only">Open playlist selector</span>
-        <List className="w-6 h-6" />
+        <span className="sr-only">Open main menu</span>
+        <Menu className="w-6 h-6" />
       </button>
       {isMobileMenu ? (
         <div className="">
@@ -53,7 +53,44 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
             )}
           >
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-lg">Playlist</h2>
+              <Link
+                href="/"
+                className=""
+                onClick={() => setIsMobileMenu(false)}
+              >
+                {logoDark ? (
+                  <>
+                    {/* Light Mode Logo */}
+                    <Image
+                      src={logo}
+                      alt="Logo"
+                      className="h-12 md:h-16 object-contain object-left block dark:hidden"
+                      height={64}
+                      width={200}
+                      priority
+                    />
+                    {/* Dark Mode Logo */}
+                    <Image
+                      src={logoDark}
+                      alt="Logo"
+                      className="h-12 md:h-16 object-contain object-left hidden dark:block"
+                      height={64}
+                      width={200}
+                      priority
+                    />
+                  </>
+                ) : (
+                  // Default Logo if no dark variant
+                  <Image
+                    src={logo}
+                    alt="Logo"
+                    className="h-12 md:h-16 object-contain object-left"
+                    height={64}
+                    width={200}
+                    priority
+                  />
+                )}
+              </Link>
               <button
                 type="button"
                 className="-m-2.5 rounded-md p-2.5 text-foreground"
@@ -65,7 +102,22 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
             </div>
             <div className="mt-6 flow-root">
               <div className="space-y-2 py-6">
-                {/* Playlist selector content will go here */}
+                {menuItems.map((item: any) => (
+                  <Link
+                    key={item.url}
+                    href={item.url}
+                    onClick={() => setIsMobileMenu(false)}
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+              <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between border-t border-border pt-4">
+                <span className="text-sm font-medium text-foreground">
+                  Toggle Dark Mode
+                </span>
+                <ThemeToggle />
               </div>
             </div>
           </div>
