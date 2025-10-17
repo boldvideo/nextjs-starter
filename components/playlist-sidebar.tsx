@@ -14,7 +14,6 @@ interface PlaylistSidebarProps {
   playlist: Playlist;
   currentVideoId: string;
   className?: string;
-  onVideoChange?: (video: Video) => void;
   isOpen?: boolean;
   onToggle?: (open: boolean) => void;
 }
@@ -23,7 +22,6 @@ export function PlaylistSidebar({
   playlist,
   currentVideoId,
   className,
-  onVideoChange,
   isOpen: externalIsOpen,
   onToggle,
 }: PlaylistSidebarProps) {
@@ -33,23 +31,10 @@ export function PlaylistSidebar({
   // Use external state if provided, otherwise use internal
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = onToggle || setInternalIsOpen;
-  const router = useRouter();
 
   const currentIndex = playlist.videos.findIndex(
     (v) => v.id === currentVideoId
   );
-
-  const handleVideoClick = (video: Video) => {
-    setIsOpen(false); // Close mobile drawer
-
-    if (onVideoChange) {
-      // Use callback for client-side switching
-      onVideoChange(video);
-    } else {
-      // Fallback to navigation for standalone usage
-      router.push(`/pl/${playlist.id}/v/${video.id}`);
-    }
-  };
 
   return (
     <>
@@ -114,8 +99,9 @@ export function PlaylistSidebar({
               const isCurrent = video.id === currentVideoId;
               return (
                 <li key={video.id}>
-                  <button
-                    onClick={() => handleVideoClick(video)}
+                  <Link
+                    href={`/pl/${playlist.id}/v/${video.id}`}
+                    onClick={() => setIsOpen(false)}
                     className={cn(
                       "w-full flex gap-3 p-3 hover:bg-accent transition-colors text-left cursor-pointer",
                       isCurrent && "bg-primary/10 border-l-4 border-l-primary"
@@ -146,7 +132,7 @@ export function PlaylistSidebar({
                         {video.title}
                       </p>
                     </div>
-                  </button>
+                  </Link>
                 </li>
               );
             })}
