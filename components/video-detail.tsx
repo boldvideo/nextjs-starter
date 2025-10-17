@@ -131,7 +131,7 @@ export function VideoDetail({
   // Handle video switching within the playlist
   const handleVideoChange = useCallback(async (newVideo: Video) => {
     if (!playlist) return;
-    
+
     setIsVideoLoading(true);
     try {
       // Fetch the extended video data
