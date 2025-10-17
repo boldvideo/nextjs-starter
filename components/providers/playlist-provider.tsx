@@ -8,47 +8,61 @@ interface PlaylistContextType {
   toggle: () => void;
   hasPlaylist: boolean;
   setHasPlaylist: (hasPlaylist: boolean) => void;
-  isContinuousPlay: boolean;
-  setContinuousPlay: (enabled: boolean) => void;
-  toggleContinuousPlay: () => void;
+  isAutoplay: boolean;
+  setAutoplay: (enabled: boolean) => void;
+  toggleAutoplay: () => void;
 }
 
 const PlaylistContext = createContext<PlaylistContextType | undefined>(undefined);
 
-const CONTINUOUS_PLAY_STORAGE_KEY = 'bold-continuous-play';
+const AUTOPLAY_STORAGE_KEY = 'bold-autoplay';
+const LEGACY_STORAGE_KEY = 'bold-continuous-play'; // For migration
 
 export function PlaylistProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hasPlaylist, setHasPlaylist] = useState(false);
 
   // Initialize from localStorage (client-side only)
-  const [isContinuousPlay, setIsContinuousPlay] = useState(false);
+  const [isAutoplay, setIsAutoplay] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Handle hydration and load from localStorage
+  // Handle hydration and load from localStorage with migration
   useEffect(() => {
     setMounted(true);
-    const stored = localStorage.getItem(CONTINUOUS_PLAY_STORAGE_KEY);
+
+    // Try new key first
+    let stored = localStorage.getItem(AUTOPLAY_STORAGE_KEY);
+
+    // Migrate from old key if new key doesn't exist
+    if (stored === null) {
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy !== null) {
+        stored = legacy;
+        localStorage.setItem(AUTOPLAY_STORAGE_KEY, legacy);
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+    }
+
     if (stored !== null) {
-      setIsContinuousPlay(stored === 'true');
+      setIsAutoplay(stored === 'true');
     }
   }, []);
 
   // Persist to localStorage whenever state changes
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem(CONTINUOUS_PLAY_STORAGE_KEY, String(isContinuousPlay));
+      localStorage.setItem(AUTOPLAY_STORAGE_KEY, String(isAutoplay));
     }
-  }, [isContinuousPlay, mounted]);
+  }, [isAutoplay, mounted]);
 
   const toggle = () => setIsOpen(!isOpen);
 
-  const setContinuousPlay = (enabled: boolean) => {
-    setIsContinuousPlay(enabled);
+  const setAutoplayFn = (enabled: boolean) => {
+    setIsAutoplay(enabled);
   };
 
-  const toggleContinuousPlay = () => {
-    setIsContinuousPlay(prev => !prev);
+  const toggleAutoplay = () => {
+    setIsAutoplay(prev => !prev);
   };
 
   return (
@@ -58,9 +72,9 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
       toggle,
       hasPlaylist,
       setHasPlaylist,
-      isContinuousPlay,
-      setContinuousPlay,
-      toggleContinuousPlay,
+      isAutoplay,
+      setAutoplay: setAutoplayFn,
+      toggleAutoplay,
     }}>
       {children}
     </PlaylistContext.Provider>
