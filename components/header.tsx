@@ -75,7 +75,18 @@ export function Header({ logo, logoDark, menuItems, session, onPlaylistToggle, c
                   )}
                 </Link>
 
-
+                {/* Desktop Navigation Menu */}
+                <div className="hidden lg:flex space-x-1">
+                  {menuItems.map((item, idx) => (
+                    <Link
+                      className="text-sm px-3 py-2 rounded-md hover:bg-primary hover:text-primary-foreground transition-colors"
+                      key={`${item.label}-${idx}`}
+                      href={item.url}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               {/* Right Side - Search, Theme Toggle, and User Menu (Desktop Only) */}
