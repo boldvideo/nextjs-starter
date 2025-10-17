@@ -4,6 +4,7 @@ import { Player } from "@/components/players";
 import { Transcript } from "@/components/transcript";
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
 import { bold } from "@/client";
 import { VideoDescription } from "./video-description";
@@ -20,6 +21,14 @@ import { usePlaylist } from "@/components/providers/playlist-provider";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AutoplayToggle } from "./autoplay-toggle";
+
+/**
+ * Extract video ID from potential "videos/xxx" format
+ * Video IDs from playlist API may come prefixed with "videos/"
+ */
+function extractVideoId(videoIdOrPath: string): string {
+  return videoIdOrPath.replace(/^videos\//, '');
+}
 
 /**
  * CTA type for call-to-action data
@@ -134,12 +143,15 @@ export function VideoDetail({
 
     setIsVideoLoading(true);
     try {
+      // Extract clean video ID (remove "videos/" prefix if present)
+      const videoId = extractVideoId(newVideo.id);
+
       // Fetch the extended video data
-      const response = await bold.videos.get(newVideo.id);
+      const response = await bold.videos.get(videoId);
       if (response?.data) {
         setVideo(response.data);
         // Update the URL without page reload
-        router.replace(`/pl/${playlist.id}/v/${newVideo.id}`, { scroll: false });
+        router.replace(`/pl/${playlist.id}/v/${videoId}`, { scroll: false });
       }
     } catch (error) {
       console.error('Failed to load video:', error);
@@ -149,11 +161,13 @@ export function VideoDetail({
   }, [playlist, router]);
 
   // Playlist navigation logic
-  const currentVideoIndex = playlist?.videos.findIndex(v => v.id === video.id) ?? -1;
+  const currentVideoIndex = playlist?.videos.findIndex(v => extractVideoId(v.id) === extractVideoId(video.id)) ?? -1;
   const hasPreviousVideo = playlist && currentVideoIndex > 0;
   const hasNextVideo = playlist && currentVideoIndex >= 0 && currentVideoIndex < playlist.videos.length - 1;
   const previousVideo = hasPreviousVideo ? playlist.videos[currentVideoIndex - 1] : null;
   const nextVideo = hasNextVideo ? playlist.videos[currentVideoIndex + 1] : null;
+  const previousVideoId = previousVideo ? extractVideoId(previousVideo.id) : null;
+  const nextVideoId = nextVideo ? extractVideoId(nextVideo.id) : null;
 
   // Handle playlist navigation
   const handlePreviousVideo = useCallback(() => {
@@ -231,20 +245,30 @@ export function VideoDetail({
               {playlist && (
                 <div className="lg:hidden flex items-center justify-between mb-4">
                   {/* Previous Button - Left Edge */}
-                  <button
-                    onClick={handlePreviousVideo}
-                    disabled={!hasPreviousVideo}
-                    className={cn(
-                      "p-2 rounded-md transition-colors",
-                      hasPreviousVideo
-                        ? "text-foreground hover:bg-accent"
-                        : "text-muted-foreground/30 cursor-not-allowed"
-                    )}
-                    aria-label="Previous video"
-                    title="Previous video"
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
+                  {hasPreviousVideo && previousVideoId ? (
+                    <Link
+                      href={`/pl/${playlist.id}/v/${previousVideoId}`}
+                      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey) {
+                          e.preventDefault();
+                          handlePreviousVideo();
+                        }
+                      }}
+                      className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
+                      aria-label="Previous video"
+                      title="Previous video"
+                    >
+                      <ChevronLeft size={24} />
+                    </Link>
+                  ) : (
+                    <div
+                      className="p-2 rounded-md text-muted-foreground/30 cursor-not-allowed"
+                      aria-label="Previous video"
+                      title="No previous video"
+                    >
+                      <ChevronLeft size={24} />
+                    </div>
+                  )}
 
                   {/* Center: Counter + Autoplay Toggle */}
                   <div className="flex items-center gap-4">
@@ -255,20 +279,30 @@ export function VideoDetail({
                   </div>
 
                   {/* Next Button - Right Edge */}
-                  <button
-                    onClick={handleNextVideo}
-                    disabled={!hasNextVideo}
-                    className={cn(
-                      "p-2 rounded-md transition-colors",
-                      hasNextVideo
-                        ? "text-foreground hover:bg-accent"
-                        : "text-muted-foreground/30 cursor-not-allowed"
-                    )}
-                    aria-label="Next video"
-                    title="Next video"
-                  >
-                    <ChevronRight size={24} />
-                  </button>
+                  {hasNextVideo && nextVideoId ? (
+                    <Link
+                      href={`/pl/${playlist.id}/v/${nextVideoId}`}
+                      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey) {
+                          e.preventDefault();
+                          handleNextVideo();
+                        }
+                      }}
+                      className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
+                      aria-label="Next video"
+                      title="Next video"
+                    >
+                      <ChevronRight size={24} />
+                    </Link>
+                  ) : (
+                    <div
+                      className="p-2 rounded-md text-muted-foreground/30 cursor-not-allowed"
+                      aria-label="Next video"
+                      title="No next video"
+                    >
+                      <ChevronRight size={24} />
+                    </div>
+                  )}
                 </div>
               )}
 
