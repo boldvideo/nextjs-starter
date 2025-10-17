@@ -4,8 +4,7 @@ import { VideoDetail } from "@/components/video-detail";
 import type { Video, Settings } from "@boldvideo/bold-js";
 import { formatDuration } from "util/format-duration";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 60;
+export const revalidate = 30;
 
 export async function generateMetadata({
   params,
@@ -14,7 +13,9 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { data } = await bold.videos.get(id);
+  const { data } = await bold.videos.get(id, {
+    next: { revalidate: 30, tags: [`video:${id}`] }
+  });
   return {
     title: data.title,
     description: data.description,
@@ -48,13 +49,17 @@ async function getVideoPageData(videoId: string): Promise<{
     // Fetch settings and video in parallel
     const [settingsData, videoResponse] = await Promise.all([
       bold
-        .settings()
+        .settings({ 
+          next: { revalidate: 300, tags: ['settings'] } 
+        })
         .then((response) => response?.data ?? null)
         .catch((error) => {
           console.warn("Unable to load Bold settings for video page:", error);
           return null;
         }),
-      bold.videos.get(videoId),
+      bold.videos.get(videoId, {
+        next: { revalidate: 30, tags: [`video:${videoId}`] }
+      }),
     ]);
 
     const settings = settingsData ?? null;
