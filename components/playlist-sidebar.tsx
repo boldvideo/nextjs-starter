@@ -71,7 +71,7 @@ export function PlaylistSidebar({
           // Mobile transform based on isOpen state
           isOpen ? "translate-x-0" : "-translate-x-full",
           // Desktop: override everything with responsive classes
-          "lg:absolute lg:top-18 lg:bottom-0 lg:translate-x-0 lg:w-80 lg:shadow-none",
+          "lg:absolute lg:top-0 lg:bottom-0 lg:translate-x-0 lg:w-80 lg:shadow-none",
           "flex flex-col",
           className
         )}

@@ -25,7 +25,7 @@ export function VideoDescription({ text }: VideoDescriptionProps) {
   );
 
   return (
-    <div className="min-h-[100px] text-[17px] lg:text-sm leading-relaxed">
+    <div className="min-h-[100px] text-[17px] lg:text-base leading-relaxed">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
