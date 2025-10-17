@@ -73,7 +73,7 @@ export function VideoDetail({
   const prevScrollY = useRef(0);
 
   // Get playlist state from context
-  const { isOpen, setIsOpen, setHasPlaylist } = usePlaylist();
+  const { isOpen, setIsOpen, setHasPlaylist, isAutoplay } = usePlaylist();
 
   // Update playlist availability when component mounts/updates
   useEffect(() => {
@@ -152,6 +152,13 @@ export function VideoDetail({
     );
   }, [video]);
 
+  // Handle video ended - autoplay to next video if enabled
+  const handleVideoEnded = useCallback(() => {
+    if (isAutoplay && hasNextVideo && nextVideo && playlist) {
+      router.push(`/pl/${playlist.id}/v/${nextVideo.id}`);
+    }
+  }, [isAutoplay, hasNextVideo, nextVideo, playlist, router]);
+
   return (
     <AIAssistantProvider onTimeClick={handleTimeSelect}>
       {/* Playlist Sidebar - Fixed Width */}
@@ -178,6 +185,7 @@ export function VideoDetail({
             startTime={startTime}
             className={className}
             isOutOfView={isOutOfView}
+            onEnded={handleVideoEnded}
           />
         </div>
 
