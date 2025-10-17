@@ -4,14 +4,22 @@ import Image from "next/image";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
+import UserMenu from "@/components/auth/user-menu";
+import type { Session } from "next-auth";
 
 interface HeaderProps {
   logo: any;
   logoDark?: string;
   menuItems: Array<{ url: string; label: string }>;
+  session?: Session | null;
 }
 
-export function Header({ logo, logoDark, menuItems }: HeaderProps) {
+export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
+  // Check if we should use larger header size for wide/short logos
+  const useLargeHeader = process.env.NEXT_PUBLIC_LARGE_HEADER === "true";
+  const desktopLogoClass = useLargeHeader ? "h-20" : "h-10";
+  const mobileLogoClass = useLargeHeader ? "h-16" : "h-8";
+
   return (
     <>
       <header className="px-5 lg:px-10 py-4 border-b border-border transition-all">
@@ -27,7 +35,7 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                       <Image
                         src={logo}
                         alt="Logo"
-                        className="h-10 w-auto object-contain block dark:hidden"
+                        className={`${desktopLogoClass} w-auto object-contain block dark:hidden`}
                         height={40}
                         width={160}
                         priority
@@ -36,7 +44,7 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                       <Image
                         src={logoDark}
                         alt="Logo"
-                        className="h-10 w-auto object-contain hidden dark:block"
+                        className={`${desktopLogoClass} w-auto object-contain hidden dark:block`}
                         height={40}
                         width={160}
                         priority
@@ -47,7 +55,7 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                     <Image
                       src={logo}
                       alt="Logo"
-                      className="h-10 w-auto object-contain"
+                      className={`${desktopLogoClass} w-auto object-contain`}
                       height={40}
                       width={160}
                       priority
@@ -69,11 +77,16 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                 </div>
               </div>
 
-              {/* Right Side - Theme Toggle (Desktop Only) */}
+              {/* Right Side - Theme Toggle and User Menu (Desktop Only) */}
               <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end">
                 <Suspense>
                   <ThemeToggle />
                 </Suspense>
+                {session !== undefined && (
+                  <Suspense>
+                    <UserMenu session={session} />
+                  </Suspense>
+                )}
               </div>
 
               {/* Mobile Header Controls */}
@@ -89,8 +102,8 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                   </Suspense>
                 </div>
 
-                {/* Right: Logo */}
-                <div className="flex justify-end">
+                {/* Right: Logo and User Menu */}
+                <div className="flex justify-end items-center space-x-2">
                   <Link href="/">
                     {logoDark ? (
                       <>
@@ -98,7 +111,7 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                         <Image
                           src={logo}
                           alt="Logo"
-                          className="h-8 w-auto object-contain block dark:hidden"
+                          className={`${mobileLogoClass} w-auto object-contain block dark:hidden`}
                           height={32}
                           width={128}
                         />
@@ -106,7 +119,7 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                         <Image
                           src={logoDark}
                           alt="Logo"
-                          className="h-8 w-auto object-contain hidden dark:block"
+                          className={`${mobileLogoClass} w-auto object-contain hidden dark:block`}
                           height={32}
                           width={128}
                         />
@@ -116,12 +129,17 @@ export function Header({ logo, logoDark, menuItems }: HeaderProps) {
                       <Image
                         src={logo}
                         alt="Logo"
-                        className="h-8 w-auto object-contain"
+                        className={`${mobileLogoClass} w-auto object-contain`}
                         height={32}
                         width={128}
                       />
                     )}
                   </Link>
+                  {session !== undefined && (
+                    <Suspense>
+                      <UserMenu session={session} />
+                    </Suspense>
+                  )}
                 </div>
               </div>
             </div>

@@ -23,6 +23,7 @@ Welcome to the Bold Video Starter Kit, the easiest way to get started with <a hr
 - **Dual Player Support**: Choose between Mux Player and Vidstack for video playback
 - **Dark Mode**: Built-in light/dark theme toggle with system preference detection
 - **Search Functionality**: Fast, accessible search with keyboard shortcuts (⌘+K)
+- **Authentication (Optional)**: OAuth support with Google/WorkOS, domain restrictions, and session management
 - **Next.js 15**: Latest App Router architecture with React Server Components
 - **Tailwind CSS v4**: Modern styling with OKLCH color space for better color perception
 - **Responsive Design**: Optimized for all device sizes
@@ -155,6 +156,100 @@ The search implementation is in:
 - `app/(default)/s/page.tsx`: Full search results page
 
 To customize the search experience, you can modify these files according to your preferences.
+
+### Authentication (Optional)
+
+The starter kit includes optional authentication support using [Auth.js](https://authjs.dev/), allowing you to protect your video portal with OAuth providers like Google or WorkOS.
+
+#### Features
+- **Disabled by default**: No authentication required out of the box
+- **Multiple providers**: Support for Google OAuth and WorkOS (can be used simultaneously)
+- **Dual-provider mode**: Automatically shows both Google and WorkOS sign-in when both are configured
+- **Bold team access**: Bold Video team members (@boldvideo.com, @boldvideo.io, @bold.video) always have access via Google OAuth when configured
+- **Domain restrictions**: Limit access to specific email domains
+- **Session management**: Secure JWT-based sessions
+- **User menu**: Profile dropdown with sign-out functionality
+
+#### Setting up Authentication
+
+1. **Enable authentication** by setting environment variables in your `.env.local`:
+
+```env
+# Enable authentication (use either AUTH_ENABLED or NEXT_PUBLIC_AUTH_ENABLED)
+AUTH_ENABLED=true
+
+# Choose your primary provider (google or workos)
+# Note: When both providers are configured, both sign-in options will be available
+AUTH_PROVIDER=workos
+
+# Generate auth secret with: npx auth secret
+AUTH_SECRET=your-generated-secret
+```
+
+2. **Configure your OAuth provider**:
+
+For Google OAuth:
+```env
+AUTH_GOOGLE_ID=your-google-client-id
+AUTH_GOOGLE_SECRET=your-google-client-secret
+```
+
+For WorkOS:
+```env
+AUTH_WORKOS_ID=your-workos-client-id
+AUTH_WORKOS_SECRET=your-workos-secret
+AUTH_WORKOS_CONNECTION=your-connection-id  # Required: Get from WorkOS dashboard
+AUTH_WORKOS_ORG=your-organization-id  # Optional: For org-specific sign-in
+```
+
+3. **Optional: Restrict to specific domains**:
+```env
+# Comma-separated list of allowed email domains
+# Note: Bold team domains are always allowed when Google auth is configured
+NEXT_PUBLIC_AUTH_ALLOWED_DOMAINS=company.com,example.org
+```
+
+#### Dual Provider Setup (Recommended for Bold-hosted portals)
+
+For portals hosted by Bold Video for customers, we recommend configuring both providers:
+
+1. **Configure WorkOS** for your customer's organization SSO
+2. **Configure Google OAuth** to allow Bold team access for support
+
+When both are configured, the sign-in page will show:
+- "Sign in with Organization SSO" button (WorkOS)
+- "Sign in with Google (Bold Team)" button
+
+This ensures both your customer and Bold support team can access the portal when needed.
+
+#### Setting up Google OAuth
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable Google+ API
+4. Create OAuth 2.0 credentials
+5. Add authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (development)
+   - `https://your-domain.com/api/auth/callback/google` (production)
+
+#### Setting up WorkOS
+1. Sign up for [WorkOS](https://workos.com/) and create an organization
+2. Navigate to the SSO section in your WorkOS dashboard
+3. Create a new SSO connection (e.g., "OAuth" or "SAML")
+4. Copy your Connection ID from the dashboard
+5. Add redirect URIs in WorkOS dashboard:
+   - `http://localhost:3000/api/auth/callback/workos` (development)
+   - `https://your-domain.com/api/auth/callback/workos` (production)
+6. Get your API keys from the WorkOS dashboard API Keys section
+
+#### Authentication Files
+
+The authentication implementation is in:
+- `auth.ts`: Main Auth.js configuration
+- `config/auth.ts`: Authentication utilities
+- `components/auth/user-menu.tsx`: User dropdown menu
+- `components/auth/sign-in.tsx`: Sign-in page component
+- `middleware.ts`: Route protection logic
 
 ## Deployment
 To deploy your app on [Vercel](https://vercel.com), follow these steps:
