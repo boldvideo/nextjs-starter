@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Playlist, Video } from "@boldvideo/bold-js";
-import { X, List, ArrowLeft } from "lucide-react";
+import { X, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDuration } from "util/format-duration";
 import { ContinuousPlayToggle } from "./continuous-play-toggle";
@@ -29,7 +29,7 @@ export function PlaylistSidebar({
 }: PlaylistSidebarProps) {
   // Internal state for when no external control
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  
+
   // Use external state if provided, otherwise use internal
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
   const setIsOpen = onToggle || setInternalIsOpen;
@@ -41,7 +41,7 @@ export function PlaylistSidebar({
 
   const handleVideoClick = (video: Video) => {
     setIsOpen(false); // Close mobile drawer
-    
+
     if (onVideoChange) {
       // Use callback for client-side switching
       onVideoChange(video);
@@ -53,8 +53,6 @@ export function PlaylistSidebar({
 
   return (
     <>
-
-
       {/* Backdrop (mobile only) */}
       {isOpen && (
         <div
@@ -72,8 +70,8 @@ export function PlaylistSidebar({
           "transition-transform duration-300 ease-in-out",
           // Mobile transform based on isOpen state
           isOpen ? "translate-x-0" : "-translate-x-full",
-          // Desktop: override everything with responsive classes  
-          "lg:fixed lg:top-18 lg:bottom-0 lg:translate-x-0 lg:w-80 lg:shadow-none",
+          // Desktop: override everything with responsive classes
+          "lg:absolute lg:top-18 lg:bottom-0 lg:translate-x-0 lg:w-80 lg:shadow-none",
           "flex flex-col",
           className
         )}
@@ -92,7 +90,8 @@ export function PlaylistSidebar({
             </Link>
             <p className="text-sm text-muted-foreground mt-1">
               {playlist.videos.length} videos
-              {currentIndex >= 0 && ` • ${currentIndex + 1} of ${playlist.videos.length}`}
+              {currentIndex >= 0 &&
+                ` • ${currentIndex + 1} of ${playlist.videos.length}`}
             </p>
           </div>
 

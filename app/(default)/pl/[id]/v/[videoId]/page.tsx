@@ -84,16 +84,21 @@ async function getPlaylistVideoData(
   settings: Settings | null;
 }> {
   try {
-    const [playlistResponse, videoResponse, settingsResponse] =
-      await Promise.all([
-        bold.playlists.get(playlistId),
-        bold.videos.get(videoId),
-        bold.settings(),
-      ]);
+    const [playlistResponse, videoResponse, settingsData] = await Promise.all([
+      bold.playlists.get(playlistId),
+      bold.videos.get(videoId),
+      bold
+        .settings()
+        .then((response) => response?.data ?? null)
+        .catch((error) => {
+          console.warn("Unable to load Bold settings for playlist video page:", error);
+          return null;
+        }),
+    ]);
 
     const playlist = playlistResponse?.data ?? null;
     const video = videoResponse?.data ?? null;
-    const settings = settingsResponse?.data ?? null;
+    const settings = settingsData ?? null;
 
     return { playlist, video, settings };
   } catch (error) {
@@ -125,11 +130,6 @@ export default async function PlaylistVideoPage({
   // If playlist doesn't exist or video is not in playlist, redirect to standalone video
   if (!playlist || !playlist.videos.some((v) => v.id === videoId)) {
     redirect(`/v/${videoId}`);
-  }
-
-  // If settings failed to load, still show the page (non-critical)
-  if (!settings) {
-    notFound();
   }
 
   const startTime = t ? Number(t) : undefined;

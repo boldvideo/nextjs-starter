@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { formatRelative } from "date-fns";
 import { Player } from "@/components/players";
 import { Transcript } from "@/components/transcript";
@@ -8,7 +7,6 @@ import { useRouter } from "next/navigation";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
 import { bold } from "@/client";
 import { VideoDescription } from "./video-description";
-import { ChapterList } from "./chapter-list";
 import { ChaptersSidebar } from "./chapters-sidebar";
 import { MobileChapterTabs } from "./mobile-chapter-tabs";
 import { VideoContentTabs, VideoTabId } from "./video-content-tabs";
@@ -51,7 +49,7 @@ interface VideoDetailProps {
   video: ExtendedVideo;
   startTime?: number;
   className?: string;
-  settings: Settings;
+  settings: Settings | null;
   playlist?: Playlist;
 }
 
@@ -67,10 +65,8 @@ export function VideoDetail({
 }: VideoDetailProps): React.JSX.Element {
   const router = useRouter();
   const playerRef = useRef<HTMLVideoElement | null>(null);
-  const playerContainerRef = useRef<HTMLDivElement>(null);
   const [video, setVideo] = useState<ExtendedVideo>(initialVideo);
   const [isVideoLoading, setIsVideoLoading] = useState(false);
-  const [isTranscriptLoading, setIsTranscriptLoading] = useState(false);
   const [hasTranscript, setHasTranscript] = useState(false);
   const [isOutOfView, setIsOutOfView] = useState<boolean>(false);
   const prevScrollY = useRef(0);
@@ -91,7 +87,7 @@ export function VideoDetail({
   const hasChapters = Boolean(video.chapters);
 
   // Check if AI assistant should be shown (requires both has_ai flag and transcript)
-  const showAIAssistant = Boolean(settings.has_ai && hasTranscript);
+  const showAIAssistant = Boolean(settings?.has_ai && hasTranscript);
 
   // Handle scroll behavior for floating player
   const handleScroll = useCallback(() => {
@@ -211,10 +207,7 @@ export function VideoDetail({
           {/* Content Wrapper - Centered with max-width */}
           <div className="w-full mx-auto max-w-[1500px] px-4 md:px-14 flex flex-col h-full">
             {/* Video Player - Fixed aspect ratio */}
-            <div
-              ref={playerContainerRef}
-              className="w-full bg-black aspect-video relative"
-            >
+            <div className="w-full bg-black aspect-video relative">
               {isVideoLoading && (
                 <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-10 transition-opacity duration-300">
                   <div className="text-white text-lg animate-pulse">Loading...</div>
@@ -368,9 +361,9 @@ export function VideoDetail({
                       <div className="h-full">
                         <AIAssistant
                           videoId={video.id}
-                          name={settings.ai_name || "AI Assistant"}
-                          avatar={settings.ai_avatar || "/default-avatar.png"}
-                          greeting={settings.ai_greeting}
+                          name={settings?.ai_name || "AI Assistant"}
+                          avatar={settings?.ai_avatar || "/default-avatar.png"}
+                          greeting={settings?.ai_greeting}
                           subdomain={""}
                           isEmbedded={true}
                           className="h-full"

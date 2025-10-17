@@ -25,7 +25,7 @@ function LayoutContent({ children, settings, session }: LayoutWithPlaylistProps)
         onPlaylistToggle={hasPlaylist ? toggle : undefined}
         className="h-18"
       />
-      <main className="flex-1 h-full overflow-y-scroll flex">{children}</main>
+      <main className="flex-1 relative h-full overflow-y-scroll flex">{children}</main>
     </>
   );
 }
