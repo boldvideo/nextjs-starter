@@ -169,20 +169,20 @@ export function VideoDetail({
       <div
         className={cn("flex-1 flex flex-col min-h-0", playlist && "lg:ml-80")}
       >
-        {/* Content Wrapper - Centered with max-width */}
-        <div className="w-full mx-auto max-w-[1500px] px-4 md:px-14 flex flex-col h-full">
-          {/* Video Player - Fixed aspect ratio */}
-          <div className="w-full bg-black aspect-video relative">
-            <Player
-              video={video}
-              autoPlay={true}
-              ref={playerRef}
-              startTime={startTime}
-              className={className}
-              isOutOfView={isOutOfView}
-            />
-          </div>
+        {/* Video Player - Fixed aspect ratio, edge-to-edge on mobile */}
+        <div className="w-full bg-black aspect-video relative">
+          <Player
+            video={video}
+            autoPlay={true}
+            ref={playerRef}
+            startTime={startTime}
+            className={className}
+            isOutOfView={isOutOfView}
+          />
+        </div>
 
+        {/* Content Wrapper - Centered with max-width and padding */}
+        <div className="w-full mx-auto max-w-[1500px] px-4 md:px-14 flex flex-col h-full">
           {/* Content Div - Fills remaining vertical space */}
           <div className="flex flex-col flex-1 h-full overflow-hidden mt-6 min-h-[600px] pb-24 lg:pb-8">
             {/* Mobile Playlist Controls - Only visible on mobile when in playlist */}
