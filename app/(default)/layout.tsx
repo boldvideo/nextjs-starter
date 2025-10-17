@@ -4,7 +4,7 @@ import "./globals.css";
 import { bold } from "@/client";
 import type { Settings } from "@boldvideo/bold-js";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { Header } from "@/components/header";
+import { LayoutWithPlaylist } from "@/components/layout-with-playlist";
 import { SettingsProvider } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { auth } from "@/auth";
@@ -264,22 +264,18 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className="bg-background flex flex-col h-screen lg:h-auto min-h-screen">
+      <body className="bg-background flex flex-col min-h-screen">
         {showContent ? (
           <SessionProvider session={session}>
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <SettingsProvider settings={settings}>
-                {showHeader && (
-                  <Header
-                    logo={settings?.logo_url || "/bold-logo.svg"}
-                    logoDark={settings?.logo_dark_url}
-                    menuItems={settings?.menu_items || []}
-                    session={session}
-                  />
-                )}
-                <main className="flex-1 min-h-0 flex flex-col items-center">
+                <LayoutWithPlaylist
+                  settings={settings}
+                  session={session}
+                  showHeader={showHeader}
+                >
                   {children}
-                </main>
+                </LayoutWithPlaylist>
               </SettingsProvider>
             </ThemeProvider>
           </SessionProvider>

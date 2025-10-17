@@ -12,9 +12,10 @@ interface HeaderProps {
   logoDark?: string;
   menuItems: Array<{ url: string; label: string }>;
   session?: Session | null;
+  className?: string;
 }
 
-export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
+export function Header({ logo, logoDark, menuItems, session, className }: HeaderProps) {
   // Check if we should use larger header size for wide/short logos
   const useLargeHeader = process.env.NEXT_PUBLIC_LARGE_HEADER === "true";
   const desktopLogoClass = useLargeHeader ? "h-20" : "h-10";
@@ -22,7 +23,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
 
   return (
     <>
-      <header className="px-5 lg:px-10 py-4 border-b border-border transition-all">
+      <header className={`px-5 lg:px-10 py-4 border-b border-border transition-all ${className || ""}`}>
         <div className="container mx-auto">
           <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">

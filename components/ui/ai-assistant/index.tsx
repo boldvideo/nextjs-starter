@@ -282,7 +282,7 @@ export const AIAssistant = ({
         <div
           ref={scrollContainerRef}
           onClick={handleTimestampInteraction}
-          className="flex-1 min-h-0 overflow-y-auto"
+          className="flex-1 min-h-0 overflow-y-auto px-4"
         >
           {/* Welcome message */}
           <div className="mb-4">
@@ -349,8 +349,8 @@ export const AIAssistant = ({
           ))}
         </div>
 
-        {/* Input Area */}
-        <div className="py-4 bg-background">
+        {/* Input Area - Sticks to bottom of container */}
+        <div className="mt-auto bg-background border-t p-4 shadow-lg">
           <div className="relative">
             <input
               ref={inputRef}
