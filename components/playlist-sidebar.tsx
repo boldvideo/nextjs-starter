@@ -19,6 +19,14 @@ interface PlaylistSidebarProps {
   onToggle?: (open: boolean) => void;
 }
 
+/**
+ * Extract video ID from potential "videos/xxx" format
+ * Video IDs from playlist API may come prefixed with "videos/"
+ */
+function extractVideoId(videoIdOrPath: string): string {
+  return videoIdOrPath.replace(/^videos\//, '');
+}
+
 export function PlaylistSidebar({
   playlist,
   currentVideoId,
@@ -36,10 +44,17 @@ export function PlaylistSidebar({
   const router = useRouter();
 
   const currentIndex = playlist.videos.findIndex(
-    (v) => v.id === currentVideoId
+    (v) => extractVideoId(v.id) === extractVideoId(currentVideoId)
   );
 
-  const handleVideoClick = (video: Video) => {
+  const handleVideoClick = (e: React.MouseEvent, video: Video) => {
+    // Allow default link behavior for cmd/ctrl+click, middle-click, etc.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) {
+      return;
+    }
+
+    // Prevent default navigation for normal clicks
+    e.preventDefault();
     setIsOpen(false); // Close mobile drawer
 
     if (onVideoChange) {
@@ -47,7 +62,7 @@ export function PlaylistSidebar({
       onVideoChange(video);
     } else {
       // Fallback to navigation for standalone usage
-      router.push(`/pl/${playlist.id}/v/${video.id}`);
+      router.push(`/pl/${playlist.id}/v/${extractVideoId(video.id)}`);
     }
   };
 
@@ -111,11 +126,13 @@ export function PlaylistSidebar({
         <div className="flex-1 overflow-y-auto no-scrollbar">
           <ul className="divide-y divide-border">
             {playlist.videos.map((video, index) => {
-              const isCurrent = video.id === currentVideoId;
+              const videoId = extractVideoId(video.id);
+              const isCurrent = videoId === extractVideoId(currentVideoId);
               return (
                 <li key={video.id}>
-                  <button
-                    onClick={() => handleVideoClick(video)}
+                  <Link
+                    href={`/pl/${playlist.id}/v/${videoId}`}
+                    onClick={(e) => handleVideoClick(e, video)}
                     className={cn(
                       "w-full flex gap-3 p-3 hover:bg-accent transition-colors text-left cursor-pointer",
                       isCurrent && "bg-primary/10 border-l-4 border-l-primary"
@@ -146,7 +163,7 @@ export function PlaylistSidebar({
                         {video.title}
                       </p>
                     </div>
-                  </button>
+                  </Link>
                 </li>
               );
             })}
