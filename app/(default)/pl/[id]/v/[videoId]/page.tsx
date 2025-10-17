@@ -33,12 +33,8 @@ export async function generateMetadata({
 
   try {
     const [playlistResponse, videoResponse] = await Promise.all([
-      bold.playlists.get(playlistId, {
-        next: { revalidate: 60, tags: [`playlist:${playlistId}`] }
-      }),
-      bold.videos.get(videoId, {
-        next: { revalidate: 30, tags: [`video:${videoId}`] }
-      }),
+      bold.playlists.get(playlistId),
+      bold.videos.get(videoId),
     ]);
 
     const playlist = playlistResponse?.data;
@@ -88,16 +84,10 @@ async function getPlaylistVideoData(
 }> {
   try {
     const [playlistResponse, videoResponse, settingsData] = await Promise.all([
-      bold.playlists.get(playlistId, {
-        next: { revalidate: 60, tags: [`playlist:${playlistId}`] }
-      }),
-      bold.videos.get(videoId, {
-        next: { revalidate: 30, tags: [`video:${videoId}`] }
-      }),
+      bold.playlists.get(playlistId),
+      bold.videos.get(videoId),
       bold
-        .settings({ 
-          next: { revalidate: 300, tags: ['settings'] } 
-        })
+        .settings()
         .then((response) => response?.data ?? null)
         .catch((error) => {
           console.warn("Unable to load Bold settings for playlist video page:", error);
