@@ -46,12 +46,18 @@ async function getVideoPageData(videoId: string): Promise<{
 }> {
   try {
     // Fetch settings and video in parallel
-    const [settingsResponse, videoResponse] = await Promise.all([
-      bold.settings(), // Fetch general settings
+    const [settingsData, videoResponse] = await Promise.all([
+      bold
+        .settings()
+        .then((response) => response?.data ?? null)
+        .catch((error) => {
+          console.warn("Unable to load Bold settings for video page:", error);
+          return null;
+        }),
       bold.videos.get(videoId),
     ]);
 
-    const settings = settingsResponse?.data ?? null;
+    const settings = settingsData ?? null;
     const video = videoResponse?.data ?? null;
 
     // Handle 404 / logical "missing" case for video
@@ -81,7 +87,7 @@ export default async function VideoPage({
   const { settings, video } = await getVideoPageData(id);
 
   // This check might be redundant if getVideoPageData throws notFound(), but kept for safety
-  if (!video || !settings) {
+  if (!video) {
     // If settings are critical and failed, maybe show an error or different notFound logic
     notFound();
   }

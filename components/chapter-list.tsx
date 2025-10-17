@@ -79,11 +79,7 @@ export function ChapterList({
                 }
               }}
             >
-              <div className="flex items-start">
-                <div className="w-6 leading-5 pt-px text-xs font-normal tracking-tight">
-                  {idx + 1}
-                </div>
-              </div>
+
               <div className="relative w-20 h-12 aspect-video flex-shrink-0 overflow-hidden border border-ring group-hover:border-primary">
                 <Image
                   // Consider adding a placeholder/fallback image

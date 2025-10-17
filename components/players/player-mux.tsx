@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { bold } from "@/client";
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState, memo } from "react";
 import type { Video } from "@boldvideo/bold-js";
 
 // Import MuxPlayer with SSR disabled to prevent hydration errors
@@ -80,12 +80,14 @@ interface MuxPlayerComponentProps {
   className?: string;
   /** Whether the player is out of view and should be shown as a floating player */
   isOutOfView?: boolean;
+  /** Callback for when the video ends */
+  onEnded?: (e: Event) => void;
 }
 
 /**
  * MuxPlayer component for video playback using Mux's player
  */
-export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
+const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
   {
     video,
     autoPlay,
@@ -94,6 +96,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
     startTime,
     className = "",
     isOutOfView = false,
+    onEnded,
   }: MuxPlayerComponentProps,
   ref
 ) {
@@ -270,22 +273,17 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
     if (onTimeUpdate) onTimeUpdate(e);
   };
 
+  const handleEnded = (e: Event) => {
+    bold.trackEvent(video, e);
+    if (onEnded) onEnded(e);
+  };
+
   return (
     <>
       <div
         ref={containerRef}
-        className={`
-          ${
-            isOutOfView
-              ? "fixed sm:bottom-4 sm:right-4 sm:top-auto top-0 w-full sm:w-1/3 lg:w-1/4 bg-black z-50 rounded-lg shadow-lg"
-              : "relative w-full h-full flex items-center justify-center"
-          }
-          aspect-video 
-        `}
-        style={{
-          // Make sure mini player has proper interactions
-          pointerEvents: isOutOfView ? "auto" : "inherit",
-        }}
+        className="relative w-full h-full flex items-center justify-center"
+
       >
         <MuxPlayer
           ref={(el) => {
@@ -323,6 +321,7 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
           onTimeUpdate={handleTimeUpdate}
           onPlay={(e) => bold.trackEvent(video, e)}
           onPause={(e) => bold.trackEvent(video, e)}
+          onEnded={handleEnded}
           onLoadedMetadata={(e) => {
             bold.trackEvent(video, e);
             console.log("MuxPlayer loadedmetadata event");
@@ -349,29 +348,21 @@ export const MuxPlayerComponent = forwardRef(function MuxPlayerComponent(
           accentColor={primaryColor || undefined}
         />
 
-        {isOutOfView && (
-          <button
-            className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 z-20 hover:bg-opacity-80"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            aria-label="Close floating player"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        )}
+
       </div>
     </>
+  );
+});
+
+// Optimize with memo to prevent unnecessary re-renders
+export const MuxPlayerComponent = memo(MuxPlayerComponentBase, (prevProps, nextProps) => {
+  // Only re-render if essential video properties change
+  return (
+    prevProps.video.playback_id === nextProps.video.playback_id &&
+    prevProps.video.id === nextProps.video.id &&
+    prevProps.startTime === nextProps.startTime &&
+    prevProps.autoPlay === nextProps.autoPlay &&
+    prevProps.currentTime === nextProps.currentTime &&
+    prevProps.onEnded === nextProps.onEnded
   );
 });
