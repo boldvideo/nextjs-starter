@@ -6,11 +6,13 @@ import { formatDuration } from "util/format-duration";
 interface VideoThumbnailProps {
   video: any;
   prefetch?: boolean;
+  playlistId?: string;
 }
 
 export function VideoThumbnail({
   video,
   prefetch = false,
+  playlistId,
 }: VideoThumbnailProps) {
   return (
     <div className="aspect-video group relative">
@@ -27,7 +29,7 @@ export function VideoThumbnail({
         </span>
       </div>
       <h3 className="mt-4 font-semibold text-lg">
-        <Link href={`/v/${video.id}`} prefetch={prefetch}>
+        <Link href={playlistId ? `/pl/${playlistId}/v/${video.id}` : `/v/${video.id}`} prefetch={prefetch}>
           <span className="absolute -inset-2.5 z-10"></span>
           <span>{video.title}</span>
         </Link>

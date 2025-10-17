@@ -15,9 +15,10 @@ interface HeaderProps {
   logoDark?: string;
   menuItems: Array<{ url: string; label: string }>;
   session?: Session | null;
+  className?: string;
 }
 
-export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
+export function Header({ logo, logoDark, menuItems, session, className }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   
   // Check if we should use larger header size for wide/short logos
@@ -29,11 +30,11 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
     <>
       <header
         className={
-          `px-5 lg:px-10 py-4 border-b border-border transition-all ` +
+          `px-5 lg:px-10 py-4 border-b border-border transition-all ${className || ""} ` +
           (searchOpen ? "sticky top-0 z-50 bg-background/90 backdrop-blur" : "")
         }
       >
-        <div className="container mx-auto">
+        <div className="w-full">
           <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
               {/* Logo */}
@@ -108,11 +109,7 @@ export function Header({ logo, logoDark, menuItems, session }: HeaderProps) {
                 <div className="flex justify-start">
                   {!searchOpen && (
                     <Suspense>
-                      <MobileMenu
-                        menuItems={menuItems}
-                        logo={logo}
-                        logoDark={logoDark}
-                      />
+                      <MobileMenu menuItems={menuItems} logo={logo} logoDark={logoDark} />
                     </Suspense>
                   )}
                 </div>
