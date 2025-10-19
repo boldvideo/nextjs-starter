@@ -2,15 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import type { Playlist, Video } from "@boldvideo/bold-js";
 import { X, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDuration } from "util/format-duration";
 import { AutoplayToggle } from "./autoplay-toggle";
-import { useProgress } from "./providers/progress-provider";
-import { ProgressBar } from "./progress-bar";
-import { CompletionIndicator } from "./completion-indicator";
+import { ThumbnailImage } from "./video-thumbnail/thumbnail-image";
 
 interface PlaylistSidebarProps {
   playlist: Playlist;
@@ -37,9 +34,6 @@ export function PlaylistSidebar({
   const currentIndex = playlist.videos.findIndex(
     (v) => v.id === currentVideoId
   );
-
-  // Get progress data
-  const { progressMap } = useProgress();
 
   return (
     <>
@@ -103,15 +97,6 @@ export function PlaylistSidebar({
             {playlist.videos.map((video, index) => {
               const isCurrent = video.id === currentVideoId;
 
-              // Get progress for this video
-              const progressRecord = progressMap.get(video.id);
-              const progress = progressRecord
-                ? {
-                    percentWatched: progressRecord.percentWatched,
-                    completed: progressRecord.completed,
-                  }
-                : null;
-
               return (
                 <li key={video.id}>
                   <Link
@@ -125,19 +110,14 @@ export function PlaylistSidebar({
                   >
                     {/* Thumbnail */}
                     <div className="relative flex-shrink-0 w-32 aspect-video bg-muted rounded overflow-hidden">
-                      <Image
-                        src={video.thumbnail}
-                        alt={video.title}
-                        fill
-                        className="object-cover"
+                      <ThumbnailImage
+                        video={video}
                         sizes="128px"
+                        showCompletionIndicator={false}
                       />
 
-                      {/* Progress bar overlay */}
-                      {progress && <ProgressBar percentWatched={progress.percentWatched} completed={progress.completed} />}
-
                       {/* Duration badge - always show in sidebar */}
-                      <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">
+                      <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded z-10">
                         {formatDuration(video.duration)}
                       </div>
                     </div>

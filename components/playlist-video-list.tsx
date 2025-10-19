@@ -1,13 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import type { Video } from "@boldvideo/bold-js";
 import { formatDuration } from "util/format-duration";
 import { cn } from "@/lib/utils";
+import { ThumbnailImage } from "./video-thumbnail/thumbnail-image";
 import { useProgress } from "./providers/progress-provider";
-import { ProgressBar } from "./progress-bar";
-import { CompletionIndicator } from "./completion-indicator";
 
 interface PlaylistVideoListProps {
   videos: Video[];
@@ -35,7 +33,7 @@ export function PlaylistVideoList({
   return (
     <ul className={cn("space-y-2", className)}>
       {videos.map((video) => {
-        // Get progress for this video
+        // Get progress for this video (for duration badge logic)
         const progressRecord = progressMap.get(video.id);
         const progress = progressRecord
           ? {
@@ -52,22 +50,15 @@ export function PlaylistVideoList({
             >
               {/* Thumbnail */}
               <div className="relative flex-shrink-0 w-full sm:w-40 md:w-48 aspect-video bg-muted rounded-lg overflow-hidden">
-                <Image
-                  src={video.thumbnail}
-                  alt={video.title}
-                  fill
-                  className="object-cover group-hover:ring-1 ring-primary transition-all"
+                <ThumbnailImage
+                  video={video}
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 160px, 192px"
+                  className="object-cover group-hover:ring-1 ring-primary transition-all"
                 />
 
-                {/* Progress bar overlay */}
-                {progress && <ProgressBar percentWatched={progress.percentWatched} completed={progress.completed} />}
-
-                {/* Duration badge or completion indicator */}
-                {progress?.completed ? (
-                  <CompletionIndicator completed={true} />
-                ) : (
-                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                {/* Duration badge override - show when not completed */}
+                {!progress?.completed && (
+                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded z-10">
                     {formatDuration(video.duration)}
                   </div>
                 )}

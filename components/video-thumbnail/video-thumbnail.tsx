@@ -2,8 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatRelative } from "date-fns/formatRelative";
 import { formatDuration } from "util/format-duration";
-import { ProgressBar } from "./progress-bar";
-import { CompletionIndicator } from "./completion-indicator";
+import { ProgressBar } from "../progress-bar";
+import { CompletionIndicator } from "../completion-indicator";
 
 interface VideoThumbnailProps {
   video: any;
@@ -21,6 +21,7 @@ export function VideoThumbnail({
   playlistId,
   progress,
 }: VideoThumbnailProps) {
+
   return (
     <div className="aspect-video group relative">
       <div className="aspect-video relative overflow-hidden rounded-lg">
@@ -56,3 +57,5 @@ export function VideoThumbnail({
     </div>
   );
 }
+
+
