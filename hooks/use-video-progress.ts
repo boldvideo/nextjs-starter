@@ -8,6 +8,7 @@ import {
   saveProgress,
   deleteProgress,
   isIndexedDBAvailable,
+  isIndexedDBDefined,
 } from '@/lib/progress/store';
 import type { ProgressRecord } from '@/lib/progress/types';
 import { PROGRESS_CONFIG } from '@/lib/progress/types';
@@ -55,8 +56,8 @@ export function useVideoProgress({
   // Get tenant ID
   const tenantId = getTenantId(settings);
 
-  // Check if we can use IndexedDB
-  const canUseStorage = enabled && isIndexedDBAvailable() && tenantId !== null;
+  // Check if we can use IndexedDB (sync check for initial render)
+  const canUseStorage = enabled && isIndexedDBDefined() && tenantId !== null;
 
   // Sync refs with current values
   useEffect(() => {
@@ -70,6 +71,22 @@ export function useVideoProgress({
   useEffect(() => {
     canUseStorageRef.current = canUseStorage;
   }, [canUseStorage]);
+
+  /**
+   * Probe actual IndexedDB availability on mount
+   * Updates canUseStorageRef with real availability (catches private mode, quota, etc.)
+   */
+  useEffect(() => {
+    if (!enabled || !tenantId) {
+      canUseStorageRef.current = false;
+      return;
+    }
+
+    // Async probe on mount
+    isIndexedDBAvailable().then((available) => {
+      canUseStorageRef.current = available;
+    });
+  }, [enabled, tenantId]);
 
   /**
    * Clear pending timeout when video changes or component unmounts
@@ -167,7 +184,7 @@ export function useVideoProgress({
         }
 
         saveTimeoutRef.current = setTimeout(() => {
-          saveCurrentProgress(position);
+          saveProgressRef.current(position);
         }, PROGRESS_CONFIG.THROTTLE_INTERVAL - timeSinceLastSave);
 
         return;
@@ -206,6 +223,10 @@ export function useVideoProgress({
     [videoId, duration]
   );
 
+  // Keep ref synchronized with latest callback on every render
+  const saveProgressRef = useRef(saveCurrentProgress);
+  saveProgressRef.current = saveCurrentProgress;
+
   /**
    * Clear progress for this video
    */
@@ -230,27 +251,27 @@ export function useVideoProgress({
 
     const handleTimeUpdate = () => {
       const position = player.currentTime;
-      saveCurrentProgress(position);
+      saveProgressRef.current(position);
     };
 
     const handlePause = () => {
       const position = player.currentTime;
       // Force immediate save on pause (bypass throttle)
       lastSaveTimeRef.current = 0;
-      saveCurrentProgress(position);
+      saveProgressRef.current(position);
     };
 
     const handleSeeking = () => {
       const position = player.currentTime;
       // Force immediate save on seek (bypass throttle)
       lastSaveTimeRef.current = 0;
-      saveCurrentProgress(position);
+      saveProgressRef.current(position);
     };
 
     const handleEnded = () => {
       // Mark as complete (100% position)
       lastSaveTimeRef.current = 0;
-      saveCurrentProgress(duration);
+      saveProgressRef.current(duration);
     };
 
     // Attach event listeners
@@ -271,7 +292,7 @@ export function useVideoProgress({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [playerRef, canUseStorage, saveCurrentProgress, duration]);
+  }, [playerRef, canUseStorage, duration]);
 
   return {
     progress,

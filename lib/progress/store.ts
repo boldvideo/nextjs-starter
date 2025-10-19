@@ -2,6 +2,7 @@ import { openDB, type IDBPDatabase } from 'idb';
 import type { ProgressRecord } from './types';
 import { PROGRESS_CONFIG } from './types';
 import { broadcastProgressUpdate } from './sync';
+import { isValidPosition, isValidProgressRecord } from './validation';
 
 interface ProgressDBSchema {
   progress: {
@@ -63,6 +64,13 @@ export async function getProgress(
     const db = await getDB();
     const key = generateProgressKey(tenantId, videoId);
     const record = await db.get(PROGRESS_CONFIG.STORE_NAME, key);
+
+    // Discard corrupted records
+    if (record && !isValidProgressRecord(record)) {
+      console.warn('[ProgressStore] Corrupted record found, discarding:', record.id);
+      return null;
+    }
+
     return record || null;
   } catch (error) {
     console.warn('[ProgressStore] Failed to get progress:', error);
@@ -81,6 +89,15 @@ export async function saveProgress(
   position: number,
   duration: number
 ): Promise<void> {
+  // Validate inputs
+  if (!isValidPosition(position, duration)) {
+    console.warn('[ProgressStore] Invalid position, skipping save:', {
+      position,
+      duration,
+    });
+    return;
+  }
+
   try {
     const db = await getDB();
     const key = generateProgressKey(tenantId, videoId);
@@ -177,10 +194,34 @@ export async function clearAllProgress(tenantId: string): Promise<void> {
 }
 
 /**
- * Check if IndexedDB is available
- * Returns false in incognito mode or unsupported browsers
+ * Check if IndexedDB is available and usable
+ * Performs actual database access to catch private mode, quota, permissions
  */
-export function isIndexedDBAvailable(): boolean {
+export async function isIndexedDBAvailable(): Promise<boolean> {
+  try {
+    // Type check first
+    if (typeof indexedDB === 'undefined') {
+      return false;
+    }
+
+    // Probe: try to open a temporary database
+    const testDB = await openDB('__bold_test__', 1);
+    await testDB.close();
+
+    // Clean up test database
+    indexedDB.deleteDatabase('__bold_test__');
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Synchronous availability check (type check only)
+ * Use for initial render - async probe happens in effects
+ */
+export function isIndexedDBDefined(): boolean {
   try {
     return typeof indexedDB !== 'undefined';
   } catch {

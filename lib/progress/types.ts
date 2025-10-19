@@ -12,13 +12,22 @@ export interface ProgressRecord {
   /** Tenant ID with "bt_" prefix (e.g., "bt_ranger") */
   tenantId: string;
 
-  /** Last playback position in seconds (for resume) */
+  /**
+   * Last playback position in seconds (for resume)
+   * Runtime validated: must be finite, non-negative, <= duration
+   */
   position: number;
 
-  /** Furthest position ever watched in seconds (for progress bars) */
+  /**
+   * Furthest position ever watched in seconds (for progress bars)
+   * Runtime validated: must be finite, non-negative, <= duration
+   */
   furthestPosition: number;
 
-  /** Total video duration in seconds */
+  /**
+   * Total video duration in seconds
+   * Runtime validated: must be finite, positive
+   */
   duration: number;
 
   /** Calculated percentage: (furthestPosition / duration) * 100 */
