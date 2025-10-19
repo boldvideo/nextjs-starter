@@ -15,11 +15,10 @@ This release dramatically improves both developer and user experience with essen
 
 ### Key Improvements
 
-- **Multiple Video Player Options**
+- **Mux Player Integration**
 
-  - Choose between Mux Player and Vidstack with a simple configuration
-  - Each player optimized for performance and usability
-  - Easy switching via a single export statement
+  - Production-ready defaults using Mux's official React component
+  - Tuned for performance and usability out of the box
 
 - **Powerful Search**
 
@@ -60,4 +59,3 @@ No breaking changes have been introduced. Existing projects can update their dep
 ---
 
 _Bold Video: Professional video infrastructure for developers._
-

@@ -21,6 +21,7 @@ import { usePlaylist } from "@/components/providers/playlist-provider";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AutoplayToggle } from "./autoplay-toggle";
+import { useVideoProgress } from "@/hooks/use-video-progress";
 
 /**
  * CTA type for call-to-action data
@@ -81,6 +82,26 @@ export function VideoDetail({
     return () => setHasPlaylist(false); // Clean up when unmounting
   }, [playlist, setHasPlaylist]);
 
+  // Progress tracking
+  const { resumePosition } = useVideoProgress({
+    videoId: video.id,
+    duration: video.duration,
+    playerRef,
+  });
+
+  // Use resumePosition as startTime if no explicit startTime provided
+  const effectiveStartTime = startTime || resumePosition || undefined;
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[VideoDetail] Progress Debug:', {
+      videoId: video.id,
+      resumePosition,
+      startTime,
+      effectiveStartTime,
+    });
+  }, [video.id, resumePosition, startTime, effectiveStartTime]);
+
   // Add state for unified tab navigation
   const [activeTab, setActiveTab] = useState<VideoTabId>("description");
 
@@ -112,10 +133,10 @@ export function VideoDetail({
 
   // Set initial time when component mounts
   useEffect(() => {
-    if (startTime && playerRef.current) {
-      playerRef.current.currentTime = startTime;
+    if (effectiveStartTime && playerRef.current) {
+      playerRef.current.currentTime = effectiveStartTime;
     }
-  }, [startTime]);
+  }, [effectiveStartTime]);
 
   /**
    * Handle clicking on a cue or chapter to seek to that position
@@ -182,7 +203,7 @@ export function VideoDetail({
             video={video}
             autoPlay={true}
             ref={playerRef}
-            startTime={startTime}
+            startTime={effectiveStartTime}
             className={className}
             isOutOfView={isOutOfView}
             onEnded={handleVideoEnded}
