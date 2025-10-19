@@ -256,6 +256,13 @@ export function useVideoProgress({
 
     const handlePause = () => {
       const position = player.currentTime;
+      
+      // Clear any pending throttled save to prevent stale overwrites
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      
       // Force immediate save on pause (bypass throttle)
       lastSaveTimeRef.current = 0;
       saveProgressRef.current(position);
@@ -263,12 +270,25 @@ export function useVideoProgress({
 
     const handleSeeking = () => {
       const position = player.currentTime;
+      
+      // Clear any pending throttled save to prevent stale overwrites
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      
       // Force immediate save on seek (bypass throttle)
       lastSaveTimeRef.current = 0;
       saveProgressRef.current(position);
     };
 
     const handleEnded = () => {
+      // Clear any pending throttled save to prevent stale overwrites
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+      
       // Mark as complete (100% position)
       lastSaveTimeRef.current = 0;
       saveProgressRef.current(duration);
