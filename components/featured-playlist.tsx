@@ -1,6 +1,8 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { VideoThumbnail } from "@/components/video-thumbnail";
+import VideoThumbnail from "@/components/video-thumbnail";
 
 interface PlaylistProps {
   playlist: {

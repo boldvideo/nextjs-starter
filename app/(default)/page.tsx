@@ -1,6 +1,6 @@
 import React from "react";
 import { bold } from "@/client";
-import { VideoThumbnail } from "@/components/video-thumbnail";
+import VideoThumbnail from "@/components/video-thumbnail";
 import { FeaturedPlaylist } from "@/components/featured-playlist";
 import type { Settings, Video, Playlist } from "@boldvideo/bold-js";
 
