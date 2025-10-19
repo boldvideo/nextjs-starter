@@ -201,22 +201,22 @@ export async function isIndexedDBAvailable(): Promise<boolean> {
   try {
     // Type check first
     if (typeof indexedDB === 'undefined') {
-      console.debug('[ProgressStore] IndexedDB not defined');
+      console.log('[ProgressStore] IndexedDB not defined');
       return false;
     }
 
     // Probe: try to open a temporary database
-    console.debug('[ProgressStore] Testing IndexedDB availability...');
+    console.log('[ProgressStore] Testing IndexedDB availability...');
     const testDB = await openDB('__bold_test__', 1);
     await testDB.close();
 
     // Clean up test database
     indexedDB.deleteDatabase('__bold_test__');
 
-    console.debug('[ProgressStore] IndexedDB is available');
+    console.log('[ProgressStore] IndexedDB is available');
     return true;
   } catch (error) {
-    console.debug('[ProgressStore] IndexedDB test failed:', error);
+    console.log('[ProgressStore] IndexedDB test failed:', error);
     return false;
   }
 }
