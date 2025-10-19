@@ -2,17 +2,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatRelative } from "date-fns/formatRelative";
 import { formatDuration } from "util/format-duration";
+import { ProgressBar } from "./progress-bar";
+import { CompletionIndicator } from "./completion-indicator";
 
 interface VideoThumbnailProps {
   video: any;
   prefetch?: boolean;
   playlistId?: string;
+  progress?: {
+    percentWatched: number;
+    completed: boolean;
+  } | null;
 }
 
 export function VideoThumbnail({
   video,
   prefetch = false,
   playlistId,
+  progress,
 }: VideoThumbnailProps) {
   return (
     <div className="aspect-video group relative">
@@ -24,9 +31,18 @@ export function VideoThumbnail({
           className="object-cover"
           sizes="100vw, (max-width: 640px) 640px"
         />
-        <span className="bg-black text-white absolute px-2 py-1 font-semibold text-sm bottom-3 right-3 rounded-md">
-          {formatDuration(video.duration)}
-        </span>
+
+        {/* Progress bar overlay */}
+        {progress && <ProgressBar percentWatched={progress.percentWatched} completed={progress.completed} />}
+
+        {/* Duration badge or completion indicator */}
+        {progress?.completed ? (
+          <CompletionIndicator completed={true} />
+        ) : (
+          <span className="bg-black text-white absolute px-2 py-1 font-semibold text-sm bottom-3 right-3 rounded-md">
+            {formatDuration(video.duration)}
+          </span>
+        )}
       </div>
       <h3 className="mt-4 font-semibold text-lg">
         <Link href={playlistId ? `/pl/${playlistId}/v/${video.id}` : `/v/${video.id}`} prefetch={prefetch}>

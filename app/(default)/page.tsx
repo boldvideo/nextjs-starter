@@ -1,6 +1,6 @@
 import React from "react";
 import { bold } from "@/client";
-import { VideoThumbnail } from "@/components/video-thumbnail";
+import { VideoThumbnailWithProgress } from "@/components/video-thumbnail-with-progress";
 import { FeaturedPlaylist } from "@/components/featured-playlist";
 import type { Settings, Video, Playlist } from "@boldvideo/bold-js";
 
@@ -62,7 +62,7 @@ export default async function Home(): Promise<React.JSX.Element> {
             {/* Type assertion needed if videos could be null, but hasVideos guards it */}
             {(videos as Video[]).map((video) => (
               <li key={video.id}>
-                <VideoThumbnail video={video} prefetch={true} />
+                <VideoThumbnailWithProgress video={video} prefetch={true} />
               </li>
             ))}
           </ul>

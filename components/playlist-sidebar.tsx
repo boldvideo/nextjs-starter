@@ -8,6 +8,9 @@ import { X, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDuration } from "util/format-duration";
 import { AutoplayToggle } from "./autoplay-toggle";
+import { useProgress } from "./providers/progress-provider";
+import { ProgressBar } from "./progress-bar";
+import { CompletionIndicator } from "./completion-indicator";
 
 interface PlaylistSidebarProps {
   playlist: Playlist;
@@ -34,6 +37,9 @@ export function PlaylistSidebar({
   const currentIndex = playlist.videos.findIndex(
     (v) => v.id === currentVideoId
   );
+
+  // Get progress data
+  const { progressMap } = useProgress();
 
   return (
     <>
@@ -96,6 +102,16 @@ export function PlaylistSidebar({
           <ul className="divide-y divide-border">
             {playlist.videos.map((video, index) => {
               const isCurrent = video.id === currentVideoId;
+
+              // Get progress for this video
+              const progressRecord = progressMap.get(video.id);
+              const progress = progressRecord
+                ? {
+                    percentWatched: progressRecord.percentWatched,
+                    completed: progressRecord.completed,
+                  }
+                : null;
+
               return (
                 <li key={video.id}>
                   <Link
@@ -116,6 +132,11 @@ export function PlaylistSidebar({
                         className="object-cover"
                         sizes="128px"
                       />
+
+                      {/* Progress bar overlay */}
+                      {progress && <ProgressBar percentWatched={progress.percentWatched} completed={progress.completed} />}
+
+                      {/* Duration badge - always show in sidebar */}
                       <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">
                         {formatDuration(video.duration)}
                       </div>
