@@ -57,19 +57,19 @@ export function useVideoProgress({
   // Get tenant ID
   const tenantId = getTenantId(settings);
   
-  console.log('[useVideoProgress] Hook called for video:', videoId, 'enabled:', enabled, 'tenantId:', tenantId);
+  
 
   // Check if we can use IndexedDB (sync check for initial render)
   const canUseStorage = enabled && isIndexedDBDefined() && tenantId !== null;
   
-  console.log('[useVideoProgress] canUseStorage (sync):', canUseStorage);
+  
 
   // Check when player becomes available
   useEffect(() => {
     const checkPlayer = () => {
       const hasPlayer = !!playerRef.current;
       if (hasPlayer !== playerReady) {
-        console.log('[useVideoProgress] Player availability changed:', hasPlayer);
+        
         setPlayerReady(hasPlayer);
       }
     };
@@ -104,15 +104,15 @@ export function useVideoProgress({
    */
   useEffect(() => {
     if (!enabled || !tenantId) {
-      console.log('[useVideoProgress] Storage disabled - enabled:', enabled, 'tenantId:', tenantId);
+      console.warn('[useVideoProgress] Storage disabled - enabled:', enabled, 'tenantId:', tenantId);
       canUseStorageRef.current = false;
       return;
     }
 
     // Async probe on mount
-    console.log('[useVideoProgress] Testing IndexedDB availability...');
+    console.debug('[useVideoProgress] Testing IndexedDB availability...');
     isIndexedDBAvailable().then((available) => {
-      console.log('[useVideoProgress] IndexedDB available:', available);
+      console.debug('[useVideoProgress] IndexedDB available:', available);
       canUseStorageRef.current = available;
     });
   }, [enabled, tenantId]);
@@ -200,7 +200,7 @@ export function useVideoProgress({
       const currentCanUseStorage = canUseStorageRef.current;
       const currentProgress = progressRef.current;
 
-      console.log('[useVideoProgress] saveCurrentProgress called:', {
+      console.debug('[useVideoProgress] saveCurrentProgress called:', {
         videoId,
         position,
         currentTenantId,
@@ -209,7 +209,7 @@ export function useVideoProgress({
       });
 
       if (!currentCanUseStorage || !currentTenantId) {
-        console.log('[useVideoProgress] Save blocked - canUseStorage:', currentCanUseStorage, 'tenantId:', currentTenantId);
+        console.warn('[useVideoProgress] Save blocked - canUseStorage:', currentCanUseStorage, 'tenantId:', currentTenantId);
         return;
       }
 
@@ -288,7 +288,7 @@ export function useVideoProgress({
    */
   useEffect(() => {
     const player = playerRef.current;
-    console.log('[useVideoProgress] Event listener effect:', {
+    console.debug('[useVideoProgress] Event listener effect:', {
       hasPlayer: !!player,
       playerReady,
       canUseStorage,
@@ -302,7 +302,7 @@ export function useVideoProgress({
 
     const handleTimeUpdate = () => {
       const position = player.currentTime;
-      console.log('[useVideoProgress] timeupdate event:', position);
+      
       saveProgressRef.current(position);
     };
 

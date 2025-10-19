@@ -24,13 +24,13 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const refreshProgress = async () => {
     if (!tenantId) {
-      console.log('[ProgressProvider] No tenant ID available');
+      console.warn('[ProgressProvider] No tenant ID available');
       return;
     }
 
     setIsLoading(true);
     try {
-      console.log('[ProgressProvider] Loading progress for tenant:', tenantId);
+      console.debug('[ProgressProvider] Loading progress for tenant:', tenantId);
       const allProgress = await getAllProgress(tenantId);
       const map = new Map(allProgress.map((p) => [p.videoId, p]));
       setProgressMap(map);
