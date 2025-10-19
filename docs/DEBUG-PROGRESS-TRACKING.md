@@ -156,8 +156,6 @@ On the homepage or playlist page, inspect a video thumbnail. You should see:
 
 **Check**: Console for errors in `useVideoProgress` hook
 - Verify `tenantId` is not null
-- Verify `isProgressTrackingEnabled()` returns `true`
-- Check localStorage for `bold-progress-enabled`
 
 ### Progress Bars Don't Show on Thumbnails
 
@@ -189,7 +187,6 @@ Core Progress:
 - `lib/progress/types.ts` - Progress record types
 - `lib/progress/store.ts` - IndexedDB operations
 - `lib/progress/tenant.ts` - Tenant ID extraction
-- `lib/progress/preferences.ts` - Opt-in/out storage
 - `lib/progress/sync.ts` - Cross-tab synchronization
 
 Hooks:
@@ -198,7 +195,6 @@ Hooks:
 Components:
 - `components/progress-bar.tsx` - Progress bar overlay
 - `components/completion-indicator.tsx` - Checkmark for completed videos
-- `components/progress-toggle.tsx` - Toggle for enable/disable
 - `components/video-thumbnail-with-progress.tsx` - Client wrapper
 - `components/providers/progress-provider.tsx` - Global progress context
 

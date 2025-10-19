@@ -22,7 +22,6 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AutoplayToggle } from "./autoplay-toggle";
 import { useVideoProgress } from "@/hooks/use-video-progress";
-import { isProgressTrackingEnabled } from "@/lib/progress/preferences";
 
 /**
  * CTA type for call-to-action data
@@ -84,12 +83,10 @@ export function VideoDetail({
   }, [playlist, setHasPlaylist]);
 
   // Progress tracking
-  const progressEnabled = isProgressTrackingEnabled();
   const { resumePosition } = useVideoProgress({
     videoId: video.id,
     duration: video.duration,
     playerRef,
-    enabled: progressEnabled,
   });
 
   // Use resumePosition as startTime if no explicit startTime provided
@@ -102,9 +99,8 @@ export function VideoDetail({
       resumePosition,
       startTime,
       effectiveStartTime,
-      progressEnabled,
     });
-  }, [video.id, resumePosition, startTime, effectiveStartTime, progressEnabled]);
+  }, [video.id, resumePosition, startTime, effectiveStartTime]);
 
   // Add state for unified tab navigation
   const [activeTab, setActiveTab] = useState<VideoTabId>("description");

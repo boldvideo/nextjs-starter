@@ -57,7 +57,7 @@ interface ProgressRecord {
    - Ensures uniqueness across tenants (critical until UUID migration)
 4. **Completion Threshold**: 90% watched (YouTube-style)
 5. **Write Throttling**: Save every 2-3 seconds + on pause/seeking/ended events
-6. **Opt-Out Mechanism**: Boolean flag in localStorage (`bold-progress-enabled`)
+6. **Opt-Out Mechanism**: Deferred (tracked for a future iteration; initial launch stores progress unconditionally)
 7. **Library**: `idb` (Jake Archibald's promise wrapper, 1.5KB)
 
 ### Tenant ID Resolution:
