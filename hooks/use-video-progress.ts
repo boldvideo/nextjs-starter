@@ -47,11 +47,42 @@ export function useVideoProgress({
   const lastSaveTimeRef = useRef<number>(0);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Refs for mutable values to avoid stale closures
+  const progressRef = useRef<ProgressRecord | null>(null);
+  const tenantIdRef = useRef<string | null>(null);
+  const canUseStorageRef = useRef<boolean>(false);
+
   // Get tenant ID
   const tenantId = getTenantId(settings);
 
   // Check if we can use IndexedDB
   const canUseStorage = enabled && isIndexedDBAvailable() && tenantId !== null;
+
+  // Sync refs with current values
+  useEffect(() => {
+    progressRef.current = progress;
+  }, [progress]);
+
+  useEffect(() => {
+    tenantIdRef.current = tenantId;
+  }, [tenantId]);
+
+  useEffect(() => {
+    canUseStorageRef.current = canUseStorage;
+  }, [canUseStorage]);
+
+  /**
+   * Clear pending timeout when video changes or component unmounts
+   */
+  useEffect(() => {
+    return () => {
+      // Clear any pending timeout when effect re-runs or unmounts
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+    };
+  }, [videoId, duration]);
 
   /**
    * Load existing progress on mount
@@ -118,7 +149,12 @@ export function useVideoProgress({
    */
   const saveCurrentProgress = useCallback(
     async (position: number) => {
-      if (!canUseStorage || !tenantId) return;
+      // Access latest values from refs
+      const currentTenantId = tenantIdRef.current;
+      const currentCanUseStorage = canUseStorageRef.current;
+      const currentProgress = progressRef.current;
+
+      if (!currentCanUseStorage || !currentTenantId) return;
 
       const now = Date.now();
       const timeSinceLastSave = now - lastSaveTimeRef.current;
@@ -141,20 +177,20 @@ export function useVideoProgress({
       lastSaveTimeRef.current = now;
 
       try {
-        await saveProgress(tenantId, videoId, position, duration);
+        await saveProgress(currentTenantId, videoId, position, duration);
 
         // Update local state with furthest position tracking
         const furthestPosition = Math.max(
           position,
-          progress?.furthestPosition || 0
+          currentProgress?.furthestPosition || 0
         );
         const percentWatched = Math.min((furthestPosition / duration) * 100, 100);
         const completed = percentWatched >= PROGRESS_CONFIG.COMPLETION_THRESHOLD;
 
         setProgress({
-          id: `${tenantId}:${videoId}`,
+          id: `${currentTenantId}:${videoId}`,
           videoId,
-          tenantId,
+          tenantId: currentTenantId,
           position,
           furthestPosition,
           duration,
@@ -167,7 +203,7 @@ export function useVideoProgress({
         console.warn('[useVideoProgress] Failed to save progress:', error);
       }
     },
-    [canUseStorage, tenantId, videoId, duration, progress]
+    [videoId, duration]
   );
 
   /**
