@@ -23,15 +23,21 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const tenantId = getTenantId(settings);
 
   const refreshProgress = async () => {
-    if (!tenantId) return;
+    if (!tenantId) {
+      console.debug('[ProgressProvider] No tenant ID available');
+      return;
+    }
 
     setIsLoading(true);
     try {
+      console.debug('[ProgressProvider] Loading progress for tenant:', tenantId);
       const allProgress = await getAllProgress(tenantId);
       const map = new Map(allProgress.map((p) => [p.videoId, p]));
       setProgressMap(map);
     } catch (error) {
-      console.warn('[ProgressProvider] Failed to load progress:', error);
+      console.error('[ProgressProvider] Failed to load progress:', error);
+      // Make sure this doesn't break the app - set empty map
+      setProgressMap(new Map());
     } finally {
       setIsLoading(false);
     }
