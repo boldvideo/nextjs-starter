@@ -43,6 +43,7 @@ export function useVideoProgress({
   const [progress, setProgress] = useState<ProgressRecord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [resumePosition, setResumePosition] = useState<number | null>(null);
+  const [playerReady, setPlayerReady] = useState(false);
 
   // Throttling state
   const lastSaveTimeRef = useRef<number>(0);
@@ -62,6 +63,27 @@ export function useVideoProgress({
   const canUseStorage = enabled && isIndexedDBDefined() && tenantId !== null;
   
   console.log('[useVideoProgress] canUseStorage (sync):', canUseStorage);
+
+  // Check when player becomes available
+  useEffect(() => {
+    const checkPlayer = () => {
+      const hasPlayer = !!playerRef.current;
+      if (hasPlayer !== playerReady) {
+        console.log('[useVideoProgress] Player availability changed:', hasPlayer);
+        setPlayerReady(hasPlayer);
+      }
+    };
+
+    // Check immediately
+    checkPlayer();
+
+    // Check periodically until player is ready
+    const interval = playerReady ? null : setInterval(checkPlayer, 100);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [playerRef, playerReady]);
 
   // Sync refs with current values
   useEffect(() => {
@@ -262,16 +284,19 @@ export function useVideoProgress({
 
   /**
    * Attach player event listeners
+   * Re-run when player becomes available
    */
   useEffect(() => {
     const player = playerRef.current;
     console.log('[useVideoProgress] Event listener effect:', {
       hasPlayer: !!player,
+      playerReady,
       canUseStorage,
-      videoId
+      videoId,
+      playerType: player?.constructor?.name
     });
     
-    if (!player || !canUseStorage) return;
+    if (!player || !canUseStorage || !playerReady) return;
 
     console.log('[useVideoProgress] Attaching event listeners to player');
 
@@ -339,7 +364,7 @@ export function useVideoProgress({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [playerRef, canUseStorage, duration]);
+  }, [playerReady, canUseStorage, duration]);
 
   return {
     progress,
