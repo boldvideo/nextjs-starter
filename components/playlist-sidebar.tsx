@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import type { Playlist, Video } from "@boldvideo/bold-js";
 import { X, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDuration } from "util/format-duration";
 import { AutoplayToggle } from "./autoplay-toggle";
+import { ThumbnailImage } from "./video-thumbnail/thumbnail-image";
 
 interface PlaylistSidebarProps {
   playlist: Playlist;
@@ -96,6 +96,7 @@ export function PlaylistSidebar({
           <ul className="divide-y divide-border">
             {playlist.videos.map((video, index) => {
               const isCurrent = video.id === currentVideoId;
+
               return (
                 <li key={video.id}>
                   <Link
@@ -109,14 +110,14 @@ export function PlaylistSidebar({
                   >
                     {/* Thumbnail */}
                     <div className="relative flex-shrink-0 w-32 aspect-video bg-muted rounded overflow-hidden">
-                      <Image
-                        src={video.thumbnail}
-                        alt={video.title}
-                        fill
-                        className="object-cover"
+                      <ThumbnailImage
+                        video={video}
                         sizes="128px"
+                        showCompletionIndicator={false}
                       />
-                      <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded">
+
+                      {/* Duration badge - always show in sidebar */}
+                      <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded z-10">
                         {formatDuration(video.duration)}
                       </div>
                     </div>

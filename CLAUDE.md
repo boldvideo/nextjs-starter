@@ -23,3 +23,9 @@
 - **Styling**: Use Tailwind CSS for styling with className prop
 - **Error Handling**: Provide default values in destructuring, use optional chaining, null checks
 
+## Communication & Documentation
+
+- **PR Descriptions**: Write objectively and concisely about WHAT the change is, not HOW or WHY we got there. No emojis.
+- **Commit Messages**: Focus on the change itself, not the decision process or context
+- **Style Reference**: Follow patterns from Guillermo Rauch, Ryan Florence, shadcn, Lee Robinson - direct and technical
+

@@ -20,7 +20,7 @@ Welcome to the Bold Video Starter Kit, the easiest way to get started with <a hr
 
 ## Features
 
-- **Dual Player Support**: Choose between Mux Player and Vidstack for video playback
+- **Mux Player**: Production-ready playback powered by Mux's official React component
 - **Dark Mode**: Built-in light/dark theme toggle with system preference detection
 - **Search Functionality**: Fast, accessible search with keyboard shortcuts (⌘+K)
 - **Authentication (Optional)**: OAuth support with Google/WorkOS, domain restrictions, and session management
@@ -76,28 +76,13 @@ If you want to change the appearance of the links, you can find the code for the
 
 You can modify these files to adjust the styling or layout of the navigation according to your preferences.
 
-### Switching Video Players
+### Video Player
 
-The starter kit supports two video player implementations:
-
-1. **Mux Player**: Based on Mux's official player component
-2. **Vidstack Player**: Based on the Vidstack player library
-
-To switch between them, edit the default export in `components/players/index.ts`:
+The starter kit ships with the Mux Player integration enabled by default. You can
+import it in your components like so:
 
 ```typescript
-// Default player export - change this line to switch the default player
-export { MuxPlayerComponent as Player } from "./player-mux";
-// Or use Vidstack instead:
-// export { VidstackPlayer as Player } from "./player-vidstack";
-```
-
-You can also import specific players directly in your components:
-
-```typescript
-import { MuxPlayer } from "@/components/players";
-// or
-import { VidstackPlayer } from "@/components/players";
+import { Player } from "@/components/players";
 ```
 
 ### Adding Videos and Playlists
@@ -263,4 +248,3 @@ Your app will be deployed to a unique URL, and you can manage it through the Ver
 
 ## Feedback and Issues
 If you encounter any issues or have feedback, please [create an issue](https://github.com/boldvideo/nextjs-starter/issues) on GitHub.
-
