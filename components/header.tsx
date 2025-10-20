@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
+import { shouldShowThemeToggle } from "@/config/theme";
 import type { Session } from "next-auth";
 
 interface HeaderProps {
@@ -80,9 +81,11 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
 
               {/* Right Side - Theme Toggle and User Menu (Desktop Only) */}
               <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end">
-                <Suspense>
-                  <ThemeToggle />
-                </Suspense>
+                {shouldShowThemeToggle() && (
+                  <Suspense>
+                    <ThemeToggle />
+                  </Suspense>
+                )}
                 {session !== undefined && (
                   <Suspense>
                     <UserMenu session={session} />
