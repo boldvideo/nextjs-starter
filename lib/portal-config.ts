@@ -31,6 +31,11 @@ export interface PortalConfig {
     showTranscripts: boolean;
     showChapters: boolean;
   };
+  theme: {
+    colorScheme: 'toggle' | 'light' | 'dark';
+    forcedTheme: 'light' | 'dark' | null;
+    showToggle: boolean;
+  };
 }
 
 /**
@@ -96,6 +101,11 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
       display: {
         showTranscripts: true,
         showChapters: true
+      },
+      theme: {
+        colorScheme: 'toggle',
+        forcedTheme: null,
+        showToggle: true
       }
     };
   }
@@ -127,6 +137,11 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // 1. Use explicit show_header setting from API (SDK 0.6.0+)
   // 2. Default to true (show header)
   const showHeader = settings.portal?.navigation?.show_header ?? true;
+
+  // Theme configuration
+  const colorScheme = (settings.portal?.color_scheme ?? 'toggle') as 'toggle' | 'light' | 'dark';
+  const forcedTheme = colorScheme === 'toggle' ? null : colorScheme;
+  const showToggle = colorScheme === 'toggle';
 
   return {
     ai: {
@@ -160,6 +175,11 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     display: {
       showTranscripts: settings.portal?.display?.show_transcripts ?? true,
       showChapters: settings.portal?.display?.show_chapters ?? true
+    },
+    theme: {
+      colorScheme,
+      forcedTheme,
+      showToggle
     }
   };
 }
