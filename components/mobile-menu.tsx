@@ -9,6 +9,8 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 import { ThemeToggle } from "./theme-toggle";
+import { useSettings } from "@/components/providers/settings-provider";
+import { getPortalConfig } from "@/lib/portal-config";
 
 type MenuItem = {
   url: string;
@@ -26,6 +28,8 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { settings } = useSettings();
+  const config = getPortalConfig(settings);
 
   // Check if we're on the search page
   const isSearchPage = pathname === "/s";
@@ -113,12 +117,14 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
                   </Link>
                 ))}
               </div>
-              <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between border-t border-border pt-4">
-                <span className="text-sm font-medium text-foreground">
-                  Toggle Dark Mode
-                </span>
-                <ThemeToggle />
-              </div>
+              {config.theme.showToggle && (
+                <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between border-t border-border pt-4">
+                  <span className="text-sm font-medium text-foreground">
+                    Toggle Dark Mode
+                  </span>
+                  <ThemeToggle />
+                </div>
+              )}
             </div>
           </div>
         </div>

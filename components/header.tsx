@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
+import { useSettings } from "@/components/providers/settings-provider";
+import { getPortalConfig } from "@/lib/portal-config";
 import type { Session } from "next-auth";
 
 interface HeaderProps {
@@ -16,6 +18,9 @@ interface HeaderProps {
 }
 
 export function Header({ logo, logoDark, menuItems, session, className }: HeaderProps) {
+  const { settings } = useSettings();
+  const config = getPortalConfig(settings);
+
   // Check if we should use larger header size for wide/short logos
   const useLargeHeader = process.env.NEXT_PUBLIC_LARGE_HEADER === "true";
   const desktopLogoClass = useLargeHeader ? "h-20" : "h-10";
@@ -80,9 +85,11 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
 
               {/* Right Side - Theme Toggle and User Menu (Desktop Only) */}
               <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end">
-                <Suspense>
-                  <ThemeToggle />
-                </Suspense>
+                {config.theme.showToggle && (
+                  <Suspense>
+                    <ThemeToggle />
+                  </Suspense>
+                )}
                 {session !== undefined && (
                   <Suspense>
                     <UserMenu session={session} />

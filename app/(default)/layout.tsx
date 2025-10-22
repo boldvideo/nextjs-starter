@@ -268,7 +268,12 @@ export default async function RootLayout({
       <body className="bg-background flex flex-col min-h-screen">
         {showContent ? (
           <SessionProvider session={session}>
-            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme={config.theme.forcedTheme || "dark"}
+              enableSystem={!config.theme.forcedTheme}
+              {...(config.theme.forcedTheme && { forcedTheme: config.theme.forcedTheme })}
+            >
               <SettingsProvider settings={settings}>
                 <ProgressProvider>
                   <LayoutWithPlaylist
