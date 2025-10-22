@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -109,10 +109,12 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
               {/* Search Bar - Mobile */}
               {config.navigation.showSearch && (
                 <div className="px-4 pb-4">
-                  <SearchBar
-                    isMobile
-                    showAiToggle={config.navigation.showAiToggle}
-                  />
+                  <Suspense>
+                    <SearchBar
+                      isMobile
+                      showAiToggle={config.navigation.showAiToggle}
+                    />
+                  </Suspense>
                 </div>
               )}
 
