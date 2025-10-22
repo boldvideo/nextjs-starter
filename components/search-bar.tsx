@@ -13,6 +13,7 @@ interface SearchBarProps {
   placeholder?: string;
   isMobile?: boolean;
   autoFocus?: boolean;
+  showAiToggle?: boolean;
 }
 
 export function SearchBar({
@@ -20,6 +21,7 @@ export function SearchBar({
   placeholder = "Search videos...",
   isMobile = false,
   autoFocus = false,
+  showAiToggle = true,
 }: SearchBarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -32,6 +34,8 @@ export function SearchBar({
   
   // Determine initial mode from URL
   const [mode, setMode] = useState<SearchMode>(() => {
+    // If AI toggle is disabled, force search mode
+    if (!showAiToggle) return "search";
     if (isAskPage) return "ask";
     return "search";
   });
@@ -190,44 +194,46 @@ export function SearchBar({
   return (
     <form onSubmit={handleSubmit} className={cn("relative", className)}>
       <div className="flex items-center gap-2">
-        {/* Mode toggle - smaller, icon-only with tooltip */}
-        <div className="relative group">
-          <div className="flex items-center bg-sidebar border border-border rounded-md p-0.5">
-            <button
-              type="button"
-              onClick={() => mode !== "search" && toggleMode()}
-              className={cn(
-                "relative p-1.5 rounded transition-colors",
-                mode === "search"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-label="Search mode"
-            >
-              <Search className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => mode !== "ask" && toggleMode()}
-              className={cn(
-                "relative p-1.5 rounded transition-colors",
-                mode === "ask"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-label="Ask AI mode"
-            >
-              <Sparkles className="h-4 w-4" />
-            </button>
-          </div>
-          {/* Tooltip */}
-          <div className="absolute left-0 top-full mt-2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
-            <div className="bg-popover text-popover-foreground text-xs rounded-md px-2 py-1 shadow-md border whitespace-nowrap">
-              {mode === "search" ? "Search videos" : "Ask AI a question"}
+        {/* Mode toggle - smaller, icon-only with tooltip - only show if AI toggle is enabled */}
+        {showAiToggle && (
+          <div className="relative group">
+            <div className="flex items-center bg-sidebar border border-border rounded-md p-0.5">
+              <button
+                type="button"
+                onClick={() => mode !== "search" && toggleMode()}
+                className={cn(
+                  "relative p-1.5 rounded transition-colors",
+                  mode === "search"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+                aria-label="Search mode"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => mode !== "ask" && toggleMode()}
+                className={cn(
+                  "relative p-1.5 rounded transition-colors",
+                  mode === "ask"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+                aria-label="Ask AI mode"
+              >
+                <Sparkles className="h-4 w-4" />
+              </button>
+            </div>
+            {/* Tooltip */}
+            <div className="absolute left-0 top-full mt-2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+              <div className="bg-popover text-popover-foreground text-xs rounded-md px-2 py-1 shadow-md border whitespace-nowrap">
+                {mode === "search" ? "Search videos" : "Ask AI a question"}
+              </div>
             </div>
           </div>
-        </div>
-        
+        )}
+
         {/* Search input */}
         <div className="relative flex-1 max-w-2xl">
           {/* Icon - always visible based on mode */}
