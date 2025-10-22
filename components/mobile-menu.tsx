@@ -9,6 +9,7 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 import { ThemeToggle } from "./theme-toggle";
+import { SearchBar } from "./search-bar";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 
@@ -105,6 +106,16 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
               </button>
             </div>
             <div className="mt-6 flow-root">
+              {/* Search Bar - Mobile */}
+              {config.navigation.showSearch && (
+                <div className="px-4 pb-4">
+                  <SearchBar
+                    isMobile
+                    showAiToggle={config.navigation.showAiToggle}
+                  />
+                </div>
+              )}
+
               <div className="space-y-2 py-6">
                 {menuItems.map((item: any) => (
                   <Link
