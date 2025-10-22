@@ -84,15 +84,11 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
                 </div>
               </div>
 
-              {/* Center - Search Bar (Desktop Only) */}
-              <div className="hidden lg:flex flex-1 justify-center px-4">
+              {/* Right Side - Search, Theme Toggle and User Menu (Desktop Only) */}
+              <div className="hidden lg:flex items-center space-x-4 flex-1 justify-end max-w-md">
                 <Suspense>
-                  <HeaderSearch className="w-full max-w-2xl" />
+                  <HeaderSearch className="w-full max-w-xs" />
                 </Suspense>
-              </div>
-
-              {/* Right Side - Theme Toggle and User Menu (Desktop Only) */}
-              <div className="hidden lg:flex items-center space-x-4 flex-shrink-0">
                 {config.theme.showToggle && (
                   <Suspense>
                     <ThemeToggle />
