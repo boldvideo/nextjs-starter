@@ -86,7 +86,9 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
 
               {/* Center - Search Bar (Desktop Only) */}
               <div className="hidden lg:flex flex-1 justify-center px-4">
-                <HeaderSearch className="w-full max-w-2xl" />
+                <Suspense>
+                  <HeaderSearch className="w-full max-w-2xl" />
+                </Suspense>
               </div>
 
               {/* Right Side - Theme Toggle and User Menu (Desktop Only) */}
