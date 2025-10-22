@@ -11,7 +11,6 @@ import { ProgressProvider } from "@/components/providers/progress-provider";
 import { auth } from "@/auth";
 import { SessionProvider } from "next-auth/react";
 import { isAuthEnabled } from "@/config/auth";
-import { getForcedTheme } from "@/config/theme";
 import SignIn from "@/components/auth/sign-in";
 
 // Default metadata values
@@ -108,7 +107,6 @@ export default async function RootLayout({
   }
 
   const theme = settings?.theme_config;
-  const forcedTheme = getForcedTheme();
 
   // Get portal configuration to determine if we should show header
   const config = getPortalConfig(settings);
@@ -270,12 +268,7 @@ export default async function RootLayout({
       <body className="bg-background flex flex-col min-h-screen">
         {showContent ? (
           <SessionProvider session={session}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme={forcedTheme || "dark"}
-              enableSystem={!forcedTheme}
-              forcedTheme={forcedTheme}
-            >
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <SettingsProvider settings={settings}>
                 <ProgressProvider>
                   <LayoutWithPlaylist
