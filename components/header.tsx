@@ -18,7 +18,7 @@ interface HeaderProps {
 }
 
 export function Header({ logo, logoDark, menuItems, session, className }: HeaderProps) {
-  const { settings } = useSettings();
+  const settings = useSettings();
   const config = getPortalConfig(settings);
 
   // Check if we should use larger header size for wide/short logos

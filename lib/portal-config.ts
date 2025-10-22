@@ -139,7 +139,8 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   const showHeader = settings.portal?.navigation?.show_header ?? true;
 
   // Theme configuration
-  const colorScheme = (settings.portal?.color_scheme ?? 'toggle') as 'toggle' | 'light' | 'dark';
+  // TODO: Remove type assertion once BOLD-759 is complete
+  const colorScheme = ((settings.portal as any)?.color_scheme ?? 'toggle') as 'toggle' | 'light' | 'dark';
   const forcedTheme = colorScheme === 'toggle' ? null : colorScheme;
   const showToggle = colorScheme === 'toggle';
 
