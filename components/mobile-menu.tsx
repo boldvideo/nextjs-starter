@@ -28,7 +28,7 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { settings } = useSettings();
+  const settings = useSettings();
   const config = getPortalConfig(settings);
 
   // Check if we're on the search page
