@@ -1,7 +1,8 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { Header } from "@/components/header";
+import { SearchPreview } from "@/components/search-preview";
 import { PlaylistProvider } from "@/components/providers/playlist-provider";
 import type { Session } from "next-auth";
 import type { Settings } from "@boldvideo/bold-js";
@@ -25,6 +26,9 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
           className="h-18 hidden md:flex"
         />
       )}
+      <Suspense>
+        <SearchPreview />
+      </Suspense>
       <main className="flex-1 relative h-full overflow-y-scroll flex">{children}</main>
     </>
   );
