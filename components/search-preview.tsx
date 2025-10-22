@@ -171,11 +171,6 @@ export function SearchPreview() {
                           {hit.title || "Untitled"}
                         </h3>
                       </Link>
-                      {hit.description && (
-                        <p className="text-sm text-sidebar-foreground mb-3">
-                          {hit.description}
-                        </p>
-                      )}
 
                       {hit.segments && hit.segments.length > 0 && (
                         <div className="space-y-2">
