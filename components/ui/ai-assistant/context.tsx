@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import type { Message } from "./types"; // Import Message type from types.ts
 
 // Define the shape of the context value
@@ -12,6 +12,9 @@ interface AIAssistantContextValue {
   setInputValue: React.Dispatch<React.SetStateAction<string>>;
   isPending: boolean;
   setIsPending: React.Dispatch<React.SetStateAction<boolean>>;
+  conversationId: string | null;
+  setConversationId: React.Dispatch<React.SetStateAction<string | null>>;
+  resetConversation: () => void;
 }
 
 // Create the context with a default value (or null)
@@ -30,6 +33,14 @@ export const AIAssistantProvider = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+
+  const resetConversation = useCallback(() => {
+    setMessages([]);
+    setConversationId(null);
+    setInputValue("");
+    setIsPending(false);
+  }, []);
 
   // Memoize the value if the onTimeClick function could change referentially,
   // though in our case it comes from a useCallback in VideoDetail, so it should be stable.
@@ -42,6 +53,9 @@ export const AIAssistantProvider = ({
     setInputValue,
     isPending,
     setIsPending,
+    conversationId,
+    setConversationId,
+    resetConversation,
   };
 
   return (
@@ -77,6 +91,11 @@ export const useAIAssistantContext = () => {
       isPending: false,
       setIsPending: () =>
         console.warn("AIAssistantContext not found, setIsPending did nothing."),
+      conversationId: null,
+      setConversationId: () =>
+        console.warn("AIAssistantContext not found, setConversationId did nothing."),
+      resetConversation: () =>
+        console.warn("AIAssistantContext not found, resetConversation did nothing."),
     } as AIAssistantContextValue; // Assert type for default return
     // Or: throw new Error('useAIAssistantContext must be used within an AIAssistantProvider');
   }
