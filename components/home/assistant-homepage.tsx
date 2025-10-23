@@ -24,9 +24,9 @@ export function AssistantHomepage({ settings, config }: AssistantHomepageProps) 
       if (!trimmedQuery || isSubmitting) return;
       
       setIsSubmitting(true);
-      
-      // Navigate to coach page with query parameter
-      router.push(`/coach?q=${encodeURIComponent(trimmedQuery)}`);
+
+      // Navigate to coach page with query parameter (using 'c' to avoid conflict with global search 'q')
+      router.push(`/coach?c=${encodeURIComponent(trimmedQuery)}`);
     },
     [query, isSubmitting, router]
   );
