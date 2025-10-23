@@ -6,7 +6,7 @@ export type { Message }; // Re-export Message type
 
 type AIResponseHandler = (
   question: string,
-  conversation: Message[],
+  conversationId: string | null,
   appendChunk?: (chunk: string) => void
 ) => Promise<void>;
 
@@ -23,6 +23,7 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
     setInputValue,
     isPending,
     setIsPending,
+    conversationId,
   } = useAIAssistantContext();
 
   // Keep local state only for UI concerns specific to this hook/component instance
@@ -90,13 +91,8 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
     const tempMessage: Message = { role: "assistant", content: "" };
     setMessages((prev) => [...prev, tempMessage]);
 
-    // Get current messages *after* adding user message for conversation history
-    // Note: Accessing state directly after setting it might not give the updated value
-    // immediately. Passing the history directly is safer.
-    const currentMessages = [...messages, userMessage]; // Pass the correct history
-
     try {
-      await onAskQuestion(question, currentMessages, appendChunk);
+      await onAskQuestion(question, conversationId, appendChunk);
     } catch (error) {
       handleError(error as Error);
     } finally {
