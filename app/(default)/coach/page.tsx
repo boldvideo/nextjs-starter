@@ -44,7 +44,7 @@ export default function CoachPage() {
   const hasInitializedRef = useRef(false);
 
   useEffect(() => {
-    const initialQuery = searchParams?.get("q");
+    const initialQuery = searchParams?.get("c");
     if (initialQuery && !hasInitializedRef.current && messages.length === 0) {
       hasInitializedRef.current = true;
       streamQuestion(initialQuery);
@@ -69,7 +69,7 @@ export default function CoachPage() {
         await streamQuestion(trimmedQuery);
       }
     },
-    [query, isStreaming, isWaitingForClarification, streamQuestion, submitClarification, conversationId, messages.length]
+    [query, isStreaming, isWaitingForClarification, streamQuestion, submitClarification]
   );
 
   const handleStop = useCallback(() => {
