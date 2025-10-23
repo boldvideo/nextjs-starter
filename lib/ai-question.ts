@@ -9,7 +9,7 @@ interface AIRequestBody {
   question: string;
   videoId: string;
   tenant: string;
-  conversation?: Message[];
+  conversationId?: string;
 }
 
 /**
@@ -19,7 +19,7 @@ export async function streamAIQuestion(
   videoId: string,
   tenant: string,
   question: string,
-  conversation?: Message[]
+  conversationId?: string
 ) {
   const apiHost = process.env.BACKEND_URL;
   const apiKey = process.env.NEXT_PUBLIC_BOLD_API_KEY;
@@ -40,9 +40,7 @@ export async function streamAIQuestion(
       },
       body: JSON.stringify({
         q: question,
-        vid: videoId,
-        subd: tenant,
-        c: conversation,
+        ...(conversationId && { conversation_id: conversationId }),
       }),
     });
 

@@ -1,7 +1,7 @@
 import { streamAIQuestion } from "../../../lib/ai-question";
-import { Message } from "../../../lib/ai-question";
 
-export const runtime = "edge"; // Optional: Use edge runtime for better streaming performance
+export const runtime = "nodejs";
+export const maxDuration = 300; // 5 minutes for web search support
 
 /**
  * Validates the request body
@@ -10,13 +10,13 @@ function validateBody(body: any): body is {
   question: string;
   videoId: string;
   subdomain: string;
-  conversation?: Message[];
+  conversationId?: string;
 } {
   return (
     typeof body.question === "string" &&
     typeof body.videoId === "string" &&
     typeof body.subdomain === "string" &&
-    (body.conversation === undefined || Array.isArray(body.conversation))
+    (body.conversationId === undefined || typeof body.conversationId === "string")
   );
 }
 
@@ -37,8 +37,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { question, videoId, subdomain, conversation } = body;
-    return streamAIQuestion(videoId, subdomain, question, conversation);
+    const { question, videoId, subdomain, conversationId } = body;
+    return streamAIQuestion(videoId, subdomain, question, conversationId);
   } catch (error) {
     return new Response(
       JSON.stringify({
