@@ -26,12 +26,12 @@ export function useAIStream({
   endpoint = "/api/ask",
   config,
 }: UseAIStreamOptions) {
-  const { setMessages } = useAIAssistantContext();
+  const { setMessages, setConversationId } = useAIAssistantContext();
   
   const handleAIQuestion = useCallback(
     async (
       question: string,
-      conversation: Message[],
+      conversationId: string | null,
       appendChunk?: (chunk: string) => void
     ) => {
       if (!appendChunk) {
@@ -40,6 +40,9 @@ export function useAIStream({
 
       const controller = new AbortController();
       const { signal } = controller;
+
+      // Set timeout for web search scenarios (3 minutes)
+      const timeoutId = setTimeout(() => controller.abort(), 180000);
 
       try {
         const response = await fetch(endpoint, {
@@ -52,10 +55,12 @@ export function useAIStream({
             question,
             videoId,
             subdomain,
-            conversation,
+            ...(conversationId && { conversationId }),
           }),
           signal,
         });
+
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
           const error = await response
@@ -99,12 +104,17 @@ export function useAIStream({
                   case "error":
                     throw new Error(data.content);
                   case "done":
+                    // Capture conversation_id from backend response
+                    if (data.conversation_id) {
+                      setConversationId(data.conversation_id);
+                    }
+
                     // Handle suggested actions from the done event
                     if (data.suggested_actions && data.suggested_actions.length > 0) {
                       setMessages((prev) => {
                         const lastMessage = prev[prev.length - 1];
                         if (!lastMessage || lastMessage.role !== "assistant") return prev;
-                        
+
                         const previousMessages = prev.slice(0, -1);
                         return [
                           ...previousMessages,
@@ -129,11 +139,15 @@ export function useAIStream({
           }
         }
       } catch (error) {
+        clearTimeout(timeoutId);
         controller.abort();
+        if (error instanceof Error && error.name === 'AbortError') {
+          throw new Error('Request timed out. Please try again.');
+        }
         throw error;
       }
     },
-    [videoId, subdomain, endpoint, config, setMessages]
+    [videoId, subdomain, endpoint, config, setMessages, setConversationId]
   );
 
   return handleAIQuestion;
