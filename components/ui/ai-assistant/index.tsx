@@ -329,7 +329,7 @@ export const AIAssistant = ({
               />
               <strong>{name}</strong>
             </div>
-            <div className="rounded-lg p-3 bg-primary text-primary-foreground ml-4">
+            <div className="rounded-lg p-3 bg-primary/10 text-foreground ml-4">
               <p>
                 {greeting && greeting.trim() !== ""
                   ? greeting
@@ -348,7 +348,7 @@ export const AIAssistant = ({
                   "rounded-lg p-3 prose max-w-none [&_ul]:marker:text-current [&_ol]:marker:text-current",
                   message.role === "user"
                     ? "bg-muted text-foreground"
-                    : "bg-primary text-primary-foreground ml-4"
+                    : "bg-primary/10 text-foreground ml-4"
                 )}
               >
                 {message.content ? (
@@ -537,7 +537,7 @@ export const AIAssistant = ({
                     "rounded-lg p-3 mx-4 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit [&_ul]:marker:text-current [&_ol]:marker:text-current",
                     message.role === "user"
                       ? "bg-background mr-8 text-foreground"
-                      : "bg-primary text-primary-foreground ml-8"
+                      : "bg-primary/10 text-foreground ml-8"
                   )}
                 >
                   {message.content ? (
