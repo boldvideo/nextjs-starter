@@ -1,12 +1,15 @@
 "use client";
 import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { X, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAIAssistant } from "./use-ai-assistant";
 import { useAIStream } from "./use-ai-stream";
 import { timestampToSeconds } from "@/lib/utils/time";
 import { useAIAssistantContext } from "./context";
+import { TimestampPill } from "@/components/timestamp-pill";
 import type { Message, SuggestedAction } from "./types";
 
 /**
@@ -34,32 +37,37 @@ interface AIAssistantProps {
 }
 
 /**
- * Processes message content to make timestamps clickable and format text
+ * Component to render text with clickable timestamps
  */
-const processMessageContent = (content: string) => {
-  // First, let's handle markdown links to avoid conflicts with timestamp processing
-  // This improved regex handles links even when wrapped in brackets like [[text](url)]
-  let processedContent = content;
-  
-  // Replace markdown links, preserving outer brackets if they exist
-  processedContent = processedContent.replace(
-    /(\[)?\[([^\]]+)\]\(([^)]+)\)(\])?/g,
-    (match, openBracket, text, url, closeBracket) => {
-      const link = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 hover:opacity-90 text-primary-foreground">${text}</a>`;
-      return (openBracket || '') + link + (closeBracket || '');
-    }
-  );
-
-  // Now process timestamps
+const TextWithTimestamps: React.FC<{ children: string }> = ({ children }) => {
+  const { onTimeClick } = useAIAssistantContext();
   const timestampRegex =
     /\[(\d{2}:)?(\d{2}:)?(\d{2})(?:-(\d{2}:)?(\d{2}:)?(\d{2}))?\]/g;
+  const parts: (string | React.ReactNode)[] = [];
   let lastIndex = 0;
-  const parts = [];
   let match;
+  let key = 0;
 
-  while ((match = timestampRegex.exec(processedContent)) !== null) {
+  const handleTimestampClick = (seconds: number, endSeconds?: number) => {
+    // Call the onTimeClick callback to seek the video
+    if (onTimeClick) {
+      onTimeClick(seconds);
+    }
+
+    // Scroll to video player
+    const videoPlayer = document.querySelector('video, [data-video-player]');
+    if (videoPlayer) {
+      videoPlayer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // Fallback: scroll to top of page where video usually is
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  while ((match = timestampRegex.exec(children)) !== null) {
+    // Add text before timestamp
     if (match.index > lastIndex) {
-      parts.push(processedContent.slice(lastIndex, match.index));
+      parts.push(children.slice(lastIndex, match.index));
     }
 
     const fullMatch = match[0];
@@ -69,34 +77,57 @@ const processMessageContent = (content: string) => {
       const [startStr, endStr] = fullMatch.slice(1, -1).split("-");
       const startSeconds = timestampToSeconds(startStr);
       const endSeconds = timestampToSeconds(endStr);
+      // Reduce by 1 second for better context, but don't go below 0
+      const adjustedStart = Math.max(0, startSeconds - 1);
 
       parts.push(
-        `<button class="cursor-pointer select-none underline decoration-current/50 hover:decoration-current transition-colors" data-time="${startSeconds}" data-end-time="${endSeconds}"><span class="pointer-events-none">${fullMatch}</span></button>`
+        <TimestampPill
+          key={key++}
+          timestamp={fullMatch.slice(1, -1)}
+          onClick={() => handleTimestampClick(adjustedStart, endSeconds)}
+        />
       );
     } else {
       const timestamp = fullMatch.slice(1, -1);
       const seconds = timestampToSeconds(timestamp);
+      // Reduce by 1 second for better context, but don't go below 0
+      const adjustedSeconds = Math.max(0, seconds - 1);
       parts.push(
-        `<button class="cursor-pointer select-none underline decoration-current/50 hover:decoration-current transition-colors" data-time="${seconds}"><span class="pointer-events-none">${fullMatch}</span></button>`
+        <TimestampPill
+          key={key++}
+          timestamp={timestamp}
+          onClick={() => handleTimestampClick(adjustedSeconds)}
+        />
       );
     }
 
     lastIndex = match.index + fullMatch.length;
   }
 
-  if (lastIndex < processedContent.length) {
-    parts.push(processedContent.slice(lastIndex));
+  // Add remaining text
+  if (lastIndex < children.length) {
+    parts.push(children.slice(lastIndex));
   }
 
-  processedContent = parts.join("");
+  return <>{parts}</>;
+};
 
-  const finalContent = processedContent
-    .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>')
-    .replace(/__([^_]+)__/g, '<strong class="font-bold">$1</strong>')
-    .split("\n")
-    .join("<br />");
-
-  return finalContent;
+/**
+ * Process children recursively to find and replace timestamps
+ */
+const processChildren = (children: React.ReactNode): React.ReactNode => {
+  return React.Children.map(children, (child) => {
+    if (typeof child === 'string') {
+      return <TextWithTimestamps>{child}</TextWithTimestamps>;
+    }
+    if (React.isValidElement(child) && child.props.children) {
+      return React.cloneElement(child, {
+        ...child.props,
+        children: processChildren(child.props.children),
+      } as any);
+    }
+    return child;
+  });
 };
 
 /**
@@ -161,7 +192,6 @@ export const AIAssistant = ({
   } = useAIAssistant({
     onAskQuestion: handleAIQuestion,
   });
-
 
   // Ensure the assistant is open when embedded
   useEffect(() => {
@@ -298,9 +328,11 @@ export const AIAssistant = ({
             </div>
             <div className="rounded-lg p-3 bg-primary text-primary-foreground ml-4">
               <p>
-                {greeting && greeting.trim() !== "" 
-                  ? greeting 
-                  : `${userName ? `Hi ${userName}!` : "Hello there!"} I'm ${name}, your AI assistant. How can I help you with this video?`}
+                {greeting && greeting.trim() !== ""
+                  ? greeting
+                  : `${
+                      userName ? `Hi ${userName}!` : "Hello there!"
+                    } I'm ${name}, your AI assistant. How can I help you with this video?`}
               </p>
             </div>
           </div>
@@ -310,40 +342,59 @@ export const AIAssistant = ({
             <div key={index} className="mb-4">
               <div
                 className={cn(
-                  "rounded-lg p-3 prose prose-sm max-w-none prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit",
+                  "rounded-lg p-3 prose max-w-none [&_ul]:marker:text-current [&_ol]:marker:text-current",
                   message.role === "user"
                     ? "bg-muted text-foreground"
                     : "bg-primary text-primary-foreground ml-4"
                 )}
               >
-                <div
-                  className=""
-                  dangerouslySetInnerHTML={{
-                    __html: message.content
-                      ? processMessageContent(message.content)
-                      : `<div class="flex items-center gap-2">
-                          <span class="flex gap-1">
-                            <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                            <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                            <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
-                          </span>
-                        </div>`,
-                  }}
-                />
-                {message.suggested_actions && message.suggested_actions.length > 0 && index === messages.length - 1 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {message.suggested_actions.map((action, actionIndex) => (
-                      <button
-                        key={actionIndex}
-                        onClick={() => handleSubmit(action.value)}
-                        className="px-3 py-1 text-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-full transition-colors"
-                        disabled={isPending}
-                      >
-                        {action.label}
-                      </button>
-                    ))}
+                {message.content ? (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => <p>{processChildren(children)}</p>,
+                      li: ({ children }) => <li>{processChildren(children)}</li>,
+                      strong: ({ children }) => <strong>{processChildren(children)}</strong>,
+                      em: ({ children }) => <em>{processChildren(children)}</em>,
+                      a: ({ href, children }) => (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2 hover:opacity-90"
+                        >
+                          {processChildren(children)}
+                        </a>
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="flex gap-1">
+                      <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                      <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                      <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
+                    </span>
                   </div>
                 )}
+                {message.suggested_actions &&
+                  message.suggested_actions.length > 0 &&
+                  index === messages.length - 1 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {message.suggested_actions.map((action, actionIndex) => (
+                        <button
+                          key={actionIndex}
+                          onClick={() => handleSubmit(action.value)}
+                          className="px-3 py-1 text-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-full transition-colors"
+                          disabled={isPending}
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
               </div>
             </div>
           ))}
@@ -467,9 +518,11 @@ export const AIAssistant = ({
                 <strong>{name}</strong>
               </div>
               <p>
-                {greeting && greeting.trim() !== "" 
-                  ? greeting 
-                  : `${userName ? `Hi ${userName}!` : "Hello there!"} I'm ${name}, your AI assistant. How can I help you with this video?`}
+                {greeting && greeting.trim() !== ""
+                  ? greeting
+                  : `${
+                      userName ? `Hi ${userName}!` : "Hello there!"
+                    } I'm ${name}, your AI assistant. How can I help you with this video?`}
               </p>
             </div>
 
@@ -478,40 +531,61 @@ export const AIAssistant = ({
               <div key={index} className="mb-4">
                 <div
                   className={cn(
-                    "rounded-lg p-3 mx-4 prose prose-sm max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit",
+                    "rounded-lg p-3 mx-4 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit [&_ul]:marker:text-current [&_ol]:marker:text-current",
                     message.role === "user"
                       ? "bg-background mr-8 text-foreground"
                       : "bg-primary text-primary-foreground ml-8"
                   )}
                 >
-                  <div
-                    className=""
-                    dangerouslySetInnerHTML={{
-                      __html: message.content
-                        ? processMessageContent(message.content)
-                        : `<div class="flex items-center gap-2">
-                            <span class="flex gap-1">
-                              <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                              <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                              <span class="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
-                            </span>
-                          </div>`,
-                    }}
-                  />
-                  {message.suggested_actions && message.suggested_actions.length > 0 && index === messages.length - 1 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {message.suggested_actions.map((action, actionIndex) => (
-                        <button
-                          key={actionIndex}
-                          onClick={() => handleSubmit(action.value)}
-                          className="px-3 py-1 text-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-full transition-colors"
-                          disabled={isPending}
-                        >
-                          {action.label}
-                        </button>
-                      ))}
+                  {message.content ? (
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({ children }) => <p>{processChildren(children)}</p>,
+                        li: ({ children }) => <li>{processChildren(children)}</li>,
+                        strong: ({ children }) => <strong>{processChildren(children)}</strong>,
+                        em: ({ children }) => <em>{processChildren(children)}</em>,
+                        a: ({ href, children }) => (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline underline-offset-2 hover:opacity-90"
+                          >
+                            {processChildren(children)}
+                          </a>
+                        ),
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="flex gap-1">
+                        <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                        <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                        <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
+                      </span>
                     </div>
                   )}
+                  {message.suggested_actions &&
+                    message.suggested_actions.length > 0 &&
+                    index === messages.length - 1 && (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {message.suggested_actions.map(
+                          (action, actionIndex) => (
+                            <button
+                              key={actionIndex}
+                              onClick={() => handleSubmit(action.value)}
+                              className="px-3 py-1 text-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-full transition-colors"
+                              disabled={isPending}
+                            >
+                              {action.label}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    )}
                 </div>
               </div>
             ))}

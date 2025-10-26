@@ -8,9 +8,9 @@ import {
   UtteranceItem,
   UtteranceLabel,
   UtteranceSpeaker,
-  UtteranceTime,
   formatTimestamp,
 } from "@boldvideo/ui";
+import { TimestampPill } from "./timestamp-pill";
 
 export function Transcript({
   url,
@@ -50,7 +50,10 @@ export function Transcript({
                 {transcript.metadata.speakers[u.speaker] ??
                   `Speaker ${u.speaker}`}
               </UtteranceSpeaker>
-              <UtteranceTime>{formatTimestamp(u.start)}</UtteranceTime>
+              <TimestampPill
+                timestamp={formatTimestamp(u.start)}
+                onClick={() => onCueClick?.(Math.max(0, u.start - 1))}
+              />
             </UtteranceLabel>
             <Utterance
               className={`text-lg hover:bg-primary/10 ${
