@@ -120,11 +120,14 @@ const processChildren = (children: React.ReactNode): React.ReactNode => {
     if (typeof child === 'string') {
       return <TextWithTimestamps>{child}</TextWithTimestamps>;
     }
-    if (React.isValidElement(child) && child.props.children) {
-      return React.cloneElement(child, {
-        ...child.props,
-        children: processChildren(child.props.children),
-      } as any);
+    if (React.isValidElement(child)) {
+      const childProps = child.props as { children?: React.ReactNode };
+      if (childProps.children) {
+        return React.cloneElement(child, {
+          ...(child.props as object),
+          children: processChildren(childProps.children),
+        } as any);
+      }
     }
     return child;
   });
