@@ -142,7 +142,7 @@ export function VideoContentTabs({
             <button
               onClick={() => onTabChange("description")}
               className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0",
+                "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0 cursor-pointer",
                 activeTab === "description"
                   ? "text-primary bg-primary/10"
                   : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -161,7 +161,7 @@ export function VideoContentTabs({
               <button
                 onClick={() => onTabChange("transcript")}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0",
+                  "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0 cursor-pointer",
                   activeTab === "transcript"
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -178,7 +178,7 @@ export function VideoContentTabs({
               <button
                 onClick={() => onTabChange("ai")}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0",
+                  "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0 cursor-pointer",
                   activeTab === "ai"
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
