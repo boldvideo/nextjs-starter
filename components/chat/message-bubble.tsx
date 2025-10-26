@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ChatMessage } from "@/hooks/use-ask-stream";
 import { cn } from "@/lib/utils";
 import { User, AlertCircle } from "lucide-react";
@@ -115,10 +117,34 @@ export function MessageBubble({
             </div>
           ) : (
             <div className={cn(
-              "whitespace-pre-wrap break-words",
-              isUser ? "text-sm" : "text-base"
+              "break-words prose max-w-none dark:prose-invert prose-p:my-2 prose-headings:mt-3 prose-headings:mb-2 prose-strong:font-semibold prose-li:my-1",
+              isUser ? "prose-sm" : "prose-base"
             )}>
-              {message.content}
+              {typeof message.content === "string" ? (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    a: ({ ...props }) => (
+                      <a
+                        {...props}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      />
+                    ),
+                    ul: ({ ...props }) => (
+                      <ul {...props} className="list-disc pl-5 space-y-1" />
+                    ),
+                    ol: ({ ...props }) => (
+                      <ol {...props} className="list-decimal pl-5 space-y-1" />
+                    ),
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              ) : (
+                message.content
+              )}
             </div>
           )}
 
