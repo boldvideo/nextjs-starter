@@ -101,6 +101,22 @@ export function useAIStream({
                       appendChunk(data.content);
                     }
                     break;
+                  case "tool_call":
+                    // Add tool call information to the current message
+                    setMessages((prev) => {
+                      const lastMessage = prev[prev.length - 1];
+                      if (!lastMessage || lastMessage.role !== "assistant") return prev;
+
+                      const previousMessages = prev.slice(0, -1);
+                      return [
+                        ...previousMessages,
+                        {
+                          ...lastMessage,
+                          tool_call: { name: data.name },
+                        },
+                      ];
+                    });
+                    break;
                   case "error":
                     throw new Error(data.content);
                   case "done":

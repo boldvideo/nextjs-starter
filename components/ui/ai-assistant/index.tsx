@@ -382,6 +382,20 @@ export const AIAssistant = ({
                     </span>
                   </div>
                 )}
+                {message.tool_call && (
+                  <div className="mt-2 flex items-center gap-2 text-xs text-foreground/60">
+                    <div className="flex gap-1">
+                      <span className="h-1 w-1 bg-current rounded-full animate-pulse"></span>
+                      <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.2s]"></span>
+                      <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.4s]"></span>
+                    </div>
+                    <span>
+                      {message.tool_call.name === "web_search" && "Searching the web..."}
+                      {message.tool_call.name === "lookup" && "Looking up information..."}
+                      {!["web_search", "lookup"].includes(message.tool_call.name) && `Using ${message.tool_call.name}...`}
+                    </span>
+                  </div>
+                )}
                 {message.suggested_actions &&
                   message.suggested_actions.length > 0 &&
                   index === messages.length - 1 && (
@@ -568,6 +582,20 @@ export const AIAssistant = ({
                         <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                         <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                         <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
+                      </span>
+                    </div>
+                  )}
+                  {message.tool_call && (
+                    <div className="mt-2 flex items-center gap-2 text-xs text-foreground/60">
+                      <div className="flex gap-1">
+                        <span className="h-1 w-1 bg-current rounded-full animate-pulse"></span>
+                        <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.2s]"></span>
+                        <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.4s]"></span>
+                      </div>
+                      <span>
+                        {message.tool_call.name === "web_search" && "Searching the web..."}
+                        {message.tool_call.name === "lookup" && "Looking up information..."}
+                        {!["web_search", "lookup"].includes(message.tool_call.name) && `Using ${message.tool_call.name}...`}
                       </span>
                     </div>
                   )}
