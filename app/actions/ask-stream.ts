@@ -50,9 +50,10 @@ export async function streamAskAction({
         
         // If we have a conversationId, append it to the URL path (continue conversation)
         // Otherwise, use the base /ask endpoint (start new conversation)
-        const endpoint = conversationId 
+        const endpoint = conversationId
           ? `${baseUrl}${apiPath}/ask/${conversationId}`
           : `${baseUrl}${apiPath}/ask`;
+
 
         // Prepare request to BOLD API
 
@@ -74,7 +75,10 @@ export async function streamAskAction({
 
         if (!response.ok) {
           const errorText = await response.text();
-          controller.enqueue({ type: "error", content: `Request failed: ${response.status}` });
+          const errorMessage = conversationId
+            ? `Failed to continue conversation (${response.status}). Please try again or start a new conversation.`
+            : `Request failed: ${response.status}`;
+          controller.enqueue({ type: "error", content: errorMessage });
           controller.close();
           return;
         }
@@ -142,7 +146,6 @@ export async function streamAskAction({
                     // Store conversation ID from initial message
                     if (data.id) {
                       currentConversationId = data.id;
-                      // Conversation created with ID
                     }
                     break;
                     

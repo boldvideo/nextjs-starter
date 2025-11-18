@@ -329,7 +329,7 @@ export const AIAssistant = ({
               />
               <strong>{name}</strong>
             </div>
-            <div className="rounded-lg p-3 bg-primary/10 text-foreground ml-4">
+            <div className="rounded-lg p-3 bg-muted text-foreground ml-4">
               <p>
                 {greeting && greeting.trim() !== ""
                   ? greeting
@@ -345,10 +345,10 @@ export const AIAssistant = ({
             <div key={index} className="mb-4">
               <div
                 className={cn(
-                  "rounded-lg p-3 prose max-w-none [&_ul]:marker:text-current [&_ol]:marker:text-current",
+                  "rounded-lg p-3 prose max-w-none dark:prose-invert prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
                   message.role === "user"
-                    ? "bg-muted text-foreground"
-                    : "bg-primary/10 text-foreground ml-4"
+                    ? "bg-muted/50 text-foreground border border-border/50"
+                    : "bg-muted text-foreground ml-4"
                 )}
               >
                 {message.content ? (
@@ -373,7 +373,7 @@ export const AIAssistant = ({
                   >
                     {message.content}
                   </ReactMarkdown>
-                ) : (
+                ) : !message.suggested_actions ? (
                   <div className="flex items-center gap-2">
                     <span className="flex gap-1">
                       <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
@@ -381,7 +381,7 @@ export const AIAssistant = ({
                       <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
                     </span>
                   </div>
-                )}
+                ) : null}
                 {message.tool_call && (
                   <div className="mt-2 flex items-center gap-2 text-xs text-foreground/60">
                     <div className="flex gap-1">
@@ -397,20 +397,30 @@ export const AIAssistant = ({
                   </div>
                 )}
                 {message.suggested_actions &&
-                  message.suggested_actions.length > 0 &&
-                  index === messages.length - 1 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {message.suggested_actions.map((action, actionIndex) => (
-                        <button
-                          key={actionIndex}
-                          onClick={() => handleSubmit(action.value)}
-                          className="px-3 py-1 text-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-full transition-colors"
-                          disabled={isPending}
-                        >
-                          {action.label}
-                        </button>
-                      ))}
-                    </div>
+                  message.suggested_actions.length > 0 && (
+                    <>
+                      {message.suggested_actions_prompt && (
+                        <p className="mt-2 text-sm">{message.suggested_actions_prompt}</p>
+                      )}
+                      {message.selected_action ? (
+                        <div className="mt-2 px-3 py-1 text-sm bg-muted/50 rounded-full inline-block">
+                          {message.selected_action}
+                        </div>
+                      ) : (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {message.suggested_actions.map((action) => (
+                            <button
+                              key={action.id}
+                              onClick={() => handleSubmit(action.value, action.label, true)}
+                              className="px-3 py-1 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors cursor-pointer font-medium"
+                              disabled={isPending}
+                            >
+                              {action.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
               </div>
             </div>
@@ -548,10 +558,10 @@ export const AIAssistant = ({
               <div key={index} className="mb-4">
                 <div
                   className={cn(
-                    "rounded-lg p-3 mx-4 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit [&_ul]:marker:text-current [&_ol]:marker:text-current",
+                    "rounded-lg p-3 mx-4 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
                     message.role === "user"
-                      ? "bg-background mr-8 text-foreground"
-                      : "bg-primary/10 text-foreground ml-8"
+                      ? "bg-muted/50 mr-8 text-foreground border border-border/50"
+                      : "bg-muted text-foreground ml-8"
                   )}
                 >
                   {message.content ? (
@@ -576,7 +586,7 @@ export const AIAssistant = ({
                     >
                       {message.content}
                     </ReactMarkdown>
-                  ) : (
+                  ) : !message.suggested_actions ? (
                     <div className="flex items-center gap-2">
                       <span className="flex gap-1">
                         <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
@@ -584,7 +594,7 @@ export const AIAssistant = ({
                         <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
                       </span>
                     </div>
-                  )}
+                  ) : null}
                   {message.tool_call && (
                     <div className="mt-2 flex items-center gap-2 text-xs text-foreground/60">
                       <div className="flex gap-1">
@@ -600,22 +610,30 @@ export const AIAssistant = ({
                     </div>
                   )}
                   {message.suggested_actions &&
-                    message.suggested_actions.length > 0 &&
-                    index === messages.length - 1 && (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {message.suggested_actions.map(
-                          (action, actionIndex) => (
-                            <button
-                              key={actionIndex}
-                              onClick={() => handleSubmit(action.value)}
-                              className="px-3 py-1 text-sm bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground rounded-full transition-colors"
-                              disabled={isPending}
-                            >
-                              {action.label}
-                            </button>
-                          )
+                    message.suggested_actions.length > 0 && (
+                      <>
+                        {message.suggested_actions_prompt && (
+                          <p className="mt-2 text-sm">{message.suggested_actions_prompt}</p>
                         )}
-                      </div>
+                        {message.selected_action ? (
+                          <div className="mt-2 px-3 py-1 text-sm bg-muted/50 rounded-full inline-block">
+                            {message.selected_action}
+                          </div>
+                        ) : (
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {message.suggested_actions.map((action) => (
+                              <button
+                                key={action.id}
+                                onClick={() => handleSubmit(action.value, action.label, true)}
+                                className="px-3 py-1 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors cursor-pointer font-medium"
+                                disabled={isPending}
+                              >
+                                {action.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
                 </div>
               </div>
