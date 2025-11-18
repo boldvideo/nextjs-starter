@@ -33,6 +33,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const conversationIdRef = useRef<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isWaitingForClarification, setIsWaitingForClarification] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -101,7 +102,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
   // Stream a question and handle responses
   const streamQuestion = useCallback(async (
-    query: string, 
+    query: string,
     useConversationId: boolean = true
   ) => {
     // Stream handling begins
@@ -127,7 +128,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       // Use server action with streaming
       const stream = await streamAskAction({
         query,
-        conversationId: useConversationId ? conversationId || undefined : undefined,
+        conversationId: useConversationId ? conversationIdRef.current || undefined : undefined,
         mode: "enhanced",
         synthesize: true
       });
@@ -165,7 +166,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                     mode: "synthesized",
                     query,
                     expanded_queries: expandedQueries,
-                    conversation_id: conversationId || "",
+                    conversation_id: conversationIdRef.current || "",
                     answer: {
                       text: accumulatedText,
                       citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
@@ -196,7 +197,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                     mode: "synthesized",
                     query,
                     expanded_queries: expandedQueries,
-                    conversation_id: conversationId || "",
+                    conversation_id: conversationIdRef.current || "",
                     answer: {
                       text: accumulatedText,
                       citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
@@ -218,6 +219,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             // Update conversation ID
             if (message.content.conversation_id) {
               // Setting conversation ID from clarification
+              conversationIdRef.current = message.content.conversation_id;
               setConversationId(message.content.conversation_id);
             }
             
@@ -238,6 +240,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             // Update conversation ID
             if (message.content.conversation_id) {
               // Setting conversation ID from complete
+              conversationIdRef.current = message.content.conversation_id;
               setConversationId(message.content.conversation_id);
             }
             
@@ -294,7 +297,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       streamingMessageIdRef.current = null;
       abortControllerRef.current = null;
     }
-  }, [conversationId, addUserMessage, addAssistantMessage, options]);
+  }, [addUserMessage, addAssistantMessage, options]);
 
   // Handle clarification submission
   const submitClarification = useCallback((clarification: string) => {
@@ -308,6 +311,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       abortControllerRef.current.abort();
     }
     setMessages([]);
+    conversationIdRef.current = null;
     setConversationId(null);
     setIsStreaming(false);
     setIsWaitingForClarification(false);

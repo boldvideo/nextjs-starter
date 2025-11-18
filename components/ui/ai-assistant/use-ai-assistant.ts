@@ -7,7 +7,8 @@ export type { Message }; // Re-export Message type
 type AIResponseHandler = (
   question: string,
   conversationId: string | null,
-  appendChunk?: (chunk: string) => void
+  appendChunk?: (chunk: string) => void,
+  actionData?: { label: string; value: string }
 ) => Promise<void>;
 
 interface UseAIAssistantProps {
@@ -73,7 +74,7 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
     [setMessages, setIsPending] // Depend on setters from context
   );
 
-  const handleSubmit = async (overrideQuestion?: string) => {
+  const handleSubmit = async (overrideQuestion?: string, displayLabel?: string, isAction?: boolean) => {
     const question = overrideQuestion || inputValue.trim();
     if (!question || isPending) return;
 
@@ -82,17 +83,33 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
     }
     setIsPending(true); // Use setter from context
 
-    // Add user message
-    const userMessage: Message = { role: "user", content: question };
-    // Use functional update with setter from context
-    setMessages((prev) => [...prev, userMessage]);
+    if (isAction) {
+      // For actions, update the last message to show which action was selected
+      setMessages((prev) => {
+        const lastMessage = prev[prev.length - 1];
+        if (lastMessage?.role === "assistant" && lastMessage.suggested_actions) {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...lastMessage,
+            selected_action: displayLabel,
+          };
+          return updated;
+        }
+        return prev;
+      });
+    } else {
+      // Add user message (use displayLabel if provided, otherwise use question)
+      const userMessage: Message = { role: "user", content: displayLabel || question };
+      setMessages((prev) => [...prev, userMessage]);
+    }
 
     // Create temporary message for response & add it
     const tempMessage: Message = { role: "assistant", content: "" };
     setMessages((prev) => [...prev, tempMessage]);
 
     try {
-      await onAskQuestion(question, conversationId, appendChunk);
+      const actionData = isAction && displayLabel ? { label: displayLabel, value: question } : undefined;
+      await onAskQuestion(question, conversationId, appendChunk, actionData);
     } catch (error) {
       handleError(error as Error);
     } finally {
