@@ -82,7 +82,7 @@ export function MessageBubble({
           "transition-all",
           isUser ? [
             "rounded-2xl px-4 py-2.5",
-            "bg-foreground text-background", // Use foreground/background for better theme consistency
+            "bg-primary/10 text-foreground",
             "rounded-tr-sm",
             "max-w-full"
           ] : [
@@ -118,7 +118,7 @@ export function MessageBubble({
           ) : (
             <div className={cn(
               "break-words prose max-w-none dark:prose-invert prose-p:my-2 prose-headings:mt-3 prose-headings:mb-2 prose-strong:font-semibold prose-li:my-1",
-              isUser ? "prose-sm" : "prose-base"
+              isUser ? "prose-base" : "prose-lg"
             )}>
               {typeof message.content === "string" ? (
                 <ReactMarkdown
