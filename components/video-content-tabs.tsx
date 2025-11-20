@@ -1,200 +1,163 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { MessageSquare, List } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FileText, MessageSquare, Info, List, ListVideo } from "lucide-react";
-import { usePlaylist } from "@/components/providers/playlist-provider";
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarToggle,
+} from "@/components/ui/sidebar";
+import { ChaptersSidebar } from "./chapters-sidebar";
+import { AIAssistant } from "./ui/ai-assistant";
+import { useSidebar } from "@/components/providers/sidebar-provider";
 
-// Updated tabs: description, chapters, transcript, ai
-export type VideoTabId = "description" | "chapters" | "transcript" | "ai";
+export type VideoTabId = "chat" | "chapters" | "description" | "transcript" | "ai";
 
 interface VideoContentTabsProps {
-  activeTab: VideoTabId;
-  onTabChange: (tab: VideoTabId) => void;
-  hasTranscript: boolean;
-  hasChapters: boolean;
-  showAI: boolean;
+  // Props for content
+  videoId: string;
+  playbackId: string;
+  chaptersWebVTT: string;
+  aiName: string;
+  aiAvatar: string;
+  subdomain: string;
+  userName?: string;
+  greeting?: string;
+  endpoint?: string;
+  onChapterClick: (time: number) => void;
+  
+  // Visual props
   className?: string;
+  
+  // Legacy props support (to be ignored or adapted)
+  activeTab?: VideoTabId;
+  onTabChange?: (tab: VideoTabId) => void;
+  hasTranscript?: boolean;
+  hasChapters?: boolean;
+  showAI?: boolean;
 }
 
+const TAB_STORAGE_KEY = "bold-video-content-tab";
+type SidebarTab = "chat" | "chapters";
+
 export function VideoContentTabs({
-  activeTab,
-  onTabChange,
-  hasTranscript,
-  hasChapters,
-  showAI,
+  videoId,
+  playbackId,
+  chaptersWebVTT,
+  aiName,
+  aiAvatar,
+  subdomain,
+  userName,
+  greeting,
+  endpoint,
+  onChapterClick,
   className,
+  hasChapters = true,
 }: VideoContentTabsProps) {
-  // Access playlist context for playlist toggle button
-  const { hasPlaylist, toggle: togglePlaylist } = usePlaylist();
+  const { right } = useSidebar();
+  const [activeTab, setActiveTab] = useState<SidebarTab>("chat");
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Hydrate tab state
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem(TAB_STORAGE_KEY);
+      if (stored === "chat" || stored === "chapters") {
+        setActiveTab(stored);
+      }
+    } catch (e) {
+      console.warn("Failed to hydrate tab state", e);
+    } finally {
+      setIsHydrated(true);
+    }
+  }, []);
+
+  // Persist tab state
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      localStorage.setItem(TAB_STORAGE_KEY, activeTab);
+    } catch (e) {
+      console.warn("Failed to save tab state", e);
+    }
+  }, [activeTab, isHydrated]);
+
+  const tabs = [
+    { id: "chat" as const, label: "Chat", icon: MessageSquare },
+    { id: "chapters" as const, label: "Chapters", icon: List },
+  ];
 
   return (
-    <>
-      {/* MOBILE: Fixed Bottom Navigation Bar */}
-      <nav
-        className={cn(
-          "lg:hidden fixed bottom-0 inset-x-0 z-40 bg-background border-t border-border",
-          className
-        )}
-      >
-        <div className="flex justify-around items-stretch">
-          {/* Description/Details Tab - Always visible */}
-          <button
-            onClick={() => onTabChange("description")}
-            className={cn(
-              "flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors relative",
-              activeTab === "description"
-                ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            aria-pressed={activeTab === "description"}
-          >
-            <Info size={24} />
-            <span className="text-xs font-medium">Details</span>
-            {/* Bottom indicator for active tab */}
-            {activeTab === "description" && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-            )}
-          </button>
-
-          {/* Chapters Tab - Conditional - Mobile only */}
-          {hasChapters && (
-            <button
-              onClick={() => onTabChange("chapters")}
-              className={cn(
-                "flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors relative",
-                activeTab === "chapters"
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-pressed={activeTab === "chapters"}
-            >
-              <List size={24} />
-              <span className="text-xs font-medium">Chapters</span>
-              {/* Bottom indicator for active tab */}
-              {activeTab === "chapters" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-              )}
-            </button>
-          )}
-
-          {/* Transcript Tab - Conditional */}
-          {hasTranscript && (
-            <button
-              onClick={() => onTabChange("transcript")}
-              className={cn(
-                "flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors relative",
-                activeTab === "transcript"
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-pressed={activeTab === "transcript"}
-            >
-              <FileText size={24} />
-              <span className="text-xs font-medium">Transcript</span>
-              {/* Bottom indicator for active tab */}
-              {activeTab === "transcript" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-              )}
-            </button>
-          )}
-
-          {/* Playlist Toggle - Conditional */}
-          {hasPlaylist && (
-            <button
-              onClick={togglePlaylist}
-              className="flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors text-muted-foreground hover:text-foreground"
-              aria-label="Toggle playlist"
-            >
-              <ListVideo size={24} />
-              <span className="text-xs font-medium">Playlist</span>
-            </button>
-          )}
-
-          {/* Ask AI Tab - Conditional */}
-          {showAI && (
-            <button
-              onClick={() => onTabChange("ai")}
-              className={cn(
-                "flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors relative",
-                activeTab === "ai"
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-              aria-pressed={activeTab === "ai"}
-            >
-              <MessageSquare size={24} />
-              <span className="text-xs font-medium">Ask AI</span>
-              {/* Bottom indicator for active tab */}
-              {activeTab === "ai" && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-              )}
-            </button>
-          )}
-        </div>
-      </nav>
-
-      {/* DESKTOP: Horizontal Scrolling Tabs (unchanged, except "Details" label) */}
-      <div className={cn("hidden lg:block w-full", className)}>
-        <div className="relative">
-          {/* Scrollable container */}
-          <div className="flex overflow-x-auto gap-2 py-3 pr-6 bg-background scrollbar-none scroll-smooth">
-            {/* Description Tab - Always visible */}
-            <button
-              onClick={() => onTabChange("description")}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0 cursor-pointer",
-                activeTab === "description"
-                  ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
-              )}
-              aria-pressed={activeTab === "description"}
-            >
-              <Info size={18} />
-              <span>Details</span>
-            </button>
-
-            {/* Chapters Tab - Desktop hidden (shown in sidebar) */}
-            {/* Chapters are always in the sidebar on desktop, no tab needed */}
-
-            {/* Transcript Tab - Conditional */}
-            {hasTranscript && (
-              <button
-                onClick={() => onTabChange("transcript")}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0 cursor-pointer",
-                  activeTab === "transcript"
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                aria-pressed={activeTab === "transcript"}
-              >
-                <FileText size={18} />
-                <span>Transcript</span>
-              </button>
-            )}
-
-            {/* Ask AI Tab - Conditional */}
-            {showAI && (
-              <button
-                onClick={() => onTabChange("ai")}
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full transition-colors text-sm font-medium whitespace-nowrap flex-shrink-0 cursor-pointer",
-                  activeTab === "ai"
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                aria-pressed={activeTab === "ai"}
-              >
-                <MessageSquare size={18} />
-                <span>Ask AI</span>
-              </button>
-            )}
+    <Sidebar side="right" mode="toggle" className={className}>
+      <SidebarHeader>
+        <div className="flex items-center w-full gap-2">
+          {/* Tab Navigation */}
+          <div className="flex-1 flex gap-1 bg-muted/50 rounded-lg p-1">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-md",
+                    "text-xs font-medium transition-all duration-200 cursor-pointer",
+                    isActive
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Fade indicator on the right */}
-          <div className="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+          {/* Mobile Close / Desktop Toggle */}
+          <div className="flex-shrink-0">
+            <SidebarToggle side="right" mode="toggle" />
+          </div>
         </div>
-      </div>
-    </>
+      </SidebarHeader>
+
+      <SidebarContent>
+        {activeTab === "chat" && (
+          <div className="h-full">
+            <AIAssistant
+              videoId={videoId}
+              name={aiName}
+              avatar={aiAvatar}
+              subdomain={subdomain}
+              userName={userName}
+              greeting={greeting}
+              endpoint={endpoint}
+              isEmbedded={true}
+            />
+          </div>
+        )}
+
+        {activeTab === "chapters" && (
+          <div className="h-full">
+             {hasChapters ? (
+              <ChaptersSidebar
+                chaptersWebVTT={chaptersWebVTT}
+                playbackId={playbackId}
+                onChapterClick={onChapterClick}
+                className="border-none shadow-none rounded-none"
+              />
+             ) : (
+               <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+                 No chapters available
+               </div>
+             )}
+          </div>
+        )}
+      </SidebarContent>
+    </Sidebar>
   );
 }

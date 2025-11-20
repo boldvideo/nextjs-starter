@@ -1,18 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import type { Playlist, Video } from "@boldvideo/bold-js";
-import { X, ArrowLeft } from "lucide-react";
+import type { Playlist } from "@boldvideo/bold-js";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDuration } from "util/format-duration";
 import { AutoplayToggle } from "./autoplay-toggle";
 import { ThumbnailImage } from "./video-thumbnail/thumbnail-image";
+import { 
+  Sidebar, 
+  SidebarHeader, 
+  SidebarContent, 
+  SidebarToggle 
+} from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/providers/sidebar-provider";
 
 interface PlaylistSidebarProps {
   playlist: Playlist;
   currentVideoId: string;
   className?: string;
+  mode?: "toggle" | "collapse";
+  // Legacy props kept for type compatibility but ignored
   isOpen?: boolean;
   onToggle?: (open: boolean) => void;
 }
@@ -21,87 +29,70 @@ export function PlaylistSidebar({
   playlist,
   currentVideoId,
   className,
-  isOpen: externalIsOpen,
-  onToggle,
+  mode = "toggle",
 }: PlaylistSidebarProps) {
-  // Internal state for when no external control
-  const [internalIsOpen, setInternalIsOpen] = useState(false);
-
-  // Use external state if provided, otherwise use internal
-  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
-  const setIsOpen = onToggle || setInternalIsOpen;
-
+  const { left } = useSidebar();
   const currentIndex = playlist.videos.findIndex(
     (v) => v.id === currentVideoId
   );
 
   return (
-    <>
-      {/* Backdrop (mobile only) */}
-      {isOpen && (
-        <div
-          className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Sidebar - CSS handles desktop vs mobile */}
-      <aside
-        className={cn(
-          // Mobile: fixed drawer from left
-          "fixed inset-y-0 left-0 z-50 w-full sm:max-w-sm",
-          "bg-sidebar text-sidebar-foreground shadow-lg",
-          "transition-transform duration-300 ease-in-out",
-          // Mobile transform based on isOpen state
-          isOpen ? "translate-x-0" : "-translate-x-full",
-          // Desktop: override everything with responsive classes
-          "lg:absolute lg:top-0 lg:bottom-0 lg:translate-x-0 lg:w-80 lg:shadow-none",
-          "flex flex-col",
-          className
-        )}
-      >
-        {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-border">
-          <div className="flex-1 min-w-0">
-            <Link
-              href={`/pl/${playlist.id}`}
-              className="group flex items-center gap-2 hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -ml-6 group-hover:ml-0" />
-              <h2 className="font-bold text-lg truncate group-hover:translate-x-1 transition-transform duration-200">
-                {playlist.title}
-              </h2>
-            </Link>
-            <p className="text-sm text-muted-foreground mt-1">
-              {playlist.videos.length} videos
-              {currentIndex >= 0 &&
-                ` • ${currentIndex + 1} of ${playlist.videos.length}`}
-            </p>
-          </div>
-
-          {/* Autoplay Toggle */}
-          <AutoplayToggle className="flex-shrink-0 ml-2" />
-
-          {/* Close button - hidden on desktop */}
-          <button
-            onClick={() => setIsOpen(false)}
-            className="lg:hidden ml-2 p-2 hover:bg-accent rounded-md transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+    <Sidebar side="left" mode={mode} className={className}>
+      <SidebarHeader>
+        {/* Collapsed Mode: Centered Toggle */}
+        <div className={cn("flex items-center justify-center w-full", mode !== "collapse" || !left.isCollapsed ? "hidden" : "")}>
+           <SidebarToggle side="left" mode="collapse" />
         </div>
+           
+        {/* Expanded Mode: Content with Absolute Toggle */}
+        <div className={cn(
+          "flex-1 min-w-0 flex items-center relative pr-8", // Add padding-right for the absolute toggle
+          mode === "collapse" && left.isCollapsed && "hidden"
+        )}>
+            <div className="flex-1 min-w-0 mr-2">
+              <Link
+                href={`/pl/${playlist.id}`}
+                className="group flex items-center gap-2 hover:text-primary transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 -ml-6 group-hover:ml-0" />
+                <h2 className="font-bold text-lg truncate group-hover:translate-x-1 transition-transform duration-200">
+                  {playlist.title}
+                </h2>
+              </Link>
+              <p className="text-sm text-muted-foreground mt-1">
+                {playlist.videos.length} videos
+                {currentIndex >= 0 &&
+                  ` • ${currentIndex + 1} of ${playlist.videos.length}`}
+              </p>
+            </div>
 
-        {/* Video List */}
-        <div className="flex-1 overflow-y-auto no-scrollbar">
+            <div className="flex items-center">
+              <AutoplayToggle className="flex-shrink-0" />
+            </div>
+
+            {/* Mobile Close Button (Normal Flow) */}
+            <div className="lg:hidden ml-2">
+              <SidebarToggle side="left" mode="toggle" />
+            </div>
+            
+            {/* Desktop Collapse Toggle (Absolute "Flap" Position) */}
+            <div className="hidden lg:block absolute -right-2 top-1/2 -translate-y-1/2 z-50">
+                <SidebarToggle side="left" mode={mode} className="hover:bg-accent/50 text-muted-foreground/50 hover:text-foreground" />
+            </div>
+          </div>
+      </SidebarHeader>
+
+      <SidebarContent data-collapsed={mode === "collapse" && left.isCollapsed}>
+        {/* Expanded List */}
+        <div className={cn(mode === "collapse" && left.isCollapsed && "hidden")}>
           <ul className="divide-y divide-border">
-            {playlist.videos.map((video, index) => {
+            {playlist.videos.map((video) => {
               const isCurrent = video.id === currentVideoId;
 
               return (
                 <li key={video.id}>
                   <Link
                     href={`/pl/${playlist.id}/v/${video.id}`}
-                    onClick={() => setIsOpen(false)}
                     className={cn(
                       "w-full flex gap-3 p-3 hover:bg-accent transition-colors text-left cursor-pointer relative",
                       isCurrent && "bg-primary/10 border-l-4 border-l-primary"
@@ -115,7 +106,7 @@ export function PlaylistSidebar({
                         showCompletionIndicator={false}
                       />
 
-                      {/* Duration badge - always show in sidebar */}
+                      {/* Duration badge */}
                       <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded z-10">
                         {formatDuration(video.duration)}
                       </div>
@@ -138,7 +129,34 @@ export function PlaylistSidebar({
             })}
           </ul>
         </div>
-      </aside>
-    </>
+
+        {/* Collapsed List (Tiny Thumbnails) */}
+        {mode === "collapse" && left.isCollapsed && (
+          <div className="flex flex-col items-center py-2 gap-2">
+            {playlist.videos.map((video) => {
+              const isCurrent = video.id === currentVideoId;
+              return (
+                 <Link
+                    key={video.id}
+                    href={`/pl/${playlist.id}/v/${video.id}`}
+                    className={cn(
+                      "relative w-10 h-10 rounded overflow-hidden hover:ring-2 hover:ring-primary transition-all",
+                      isCurrent && "ring-2 ring-primary"
+                    )}
+                    title={video.title}
+                  >
+                    <ThumbnailImage
+                        video={video}
+                        sizes="40px"
+                        showCompletionIndicator={false}
+                        className="object-cover w-full h-full"
+                      />
+                  </Link>
+              );
+            })}
+          </div>
+        )}
+      </SidebarContent>
+    </Sidebar>
   );
 }

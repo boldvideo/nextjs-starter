@@ -1,4 +1,5 @@
 "use client";
+
 import { formatRelative } from "date-fns";
 import { Player } from "@/components/players";
 import { Transcript } from "@/components/transcript";
@@ -6,14 +7,9 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
-import { bold } from "@/client";
 import { VideoDescription } from "./video-description";
-import { ChaptersSidebar } from "./chapters-sidebar";
-import { MobileChapterTabs } from "./mobile-chapter-tabs";
-import { VideoContentTabs, VideoTabId } from "./video-content-tabs";
-import type React from "react";
+import { VideoContentTabs } from "./video-content-tabs";
 import { AIAssistantProvider } from "./ui/ai-assistant/context";
-import { AIAssistant } from "./ui/ai-assistant";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { PlaylistSidebar } from "./playlist-sidebar";
@@ -22,6 +18,8 @@ import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AutoplayToggle } from "./autoplay-toggle";
 import { useVideoProgress } from "@/hooks/use-video-progress";
+import { useSidebar } from "@/components/providers/sidebar-provider";
+import { SidebarToggle } from "@/components/ui/sidebar";
 
 /**
  * CTA type for call-to-action data
@@ -73,13 +71,16 @@ export function VideoDetail({
   const [isOutOfView, setIsOutOfView] = useState<boolean>(false);
   const prevScrollY = useRef(0);
 
-  // Get playlist state from context
-  const { isOpen, setIsOpen, setHasPlaylist, isAutoplay } = usePlaylist();
+  // Sidebar state for layout
+  const { left, right, isMobile } = useSidebar();
+  
+  // Playlist state
+  const { setHasPlaylist, isAutoplay } = usePlaylist();
 
-  // Update playlist availability when component mounts/updates
+  // Update playlist availability
   useEffect(() => {
     setHasPlaylist(!!playlist);
-    return () => setHasPlaylist(false); // Clean up when unmounting
+    return () => setHasPlaylist(false);
   }, [playlist, setHasPlaylist]);
 
   // Progress tracking
@@ -89,29 +90,15 @@ export function VideoDetail({
     playerRef,
   });
 
-  // Use resumePosition as startTime if no explicit startTime provided
   const effectiveStartTime = startTime || resumePosition || undefined;
 
-  // Debug logging
-  useEffect(() => {
-    console.log('[VideoDetail] Progress Debug:', {
-      videoId: video.id,
-      resumePosition,
-      startTime,
-      effectiveStartTime,
-    });
-  }, [video.id, resumePosition, startTime, effectiveStartTime]);
-
-  // Add state for unified tab navigation
-  const [activeTab, setActiveTab] = useState<VideoTabId>("description");
+  // Main Content Tab State (Description / Transcript)
+  const [activeMainTab, setActiveMainTab] = useState<"description" | "transcript">("description");
 
   // Check if the video has chapters
   const hasChapters = Boolean(video.chapters);
 
-  // Check if AI assistant should be shown (requires both has_ai flag and transcript)
-  const showAIAssistant = Boolean(settings?.has_ai && hasTranscript);
-
-  // Handle scroll behavior for floating player
+  // Scroll behavior
   const handleScroll = useCallback(() => {
     const currentScrollY = window.scrollY;
     if (currentScrollY > window.innerHeight * 0.7 && !isOutOfView) {
@@ -123,24 +110,17 @@ export function VideoDetail({
     prevScrollY.current = currentScrollY;
   }, [isOutOfView]);
 
-  // Set up scroll listener
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // Set initial time when component mounts
   useEffect(() => {
     if (effectiveStartTime && playerRef.current) {
       playerRef.current.currentTime = effectiveStartTime;
     }
   }, [effectiveStartTime]);
 
-  /**
-   * Handle clicking on a cue or chapter to seek to that position
-   */
   const handleTimeSelect = useCallback((time: number) => {
     const toTime = isNaN(time) ? 0.1 : parseFloat(time.toString());
     if (playerRef?.current) {
@@ -164,7 +144,6 @@ export function VideoDetail({
     ? playlist.videos[currentVideoIndex + 1]
     : null;
 
-  // Check if transcript is available
   useEffect(() => {
     setHasTranscript(
       !!video.transcript &&
@@ -173,7 +152,6 @@ export function VideoDetail({
     );
   }, [video]);
 
-  // Handle video ended - autoplay to next video if enabled
   const handleVideoEnded = useCallback(() => {
     if (isAutoplay && hasNextVideo && nextVideo && playlist) {
       router.push(`/pl/${playlist.id}/v/${nextVideo.id}`);
@@ -182,222 +160,195 @@ export function VideoDetail({
 
   return (
     <AIAssistantProvider onTimeClick={handleTimeSelect}>
-      {/* Playlist Sidebar - Fixed Width */}
-      {playlist && (
-        <PlaylistSidebar
-          playlist={playlist}
-          currentVideoId={video.id}
-          className="flex-shrink-0"
-          isOpen={isOpen}
-          onToggle={setIsOpen}
-        />
-      )}
-
-      {/* Outer Content Wrapper - Fills remaining horizontal space */}
-      <div
-        className={cn("flex-1 flex flex-col min-h-0", playlist && "lg:ml-80")}
-      >
-        {/* Video Player - Fixed aspect ratio, edge-to-edge on mobile */}
-        <div className="w-full bg-black aspect-video relative">
-          <Player
-            video={video}
-            autoPlay={true}
-            ref={playerRef}
-            startTime={effectiveStartTime}
-            className={className}
-            isOutOfView={isOutOfView}
-            onEnded={handleVideoEnded}
+      {/* 3-Column Flex Layout */}
+      <div className="flex flex-col lg:flex-row min-h-full relative">
+        
+        {/* Left Sidebar: Playlist */}
+        {playlist && (
+          <PlaylistSidebar
+            playlist={playlist}
+            currentVideoId={video.id}
+            className="z-30"
+            mode="collapse"
           />
-        </div>
+        )}
 
-        {/* Content Wrapper - Centered with max-width and padding */}
-        <div className="w-full mx-auto max-w-[1500px] px-4 md:px-14 flex flex-col h-full">
-          {/* Content Div - Fills remaining vertical space */}
-          <div className="flex flex-col flex-1 h-full overflow-hidden mt-6 min-h-[600px] pb-24 lg:pb-8">
-            {/* Mobile Playlist Controls - Only visible on mobile when in playlist */}
-            {playlist && (
-              <div className="lg:hidden flex items-center justify-between mb-4">
-                {/* Previous Button - Left Edge */}
-                {hasPreviousVideo && previousVideo ? (
-                  <Link
-                    href={`/pl/${playlist.id}/v/${previousVideo.id}`}
-                    className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
-                    aria-label="Previous video"
-                    title="Previous video"
-                  >
-                    <ChevronLeft size={24} />
-                  </Link>
-                ) : (
-                  <div
-                    className="p-2 rounded-md text-muted-foreground/30 cursor-not-allowed"
-                    aria-label="Previous video"
-                    title="No previous video"
-                  >
-                    <ChevronLeft size={24} />
+        {/* Main Content Area */}
+        <div className="flex-1 min-w-0">
+          {/* Video Player */}
+          <div className="w-full bg-black aspect-video relative">
+            <Player
+              video={video}
+              autoPlay={true}
+              ref={playerRef}
+              startTime={effectiveStartTime}
+              className={className}
+              isOutOfView={isOutOfView}
+              onEnded={handleVideoEnded}
+            />
+          </div>
+
+          {/* Content below player */}
+          <div className="w-full mx-auto max-w-[1500px] px-4 md:px-14 flex flex-col h-full">
+            <div className="flex flex-col flex-1 h-full overflow-hidden mt-6 min-h-[600px] pb-24 lg:pb-8">
+              
+              {/* Mobile Playlist Controls */}
+              {playlist && (
+                <div className="lg:hidden flex items-center justify-between mb-4">
+                  {/* Previous */}
+                  <div className="lg:hidden">
+                    {/* Mobile Toggle */}
+                    <SidebarToggle side="left" mode="toggle" className="mr-2" />
                   </div>
-                )}
-
-                {/* Center: Counter + Autoplay Toggle */}
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {currentVideoIndex + 1} / {playlist.videos.length}
-                  </span>
-                  <AutoplayToggle />
-                </div>
-
-                {/* Next Button - Right Edge */}
-                {hasNextVideo && nextVideo ? (
-                  <Link
-                    href={`/pl/${playlist.id}/v/${nextVideo.id}`}
-                    className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
-                    aria-label="Next video"
-                    title="Next video"
-                  >
-                    <ChevronRight size={24} />
-                  </Link>
-                ) : (
-                  <div
-                    className="p-2 rounded-md text-muted-foreground/30 cursor-not-allowed"
-                    aria-label="Next video"
-                    title="No next video"
-                  >
-                    <ChevronRight size={24} />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Title - Now full width on mobile */}
-            <div className="mb-2">
-              <h1 className="text-2xl lg:text-3xl font-bold line-clamp-2 leading-tight">
-                {video.title}
-              </h1>
-            </div>
-
-            {/* Metadata */}
-            <div className="flex items-center gap-4 text-base text-muted-foreground mb-4">
-              <span>
-                {video.published_at &&
-                  formatRelative(new Date(video.published_at), new Date())}
-              </span>
-            </div>
-
-            {/* Inner Content Wrapper - Horizontal Flex 70/30, fills remaining space */}
-            <div className="flex flex-1 gap-6 min-h-0">
-              {/* Main Content - 70% */}
-              <div className="flex-[2] flex flex-col min-w-0">
-                {/* Tab Nav - Fixed height */}
-                <VideoContentTabs
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
-                  hasTranscript={hasTranscript}
-                  hasChapters={hasChapters}
-                  showAI={showAIAssistant}
-                />
-
-                {/* Tab Content - Fills remaining space */}
-                <div className="flex-1 min-h-0">
-                  {/* Description Tab */}
-                  {activeTab === "description" && (
-                    <div className="space-y-6 h-full overflow-y-auto">
-                      <VideoDescription text={video.description || ""} />
-
-                      {/* CTA */}
-                      {video.cta && (
-                        <div className="rounded-lg border border-border p-6 bg-card">
-                          <h2 className="text-lg font-bold mb-2">
-                            {video.cta.title}
-                          </h2>
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={{
-                              a: ({ ...props }) => (
-                                <a
-                                  {...props}
-                                  className="text-primary hover:underline"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                />
-                              ),
-                              p: ({ ...props }) => (
-                                <p {...props} className="mb-4 last:mb-0" />
-                              ),
-                            }}
-                          >
-                            {video.cta.description}
-                          </ReactMarkdown>
-                          {video.cta.button_text && video.cta.button_url && (
-                            <a
-                              className="mt-4 inline-flex bg-foreground text-background rounded-md px-4 py-2 items-center justify-center hover:opacity-90 transition-opacity"
-                              href={video.cta.button_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {video.cta.button_text}
-                            </a>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Transcript Tab */}
-                  {activeTab === "transcript" && hasTranscript && (
-                    <div className="h-full overflow-y-auto">
-                      <Transcript
-                        url={video.transcript?.json?.url || ""}
-                        onCueClick={handleTimeSelect}
-                        playerRef={playerRef}
-                      />
-                    </div>
-                  )}
-
-                  {/* Chapters Tab - Mobile only */}
-                  {activeTab === "chapters" && hasChapters && (
-                    <div className="h-full lg:hidden overflow-y-auto">
-                      <MobileChapterTabs
-                        chaptersWebVTT={video.chapters}
-                        onChapterClick={handleTimeSelect}
-                      />
-                    </div>
-                  )}
-
-                  {/* Ask AI Tab */}
-                  {activeTab === "ai" && showAIAssistant && (
-                    <div className="h-full">
-                      <AIAssistant
-                        videoId={video.id}
-                        name={settings?.ai_name || "AI Assistant"}
-                        avatar={settings?.ai_avatar || "/default-avatar.png"}
-                        greeting={settings?.ai_greeting}
-                        subdomain={""}
-                        isEmbedded={true}
-                        className="h-full"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Chapters Sidebar - 30% */}
-              <aside className="hidden lg:block flex-[1] min-w-0">
-                <div className="sticky top-6 h-full overflow-y-auto">
-                  {hasChapters ? (
-                    <ChaptersSidebar
-                      chaptersWebVTT={video.chapters || ""}
-                      playbackId={video.playback_id}
-                      onChapterClick={handleTimeSelect}
-                    />
+                  
+                  {hasPreviousVideo && previousVideo ? (
+                    <Link
+                      href={`/pl/${playlist.id}/v/${previousVideo.id}`}
+                      className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
+                    >
+                      <ChevronLeft size={24} />
+                    </Link>
                   ) : (
-                    <div className="text-muted-foreground text-sm">
-                      No chapters available
+                    <div className="p-2 rounded-md text-muted-foreground/30">
+                      <ChevronLeft size={24} />
+                    </div>
+                  )}
+
+                  {/* Counter */}
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {currentVideoIndex + 1} / {playlist.videos.length}
+                    </span>
+                    <AutoplayToggle />
+                  </div>
+
+                  {/* Next */}
+                  {hasNextVideo && nextVideo ? (
+                    <Link
+                      href={`/pl/${playlist.id}/v/${nextVideo.id}`}
+                      className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
+                    >
+                      <ChevronRight size={24} />
+                    </Link>
+                  ) : (
+                    <div className="p-2 rounded-md text-muted-foreground/30">
+                      <ChevronRight size={24} />
                     </div>
                   )}
                 </div>
-              </aside>
+              )}
+
+              {/* Title & Metadata */}
+              <div className="mb-2">
+                <h1 className="text-2xl lg:text-3xl font-bold line-clamp-2 leading-tight">
+                  {video.title}
+                </h1>
+              </div>
+              <div className="flex items-center gap-4 text-base text-muted-foreground mb-6">
+                <span>
+                  {video.published_at &&
+                    formatRelative(new Date(video.published_at), new Date())}
+                </span>
+              </div>
+
+              {/* Main Tabs Navigation */}
+              <div className="flex items-center border-b border-border mb-6">
+                <button
+                  onClick={() => setActiveMainTab("description")}
+                  className={cn(
+                    "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                    activeMainTab === "description"
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Description
+                </button>
+                {hasTranscript && (
+                  <button
+                    onClick={() => setActiveMainTab("transcript")}
+                    className={cn(
+                      "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                      activeMainTab === "transcript"
+                        ? "border-primary text-primary"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    Transcript
+                  </button>
+                )}
+              </div>
+
+              {/* Tab Content */}
+              <div className="flex-1 min-h-0">
+                {activeMainTab === "description" && (
+                  <div className="space-y-6">
+                    <VideoDescription text={video.description || ""} />
+                    {video.cta && (
+                      <div className="rounded-lg border border-border p-6 bg-card">
+                        <h2 className="text-lg font-bold mb-2">
+                          {video.cta.title}
+                        </h2>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            a: ({ ...props }) => (
+                              <a
+                                {...props}
+                                className="text-primary hover:underline"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              />
+                            ),
+                            p: ({ ...props }) => (
+                              <p {...props} className="mb-4 last:mb-0" />
+                            ),
+                          }}
+                        >
+                          {video.cta.description}
+                        </ReactMarkdown>
+                        {video.cta.button_text && video.cta.button_url && (
+                          <a
+                            className="mt-4 inline-flex bg-foreground text-background rounded-md px-4 py-2 items-center justify-center hover:opacity-90 transition-opacity"
+                            href={video.cta.button_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {video.cta.button_text}
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeMainTab === "transcript" && hasTranscript && (
+                  <div className="h-[600px] border rounded-md overflow-hidden">
+                    <Transcript
+                      url={video.transcript?.json?.url || ""}
+                      onCueClick={handleTimeSelect}
+                      playerRef={playerRef}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Right Sidebar: Chat & Chapters */}
+        <VideoContentTabs
+          videoId={video.id}
+          playbackId={video.playback_id}
+          chaptersWebVTT={video.chapters || ""}
+          aiName={settings?.ai_name || "AI Assistant"}
+          aiAvatar={settings?.ai_avatar || "/default-avatar.png"}
+          subdomain={""}
+          greeting={settings?.ai_greeting}
+          onChapterClick={handleTimeSelect}
+          hasChapters={hasChapters}
+          className="z-30"
+        />
       </div>
     </AIAssistantProvider>
   );

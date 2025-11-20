@@ -3,13 +3,11 @@ import "./globals.css";
 
 import { bold } from "@/client";
 import type { Settings } from "@boldvideo/bold-js";
-import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LayoutWithPlaylist } from "@/components/layout-with-playlist";
 import { SettingsProvider } from "@/components/providers/settings-provider";
+import { AppProviders } from "@/components/providers/app-providers";
 import { getPortalConfig } from "@/lib/portal-config";
-import { ProgressProvider } from "@/components/providers/progress-provider";
 import { auth } from "@/auth";
-import { SessionProvider } from "next-auth/react";
 import { isAuthEnabled } from "@/config/auth";
 import SignIn from "@/components/auth/sign-in";
 
@@ -267,26 +265,19 @@ export default async function RootLayout({
       </head>
       <body className="bg-background flex flex-col min-h-screen">
         {showContent ? (
-          <SessionProvider session={session}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme={config.theme.forcedTheme || "dark"}
-              enableSystem={!config.theme.forcedTheme}
-              {...(config.theme.forcedTheme && { forcedTheme: config.theme.forcedTheme })}
+          <AppProviders
+            session={session}
+            settings={settings}
+            themeConfig={config.theme}
+          >
+            <LayoutWithPlaylist
+              settings={settings}
+              session={session}
+              showHeader={showHeader}
             >
-              <SettingsProvider settings={settings}>
-                <ProgressProvider>
-                  <LayoutWithPlaylist
-                    settings={settings}
-                    session={session}
-                    showHeader={showHeader}
-                  >
-                    {children}
-                  </LayoutWithPlaylist>
-                </ProgressProvider>
-              </SettingsProvider>
-            </ThemeProvider>
-          </SessionProvider>
+              {children}
+            </LayoutWithPlaylist>
+          </AppProviders>
         ) : (
           <SettingsProvider settings={settings}>
             <SignIn settings={settings ?? undefined} />
