@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState, useLayoutEffect } from "react";
+import React, { useRef, useEffect, useState, useLayoutEffect, useCallback } from "react";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -183,6 +183,7 @@ export const AIAssistant = ({
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputContainerRef = useRef<HTMLDivElement>(null);
 
   const {
     messages,
@@ -301,7 +302,7 @@ export const AIAssistant = ({
   }, [messages, isPending]);
 
   /** Auto-resize textarea */
-  useEffect(() => {
+  const resizeTextarea = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
@@ -317,7 +318,24 @@ export const AIAssistant = ({
         textarea.style.overflowY = "hidden";
       }
     }
-  }, [inputValue]);
+  }, []);
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [inputValue, resizeTextarea]);
+
+  // Re-measure on container width change (fixes issue where sidebar animation causes incorrect height calculation)
+  useEffect(() => {
+    const container = inputContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(() => {
+      resizeTextarea();
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [resizeTextarea]);
 
   const renderContent = () => (
     <>
@@ -480,7 +498,7 @@ export const AIAssistant = ({
             : "p-4 bg-background-muted border-t border-background-muted"
         )}
       >
-        <div className="relative flex items-end gap-2">
+        <div className="relative flex items-end gap-2" ref={inputContainerRef}>
           <textarea
             ref={textareaRef}
             value={inputValue}
