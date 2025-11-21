@@ -10,6 +10,7 @@ const MOBILE_BREAKPOINT = 768;
 interface SidebarSideState {
   isOpen: boolean;
   isCollapsed: boolean;
+  width?: number;
 }
 
 interface SidebarState {
@@ -26,6 +27,7 @@ interface SidebarContextValue extends SidebarState {
   setRightOpen: (open: boolean) => void;
   setLeftCollapsed: (collapsed: boolean) => void;
   setRightCollapsed: (collapsed: boolean) => void;
+  setRightWidth: (width: number) => void;
   
   // Legacy API compatibility (maps to left sidebar)
   /** @deprecated Use toggleLeft() instead */
@@ -56,7 +58,7 @@ export function SidebarProvider({
   // Default: Left open on desktop, closed on mobile. Right closed.
   const [state, setState] = React.useState<SidebarState>({
     left: { isOpen: defaultOpen, isCollapsed: false },
-    right: { isOpen: false, isCollapsed: false },
+    right: { isOpen: false, isCollapsed: false, width: 380 },
     isMobile: false, // Assume desktop first for SSR
   });
 
@@ -211,6 +213,13 @@ export function SidebarProvider({
     }));
   }, []);
 
+  const setRightWidth = React.useCallback((width: number) => {
+    setState((prev) => ({
+      ...prev,
+      right: { ...prev.right, width },
+    }));
+  }, []);
+
   // Legacy wrappers
   const legacyToggle = toggleLeft;
   const legacySetOpen = setLeftOpen;
@@ -225,6 +234,7 @@ export function SidebarProvider({
       setRightOpen,
       setLeftCollapsed,
       setRightCollapsed,
+      setRightWidth,
       // Legacy
       isOpen: state.left.isOpen,
       toggle: legacyToggle,
@@ -251,7 +261,7 @@ export function SidebarProvider({
     : "0px";
 
   const rightWidth = state.right.isOpen 
-    ? state.right.isCollapsed ? "56px" : "320px"
+    ? state.right.isCollapsed ? "56px" : `${state.right.width ?? 380}px`
     : state.right.isCollapsed 
     ? "56px" 
     : "0px";

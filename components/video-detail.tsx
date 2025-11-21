@@ -176,7 +176,7 @@ export function VideoDetail({
 
         {/* Main Content Area (Scrolls naturally) */}
         <div
-          className="flex-1 min-w-0 transition-all duration-300 ease-in-out w-full pt-5"
+          className="flex-1 min-w-0 w-full pt-5"
           style={{
             paddingLeft: playlist ? "calc(var(--sidebar-left-width) + 20px)" : "20px",
             paddingRight: "calc(var(--sidebar-right-width) + 20px)",

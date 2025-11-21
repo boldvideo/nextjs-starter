@@ -182,7 +182,7 @@ export const AIAssistant = ({
     endpoint,
   });
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     messages,
@@ -272,7 +272,7 @@ export const AIAssistant = ({
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => {
-        inputRef.current?.focus();
+        textareaRef.current?.focus();
       }, 100);
     }
   }, [isOpen]);
@@ -299,6 +299,25 @@ export const AIAssistant = ({
       });
     }
   }, [messages, isPending]);
+
+  /** Auto-resize textarea */
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      const maxHeight = 120; // ~5 lines
+      const minHeight = 64;  // ~2 lines
+      const newHeight = Math.max(minHeight, Math.min(textarea.scrollHeight, maxHeight));
+      textarea.style.height = `${newHeight}px`;
+      
+      // Show scrollbar only if content exceeds max height
+      if (textarea.scrollHeight > maxHeight) {
+        textarea.style.overflowY = "auto";
+      } else {
+        textarea.style.overflowY = "hidden";
+      }
+    }
+  }, [inputValue]);
 
   const renderContent = () => (
     <>
@@ -372,6 +391,12 @@ export const AIAssistant = ({
                       <strong>{processChildren(children)}</strong>
                     ),
                     em: ({ children }) => <em>{processChildren(children)}</em>,
+                    h1: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
+                    h2: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
+                    h3: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
+                    h4: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
+                    h5: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
+                    h6: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
                     a: ({ href, children }) => (
                       <a
                         href={href}
@@ -455,34 +480,39 @@ export const AIAssistant = ({
             : "p-4 bg-background-muted border-t border-background-muted"
         )}
       >
-        <div className="relative">
-          <input
-            ref={inputRef}
-            type="text"
+        <div className="relative flex items-end gap-2">
+          <textarea
+            ref={textareaRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
                 handleSubmit();
               }
             }}
             placeholder="Ask me something about this video..."
+            rows={2}
             className={cn(
-              "w-full rounded-full py-2 px-4 pr-10",
+              "w-full rounded-2xl py-3 px-4 resize-none overflow-hidden min-h-[64px]",
+              "focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm",
               isEmbedded
                 ? "bg-muted text-foreground"
                 : "bg-background text-foreground"
             )}
           />
-          {inputValue && (
-            <button
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/90"
-              onClick={() => handleSubmit()}
-              disabled={isPending}
-            >
-              <Send size={20} />
-            </button>
-          )}
+          <button
+            className={cn(
+              "flex-shrink-0 p-3 rounded-full transition-colors mb-1",
+              inputValue.trim()
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+            )}
+            onClick={() => handleSubmit()}
+            disabled={isPending || !inputValue.trim()}
+          >
+            <Send size={18} />
+          </button>
         </div>
         {!isEmbedded && (
           <p className="text-xs text-gray-500 mt-2">
