@@ -334,7 +334,7 @@ export function VideoDetail({
                   )}
 
                   {activeMainTab === "transcript" && hasTranscript && (
-                    <div className="h-[600px] border rounded-md overflow-hidden">
+                    <div className="min-h-[600px] max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar rounded-md">
                       <Transcript
                         url={video.transcript?.json?.url || ""}
                         onCueClick={handleTimeSelect}
