@@ -13,14 +13,7 @@ import { ChaptersSidebar } from "./chapters-sidebar";
 import { AIAssistant } from "./ui/ai-assistant";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 
-export type VideoTabId =
-  | "chat"
-  | "chapters"
-  | "description"
-  | "transcript"
-  | "ai";
-
-interface VideoContentTabsProps {
+interface VideoCompanionSidebarProps {
   // Props for content
   videoId: string;
   playbackId: string;
@@ -32,22 +25,16 @@ interface VideoContentTabsProps {
   greeting?: string;
   endpoint?: string;
   onChapterClick: (time: number) => void;
+  hasChapters?: boolean;
 
   // Visual props
   className?: string;
-
-  // Legacy props support (to be ignored or adapted)
-  activeTab?: VideoTabId;
-  onTabChange?: (tab: VideoTabId) => void;
-  hasTranscript?: boolean;
-  hasChapters?: boolean;
-  showAI?: boolean;
 }
 
-const TAB_STORAGE_KEY = "bold-video-content-tab";
-type SidebarTab = "chat" | "chapters";
+const TAB_STORAGE_KEY = "bold-video-companion-tab";
+type CompanionTab = "chat" | "chapters";
 
-export function VideoContentTabs({
+export function VideoCompanionSidebar({
   videoId,
   playbackId,
   chaptersWebVTT,
@@ -60,10 +47,10 @@ export function VideoContentTabs({
   onChapterClick,
   className,
   hasChapters = true,
-}: VideoContentTabsProps) {
+}: VideoCompanionSidebarProps) {
   const { right, isMobile, setRightCollapsed, toggleRight, setRightOpen } =
     useSidebar();
-  const [activeTab, setActiveTab] = useState<SidebarTab>("chat");
+  const [activeTab, setActiveTab] = useState<CompanionTab>("chat");
   const [isHydrated, setIsHydrated] = useState(false);
   const isCollapsed = right.isCollapsed && !isMobile;
 
@@ -81,7 +68,7 @@ export function VideoContentTabs({
     try {
       const stored = localStorage.getItem(TAB_STORAGE_KEY);
       if (stored === "chat" || stored === "chapters") {
-        setActiveTab(stored);
+        setActiveTab(stored as CompanionTab);
       }
     } catch (e) {
       console.warn("Failed to hydrate tab state", e);
