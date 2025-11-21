@@ -104,18 +104,13 @@ export function ChaptersSidebar({
                     onChapterClick(chapter.startTime);
                   }}
                   className={cn(
-                    "w-full text-left px-4 py-3 transition-colors hover:bg-accent group cursor-pointer",
+                    "w-full text-left px-4 py-3 transition-colors hover:bg-accent group cursor-pointer flex items-start gap-2.5",
                     activeChapter === index && "bg-primary/10"
                   )}
                 >
-                  {/* Chapter Time */}
-                  <div className="mb-1">
-                    <span className="text-xs text-muted-foreground">
-                      {formatTime(chapter.startTime)}
-                    </span>
-                  </div>
-
-                  {/* Chapter Title */}
+                  <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
+                    {formatTime(chapter.startTime)}
+                  </span>
                   <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                     {chapter.title}
                   </div>
