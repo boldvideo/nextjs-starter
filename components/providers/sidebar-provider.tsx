@@ -245,13 +245,13 @@ export function SidebarProvider({
 
   // Calculate widths for CSS variables
   const leftWidth = state.left.isOpen 
-    ? "320px" 
+    ? state.left.isCollapsed ? "56px" : "320px"
     : state.left.isCollapsed 
     ? "56px" 
     : "0px";
 
   const rightWidth = state.right.isOpen 
-    ? "320px" 
+    ? state.right.isCollapsed ? "56px" : "320px"
     : state.right.isCollapsed 
     ? "56px" 
     : "0px";

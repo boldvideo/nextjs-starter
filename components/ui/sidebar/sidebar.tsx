@@ -57,12 +57,13 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
               isOpen ? "translate-x-0" : side === "left" ? "-translate-x-full" : "translate-x-full",
             ],
 
-            // Desktop: Sticky Sidebar
+            // Desktop: Fixed Sidebar (App-Shell style)
             !sidebar.isMobile && [
-              "sticky top-0 h-screen z-30 flex-shrink-0", // Sticky, full height, don't shrink
+              "fixed bottom-0 z-30 bg-background", // Fixed, anchored bottom
+              "top-[var(--header-height)]", // Matches standard header height
               width,
-              side === "right" && "border-l",
-              side === "left" && "border-r",
+              side === "right" && "right-0 border-l",
+              side === "left" && "left-0 border-r",
             ],
 
             // Position for Mobile (or if fixed is forced)
@@ -74,6 +75,7 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
             className
           )}
         >
+          {/* No inner sticky wrapper needed for fixed sidebar */}
           {children}
         </aside>
       </>

@@ -16,7 +16,7 @@ export const SidebarContent = React.forwardRef<HTMLDivElement, SidebarContentPro
       <div
         ref={ref}
         className={cn(
-          "flex-1 overflow-y-auto overflow-x-hidden no-scrollbar",
+          "flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar",
           className
         )}
         {...props}

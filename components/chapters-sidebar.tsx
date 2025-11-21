@@ -79,7 +79,7 @@ export function ChaptersSidebar({
   return (
     <div
       className={cn(
-        "bg-sidebar rounded-lg border border-border overflow-hidden flex flex-col h-full max-h-[600px]",
+        "bg-sidebar rounded-lg border border-border overflow-hidden flex flex-col h-full",
         className
       )}
     >

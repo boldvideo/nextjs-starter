@@ -56,9 +56,18 @@ export function VideoContentTabs({
   className,
   hasChapters = true,
 }: VideoContentTabsProps) {
-  const { right } = useSidebar();
+  const { right, isMobile, setRightCollapsed, toggleRight, setRightOpen } = useSidebar();
   const [activeTab, setActiveTab] = useState<SidebarTab>("chat");
   const [isHydrated, setIsHydrated] = useState(false);
+  const isCollapsed = right.isCollapsed && !isMobile;
+
+  // Ensure right sidebar is "open" in context for desktop so width var is calculated correctly
+  // even though we use mode="collapse" which technically makes it visible always
+  useEffect(() => {
+    if (!isMobile && !right.isOpen) {
+      setRightOpen(true);
+    }
+  }, [isMobile, right.isOpen, setRightOpen]);
 
   // Hydrate tab state
   useEffect(() => {
@@ -91,73 +100,122 @@ export function VideoContentTabs({
   ];
 
   return (
-    <Sidebar side="right" mode="toggle" className={className}>
-      <SidebarHeader>
-        <div className="flex items-center w-full gap-2">
-          {/* Tab Navigation */}
-          <div className="flex-1 flex gap-1 bg-muted/50 rounded-lg p-1">
+    <>
+      {isMobile && !right.isOpen && (
+        <button
+          onClick={toggleRight}
+          className="fixed bottom-6 right-6 z-40 flex items-center justify-center bg-primary text-primary-foreground p-3 rounded-full shadow-lg transition-transform hover:scale-105"
+          aria-label="Open sidebar"
+        >
+          {activeTab === "chat" ? (
+            <MessageSquare className="h-6 w-6" />
+          ) : (
+            <List className="h-6 w-6" />
+          )}
+        </button>
+      )}
+      <Sidebar side="right" mode="collapse" className={className}>
+      <SidebarHeader className={isCollapsed ? "px-2 justify-center" : ""}>
+        {isCollapsed ? (
+          <SidebarToggle side="right" mode="collapse" />
+        ) : (
+          <div className="flex items-center w-full gap-2">
+            {/* Tab Navigation */}
+            <div className="flex-1 flex gap-1 bg-muted/50 rounded-lg p-1">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-md",
+                      "text-xs font-medium transition-all duration-200 cursor-pointer",
+                      isActive
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Mobile Close / Desktop Toggle */}
+            <div className="flex-shrink-0">
+              <SidebarToggle side="right" mode="collapse" />
+            </div>
+          </div>
+        )}
+      </SidebarHeader>
+
+      <SidebarContent className="overflow-hidden flex flex-col h-full">
+        {isCollapsed ? (
+          <div className="flex flex-col gap-2 p-2 items-center mt-2">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setRightCollapsed(false);
+                  }}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-md",
-                    "text-xs font-medium transition-all duration-200 cursor-pointer",
+                    "p-2.5 rounded-md transition-all duration-200",
                     isActive
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
+                  title={tab.label}
                 >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <Icon className="h-5 w-5" />
                 </button>
               );
             })}
           </div>
+        ) : (
+          <>
+            {activeTab === "chat" && (
+              <div className="h-full flex flex-col min-h-0">
+                <AIAssistant
+                  videoId={videoId}
+                  name={aiName}
+                  avatar={aiAvatar}
+                  subdomain={subdomain}
+                  userName={userName}
+                  greeting={greeting}
+                  endpoint={endpoint}
+                  isEmbedded={true}
+                  className="h-full"
+                />
+              </div>
+            )}
 
-          {/* Mobile Close / Desktop Toggle */}
-          <div className="flex-shrink-0">
-            <SidebarToggle side="right" mode="toggle" />
-          </div>
-        </div>
-      </SidebarHeader>
-
-      <SidebarContent>
-        {activeTab === "chat" && (
-          <div className="h-full">
-            <AIAssistant
-              videoId={videoId}
-              name={aiName}
-              avatar={aiAvatar}
-              subdomain={subdomain}
-              userName={userName}
-              greeting={greeting}
-              endpoint={endpoint}
-              isEmbedded={true}
-            />
-          </div>
-        )}
-
-        {activeTab === "chapters" && (
-          <div className="h-full">
-             {hasChapters ? (
-              <ChaptersSidebar
-                chaptersWebVTT={chaptersWebVTT}
-                playbackId={playbackId}
-                onChapterClick={onChapterClick}
-                className="border-none shadow-none rounded-none"
-              />
-             ) : (
-               <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-                 No chapters available
-               </div>
-             )}
-          </div>
+            {activeTab === "chapters" && (
+              <div className="h-full flex flex-col min-h-0">
+                {hasChapters ? (
+                  <ChaptersSidebar
+                    chaptersWebVTT={chaptersWebVTT}
+                    playbackId={playbackId}
+                    onChapterClick={onChapterClick}
+                    className="border-none shadow-none rounded-none h-full max-h-none"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+                    No chapters available
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </SidebarContent>
     </Sidebar>
+    </>
   );
 }

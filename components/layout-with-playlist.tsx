@@ -29,7 +29,7 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
       <Suspense>
         <SearchPreview />
       </Suspense>
-      <main className="flex-1 relative h-full overflow-y-scroll flex">{children}</main>
+      <main className="flex-1 relative flex flex-col pt-[var(--header-height)]">{children}</main>
     </>
   );
 }

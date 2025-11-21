@@ -300,173 +300,214 @@ export const AIAssistant = ({
     }
   }, [messages, isPending]);
 
-  // For embedded mode, we use a simpler layout without the floating button or sidebar positioning
+  const renderContent = () => (
+    <>
+      {!isEmbedded && (
+        <div className="flex justify-between items-center px-4 h-16 flex-shrink-0 border-b border-background-muted">
+          <h2 className="text-xl font-bold">Ask {name}</h2>
+          <button
+            onClick={toggleOpen}
+            className="text-foreground-muted hover:text-foreground"
+          >
+            <X size={24} />
+          </button>
+        </div>
+      )}
+
+      <div
+        ref={scrollContainerRef}
+        className={cn(
+          "flex-1 min-h-0 overflow-y-auto",
+          isEmbedded ? "px-4" : ""
+        )}
+        onClick={handleTimestampInteraction}
+      >
+        <div className={cn("mb-4", isEmbedded ? "" : "px-4 pt-4")}>
+          <div className="flex items-center mb-2">
+            <Image
+              src={avatar}
+              alt={name}
+              width={40}
+              height={40}
+              className="rounded-full mr-2"
+            />
+            <strong>{name}</strong>
+          </div>
+          <div
+            className={cn(
+              isEmbedded
+                ? "rounded-lg p-3 bg-muted text-foreground ml-4"
+                : ""
+            )}
+          >
+            <p>
+              {greeting && greeting.trim() !== ""
+                ? greeting
+                : `${
+                    userName ? `Hi ${userName}!` : "Hello there!"
+                  } I'm ${name}, your AI assistant. How can I help you with this video?`}
+            </p>
+          </div>
+        </div>
+
+        {messages.map((message, index) => (
+          <div key={index} className="mb-4">
+            <div
+              className={cn(
+                "rounded-lg p-3 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
+                message.role === "user"
+                  ? "bg-muted/50 text-foreground border border-border/50"
+                  : "bg-muted text-foreground ml-4",
+                message.role === "user" && !isEmbedded ? "mr-8" : "",
+                message.role !== "user" && !isEmbedded ? "ml-8" : ""
+              )}
+            >
+              {message.content ? (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <p>{processChildren(children)}</p>,
+                    li: ({ children }) => <li>{processChildren(children)}</li>,
+                    strong: ({ children }) => (
+                      <strong>{processChildren(children)}</strong>
+                    ),
+                    em: ({ children }) => <em>{processChildren(children)}</em>,
+                    a: ({ href, children }) => (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-2 hover:opacity-90"
+                      >
+                        {processChildren(children)}
+                      </a>
+                    ),
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              ) : !message.suggested_actions ? (
+                <div className="flex items-center gap-2">
+                  <span className="flex gap-1">
+                    <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
+                  </span>
+                </div>
+              ) : null}
+              {message.tool_call && (
+                <div className="mt-2 flex items-center gap-2 text-xs text-foreground/60">
+                  <div className="flex gap-1">
+                    <span className="h-1 w-1 bg-current rounded-full animate-pulse"></span>
+                    <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.2s]"></span>
+                    <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.4s]"></span>
+                  </div>
+                  <span>
+                    {message.tool_call.name === "web_search" &&
+                      "Searching the web..."}
+                    {message.tool_call.name === "lookup" &&
+                      "Looking up information..."}
+                    {!["web_search", "lookup"].includes(
+                      message.tool_call.name
+                    ) && `Using ${message.tool_call.name}...`}
+                  </span>
+                </div>
+              )}
+              {message.suggested_actions &&
+                message.suggested_actions.length > 0 && (
+                  <>
+                    {message.suggested_actions_prompt && (
+                      <p className="mt-2 text-sm">
+                        {message.suggested_actions_prompt}
+                      </p>
+                    )}
+                    {message.selected_action ? (
+                      <div className="mt-2 px-3 py-1 text-sm bg-muted/50 rounded-full inline-block">
+                        {message.selected_action}
+                      </div>
+                    ) : (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {message.suggested_actions.map((action) => (
+                          <button
+                            key={action.id}
+                            onClick={() =>
+                              handleSubmit(action.value, action.label, true)
+                            }
+                            className="px-3 py-1 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors cursor-pointer font-medium"
+                            disabled={isPending}
+                          >
+                            {action.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div
+        className={cn(
+          isEmbedded
+            ? "mt-auto bg-background border-t p-4 shadow-lg"
+            : "p-4 bg-background-muted border-t border-background-muted"
+        )}
+      >
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
+            placeholder="Ask me something about this video..."
+            className={cn(
+              "w-full rounded-full py-2 px-4 pr-10",
+              isEmbedded
+                ? "bg-muted text-foreground"
+                : "bg-background text-foreground"
+            )}
+          />
+          {inputValue && (
+            <button
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/90"
+              onClick={() => handleSubmit()}
+              disabled={isPending}
+            >
+              <Send size={20} />
+            </button>
+          )}
+        </div>
+        {!isEmbedded && (
+          <p className="text-xs text-gray-500 mt-2">
+            Note: our AI chat can make mistakes.
+          </p>
+        )}
+      </div>
+    </>
+  );
+
   if (isEmbedded) {
     return (
       <div
         className={cn(
-          isEmbedded
-            ? "flex flex-col flex-1 min-h-0 h-full overflow-hidden"
-            : "",
+          "flex flex-col flex-1 min-h-0 h-full overflow-hidden",
           className
         )}
       >
-        {/* Messages Area */}
-        <div
-          ref={scrollContainerRef}
-          onClick={handleTimestampInteraction}
-          className="flex-1 min-h-0 overflow-y-auto px-4"
-        >
-          {/* Welcome message */}
-          <div className="mb-4">
-            <div className="flex items-center mb-2">
-              <Image
-                src={avatar}
-                alt={name}
-                width={40}
-                height={40}
-                className="rounded-full mr-2"
-              />
-              <strong>{name}</strong>
-            </div>
-            <div className="rounded-lg p-3 bg-muted text-foreground ml-4">
-              <p>
-                {greeting && greeting.trim() !== ""
-                  ? greeting
-                  : `${
-                      userName ? `Hi ${userName}!` : "Hello there!"
-                    } I'm ${name}, your AI assistant. How can I help you with this video?`}
-              </p>
-            </div>
-          </div>
-
-          {/* Chat messages */}
-          {messages.map((message, index) => (
-            <div key={index} className="mb-4">
-              <div
-                className={cn(
-                  "rounded-lg p-3 prose max-w-none dark:prose-invert prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
-                  message.role === "user"
-                    ? "bg-muted/50 text-foreground border border-border/50"
-                    : "bg-muted text-foreground ml-4"
-                )}
-              >
-                {message.content ? (
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      p: ({ children }) => <p>{processChildren(children)}</p>,
-                      li: ({ children }) => <li>{processChildren(children)}</li>,
-                      strong: ({ children }) => <strong>{processChildren(children)}</strong>,
-                      em: ({ children }) => <em>{processChildren(children)}</em>,
-                      a: ({ href, children }) => (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline underline-offset-2 hover:opacity-90"
-                        >
-                          {processChildren(children)}
-                        </a>
-                      ),
-                    }}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
-                ) : !message.suggested_actions ? (
-                  <div className="flex items-center gap-2">
-                    <span className="flex gap-1">
-                      <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                      <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                      <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
-                    </span>
-                  </div>
-                ) : null}
-                {message.tool_call && (
-                  <div className="mt-2 flex items-center gap-2 text-xs text-foreground/60">
-                    <div className="flex gap-1">
-                      <span className="h-1 w-1 bg-current rounded-full animate-pulse"></span>
-                      <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.2s]"></span>
-                      <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.4s]"></span>
-                    </div>
-                    <span>
-                      {message.tool_call.name === "web_search" && "Searching the web..."}
-                      {message.tool_call.name === "lookup" && "Looking up information..."}
-                      {!["web_search", "lookup"].includes(message.tool_call.name) && `Using ${message.tool_call.name}...`}
-                    </span>
-                  </div>
-                )}
-                {message.suggested_actions &&
-                  message.suggested_actions.length > 0 && (
-                    <>
-                      {message.suggested_actions_prompt && (
-                        <p className="mt-2 text-sm">{message.suggested_actions_prompt}</p>
-                      )}
-                      {message.selected_action ? (
-                        <div className="mt-2 px-3 py-1 text-sm bg-muted/50 rounded-full inline-block">
-                          {message.selected_action}
-                        </div>
-                      ) : (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {message.suggested_actions.map((action) => (
-                            <button
-                              key={action.id}
-                              onClick={() => handleSubmit(action.value, action.label, true)}
-                              className="px-3 py-1 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors cursor-pointer font-medium"
-                              disabled={isPending}
-                            >
-                              {action.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Input Area - Sticks to bottom of container */}
-        <div className="mt-auto bg-background border-t p-4 shadow-lg">
-          <div className="relative">
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleSubmit();
-                }
-              }}
-              placeholder="Ask me something about this video..."
-              className="w-full bg-muted text-foreground rounded-full py-2 px-4 pr-10"
-            />
-            {inputValue && (
-              <button
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/90"
-                onClick={() => handleSubmit()}
-                disabled={isPending}
-              >
-                <Send size={20} />
-              </button>
-            )}
-          </div>
-        </div>
+        {renderContent()}
       </div>
     );
   }
 
-  // Floating/sidebar mode (original implementation)
   return (
-    <div
-      className={cn(
-        isEmbedded ? "flex flex-col flex-1 min-h-0 h-full overflow-hidden" : "",
-        className
-      )}
-    >
-      {/* Trigger Button */}
+    <div className={className}>
       <button
         onClick={toggleOpen}
         className={cn(
@@ -487,7 +528,6 @@ export const AIAssistant = ({
         <span className="ml-2 font-bold">Ask {name}</span>
       </button>
 
-      {/* Sidebar Content */}
       {isOpen && (
         <aside
           ref={sidebarRef}
@@ -503,7 +543,6 @@ export const AIAssistant = ({
             !isDragging && "transition-[width] duration-300 ease-in-out"
           )}
         >
-          {/* Drag Handle */}
           {isDesktop && (
             <div
               onMouseDown={handleDrag}
@@ -513,162 +552,7 @@ export const AIAssistant = ({
               <span className="block h-full w-1 bg-border group-hover:bg-primary rounded-full mx-auto" />
             </div>
           )}
-
-          {/* Header */}
-          <div className="flex justify-between items-center px-4 h-16 flex-shrink-0 border-b border-background-muted">
-            <h2 className="text-xl font-bold">Ask {name}</h2>
-            <button
-              onClick={toggleOpen}
-              className="text-foreground-muted hover:text-foreground"
-            >
-              <X size={24} />
-            </button>
-          </div>
-
-          {/* Messages Area */}
-          <div
-            ref={scrollContainerRef}
-            className="flex-1 min-h-0 overflow-y-auto"
-            onClick={handleTimestampInteraction}
-          >
-            {/* Welcome message */}
-
-            <div className="mb-4 px-4 pt-4">
-              <div className="flex items-center mb-2">
-                <Image
-                  src={avatar}
-                  alt={name}
-                  width={40}
-                  height={40}
-                  className="rounded-full mr-2"
-                />
-                <strong>{name}</strong>
-              </div>
-              <p>
-                {greeting && greeting.trim() !== ""
-                  ? greeting
-                  : `${
-                      userName ? `Hi ${userName}!` : "Hello there!"
-                    } I'm ${name}, your AI assistant. How can I help you with this video?`}
-              </p>
-            </div>
-
-            {/* Chat messages */}
-            {messages.map((message, index) => (
-              <div key={index} className="mb-4">
-                <div
-                  className={cn(
-                    "rounded-lg p-3 mx-4 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
-                    message.role === "user"
-                      ? "bg-muted/50 mr-8 text-foreground border border-border/50"
-                      : "bg-muted text-foreground ml-8"
-                  )}
-                >
-                  {message.content ? (
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        p: ({ children }) => <p>{processChildren(children)}</p>,
-                        li: ({ children }) => <li>{processChildren(children)}</li>,
-                        strong: ({ children }) => <strong>{processChildren(children)}</strong>,
-                        em: ({ children }) => <em>{processChildren(children)}</em>,
-                        a: ({ href, children }) => (
-                          <a
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline underline-offset-2 hover:opacity-90"
-                          >
-                            {processChildren(children)}
-                          </a>
-                        ),
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                  ) : !message.suggested_actions ? (
-                    <div className="flex items-center gap-2">
-                      <span className="flex gap-1">
-                        <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                        <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                        <span className="h-1.5 w-1.5 bg-current rounded-full animate-bounce"></span>
-                      </span>
-                    </div>
-                  ) : null}
-                  {message.tool_call && (
-                    <div className="mt-2 flex items-center gap-2 text-xs text-foreground/60">
-                      <div className="flex gap-1">
-                        <span className="h-1 w-1 bg-current rounded-full animate-pulse"></span>
-                        <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.2s]"></span>
-                        <span className="h-1 w-1 bg-current rounded-full animate-pulse [animation-delay:0.4s]"></span>
-                      </div>
-                      <span>
-                        {message.tool_call.name === "web_search" && "Searching the web..."}
-                        {message.tool_call.name === "lookup" && "Looking up information..."}
-                        {!["web_search", "lookup"].includes(message.tool_call.name) && `Using ${message.tool_call.name}...`}
-                      </span>
-                    </div>
-                  )}
-                  {message.suggested_actions &&
-                    message.suggested_actions.length > 0 && (
-                      <>
-                        {message.suggested_actions_prompt && (
-                          <p className="mt-2 text-sm">{message.suggested_actions_prompt}</p>
-                        )}
-                        {message.selected_action ? (
-                          <div className="mt-2 px-3 py-1 text-sm bg-muted/50 rounded-full inline-block">
-                            {message.selected_action}
-                          </div>
-                        ) : (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {message.suggested_actions.map((action) => (
-                              <button
-                                key={action.id}
-                                onClick={() => handleSubmit(action.value, action.label, true)}
-                                className="px-3 py-1 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors cursor-pointer font-medium"
-                                disabled={isPending}
-                              >
-                                {action.label}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                </div>
-              </div>
-            ))}
-          </div>
-          {/* Input Area */}
-          <div className="p-4 bg-background-muted border-t border-background-muted">
-            <div className="relative">
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleSubmit();
-                  }
-                }}
-                placeholder="Ask me something about this video..."
-                className="w-full bg-background text-foreground rounded-full py-2 px-4 pr-10"
-              />
-              {inputValue && (
-                <button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/90"
-                  onClick={() => handleSubmit()}
-                  disabled={isPending}
-                >
-                  <Send size={20} />
-                </button>
-              )}
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Note: our AI chat can make mistakes.
-            </p>
-          </div>
+          {renderContent()}
         </aside>
       )}
     </div>
