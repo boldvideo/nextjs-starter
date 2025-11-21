@@ -18,7 +18,13 @@ interface HeaderProps {
   className?: string;
 }
 
-export function Header({ logo, logoDark, menuItems, session, className }: HeaderProps) {
+export function Header({
+  logo,
+  logoDark,
+  menuItems,
+  session,
+  className,
+}: HeaderProps) {
   const settings = useSettings();
   const config = getPortalConfig(settings);
 
@@ -29,8 +35,12 @@ export function Header({ logo, logoDark, menuItems, session, className }: Header
 
   return (
     <>
-      <header className={`fixed top-0 w-full z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5 lg:px-10 py-4 border-b border-border transition-all ${className || ""}`}>
-        <div className="container mx-auto">
+      <header
+        className={`fixed top-0 w-full z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5  py-4 border-b border-border transition-all ${
+          className || ""
+        }`}
+      >
+        <div className="mx-auto w-full">
           <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
               {/* Logo */}

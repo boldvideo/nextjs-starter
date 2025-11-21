@@ -13,7 +13,12 @@ import { ChaptersSidebar } from "./chapters-sidebar";
 import { AIAssistant } from "./ui/ai-assistant";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 
-export type VideoTabId = "chat" | "chapters" | "description" | "transcript" | "ai";
+export type VideoTabId =
+  | "chat"
+  | "chapters"
+  | "description"
+  | "transcript"
+  | "ai";
 
 interface VideoContentTabsProps {
   // Props for content
@@ -27,10 +32,10 @@ interface VideoContentTabsProps {
   greeting?: string;
   endpoint?: string;
   onChapterClick: (time: number) => void;
-  
+
   // Visual props
   className?: string;
-  
+
   // Legacy props support (to be ignored or adapted)
   activeTab?: VideoTabId;
   onTabChange?: (tab: VideoTabId) => void;
@@ -56,7 +61,8 @@ export function VideoContentTabs({
   className,
   hasChapters = true,
 }: VideoContentTabsProps) {
-  const { right, isMobile, setRightCollapsed, toggleRight, setRightOpen } = useSidebar();
+  const { right, isMobile, setRightCollapsed, toggleRight, setRightOpen } =
+    useSidebar();
   const [activeTab, setActiveTab] = useState<SidebarTab>("chat");
   const [isHydrated, setIsHydrated] = useState(false);
   const isCollapsed = right.isCollapsed && !isMobile;
@@ -115,107 +121,106 @@ export function VideoContentTabs({
         </button>
       )}
       <Sidebar side="right" mode="collapse" className={className}>
-      <SidebarHeader className={isCollapsed ? "px-2 justify-center" : ""}>
-        {isCollapsed ? (
-          <SidebarToggle side="right" mode="collapse" />
-        ) : (
-          <div className="flex items-center w-full gap-2">
-            {/* Tab Navigation */}
-            <div className="flex-1 flex gap-1 bg-muted/50 rounded-lg p-1">
+        <SidebarHeader className={isCollapsed ? "px-2 justify-center" : "p-0"}>
+          {isCollapsed ? (
+            <SidebarToggle side="right" mode="collapse" className="mt-2" />
+          ) : (
+            <div className="flex items-center w-full justify-between px-2">
+              {/* Tab Navigation */}
+              <div className="flex">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={cn(
+                        "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors -mb-px",
+                        isActive
+                          ? "border-primary text-primary"
+                          : "border-transparent text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Mobile Close / Desktop Toggle */}
+              <div className="flex-shrink-0">
+                <SidebarToggle side="right" mode="collapse" />
+              </div>
+            </div>
+          )}
+        </SidebarHeader>
+
+        <SidebarContent className="overflow-hidden flex flex-col h-full">
+          {isCollapsed ? (
+            <div className="flex flex-col gap-2 p-2 items-center mt-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setRightCollapsed(false);
+                    }}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-2 px-3 py-1.5 rounded-md",
-                      "text-xs font-medium transition-all duration-200 cursor-pointer",
+                      "p-2.5 rounded-md transition-all duration-200",
                       isActive
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
+                    title={tab.label}
                   >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{tab.label}</span>
+                    <Icon className="h-5 w-5" />
                   </button>
                 );
               })}
             </div>
-
-            {/* Mobile Close / Desktop Toggle */}
-            <div className="flex-shrink-0">
-              <SidebarToggle side="right" mode="collapse" />
-            </div>
-          </div>
-        )}
-      </SidebarHeader>
-
-      <SidebarContent className="overflow-hidden flex flex-col h-full">
-        {isCollapsed ? (
-          <div className="flex flex-col gap-2 p-2 items-center mt-2">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    setRightCollapsed(false);
-                  }}
-                  className={cn(
-                    "p-2.5 rounded-md transition-all duration-200",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  )}
-                  title={tab.label}
-                >
-                  <Icon className="h-5 w-5" />
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <>
-            {activeTab === "chat" && (
-              <div className="h-full flex flex-col min-h-0">
-                <AIAssistant
-                  videoId={videoId}
-                  name={aiName}
-                  avatar={aiAvatar}
-                  subdomain={subdomain}
-                  userName={userName}
-                  greeting={greeting}
-                  endpoint={endpoint}
-                  isEmbedded={true}
-                  className="h-full"
-                />
-              </div>
-            )}
-
-            {activeTab === "chapters" && (
-              <div className="h-full flex flex-col min-h-0">
-                {hasChapters ? (
-                  <ChaptersSidebar
-                    chaptersWebVTT={chaptersWebVTT}
-                    playbackId={playbackId}
-                    onChapterClick={onChapterClick}
-                    className="border-none shadow-none rounded-none h-full max-h-none"
+          ) : (
+            <>
+              {activeTab === "chat" && (
+                <div className="h-full flex flex-col min-h-0 pt-5">
+                  <AIAssistant
+                    videoId={videoId}
+                    name={aiName}
+                    avatar={aiAvatar}
+                    subdomain={subdomain}
+                    userName={userName}
+                    greeting={greeting}
+                    endpoint={endpoint}
+                    isEmbedded={true}
+                    className="h-full"
                   />
-                ) : (
-                  <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
-                    No chapters available
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </SidebarContent>
-    </Sidebar>
+                </div>
+              )}
+
+              {activeTab === "chapters" && (
+                <div className="h-full flex flex-col min-h-0">
+                  {hasChapters ? (
+                    <ChaptersSidebar
+                      chaptersWebVTT={chaptersWebVTT}
+                      playbackId={playbackId}
+                      onChapterClick={onChapterClick}
+                      className="border-none shadow-none rounded-none h-full max-h-none"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+                      No chapters available
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </SidebarContent>
+      </Sidebar>
     </>
   );
 }

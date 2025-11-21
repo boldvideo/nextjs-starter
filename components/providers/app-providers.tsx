@@ -13,7 +13,7 @@ interface AppProvidersProps {
   session: Session | null;
   settings: Settings | null;
   themeConfig: {
-    forcedTheme?: string;
+    forcedTheme?: string | null;
     [key: string]: any;
   };
 }

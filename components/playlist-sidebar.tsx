@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import type { Playlist } from "@boldvideo/bold-js";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,16 @@ export function PlaylistSidebar({
   className,
   mode = "toggle",
 }: PlaylistSidebarProps) {
-  const { left } = useSidebar();
+  const { left, setLeftOpen, isMobile } = useSidebar();
+  
+  // Ensure sidebar is "open" in context for desktop when in collapse mode
+  // so width var is calculated correctly
+  useEffect(() => {
+    if (mode === "collapse" && !isMobile && !left.isOpen) {
+      setLeftOpen(true);
+    }
+  }, [mode, isMobile, left.isOpen, setLeftOpen]);
+
   const currentIndex = playlist.videos.findIndex(
     (v) => v.id === currentVideoId
   );
