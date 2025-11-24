@@ -4,16 +4,18 @@ import { Player } from "@/components/players";
 import { useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { Settings, Playlist } from "@boldvideo/bold-js";
-import { AIAssistantProvider } from "./ui/ai-assistant/context";
-import { PlaylistSidebar } from "./playlist-sidebar";
+import { AIAssistantProvider } from "../chat/context";
+import { PlaylistSidebar } from "../navigation/playlist-sidebar";
 import { usePlaylist } from "@/components/providers/playlist-provider";
 import { useVideoProgress } from "@/hooks/use-video-progress";
 import type { ExtendedVideo } from "@/types/video-detail";
 import { FixedSidebarLayout } from "@/components/layout/fixed-sidebar-layout";
-import { VideoCompanionSidebar } from "@/components/video-companion-sidebar";
-import { VideoMainContent } from "@/components/video-main-content";
+import { VideoCompanionSidebar } from "../companion";
+import { VideoMainContent } from "./video-main-content";
 import { usePlaylistNavigation } from "@/hooks/use-playlist-navigation";
 import { useScrollOutOfView } from "@/hooks/use-scroll-out-of-view";
+import MobileContentShell from "../mobile/mobile-content-shell";
+import { cn } from "@/lib/utils";
 
 interface VideoDetailProps {
   video: ExtendedVideo;
@@ -86,59 +88,84 @@ export function VideoDetail({
 
   return (
     <AIAssistantProvider onTimeClick={handleTimeSelect}>
-      <FixedSidebarLayout
-        leftSidebar={
-          playlist ? (
-            <PlaylistSidebar
-              playlist={playlist}
-              currentVideoId={video.id}
-              className="z-30"
-              mode="collapse"
+      {/* Desktop Layout (>= lg) */}
+      <div className="hidden lg:flex flex-1 flex-col min-h-0">
+        <FixedSidebarLayout
+          leftSidebar={
+            playlist ? (
+              <PlaylistSidebar
+                playlist={playlist}
+                currentVideoId={video.id}
+                className="z-30"
+                mode="collapse"
+              />
+            ) : undefined
+          }
+          rightSidebar={
+            <VideoCompanionSidebar
+              videoId={video.id}
+              playbackId={video.playback_id}
+              chaptersWebVTT={video.chapters || ""}
+              aiName={settings?.ai_name || "AI Assistant"}
+              aiAvatar={settings?.ai_avatar || "/default-avatar.png"}
+              subdomain={""}
+              greeting={settings?.ai_greeting}
+              onChapterClick={handleTimeSelect}
+              hasChapters={Boolean(video.chapters)}
+              className="z-[35]"
             />
-          ) : undefined
-        }
-        rightSidebar={
-          <VideoCompanionSidebar
-            videoId={video.id}
-            playbackId={video.playback_id}
-            chaptersWebVTT={video.chapters || ""}
-            aiName={settings?.ai_name || "AI Assistant"}
-            aiAvatar={settings?.ai_avatar || "/default-avatar.png"}
-            subdomain={""}
-            greeting={settings?.ai_greeting}
-            onChapterClick={handleTimeSelect}
-            hasChapters={Boolean(video.chapters)}
-            className="z-30 z-[40]"
-          />
-        }
-        className={className}
-      >
-        {/* Video Player */}
-        <div className="w-full bg-black aspect-video relative rounded-lg overflow-hidden shadow-lg">
-          <Player
+          }
+          className={className}
+        >
+          <div className="w-full bg-black aspect-video relative lg:rounded-lg overflow-hidden shadow-lg z-20">
+            <Player
+              video={video as any}
+              autoPlay={true}
+              ref={playerRef}
+              startTime={effectiveStartTime}
+              className="w-full h-full"
+              isOutOfView={isOutOfView}
+              onEnded={handleVideoEnded}
+            />
+          </div>
+
+          <VideoMainContent
             video={video}
+            playlist={playlist}
+            currentVideoIndex={currentVideoIndex}
+            previousVideo={previousVideo}
+            nextVideo={nextVideo}
+            hasPreviousVideo={hasPreviousVideo}
+            hasNextVideo={hasNextVideo}
+            onTimeSelect={handleTimeSelect}
+            playerRef={playerRef}
+          />
+        </FixedSidebarLayout>
+      </div>
+
+      {/* Mobile Layout (< lg) */}
+      <div className="lg:hidden flex flex-col min-h-screen">
+        <div className="w-full bg-black aspect-video relative overflow-hidden shadow-lg">
+          <Player
+            video={video as any}
             autoPlay={true}
             ref={playerRef}
             startTime={effectiveStartTime}
-            className={className}
+            className="w-full h-full"
             isOutOfView={isOutOfView}
             onEnded={handleVideoEnded}
           />
         </div>
 
-        {/* Content below player */}
-        <VideoMainContent
+        <MobileContentShell
           video={video}
           playlist={playlist}
-          currentVideoIndex={currentVideoIndex}
-          previousVideo={previousVideo}
-          nextVideo={nextVideo}
-          hasPreviousVideo={hasPreviousVideo}
-          hasNextVideo={hasNextVideo}
-          onTimeSelect={handleTimeSelect}
           playerRef={playerRef}
+          onChapterClick={handleTimeSelect}
+          onTimeSelect={handleTimeSelect}
+          settings={settings}
         />
-      </FixedSidebarLayout>
+      </div>
     </AIAssistantProvider>
   );
 }

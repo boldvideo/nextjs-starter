@@ -27,8 +27,8 @@ export function SearchBar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isSearchPage = pathname === "/s";
-  const isAskPage = pathname === "/ask";
-  const currentQuery = searchParams?.get("q") || "";
+  const isAskPage = pathname === "/coach";
+  const currentQuery = searchParams?.get("q") || searchParams?.get("c") || "";
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   
@@ -130,7 +130,7 @@ export function SearchBar({
 
     if (inputValue.trim()) {
       if (mode === "ask") {
-        router.push(`/ask?q=${encodeURIComponent(inputValue)}`);
+        router.push(`/coach?c=${encodeURIComponent(inputValue)}`);
       } else {
         router.push(`/s?q=${encodeURIComponent(inputValue)}`);
       }

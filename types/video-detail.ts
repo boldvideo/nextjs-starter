@@ -15,9 +15,15 @@ export interface CTA {
 /**
  * Extended Video type with additional properties used in our application
  */
-export interface ExtendedVideo extends Omit<Video, "cta"> {
+export interface ExtendedVideo extends Omit<Video, "cta" | "attachments"> {
   chapters_url?: string;
   ai_avatar?: string;
   ai_name?: string;
   cta?: CTA | null;
+  attachments?: {
+    id: string;
+    name: string;
+    url: string;
+    type?: string;
+  }[];
 }

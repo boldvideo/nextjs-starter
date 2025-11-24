@@ -10,7 +10,7 @@ import {
   SidebarToggle,
 } from "@/components/ui/sidebar";
 import { ChaptersSidebar } from "./chapters-sidebar";
-import { AIAssistant } from "./ui/ai-assistant";
+import { AIAssistant } from "../chat";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 
 interface VideoCompanionSidebarProps {
@@ -94,19 +94,6 @@ export function VideoCompanionSidebar({
 
   return (
     <>
-      {isMobile && !right.isOpen && (
-        <button
-          onClick={toggleRight}
-          className="fixed bottom-6 right-6 z-40 flex items-center justify-center bg-primary text-primary-foreground p-3 rounded-full shadow-lg transition-transform hover:scale-105"
-          aria-label="Open sidebar"
-        >
-          {activeTab === "chat" ? (
-            <MessageSquare className="h-6 w-6" />
-          ) : (
-            <List className="h-6 w-6" />
-          )}
-        </button>
-      )}
       <Sidebar side="right" mode="collapse" className={className}>
         <SidebarHeader className={isCollapsed ? "px-2 justify-center" : "p-0"}>
           {isCollapsed ? (

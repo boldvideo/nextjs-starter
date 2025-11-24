@@ -15,6 +15,8 @@ interface AIAssistantContextValue {
   conversationId: string | null;
   setConversationId: React.Dispatch<React.SetStateAction<string | null>>;
   resetConversation: () => void;
+  hasUnreadMessage: boolean;
+  setHasUnreadMessage: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Create the context with a default value (or null)
@@ -34,6 +36,7 @@ export const AIAssistantProvider = ({
   const [inputValue, setInputValue] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [hasUnreadMessage, setHasUnreadMessage] = useState(false);
 
   const resetConversation = useCallback(() => {
     setMessages([]);
@@ -56,6 +59,8 @@ export const AIAssistantProvider = ({
     conversationId,
     setConversationId,
     resetConversation,
+    hasUnreadMessage,
+    setHasUnreadMessage,
   };
 
   return (
@@ -96,6 +101,9 @@ export const useAIAssistantContext = () => {
         console.warn("AIAssistantContext not found, setConversationId did nothing."),
       resetConversation: () =>
         console.warn("AIAssistantContext not found, resetConversation did nothing."),
+      hasUnreadMessage: false,
+      setHasUnreadMessage: () =>
+        console.warn("AIAssistantContext not found, setHasUnreadMessage did nothing."),
     } as AIAssistantContextValue; // Assert type for default return
     // Or: throw new Error('useAIAssistantContext must be used within an AIAssistantProvider');
   }

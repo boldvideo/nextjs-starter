@@ -25,6 +25,7 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
     isPending,
     setIsPending,
     conversationId,
+    setHasUnreadMessage,
   } = useAIAssistantContext();
 
   // Keep local state only for UI concerns specific to this hook/component instance
@@ -114,6 +115,7 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
       handleError(error as Error);
     } finally {
       setIsPending(false); // Use setter from context
+      setHasUnreadMessage(true);
     }
   };
 

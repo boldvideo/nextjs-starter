@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDuration } from "util/format-duration";
 import { AutoplayToggle } from "./autoplay-toggle";
-import { ThumbnailImage } from "./video-thumbnail/thumbnail-image";
+import { ThumbnailImage } from "@/components/video-thumbnail/thumbnail-image";
 import { 
   Sidebar, 
   SidebarHeader, 

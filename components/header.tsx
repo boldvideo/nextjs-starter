@@ -36,7 +36,7 @@ export function Header({
   return (
     <>
       <header
-        className={`fixed top-0 w-full z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5  py-4 border-b border-border transition-all ${
+        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5  py-4 border-b border-border transition-all ${
           className || ""
         }`}
       >
@@ -112,9 +112,9 @@ export function Header({
               </div>
 
               {/* Mobile Header Controls */}
-              <div className="grid grid-cols-2 items-center w-full lg:hidden">
-                {/* Left: Hamburger Menu */}
-                <div className="flex justify-start">
+              <div className="flex items-center justify-between w-full lg:hidden">
+                {/* Left: Hamburger Menu and Logo */}
+                <div className="flex items-center gap-4">
                   <Suspense>
                     <MobileMenu
                       menuItems={menuItems}
@@ -122,10 +122,7 @@ export function Header({
                       logoDark={logoDark}
                     />
                   </Suspense>
-                </div>
 
-                {/* Right: Logo and User Menu */}
-                <div className="flex justify-end items-center space-x-2">
                   <Link href="/">
                     {logoDark ? (
                       <>
@@ -157,6 +154,10 @@ export function Header({
                       />
                     )}
                   </Link>
+                </div>
+
+                {/* Right: User Menu */}
+                <div className="flex items-center">
                   {session !== undefined && (
                     <Suspense>
                       <UserMenu session={session} />

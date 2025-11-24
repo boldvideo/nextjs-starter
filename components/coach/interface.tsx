@@ -2,9 +2,9 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { ChatMessage } from "@/hooks/use-ask-stream";
-import { MessageBubble } from "./message-bubble";
-import { ClarificationCard } from "./clarification-card";
-import { AnswerCard } from "./answer-card";
+import { MessageBubble } from "./message";
+import { ClarificationCard } from "./clarification";
+import { AnswerCard } from "./answer";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ interface ChatInterfaceProps {
   aiAvatar?: string;
 }
 
-export function ChatInterface({
+export function CoachInterface({
   messages,
   onClarificationSubmit,
   isStreaming = false,

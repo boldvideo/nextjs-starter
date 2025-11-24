@@ -4,7 +4,7 @@ import * as React from "react";
 
 // Constants
 const STORAGE_KEY = "bold-sidebar-state-v1";
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = 768; // Mobile uses bottom nav, desktop uses sidebars
 
 // Types
 interface SidebarSideState {
@@ -250,6 +250,7 @@ export function SidebarProvider({
       setRightCollapsed,
       legacyToggle,
       legacySetOpen,
+      setRightWidth,
     ]
   );
 

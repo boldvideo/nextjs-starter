@@ -4,12 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Paperclip } from "lucide-react";
 import { formatRelative } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/components/transcript";
-import { AutoplayToggle } from "./autoplay-toggle";
-import { VideoDescription } from "./video-description";
+import { AutoplayToggle } from "../navigation/autoplay-toggle";
+import { VideoDescription } from "@/components/video-description";
 import { SidebarToggle } from "@/components/ui/sidebar";
 import type { ExtendedVideo } from "@/types/video-detail";
 import type { Playlist } from "@boldvideo/bold-js";
@@ -38,7 +38,7 @@ export function VideoMainContent({
   playerRef,
 }: VideoMainContentProps) {
   const [activeMainTab, setActiveMainTab] = useState<
-    "description" | "transcript"
+    "description" | "transcript" | "attachments"
   >("description");
 
   const hasTranscript =
@@ -46,55 +46,11 @@ export function VideoMainContent({
     !!video.transcript.json &&
     !!video.transcript.json.url;
 
+  const hasAttachments = video.attachments && video.attachments.length > 0;
+
   return (
     <div className="w-full mx-auto flex flex-col">
       <div className="flex flex-col flex-1 mt-6 min-h-[600px] pb-24 lg:pb-8">
-        {/* Mobile Playlist Controls */}
-        {playlist && (
-          <div className="lg:hidden flex items-center justify-between mb-4">
-            {/* Previous */}
-            <div className="lg:hidden">
-              {/* Mobile Toggle */}
-              <SidebarToggle side="left" mode="toggle" className="mr-2" />
-            </div>
-
-            {hasPreviousVideo && previousVideo ? (
-              <Link
-                href={`/pl/${playlist.id}/v/${previousVideo.id}`}
-                className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
-              >
-                <ChevronLeft size={24} />
-              </Link>
-            ) : (
-              <div className="p-2 rounded-md text-muted-foreground/30">
-                <ChevronLeft size={24} />
-              </div>
-            )}
-
-            {/* Counter */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-muted-foreground">
-                {currentVideoIndex + 1} / {playlist.videos.length}
-              </span>
-              <AutoplayToggle />
-            </div>
-
-            {/* Next */}
-            {hasNextVideo && nextVideo ? (
-              <Link
-                href={`/pl/${playlist.id}/v/${nextVideo.id}`}
-                className="p-2 rounded-md transition-colors text-foreground hover:bg-accent"
-              >
-                <ChevronRight size={24} />
-              </Link>
-            ) : (
-              <div className="p-2 rounded-md text-muted-foreground/30">
-                <ChevronRight size={24} />
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Title & Metadata */}
         <div className="mb-2">
           <h1 className="text-2xl lg:text-3xl font-bold line-clamp-2 leading-tight">
@@ -108,15 +64,15 @@ export function VideoMainContent({
           </span>
         </div>
 
-        {/* Main Tabs Navigation */}
-        <div className="flex items-center border-b border-border mb-6">
+        {/* Main Pills Navigation */}
+        <div className="flex items-center gap-2 border-b border-border mb-6 pb-4 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveMainTab("description")}
             className={cn(
-              "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+              "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
               activeMainTab === "description"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
             )}
           >
             Description
@@ -125,13 +81,29 @@ export function VideoMainContent({
             <button
               onClick={() => setActiveMainTab("transcript")}
               className={cn(
-                "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
                 activeMainTab === "transcript"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
               Transcript
+            </button>
+          )}
+          {hasAttachments && (
+            <button
+              onClick={() => setActiveMainTab("attachments")}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+                activeMainTab === "attachments"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              Attachments
+              <span className="ml-2 text-xs opacity-80">
+                {video.attachments?.length}
+              </span>
             </button>
           )}
         </div>
@@ -139,7 +111,7 @@ export function VideoMainContent({
         {/* Tab Content */}
         <div className="flex-1 min-h-0">
           {activeMainTab === "description" && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in fade-in slide-in-from-left-1 duration-300">
               <VideoDescription text={video.description || ""} />
               {video.cta && (
                 <div className="rounded-lg border border-border p-6 bg-card">
@@ -178,12 +150,42 @@ export function VideoMainContent({
           )}
 
           {activeMainTab === "transcript" && hasTranscript && (
-            <div className="min-h-[600px] max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar rounded-md">
+            <div className="min-h-[600px] max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar rounded-md animate-in fade-in slide-in-from-right-1 duration-300">
               <Transcript
                 url={video.transcript?.json?.url || ""}
                 onCueClick={onTimeSelect}
                 playerRef={playerRef}
               />
+            </div>
+          )}
+
+          {activeMainTab === "attachments" && hasAttachments && (
+            <div className="space-y-3 animate-in fade-in slide-in-from-right-1 duration-300">
+              {video.attachments?.map((attachment) => (
+                <a
+                  key={attachment.id || attachment.url}
+                  href={attachment.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                    {attachment.type === "pdf" ? (
+                      <FileText className="h-6 w-6 text-muted-foreground" />
+                    ) : (
+                      <Paperclip className="h-6 w-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-medium truncate">
+                      {attachment.name}
+                    </p>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {new URL(attachment.url).hostname}
+                    </p>
+                  </div>
+                </a>
+              ))}
             </div>
           )}
         </div>

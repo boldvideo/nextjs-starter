@@ -6,7 +6,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SynthesizedResponse, AskCitation } from "@/lib/ask";
-import { CitationModal } from "./citation-modal";
+import { CitationModal } from "./citation";
 import { ChevronDown, ChevronUp, PlayCircle, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
