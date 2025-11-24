@@ -181,7 +181,13 @@ export function VideoMainContent({
                       {attachment.name}
                     </p>
                     <p className="text-sm text-muted-foreground truncate">
-                      {new URL(attachment.url).hostname}
+                      {(() => {
+                        try {
+                          return new URL(attachment.url).hostname;
+                        } catch {
+                          return attachment.url;
+                        }
+                      })()}
                     </p>
                   </div>
                 </a>

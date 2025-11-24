@@ -158,7 +158,13 @@ export default function InfoTab({
                     {attachment.name}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {new URL(attachment.url).hostname}
+                    {(() => {
+                      try {
+                        return new URL(attachment.url).hostname;
+                      } catch {
+                        return attachment.url;
+                      }
+                    })()}
                   </p>
                 </div>
               </a>
