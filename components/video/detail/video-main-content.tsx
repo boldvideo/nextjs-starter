@@ -163,14 +163,14 @@ export function VideoMainContent({
             <div className="space-y-3 animate-in fade-in slide-in-from-right-1 duration-300">
               {video.attachments?.map((attachment) => (
                 <a
-                  key={attachment.id || attachment.url}
-                  href={attachment.url}
+                  key={attachment.id}
+                  href={attachment.file_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
                 >
                   <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                    {attachment.type === "pdf" ? (
+                    {attachment.mime_type === "application/pdf" ? (
                       <FileText className="h-6 w-6 text-muted-foreground" />
                     ) : (
                       <Paperclip className="h-6 w-6 text-muted-foreground" />
@@ -178,14 +178,14 @@ export function VideoMainContent({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-base font-medium truncate">
-                      {attachment.name}
+                      {attachment.title}
                     </p>
                     <p className="text-sm text-muted-foreground truncate">
                       {(() => {
                         try {
-                          return new URL(attachment.url).hostname;
+                          return new URL(attachment.file_url).hostname;
                         } catch {
-                          return attachment.url;
+                          return attachment.file_url;
                         }
                       })()}
                     </p>

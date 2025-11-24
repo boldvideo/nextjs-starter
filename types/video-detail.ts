@@ -21,9 +21,11 @@ export interface ExtendedVideo extends Omit<Video, "cta" | "attachments"> {
   ai_name?: string;
   cta?: CTA | null;
   attachments?: {
-    id: string;
-    name: string;
-    url: string;
-    type?: string;
+    id: number;
+    description: string | null;
+    title: string;
+    file_size: number;
+    file_url: string;
+    mime_type: string;
   }[];
 }
