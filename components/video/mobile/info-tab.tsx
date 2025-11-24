@@ -8,6 +8,7 @@ import remarkGfm from "remark-gfm";
 import { RefObject, useState } from "react";
 import { cn } from "@/lib/utils";
 import { FileText, Paperclip } from "lucide-react";
+import { formatFileSize } from "@/util/format-file-size";
 
 interface InfoTabProps {
   video: ExtendedVideo;
@@ -158,13 +159,7 @@ export default function InfoTab({
                     {attachment.title}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {(() => {
-                      try {
-                        return new URL(attachment.file_url).hostname;
-                      } catch {
-                        return attachment.file_url;
-                      }
-                    })()}
+                    {formatFileSize(attachment.file_size)} • {attachment.mime_type.split('/')[1]?.toUpperCase() || 'FILE'}
                   </p>
                 </div>
               </a>

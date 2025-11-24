@@ -13,6 +13,7 @@ import { VideoDescription } from "@/components/video-description";
 import { SidebarToggle } from "@/components/ui/sidebar";
 import type { ExtendedVideo } from "@/types/video-detail";
 import type { Playlist } from "@boldvideo/bold-js";
+import { formatFileSize } from "@/util/format-file-size";
 
 interface VideoMainContentProps {
   video: ExtendedVideo;
@@ -181,13 +182,7 @@ export function VideoMainContent({
                       {attachment.title}
                     </p>
                     <p className="text-sm text-muted-foreground truncate">
-                      {(() => {
-                        try {
-                          return new URL(attachment.file_url).hostname;
-                        } catch {
-                          return attachment.file_url;
-                        }
-                      })()}
+                      {formatFileSize(attachment.file_size)} • {attachment.mime_type.split('/')[1]?.toUpperCase() || 'FILE'}
                     </p>
                   </div>
                 </a>
