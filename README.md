@@ -59,6 +59,22 @@ npm run dev
 
 After running the app, it will be available at localhost:3000.
 
+## Component Organization
+
+This starter uses route-aligned component organization:
+
+- **Video features** (`/pl/[id]/v/[videoId]`): `components/video/`
+  - Video Q&A chat with timestamp seeking
+  - Dual sidebar system (playlist + chapters/chat)
+  - Video player and controls
+
+- **Coach features** (`/coach`): `components/coach/`
+  - Full-screen conversational AI
+  - Clarification loop
+  - Citation support
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed information.
+
 ## Customization
 ### Logo
 To change the logo placeholder, replace the image file in the `/public` folder. The logo is used in the files `app/layout.tsx` and `components/mobile-menu.tsx`.
