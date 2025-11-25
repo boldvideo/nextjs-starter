@@ -1,5 +1,6 @@
 import { bold } from "@/client";
 import "./globals.css";
+import type { ExtendedThemeConfig } from "@/types/bold-extensions";
 
 export const metadata = {
   title: "Bold Demo Site",
@@ -11,11 +12,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let theme;
+  let theme: ExtendedThemeConfig | undefined;
 
   try {
     const { data: settings } = await bold.settings();
-    theme = settings?.theme_config;
+    theme = settings?.theme_config as ExtendedThemeConfig | undefined;
   } catch (error) {
     console.error("Failed to fetch settings:", error);
   }
@@ -42,21 +43,21 @@ export default async function RootLayout({
                 --secondary-foreground: ${theme.light["secondary-foreground"]};
                 --muted: ${theme.light.muted};
                 --muted-foreground: ${theme.light["muted-foreground"]};
-                --accent: ${(theme.light as any).accent};
-                --accent-foreground: ${(theme.light as any)["accent-foreground"]};
+                --accent: ${theme.light.accent};
+                --accent-foreground: ${theme.light["accent-foreground"]};
                 --destructive-foreground: ${theme.light["destructive-foreground"]};
                 --destructive: ${theme.light.destructive};
                 --border: ${theme.light.border};
                 --input: ${theme.light.input};
                 --ring: ${theme.light.ring};
-                --sidebar: ${(theme.light as any).sidebar};
-                --sidebar-foreground: ${(theme.light as any)["sidebar-foreground"]};
-                --sidebar-primary: ${(theme.light as any)["sidebar-primary"]};
-                --sidebar-primary-foreground: ${(theme.light as any)["sidebar-primary-foreground"]};
-                --sidebar-accent: ${(theme.light as any)["sidebar-accent"]};
-                --sidebar-accent-foreground: ${(theme.light as any)["sidebar-accent-foreground"]};
-                --sidebar-border: ${(theme.light as any)["sidebar-border"]};
-                --sidebar-ring: ${(theme.light as any)["sidebar-ring"]};
+                --sidebar: ${theme.light.sidebar};
+                --sidebar-foreground: ${theme.light["sidebar-foreground"]};
+                --sidebar-primary: ${theme.light["sidebar-primary"]};
+                --sidebar-primary-foreground: ${theme.light["sidebar-primary-foreground"]};
+                --sidebar-accent: ${theme.light["sidebar-accent"]};
+                --sidebar-accent-foreground: ${theme.light["sidebar-accent-foreground"]};
+                --sidebar-border: ${theme.light["sidebar-border"]};
+                --sidebar-ring: ${theme.light["sidebar-ring"]};
               }
               
               .dark {
@@ -72,21 +73,21 @@ export default async function RootLayout({
                 --secondary-foreground: ${theme.dark["secondary-foreground"]};
                 --muted: ${theme.dark.muted};
                 --muted-foreground: ${theme.dark["muted-foreground"]};
-                --accent: ${(theme.dark as any).accent};
-                --accent-foreground: ${(theme.dark as any)["accent-foreground"]};
+                --accent: ${theme.dark.accent};
+                --accent-foreground: ${theme.dark["accent-foreground"]};
                 --destructive-foreground: ${theme.dark["destructive-foreground"]};
                 --destructive: ${theme.dark.destructive};
                 --border: ${theme.dark.border};
                 --input: ${theme.dark.input};
                 --ring: ${theme.dark.ring};
-                --sidebar: ${(theme.dark as any).sidebar};
-                --sidebar-foreground: ${(theme.dark as any)["sidebar-foreground"]};
-                --sidebar-primary: ${(theme.dark as any)["sidebar-primary"]};
-                --sidebar-primary-foreground: ${(theme.dark as any)["sidebar-primary-foreground"]};
-                --sidebar-accent: ${(theme.dark as any)["sidebar-accent"]};
-                --sidebar-accent-foreground: ${(theme.dark as any)["sidebar-accent-foreground"]};
-                --sidebar-border: ${(theme.dark as any)["sidebar-border"]};
-                --sidebar-ring: ${(theme.dark as any)["sidebar-ring"]};
+                --sidebar: ${theme.dark.sidebar};
+                --sidebar-foreground: ${theme.dark["sidebar-foreground"]};
+                --sidebar-primary: ${theme.dark["sidebar-primary"]};
+                --sidebar-primary-foreground: ${theme.dark["sidebar-primary-foreground"]};
+                --sidebar-accent: ${theme.dark["sidebar-accent"]};
+                --sidebar-accent-foreground: ${theme.dark["sidebar-accent-foreground"]};
+                --sidebar-border: ${theme.dark["sidebar-border"]};
+                --sidebar-ring: ${theme.dark["sidebar-ring"]};
               }
             `,
             }}

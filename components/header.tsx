@@ -1,6 +1,6 @@
 "use client";
 import { Suspense } from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
@@ -11,7 +11,7 @@ import { getPortalConfig } from "@/lib/portal-config";
 import type { Session } from "next-auth";
 
 interface HeaderProps {
-  logo: any;
+  logo: StaticImageData | string;
   logoDark?: string;
   menuItems: Array<{ url: string; label: string }>;
   session?: Session | null;

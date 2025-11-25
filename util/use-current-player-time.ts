@@ -1,6 +1,22 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-export const useCurrentPlayerTime = (ref: React.RefObject<any>) => {
+interface MediaElement {
+  currentTime: number;
+  addEventListener: (
+    type: string,
+    listener: EventListenerOrEventListenerObject
+  ) => void;
+  removeEventListener: (
+    type: string,
+    listener: EventListenerOrEventListenerObject
+  ) => void;
+}
+
+interface TimeUpdateEvent {
+  currentTime: number;
+}
+
+export const useCurrentPlayerTime = (ref: React.RefObject<MediaElement | null>) => {
   const subscribe = useCallback(
     (onStoreChange: (newVal: number) => void) => {
       const { current } = ref;
@@ -8,8 +24,9 @@ export const useCurrentPlayerTime = (ref: React.RefObject<any>) => {
         return () => undefined;
       }
 
-      const updater = (e: any) => {
-        onStoreChange(e.currentTime);
+      const updater = (e: Event | TimeUpdateEvent) => {
+        const time = "currentTime" in e ? e.currentTime : ((e.target as unknown) as MediaElement)?.currentTime ?? 0;
+        onStoreChange(time);
       };
       current.addEventListener("timeupdate", updater);
       return () => {

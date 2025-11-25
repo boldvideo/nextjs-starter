@@ -15,7 +15,7 @@ interface AppProvidersProps {
   settings: Settings | null;
   themeConfig: {
     forcedTheme?: string | null;
-    [key: string]: any;
+    showToggle?: boolean;
   };
 }
 

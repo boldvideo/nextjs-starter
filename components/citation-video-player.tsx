@@ -40,6 +40,7 @@ export function CitationVideoPlayer({
   isExpanded,
   onToggle,
 }: CitationVideoPlayerProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer doesn't export proper ref types
   const playerRef = useRef<any>(null);
   const [hasStarted, setHasStarted] = useState(false);
 
@@ -53,10 +54,9 @@ export function CitationVideoPlayer({
       playerRef.current.play().catch((err: unknown) => {
         console.error("[CitationVideoPlayer] Autoplay failed:", err);
       });
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: tracking player state changes
       setHasStarted(true);
     } else if (!isExpanded && hasStarted) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasStarted(false);
     }
   }, [isExpanded, startTime, hasStarted]);
@@ -117,6 +117,7 @@ export function CitationVideoPlayer({
               autoPlay={false} // We control this manually
               muted={false}
               style={{ width: "100%", height: "100%" }}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer event types not exported
               onTimeUpdate={(e: any) => {
                 // Auto-pause at end time if specified
                 if (endTime && e.target) {

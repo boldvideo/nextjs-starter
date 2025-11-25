@@ -88,6 +88,7 @@ export function VideoDetail({
         className={className}
         player={
           <Player
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ExtendedVideo type compatibility with Player component
             video={video as any}
             autoPlay={true}
             ref={playerRef}

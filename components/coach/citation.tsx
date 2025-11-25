@@ -19,6 +19,7 @@ interface CitationModalProps {
 }
 
 export function CitationModal({ citation, isOpen, onClose }: CitationModalProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer doesn't export proper ref types
   const playerRef = useRef<any>(null);
 
   // Handle escape key
@@ -37,6 +38,7 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
     if (playerRef.current && citation && isOpen) {
       const startSeconds = citation.start_ms / 1000;
       playerRef.current.currentTime = startSeconds;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer types not exported
       playerRef.current.play().catch((err: any) => {
         console.error("[CitationModal] Autoplay failed:", err);
       });
@@ -94,6 +96,7 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
             autoPlay={false}
             muted={false}
             style={{ width: "100%", height: "100%" }}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer event types not exported
             onTimeUpdate={(e: any) => {
               // Auto-pause at end time
               if (e.target) {
