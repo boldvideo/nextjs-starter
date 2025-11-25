@@ -12,10 +12,6 @@ interface MediaElement {
   ) => void;
 }
 
-interface TimeUpdateEvent {
-  currentTime: number;
-}
-
 export const useCurrentPlayerTime = (ref: React.RefObject<MediaElement | null>) => {
   const subscribe = useCallback(
     (onStoreChange: (newVal: number) => void) => {
@@ -24,9 +20,9 @@ export const useCurrentPlayerTime = (ref: React.RefObject<MediaElement | null>) 
         return () => undefined;
       }
 
-      const updater = (e: Event | TimeUpdateEvent) => {
-        const time = "currentTime" in e ? e.currentTime : ((e.target as unknown) as MediaElement)?.currentTime ?? 0;
-        onStoreChange(time);
+      const updater = (e: Event) => {
+        const target = e.target as MediaElement | null;
+        onStoreChange(target?.currentTime ?? 0);
       };
       current.addEventListener("timeupdate", updater);
       return () => {
