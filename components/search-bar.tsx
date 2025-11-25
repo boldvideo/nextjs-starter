@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Command, Sparkles } from "lucide-react";
+import { Search, Command } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearch } from "@/components/providers/search-provider";
 
@@ -16,9 +16,8 @@ export function SearchBar({
   className,
   placeholder,
   isMobile = false,
-  showAiToggle = true,
 }: SearchBarProps) {
-  const { setIsOpen, mode } = useSearch();
+  const { setIsOpen } = useSearch();
 
   return (
     <button

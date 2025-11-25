@@ -66,7 +66,6 @@ function formatTime(seconds: number): string {
 export function MobileChapterTabs({
   chaptersWebVTT,
   onChapterClick,
-  currentTime = 0,
   className,
 }: MobileChapterTabsProps): React.JSX.Element | null {
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -75,6 +74,7 @@ export function MobileChapterTabs({
   useEffect(() => {
     if (chaptersWebVTT) {
       const parsed = parseWebVTT(chaptersWebVTT);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- parsing external data
       setChapters(parsed);
     }
   }, [chaptersWebVTT]);

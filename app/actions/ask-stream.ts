@@ -1,11 +1,10 @@
 "use server";
 
-import { 
+import {
   AskResponse,
   AskCitation,
   ClarificationResponse,
-  SynthesizedResponse,
-  ErrorResponse 
+  SynthesizedResponse
 } from "@/lib/ask";
 import { processCitations } from "@/lib/citation-helpers";
 
@@ -29,8 +28,8 @@ interface StreamAskParams {
 export async function streamAskAction({
   query,
   conversationId,
-  mode = "enhanced",
-  synthesize = true
+  mode: _mode = "enhanced",
+  synthesize: _synthesize = true
 }: StreamAskParams): Promise<ReadableStream<StreamMessage>> {
   const apiHost = process.env.BACKEND_URL || "https://api.boldvideo.io";
   const apiKey = process.env.NEXT_PUBLIC_BOLD_API_KEY;
@@ -74,7 +73,7 @@ export async function streamAskAction({
         });
 
         if (!response.ok) {
-          const errorText = await response.text();
+          await response.text(); // Consume error body
           const errorMessage = conversationId
             ? `Failed to continue conversation (${response.status}). Please try again or start a new conversation.`
             : `Request failed: ${response.status}`;
@@ -120,7 +119,7 @@ export async function streamAskAction({
         let buffer = "";
         let accumulatedAnswer = "";
         let citations: AskCitation[] = [];
-        let expandedQueries: string[] = [];
+        const expandedQueries: string[] = [];
         let currentConversationId = conversationId;
 
         while (true) {
@@ -222,7 +221,7 @@ export async function streamAskAction({
                   default:
                     // Unknown stream event type
                 }
-              } catch (e) {
+              } catch {
                 // Failed to parse SSE data
               }
             }
@@ -272,8 +271,8 @@ export async function streamAskAction({
 export async function askAction({
   query,
   conversationId,
-  mode = "enhanced",
-  synthesize = true
+  mode: _mode = "enhanced",
+  synthesize: _synthesize = true
 }: StreamAskParams): Promise<AskResponse> {
   const apiHost = process.env.BACKEND_URL || "https://api.boldvideo.io";
   const apiKey = process.env.NEXT_PUBLIC_BOLD_API_KEY;

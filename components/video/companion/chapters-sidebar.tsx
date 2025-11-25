@@ -62,7 +62,6 @@ function formatTime(seconds: number): string {
 
 export function ChaptersSidebar({
   chaptersWebVTT,
-  playbackId,
   onChapterClick,
   className,
 }: ChaptersSidebarProps) {
@@ -72,6 +71,7 @@ export function ChaptersSidebar({
   useEffect(() => {
     if (chaptersWebVTT) {
       const parsed = parseWebVTT(chaptersWebVTT);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- parsing external data
       setChapters(parsed);
     }
   }, [chaptersWebVTT]);

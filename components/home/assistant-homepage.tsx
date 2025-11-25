@@ -11,7 +11,7 @@ interface AssistantHomepageProps {
   config: PortalConfig;
 }
 
-export function AssistantHomepage({ settings, config }: AssistantHomepageProps) {
+export function AssistantHomepage({ config }: AssistantHomepageProps) {
   const [query, setQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();

@@ -53,6 +53,7 @@ export function CoachInterface({
         }
       }
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- checking scroll position
     checkScrollPosition();
   }, [messages, isStreaming]);
 

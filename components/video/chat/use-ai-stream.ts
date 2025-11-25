@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { useAIAssistantContext } from "./context";
-import type { Message } from "./types";
 
 interface UseAIStreamOptions {
   /** Video ID to get AI responses for */

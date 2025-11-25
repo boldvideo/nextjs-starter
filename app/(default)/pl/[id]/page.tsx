@@ -2,7 +2,6 @@ import { bold } from "@/client";
 import { PlaylistVideoList } from "@/components/playlist-video-list";
 import { PlaylistMetadataSidebar } from "@/components/playlist-metadata-sidebar";
 import { SponsorBox } from "@/components/sponsor-box";
-import type { Playlist, Video } from "@boldvideo/bold-js";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -53,10 +52,8 @@ export async function generateMetadata({
 
 export default async function PlaylistPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const resolvedParams = await params;
   const { data: playlist } = await bold.playlists.get(resolvedParams.id);

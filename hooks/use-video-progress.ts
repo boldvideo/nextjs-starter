@@ -368,6 +368,8 @@ export function useVideoProgress({
         clearTimeout(saveTimeoutRef.current);
       }
     };
+  // Note: playerRef is intentionally omitted - we only want to run this when playerReady changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerReady, canUseStorage, duration]);
 
   return {

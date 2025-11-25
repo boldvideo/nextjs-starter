@@ -26,6 +26,8 @@ export default [
       "@next/next/no-img-element": "off",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
+      "react/no-unknown-property": ["error", { ignore: ["tw", "jsx"] }],
+      "react/prop-types": "off",
     },
     settings: {
       react: {

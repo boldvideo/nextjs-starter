@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
 
-export default auth((req) => {
+export default auth((_req) => {
   // Skip middleware if auth is disabled
   if (!isAuthEnabled()) {
     return;

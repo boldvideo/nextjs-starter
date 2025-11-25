@@ -44,7 +44,7 @@ export const config = {
     error: "/auth/signin?error=true",
   },
   callbacks: {
-    authorized({ request, auth }) {
+    authorized({ auth }) {
       // If auth is disabled, always return true
       if (!isAuthEnabled()) {
         return true;
@@ -53,7 +53,7 @@ export const config = {
       // Check if user is authenticated
       return !!auth;
     },
-    signIn({ user, account, profile }) {
+    signIn({ user, account }) {
       // If auth is disabled, always allow
       if (!isAuthEnabled()) {
         return true;

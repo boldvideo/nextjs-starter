@@ -1,6 +1,5 @@
 import { bold } from "@/client";
 import "./globals.css";
-import type { Settings } from "@boldvideo/bold-js";
 
 export const metadata = {
   title: "Bold Demo Site",

@@ -66,7 +66,7 @@ export function ChapterList({
       <div className="lg:absolute top-0 left-0 w-full h-full flex flex-col">
         <h3 className="p-3 font-bold text-lg">Chapters</h3>
         <ol>
-          {chapters.map((chapter, idx) => (
+          {chapters.map((chapter) => (
             <li
               key={chapter.startTimeSeconds} // Use seconds for a more unique key
               onClick={() => onChapterClick(chapter.startTimeSeconds)}
