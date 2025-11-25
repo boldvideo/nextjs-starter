@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -26,6 +27,7 @@ type Props = {
 
 export function MobileMenu({ menuItems, logo, logoDark }: Props) {
   const [isMobileMenu, setIsMobileMenu] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -35,28 +37,22 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
   // Check if we're on the search page
   const isSearchPage = pathname === "/s";
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const menuContent = isMobileMenu ? (
     <>
-      <button
-        type="button"
-        className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
-        onClick={() => setIsMobileMenu(true)}
+      <div
+        className="fixed inset-0 z-[60] bg-background/80 backdrop-blur-sm"
+        onClick={() => setIsMobileMenu(false)}
+      />
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-[61] w-[85vw] max-w-sm overflow-y-auto bg-background px-5 py-4 sm:ring-1 sm:ring-border transition-transform duration-300 ease-in-out transform shadow-xl",
+          isMobileMenu ? "translate-x-0" : "-translate-x-full"
+        )}
       >
-        <span className="sr-only">Open main menu</span>
-        <Menu className="w-6 h-6" />
-      </button>
-      {isMobileMenu ? (
-        <div className="">
-          <div
-            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-            onClick={() => setIsMobileMenu(false)}
-          />
-          <div
-            className={cn(
-              "fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-background px-5 py-4 sm:max-w-sm sm:ring-1 sm:ring-border transition-transform duration-300 ease-in-out transform",
-              isMobileMenu ? "translate-x-0" : "-translate-x-full"
-            )}
-          >
             <div className="flex items-center justify-between">
               <Link
                 href="/"
@@ -140,8 +136,20 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
               )}
             </div>
           </div>
-        </div>
-      ) : null}
+    </>
+  ) : null;
+
+  return (
+    <>
+      <button
+        type="button"
+        className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground"
+        onClick={() => setIsMobileMenu(true)}
+      >
+        <span className="sr-only">Open main menu</span>
+        <Menu className="w-6 h-6" />
+      </button>
+      {mounted && menuContent && createPortal(menuContent, document.body)}
     </>
   );
 }

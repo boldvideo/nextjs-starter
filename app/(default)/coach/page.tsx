@@ -2,8 +2,8 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useAskStream } from "@/hooks/use-ask-stream";
-import { ChatInterface } from "@/components/chat/chat-interface";
-import { ChatInput } from "@/components/chat/chat-input";
+import { CoachInterface } from "@/components/coach";
+import { ChatInput } from "@/components/coach";
 import { useSettings } from "@/components/providers/settings-provider";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -107,7 +107,7 @@ export default function CoachPage() {
 
       {/* Chat Interface */}
       <div className="flex-1 overflow-hidden">
-        <ChatInterface
+        <CoachInterface
           messages={messages}
           onClarificationSubmit={() => {}} // No longer needed - handled via main input
           isStreaming={isStreaming}

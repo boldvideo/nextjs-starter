@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { bold } from "@/client";
-import { VideoDetail } from "@/components/video-detail";
+import { VideoDetail } from "@/components/video/detail";
 import type { Video, Settings } from "@boldvideo/bold-js";
+import type { ExtendedVideo } from "@/types/video-detail";
 import { formatDuration } from "util/format-duration";
 
 export const revalidate = 30;
@@ -96,7 +97,7 @@ export default async function VideoPage({
   return (
     <>
       <VideoDetail
-        video={video}
+        video={video as unknown as ExtendedVideo}
         startTime={startTime}
         settings={settings}
         className="max-w-7xl"

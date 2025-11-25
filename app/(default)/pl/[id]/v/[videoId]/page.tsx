@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { bold } from "@/client";
-import { VideoDetail } from "@/components/video-detail";
+import { VideoDetail } from "@/components/video/detail";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
+import type { ExtendedVideo } from "@/types/video-detail";
 import { formatDuration } from "util/format-duration";
 
 export const revalidate = 30;
@@ -135,7 +136,7 @@ export default async function PlaylistVideoPage({
 
   return (
     <VideoDetail
-      video={video}
+      video={video as unknown as ExtendedVideo}
       startTime={startTime}
       settings={settings}
       playlist={playlist}

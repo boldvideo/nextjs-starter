@@ -110,9 +110,9 @@ export function useVideoProgress({
     }
 
     // Async probe on mount
-    console.debug('[useVideoProgress] Testing IndexedDB availability...');
+    // console.debug('[useVideoProgress] Testing IndexedDB availability...');
     isIndexedDBAvailable().then((available) => {
-      console.debug('[useVideoProgress] IndexedDB available:', available);
+      // console.debug('[useVideoProgress] IndexedDB available:', available);
       canUseStorageRef.current = available;
     });
   }, [enabled, tenantId]);
@@ -200,6 +200,7 @@ export function useVideoProgress({
       const currentCanUseStorage = canUseStorageRef.current;
       const currentProgress = progressRef.current;
 
+      /*
       console.debug('[useVideoProgress] saveCurrentProgress called:', {
         videoId,
         position,
@@ -207,6 +208,7 @@ export function useVideoProgress({
         currentCanUseStorage,
         hasProgress: !!currentProgress
       });
+      */
 
       if (!currentCanUseStorage || !currentTenantId) {
         console.warn('[useVideoProgress] Save blocked - canUseStorage:', currentCanUseStorage, 'tenantId:', currentTenantId);
@@ -288,6 +290,7 @@ export function useVideoProgress({
    */
   useEffect(() => {
     const player = playerRef.current;
+    /*
     console.debug('[useVideoProgress] Event listener effect:', {
       hasPlayer: !!player,
       playerReady,
@@ -295,10 +298,11 @@ export function useVideoProgress({
       videoId,
       playerType: player?.constructor?.name
     });
+    */
     
     if (!player || !canUseStorage || !playerReady) return;
 
-    console.log('[useVideoProgress] Attaching event listeners to player');
+    // console.log('[useVideoProgress] Attaching event listeners to player');
 
     const handleTimeUpdate = () => {
       const position = player.currentTime;

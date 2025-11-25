@@ -2,7 +2,7 @@
 
 import { ReactNode, Suspense } from "react";
 import { Header } from "@/components/header";
-import { SearchPreview } from "@/components/search-preview";
+import { SearchCommandDialog } from "@/components/search-command-dialog";
 import { PlaylistProvider } from "@/components/providers/playlist-provider";
 import type { Session } from "next-auth";
 import type { Settings } from "@boldvideo/bold-js";
@@ -23,13 +23,11 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
           logoDark={settings?.logo_dark_url}
           menuItems={settings?.menu_items || []}
           session={session}
-          className="h-18 hidden md:flex"
+          className="h-18"
         />
       )}
-      <Suspense>
-        <SearchPreview />
-      </Suspense>
-      <main className="flex-1 relative h-full overflow-y-scroll flex">{children}</main>
+      <SearchCommandDialog />
+      <main className="flex-1 relative flex flex-col min-h-0 pt-[var(--header-height)]">{children}</main>
     </>
   );
 }
