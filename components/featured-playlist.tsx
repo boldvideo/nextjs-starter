@@ -3,12 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import VideoThumbnail from "@/components/video-thumbnail";
+import type { Video } from "@boldvideo/bold-js";
 
 interface PlaylistProps {
   playlist: {
     id: string;
     title: string;
-    videos: any[];
+    videos: Video[];
   };
 }
 

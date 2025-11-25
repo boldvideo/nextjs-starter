@@ -1,8 +1,9 @@
 import { Play } from "lucide-react";
+import { MouseEventHandler } from "react";
 
 interface TimestampPillProps {
   timestamp: string;
-  onClick?: () => void;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
   className?: string;
 }
 

@@ -40,6 +40,16 @@ export async function generateMetadata(props: {
   };
 }
 
+async function getVideo(id: string): Promise<ExtendedVideo | null> {
+  try {
+    const { data } = await bold.videos.get(id);
+    return data as ExtendedVideo;
+  } catch (error) {
+    console.error("Failed to fetch video:", error);
+    return null;
+  }
+}
+
 export default async function EmbedPage({
   params: paramsPromise,
   searchParams: searchParamsPromise,
@@ -50,35 +60,9 @@ export default async function EmbedPage({
   const params = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  try {
-    const { data } = await bold.videos.get(params.id);
-    // Cast to ExtendedVideo to access chapters_url property
-    const video = data as ExtendedVideo;
+  const video = await getVideo(params.id);
 
-    if (!video) {
-      return (
-        <div className="bg-black m-0 p-0 w-screen h-screen overflow-hidden flex items-center justify-center">
-          <p className="text-white">Loading video...</p>
-        </div>
-      );
-    }
-
-    // Parse start time from query params
-    const startTime = searchParams.t ? parseInt(searchParams.t, 10) : undefined;
-
-    return (
-      <div className="bg-black m-0 p-0 w-screen h-screen overflow-hidden">
-        <Player
-          key={`video-${video.id}`}
-          video={video}
-          autoPlay={false}
-          startTime={startTime}
-          className="max-w-none" // Removes any max-width constraint in the embed view
-        />
-      </div>
-    );
-  } catch (error) {
-    console.error("Failed to fetch video:", error);
+  if (!video) {
     return (
       <div className="bg-black m-0 p-0 w-screen h-screen overflow-hidden flex items-center justify-center">
         <p className="text-white">
@@ -87,4 +71,19 @@ export default async function EmbedPage({
       </div>
     );
   }
+
+  // Parse start time from query params
+  const startTime = searchParams.t ? parseInt(searchParams.t, 10) : undefined;
+
+  return (
+    <div className="bg-black m-0 p-0 w-screen h-screen overflow-hidden">
+      <Player
+        key={`video-${video.id}`}
+        video={video}
+        autoPlay={false}
+        startTime={startTime}
+        className="max-w-none" // Removes any max-width constraint in the embed view
+      />
+    </div>
+  );
 }

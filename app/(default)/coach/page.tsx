@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import Image from "next/image";
 import { useAskStream } from "@/hooks/use-ask-stream";
-import { ChatInterface } from "@/components/chat/chat-interface";
-import { ChatInput } from "@/components/chat/chat-input";
+import { CoachInterface } from "@/components/coach";
+import { ChatInput } from "@/components/coach";
 import { useSettings } from "@/components/providers/settings-provider";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,13 +20,13 @@ export default function CoachPage() {
   const config = getPortalConfig(settings);
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
+  const suggestions = config.homepage.assistantConfig?.suggestions || [];
 
   // Initialize streaming hook
   const {
     messages,
     isStreaming,
     isWaitingForClarification,
-    conversationId,
     streamQuestion,
     submitClarification,
     stop,
@@ -35,7 +36,7 @@ export default function CoachPage() {
       // Clear input after successful response
       setQuery("");
     },
-    onError: (error) => {
+    onError: (_error) => {
       // Error is handled internally by the hook
     }
   });
@@ -85,29 +86,89 @@ export default function CoachPage() {
 
   const placeholder = isWaitingForClarification
     ? "Type your answer here..."
-    : "Ask a follow-up question...";
+    : "What's on your mind?";
 
+  const hasMessages = messages.length > 0;
+  const greeting = config.ai.greeting || "How can I help you today?";
+
+  // Empty state - centered welcome screen
+  if (!hasMessages) {
+    return (
+      <div className="flex h-[calc(100vh-120px)] w-full items-center justify-center px-4 md:px-6">
+        <div className="w-full max-w-2xl space-y-8">
+          {/* Centered content with avatar, name, greeting */}
+          <div className="text-center space-y-4">
+            {aiAvatar && (
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full overflow-hidden">
+                <Image
+                  src={aiAvatar}
+                  alt={aiName}
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground">
+              {aiName}
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              {greeting}
+            </p>
+          </div>
+
+          {/* Input */}
+          <ChatInput
+            value={query}
+            onChange={setQuery}
+            onSubmit={handleSubmit}
+            onStop={handleStop}
+            placeholder={placeholder}
+            disabled={false}
+            isStreaming={isStreaming}
+            autoFocus={true}
+            suggestions={suggestions}
+            showSuggestions={true}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Active chat state - messages with bottom input
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] w-full max-w-4xl mx-auto">
-      {/* Header with New Chat button */}
-      <div className="flex items-center justify-between px-6 py-4 border-b">
-        <h1 className="text-xl font-semibold">Chat with {aiName}</h1>
+    <div className="flex flex-col h-[calc(100vh-120px)] w-full max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border/50">
+        <div className="flex items-center gap-3">
+          {aiAvatar && (
+            <Image
+              src={aiAvatar}
+              alt={aiName}
+              width={36}
+              height={36}
+              className="rounded-full"
+            />
+          )}
+          <h1 className="text-lg md:text-xl font-semibold">{aiName}</h1>
+        </div>
         <button
           onClick={handleReset}
           className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg",
-            "border border-border hover:bg-accent transition-colors",
-            "text-sm font-medium"
+            "flex items-center gap-2 px-3 py-1.5 rounded-lg",
+            "text-muted-foreground hover:text-foreground hover:bg-accent transition-colors",
+            "text-sm"
           )}
+          title="Start new session"
         >
-          <Plus className="h-4 w-4" />
-          New Chat
+          <RotateCcw className="h-4 w-4" />
+          <span className="hidden sm:inline">New Session</span>
         </button>
       </div>
 
       {/* Chat Interface */}
       <div className="flex-1 overflow-hidden">
-        <ChatInterface
+        <CoachInterface
           messages={messages}
           onClarificationSubmit={() => {}} // No longer needed - handled via main input
           isStreaming={isStreaming}
@@ -118,8 +179,8 @@ export default function CoachPage() {
       </div>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="w-full px-6 py-3 md:p-4">
+      <div className="flex-shrink-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="w-full px-4 py-3 md:px-6 md:py-4">
           <ChatInput
             value={query}
             onChange={setQuery}

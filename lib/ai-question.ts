@@ -5,13 +5,6 @@ export type Message = {
   content: string;
 };
 
-interface AIRequestBody {
-  question: string;
-  videoId: string;
-  tenant: string;
-  conversationId?: string;
-}
-
 /**
  * Streams AI responses from the backend
  */
@@ -97,10 +90,10 @@ export async function streamAIQuestion(
             // Pass through the SSE data directly
             controller.enqueue(value);
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           const errorEvent = `data: ${JSON.stringify({
             type: "error",
-            content: error?.message || "Unknown error occurred",
+            content: error instanceof Error ? error.message : "Unknown error occurred",
           })}\n\n`;
           controller.enqueue(new TextEncoder().encode(errorEvent));
           controller.error(error);

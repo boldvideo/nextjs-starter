@@ -2,6 +2,7 @@
 const nextConfig = {
   // Allow ngrok and other dev origins (optional, suppresses warning)
   allowedDevOrigins: ["bold.eu.ngrok.io", "*.ngrok.io", "*.ngrok-free.app"],
+
   images: {
     remotePatterns: [
       {
@@ -21,6 +22,14 @@ const nextConfig = {
         hostname: "**.googleusercontent.com",
       },
     ],
+  },
+
+  // Next.js 16: Enable React Compiler for automatic memoization
+  reactCompiler: true,
+
+  // Next.js 16: Enable Turbopack filesystem caching for faster dev restarts
+  experimental: {
+    turbopackFileSystemCacheForDev: true,
   },
 };
 

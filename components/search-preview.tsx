@@ -42,7 +42,7 @@ export function SearchPreview() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isSearchPage = pathname === "/s";
-  const isAskPage = pathname === "/ask";
+  const isAskPage = pathname === "/coach";
 
   // Get the current query from the URL
   const query = searchParams?.get("q") || "";

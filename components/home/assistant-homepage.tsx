@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChatInput } from "@/components/chat/chat-input";
+import { ChatInput } from "@/components/coach";
 import { PortalSettings, PortalConfig } from "@/lib/portal-config";
 
 interface AssistantHomepageProps {
@@ -11,7 +11,7 @@ interface AssistantHomepageProps {
   config: PortalConfig;
 }
 
-export function AssistantHomepage({ settings, config }: AssistantHomepageProps) {
+export function AssistantHomepage({ config }: AssistantHomepageProps) {
   const [query, setQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();

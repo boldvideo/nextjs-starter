@@ -28,6 +28,7 @@ export function PlaylistProvider({ children }: { children: ReactNode }) {
 
   // Handle hydration and load from localStorage with migration
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration pattern
     setMounted(true);
 
     // Try new key first

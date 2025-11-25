@@ -2,7 +2,6 @@ import { bold } from "@/client";
 import { PlaylistVideoList } from "@/components/playlist-video-list";
 import { PlaylistMetadataSidebar } from "@/components/playlist-metadata-sidebar";
 import { SponsorBox } from "@/components/sponsor-box";
-import type { Playlist, Video } from "@boldvideo/bold-js";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -53,10 +52,8 @@ export async function generateMetadata({
 
 export default async function PlaylistPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const resolvedParams = await params;
   const { data: playlist } = await bold.playlists.get(resolvedParams.id);
@@ -70,11 +67,10 @@ export default async function PlaylistPage({
 
   return (
     <div className="p-5 md:p-10 pb-20 md:pb-24 max-w-screen-2xl w-full">
-      {/* Header + Sidebar Layout */}
-      <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto mb-8">
-        {/* Header Content */}
+      <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto">
+        {/* Main Content Column */}
         <div className="flex-1 min-w-0 max-w-3xl">
-          <header>
+          <header className="mb-8">
             <h1 className="font-bold text-3xl mb-5">{playlist.title}</h1>
             {playlist.description && (
               <>
@@ -92,6 +88,12 @@ export default async function PlaylistPage({
               </>
             )}
           </header>
+
+          {/* Video List - in main column */}
+          <PlaylistVideoList
+            videos={playlist.videos}
+            playlistId={playlist.id}
+          />
         </div>
 
         {/* Sidebar - Metadata - Hidden on mobile */}
@@ -100,16 +102,6 @@ export default async function PlaylistPage({
             <PlaylistMetadataSidebar playlist={playlist} />
           </div>
         </aside>
-      </div>
-
-      {/* Video List - Full Width */}
-      <div className="max-w-6xl mx-auto">
-        <div className="max-w-3xl">
-          <PlaylistVideoList
-            videos={playlist.videos}
-            playlistId={playlist.id}
-          />
-        </div>
       </div>
     </div>
   );

@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { bold } from "@/client";
-import { VideoDetail } from "@/components/video-detail";
+import { VideoDetail } from "@/components/video/detail";
+import { VideoSchema } from "@/components/seo/video-schema";
 import type { Video, Settings } from "@boldvideo/bold-js";
+import type { ExtendedVideo } from "@/types/video-detail";
 import { formatDuration } from "util/format-duration";
 
 export const revalidate = 30;
@@ -93,10 +95,15 @@ export default async function VideoPage({
 
   const startTime = t ? Number(t) : undefined;
 
+  // Build URL for schema using environment variable
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const videoUrl = baseUrl ? `${baseUrl}/v/${id}` : null;
+
   return (
     <>
+      {videoUrl && <VideoSchema video={video} url={videoUrl} />}
       <VideoDetail
-        video={video}
+        video={video as unknown as ExtendedVideo}
         startTime={startTime}
         settings={settings}
         className="max-w-7xl"
