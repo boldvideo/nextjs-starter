@@ -28,8 +28,8 @@ export function ClarificationCard({
         <Image
           src={aiAvatar}
           alt={aiName}
-          width={32}
-          height={32}
+          width={36}
+          height={36}
           className="rounded-full"
         />
       </div>
@@ -38,19 +38,19 @@ export function ClarificationCard({
       <div className="flex-1">
         <span className="text-xs text-muted-foreground ml-3">{aiName}</span>
         
-        <div className="mt-1 space-y-3">
+        <div className="mt-1 space-y-4">
           {/* Simple intro text */}
-          <p className="text-base">
-            I need a bit more context to give you the best answer. Could you help me understand:
+          <p className="text-lg leading-relaxed">
+            I&apos;d love to help you with that. To give you the most relevant guidance, could you tell me:
           </p>
 
           {/* Clarifying Questions */}
           {response.clarifying_questions.length > 0 && (
-            <div className="space-y-2.5 mt-3">
+            <div className="space-y-3 mt-4">
               {response.clarifying_questions.map((question, idx) => (
-                <div key={idx} className="flex items-start gap-2.5">
-                  <MessageCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-base text-foreground">
+                <div key={idx} className="flex items-start gap-3">
+                  <MessageCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-lg text-foreground leading-relaxed">
                     {question}
                   </p>
                 </div>

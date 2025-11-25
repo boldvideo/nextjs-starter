@@ -138,8 +138,8 @@ export function AnswerCard({
         <Image
           src={aiAvatar}
           alt={aiName}
-          width={32}
-          height={32}
+          width={36}
+          height={36}
           className="rounded-full"
         />
       </div>
@@ -151,10 +151,10 @@ export function AnswerCard({
         <div className="mt-1 space-y-4">
           {/* Main Answer - No bubble, just text */}
           <div className={cn(
-            "prose prose-base max-w-none text-foreground",
+            "prose prose-lg max-w-none text-foreground",
             "dark:prose-invert", // This is the key - invert prose colors in dark mode
-            "prose-p:my-3 prose-headings:mt-4 prose-headings:mb-2",
-            "prose-strong:font-semibold prose-li:my-1"
+            "prose-p:my-4 prose-p:leading-relaxed prose-headings:mt-6 prose-headings:mb-3",
+            "prose-strong:font-semibold prose-li:my-2"
           )}>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}

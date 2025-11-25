@@ -81,7 +81,7 @@ export function CoachInterface({
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto w-full"
       >
-        <div className="w-full px-6 py-4 sm:py-6 space-y-4">
+        <div className="w-full px-4 md:px-6 py-6 md:py-8 space-y-6">
         {messages.map((message) => {
           // Handle clarification messages specially
           if (message.type === "clarification" && message.metadata?.clarificationResponse) {

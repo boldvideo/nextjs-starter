@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 import { User, AlertCircle } from "lucide-react";
 
 const LOADING_MESSAGES = [
-  "Analyzing your question",
-  "Searching through content",
-  "Finding the best answer",
-  "Synthesizing information",
-  "Preparing response"
+  "Thinking about that",
+  "Exploring your question",
+  "Finding insights",
+  "Connecting the dots",
+  "Preparing guidance"
 ];
 
 interface MessageBubbleProps {
@@ -57,8 +57,8 @@ export function MessageBubble({
           <Image
             src={aiAvatar}
             alt={aiName}
-            width={32}
-            height={32}
+            width={36}
+            height={36}
             className="rounded-full"
           />
         </div>
@@ -82,7 +82,7 @@ export function MessageBubble({
           "transition-all",
           isUser ? [
             "rounded-2xl px-4 py-2.5",
-            "bg-foreground text-background", // Use foreground/background for better theme consistency
+            "bg-muted text-foreground",
             "rounded-tr-sm",
             "max-w-full"
           ] : [
@@ -94,20 +94,20 @@ export function MessageBubble({
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </span>
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75 [animation-delay:0.2s]"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 [animation-delay:0.2s]"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </span>
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75 [animation-delay:0.4s]"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-current"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 [animation-delay:0.4s]"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </span>
               </div>
-              <span className="text-sm text-foreground animate-pulse">
-                {LOADING_MESSAGES[loadingMessageIndex]}
+              <span className="text-base text-muted-foreground">
+                {LOADING_MESSAGES[loadingMessageIndex]}...
               </span>
             </div>
           ) : isError ? (
@@ -117,8 +117,8 @@ export function MessageBubble({
             </div>
           ) : (
             <div className={cn(
-              "break-words prose max-w-none dark:prose-invert prose-p:my-2 prose-headings:mt-3 prose-headings:mb-2 prose-strong:font-semibold prose-li:my-1",
-              isUser ? "prose-sm" : "prose-base"
+              "break-words prose max-w-none dark:prose-invert prose-headings:mt-4 prose-headings:mb-2 prose-strong:font-semibold",
+              isUser ? "prose-sm prose-p:my-2 prose-li:my-1" : "prose-lg prose-p:my-4 prose-p:leading-relaxed prose-li:my-2"
             )}>
               {typeof message.content === "string" ? (
                 <ReactMarkdown
@@ -158,8 +158,8 @@ export function MessageBubble({
       {/* Avatar for User (right side) */}
       {isUser && (
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-foreground flex items-center justify-center">
-            <User className="w-5 h-5 text-background" />
+          <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+            <User className="w-5 h-5 text-muted-foreground" />
           </div>
         </div>
       )}
