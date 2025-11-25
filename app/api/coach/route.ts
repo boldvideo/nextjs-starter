@@ -14,7 +14,7 @@ interface CoachRequestBody {
  */
 export async function POST(request: Request) {
   const apiHost = process.env.BACKEND_URL || "https://api.boldvideo.io";
-  const apiKey = process.env.NEXT_PUBLIC_BOLD_API_KEY;
+  const apiKey = process.env.BOLD_API_KEY;
 
   if (!apiKey) {
     return new Response(
@@ -49,7 +49,6 @@ export async function POST(request: Request) {
     ? `${baseUrl}${apiPath}/ask/${conversationId}`
     : `${baseUrl}${apiPath}/ask`;
 
-  console.log("[Coach API] Request to:", endpoint);
 
   try {
     const backendResponse = await fetch(endpoint, {
@@ -64,8 +63,6 @@ export async function POST(request: Request) {
     });
 
     if (!backendResponse.ok) {
-      const errorText = await backendResponse.text();
-      console.error("[Coach API] Backend error:", backendResponse.status, errorText);
       return new Response(
         JSON.stringify({
           type: "error",
@@ -82,7 +79,6 @@ export async function POST(request: Request) {
     // If not streaming, handle as regular JSON response
     if (!contentType?.includes("text/event-stream")) {
       const data = await backendResponse.json();
-      console.log("[Coach API] Non-streaming response:", data.mode);
 
       // Return as SSE format for consistency
       const encoder = new TextEncoder();
@@ -171,7 +167,6 @@ export async function POST(request: Request) {
 
           // If we got here without a complete event, send what we have
           if (accumulatedAnswer) {
-            console.log("[Coach API] Sending fallback complete, text length:", accumulatedAnswer.length);
             controller.enqueue(
               encoder.encode(
                 `data: ${JSON.stringify({
@@ -193,7 +188,6 @@ export async function POST(request: Request) {
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
         } catch (error) {
-          console.error("[Coach API] Stream error:", error);
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
@@ -264,7 +258,6 @@ export async function POST(request: Request) {
             return true; // Stop processing
 
           case "complete":
-            console.log("[Coach API] Complete event, text length:", accumulatedAnswer.length);
             controller.enqueue(
               encoder.encode(
                 `data: ${JSON.stringify({
@@ -295,10 +288,10 @@ export async function POST(request: Request) {
             return true; // Stop processing
         }
       } catch {
-        // Failed to parse SSE data - continue
+        // Non-JSON SSE lines (e.g., keep-alive, comments) are expected and safe to ignore
       }
       return false;
-    }
+    };
 
     return new Response(stream, {
       headers: {
@@ -308,7 +301,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("[Coach API] Error:", error);
     return new Response(
       JSON.stringify({
         type: "error",

@@ -59,7 +59,7 @@ export function ChatInput({
   // Adjust height when value changes
   useEffect(() => {
     adjustHeight();
-  }, [value, adjustHeight]);
+  }, [value]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();

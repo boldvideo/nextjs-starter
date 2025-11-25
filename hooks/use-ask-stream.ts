@@ -187,7 +187,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       try {
         while (true) {
           if (abortControllerRef.current?.signal.aborted) {
-            console.log('[useAskStream] Aborted by user');
             await reader.cancel();
             break;
           }
@@ -195,7 +194,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
           const { done, value } = await reader.read();
 
           if (done) {
-            console.log('[useAskStream] Stream done, total chunks:', chunkCount, 'receivedComplete:', receivedCompleteEvent);
             break;
           }
 
@@ -213,7 +211,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             try {
               message = JSON.parse(dataStr) as StreamMessage;
             } catch {
-              console.warn('[useAskStream] Failed to parse SSE data:', dataStr);
               continue;
             }
 
@@ -222,10 +219,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                 chunkCount++;
                 accumulatedText += message.content;
                 
-                if (chunkCount % 100 === 0) {
-                  console.log('[useAskStream] Processed', chunkCount, 'chunks, text length:', accumulatedText.length);
-                }
-
                 if (!hasStartedStreaming || shouldUpdateUI()) {
                   const placeholderCitations = accumulatedCitations.length === 0 ?
                     createPlaceholderCitations(accumulatedText) : [];
@@ -292,7 +285,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
               case "complete": {
                 receivedCompleteEvent = true;
                 const completeMsg = message as CompleteMessage;
-                console.log('[useAskStream] Complete event received, final text length:', accumulatedText.length, 'chunk count:', chunkCount);
 
                 if (completeMsg.conversation_id) {
                   conversationIdRef.current = completeMsg.conversation_id;
@@ -326,8 +318,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                   processing_time_ms: 0
                 };
 
-                console.log('[useAskStream] Sending final response to UI, text preview:', finalText.substring(0, 100) + '...');
-
                 addAssistantMessage(
                   finalText,
                   "answer",
@@ -341,7 +331,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
               case "error": {
                 receivedCompleteEvent = true;
                 const errorMsg = message as ErrorMessage;
-                console.error('[useAskStream] Error event from server:', errorMsg.content);
                 addAssistantMessage(
                   `Error: ${errorMsg.content}`,
                   "error"
@@ -351,16 +340,14 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
               }
 
               default:
-                console.warn('[useAskStream] Unknown message type:', (message as { type: string }).type);
                 break;
             }
           }
         }
       } catch (loopError) {
         if (loopError instanceof Error && loopError.name === 'AbortError') {
-          console.log('[useAskStream] Stream aborted');
+          // Stream was intentionally aborted
         } else {
-          console.error('[useAskStream] Error in stream loop:', loopError);
           throw loopError;
         }
       }
@@ -368,7 +355,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       reader.releaseLock();
 
       if (!receivedCompleteEvent && accumulatedText && !abortControllerRef.current?.signal.aborted) {
-        console.warn('[useAskStream] Stream ended without complete event, finalizing partial response. Text length:', accumulatedText.length);
         const placeholderCitations = createPlaceholderCitations(accumulatedText);
         const partialResponse: SynthesizedResponse = {
           success: true,
@@ -390,7 +376,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
         };
 
         addAssistantMessage(
-          "",
+          accumulatedText,
           "answer",
           { synthesizedResponse: partialResponse }
         );
@@ -405,7 +391,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
-        console.log('[useAskStream] Request aborted');
         return;
       }
       
