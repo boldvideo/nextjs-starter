@@ -2,9 +2,10 @@
 
 import { VideoThumbnail } from "./video-thumbnail";
 import { useProgress } from "../providers/progress-provider";
+import type { Video } from "@boldvideo/bold-js";
 
 interface VideoThumbnailWithProgressProps {
-  video: any;
+  video: Video;
   prefetch?: boolean;
   playlistId?: string;
   progress?: {

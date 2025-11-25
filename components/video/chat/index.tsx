@@ -122,10 +122,14 @@ const processChildren = (children: React.ReactNode): React.ReactNode => {
     if (React.isValidElement(child)) {
       const childProps = child.props as { children?: React.ReactNode };
       if (childProps.children) {
-        return React.cloneElement(child, {
-          ...(child.props as object),
-          children: processChildren(childProps.children),
-        } as any);
+        return React.cloneElement(
+          child,
+          {
+            ...(child.props as object),
+            children: processChildren(childProps.children),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- React.cloneElement generic typing requires any for props spread
+          } as any
+        );
       }
     }
     return child;
@@ -225,6 +229,7 @@ export const AIAssistant = ({
       setIsDesktop(e.matches);
     handle(mq);
     mq.addEventListener("change", handle);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MediaQueryList event listener type mismatch
     return () => mq.removeEventListener("change", handle as any);
   }, [isEmbedded]);
 
@@ -358,7 +363,7 @@ export const AIAssistant = ({
         )}
         onClick={handleTimestampInteraction}
       >
-        <div className={cn("mb-4", isEmbedded ? "" : "px-4 pt-4")}>
+        <div className={cn("mb-4", isEmbedded ? "pt-4" : "px-4 pt-4")}>
           <div className="flex items-center mb-2">
             <Image
               src={avatar}
@@ -493,7 +498,7 @@ export const AIAssistant = ({
       <div
         className={cn(
           isEmbedded
-            ? "mt-auto bg-background border-t p-4 shadow-lg"
+            ? "mt-auto bg-background border-t p-4 pb-20 shadow-lg"
             : "p-4 bg-background-muted border-t border-background-muted"
         )}
       >

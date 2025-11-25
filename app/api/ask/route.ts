@@ -3,39 +3,45 @@ import { streamAIQuestion } from "../../../lib/ai-question";
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5 minutes for web search support
 
-/**
- * Validates the request body for regular questions
- */
-function validateQuestionBody(body: any): body is {
+interface QuestionBody {
   question: string;
   videoId: string;
   subdomain: string;
   conversationId?: string;
-} {
+}
+
+interface ActionBody {
+  type: "action";
+  value: string;
+  label: string;
+  id: string;
+  conversation_id?: string;
+}
+
+/**
+ * Validates the request body for regular questions
+ */
+function validateQuestionBody(body: unknown): body is QuestionBody {
+  const b = body as Record<string, unknown>;
   return (
-    typeof body.question === "string" &&
-    typeof body.videoId === "string" &&
-    typeof body.subdomain === "string" &&
-    (body.conversationId === undefined || typeof body.conversationId === "string")
+    typeof b.question === "string" &&
+    typeof b.videoId === "string" &&
+    typeof b.subdomain === "string" &&
+    (b.conversationId === undefined || typeof b.conversationId === "string")
   );
 }
 
 /**
  * Validates the request body for action requests
  */
-function validateActionBody(body: any): body is {
-  type: string;
-  value: string;
-  label: string;
-  id: string;
-  conversation_id?: string;
-} {
+function validateActionBody(body: unknown): body is ActionBody {
+  const b = body as Record<string, unknown>;
   return (
-    body.type === "action" &&
-    typeof body.value === "string" &&
-    typeof body.label === "string" &&
-    typeof body.id === "string" &&
-    (body.conversation_id === undefined || typeof body.conversation_id === "string")
+    b.type === "action" &&
+    typeof b.value === "string" &&
+    typeof b.label === "string" &&
+    typeof b.id === "string" &&
+    (b.conversation_id === undefined || typeof b.conversation_id === "string")
   );
 }
 

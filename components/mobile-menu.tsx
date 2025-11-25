@@ -109,7 +109,7 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
               )}
 
               <div className="space-y-2 py-6">
-                {menuItems.map((item: any) => (
+                {menuItems.map((item) => (
                   <Link
                     key={item.url}
                     href={item.url}

@@ -52,7 +52,8 @@ export function SearchCommandDialog() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [mounted, setMounted] = useState(false);
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputElementRef = useRef<HTMLInputElement>(null);
   const [expandedVideos, setExpandedVideos] = useState<Record<string, boolean>>(
     {}
   );
@@ -67,7 +68,11 @@ export function SearchCommandDialog() {
     if (isOpen) {
       // Slightly longer delay to ensure render and transition
       const timer = setTimeout(() => {
-        inputRef.current?.focus();
+        if (mode === "ask") {
+          textareaRef.current?.focus();
+        } else {
+          inputElementRef.current?.focus();
+        }
       }, 50);
 
       // Lock body scroll
@@ -82,7 +87,7 @@ export function SearchCommandDialog() {
     return () => {
       document.body.style.removeProperty("overflow");
     };
-  }, [isOpen]);
+  }, [isOpen, mode]);
 
   // Search logic
   useEffect(() => {
@@ -228,7 +233,7 @@ export function SearchCommandDialog() {
           <div className="flex-1 relative">
             {mode === "ask" ? (
               <textarea
-                ref={inputRef as any}
+                ref={textareaRef}
                 placeholder="Ask anything about your videos..."
                 className="w-full bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/20 text-lg placeholder:text-muted-foreground resize-none py-2 h-[44px] max-h-[120px] px-3 shadow-sm"
                 value={query}
@@ -241,7 +246,7 @@ export function SearchCommandDialog() {
               />
             ) : (
               <input
-                ref={inputRef as any}
+                ref={inputElementRef}
                 type="text"
                 placeholder="Search videos, transcripts..."
                 className="w-full h-10 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/20 text-lg placeholder:text-muted-foreground px-3 shadow-sm"

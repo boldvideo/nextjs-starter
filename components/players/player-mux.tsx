@@ -295,6 +295,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
             if (typeof ref === "function") {
               ref(el);
             } else if (ref) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- forwardRef callback requires runtime type assignment
               (ref as React.MutableRefObject<any>).current = el;
             }
 
