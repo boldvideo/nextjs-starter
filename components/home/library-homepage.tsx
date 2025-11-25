@@ -15,7 +15,7 @@ export function LibraryHomepage({ settings, videos }: LibraryHomepageProps) {
   const showPlaylists = settings?.portal?.layout?.show_playlists ?? true;
 
   return (
-    <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
+    <div className="p-5 md:p-10 max-w-screen-2xl mx-auto overflow-y-auto">
       {/* Videos Section */}
       {hasVideos && (
         <section>

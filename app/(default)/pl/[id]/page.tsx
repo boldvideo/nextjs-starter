@@ -66,7 +66,7 @@ export default async function PlaylistPage({
   };
 
   return (
-    <div className="p-5 md:p-10 pb-20 md:pb-24 max-w-screen-2xl w-full">
+    <div className="p-5 md:p-10 pb-20 md:pb-24 max-w-screen-2xl w-full overflow-y-auto">
       <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto">
         {/* Main Content Column */}
         <div className="flex-1 min-w-0 max-w-3xl">
