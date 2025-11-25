@@ -64,14 +64,8 @@ export default function MobileTabContent({
 
       {/* Chat Tab */}
       {activeTab === "chat" && (
-        <div className="absolute inset-0 overflow-hidden animate-in fade-in duration-200 pb-[env(safe-area-inset-bottom)]">
-           {/* We need extra padding for chat because it has its own input area at bottom */}
-           {/* Actually MobileBottomNav handles the bottom spacing with pb-safe and fixed position */}
-           {/* But we need to make sure chat input doesn't get covered by nav */}
-           {/* The nav height is around 60px. We should add padding-bottom to ChatTab container */}
-           <div className="h-full flex flex-col pb-[60px]"> 
-             <ChatTab video={video} settings={settings} />
-           </div>
+        <div className="absolute inset-0 overflow-hidden animate-in fade-in duration-200">
+          <ChatTab video={video} settings={settings} />
         </div>
       )}
     </div>

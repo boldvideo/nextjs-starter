@@ -363,7 +363,7 @@ export const AIAssistant = ({
         )}
         onClick={handleTimestampInteraction}
       >
-        <div className={cn("mb-4", isEmbedded ? "" : "px-4 pt-4")}>
+        <div className={cn("mb-4", isEmbedded ? "pt-4" : "px-4 pt-4")}>
           <div className="flex items-center mb-2">
             <Image
               src={avatar}
@@ -498,7 +498,7 @@ export const AIAssistant = ({
       <div
         className={cn(
           isEmbedded
-            ? "mt-auto bg-background border-t p-4 shadow-lg"
+            ? "mt-auto bg-background border-t p-4 pb-20 shadow-lg"
             : "p-4 bg-background-muted border-t border-background-muted"
         )}
       >
