@@ -20,8 +20,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Revalidate each tag
+    // Next.js 16 requires a second argument for cacheLife profile
+    // "max" profile triggers immediate expiration
     for (const tag of tags) {
-      revalidateTag(tag);
+      revalidateTag(tag, "max");
       console.log(`Revalidated tag: ${tag}`);
     }
 

@@ -1,0 +1,28 @@
+# BOLD Video Portal
+
+> A video hosting and streaming platform built with Next.js. Browse videos, playlists, and courses with full transcripts and chapter markers.
+
+## Main Resources
+
+- [Video Library](/): Browse all videos by category and topic
+- [Search](/s): Find videos by keyword, speaker, or topic
+- [Playlists](/pl): Curated video collections and courses
+
+## Content Types
+
+- **Videos**: Individual video content with descriptions, transcripts, and chapters
+- **Playlists**: Organized collections of related videos
+- **Courses**: Structured learning paths with multiple videos
+
+## Technical Details
+
+- Built with Next.js 16 and React 19
+- Server-side rendered for optimal performance
+- Full-text search across video titles and descriptions
+- Video chapters for navigation
+- Transcripts available for accessibility
+
+## API Access
+
+Video metadata and content is accessible via the BOLD Video API.
+Contact the site administrator for API access.

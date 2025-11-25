@@ -65,7 +65,7 @@ export default function MobileContentShell({
   }, [activeTab, isHydrated]);
 
   return (
-    <div className="flex flex-col flex-1 bg-background pb-16">
+    <div className="flex flex-col flex-1 min-h-0 bg-background pb-16">
       {/* Video Metadata Header */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-border bg-background">
         <h1 className="text-lg font-semibold line-clamp-2">{video.title}</h1>
