@@ -77,11 +77,11 @@ export function SearchCommandDialog() {
     } else {
       setQuery("");
       setResults([]);
-      // Unlock body scroll
-      document.body.style.overflow = "unset";
+      // Unlock body scroll - remove inline style to let CSS classes take over
+      document.body.style.removeProperty("overflow");
     }
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.removeProperty("overflow");
     };
   }, [isOpen]);
 

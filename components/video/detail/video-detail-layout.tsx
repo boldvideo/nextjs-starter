@@ -117,14 +117,14 @@ export function VideoDetailLayout({
       </div>
 
       {/* === MOBILE LAYOUT (<lg) === */}
-      <div className="video-detail__mobile lg:hidden flex flex-col flex-grow bg-background">
+      <div className="video-detail__mobile lg:hidden flex flex-col flex-1 min-h-0 bg-background">
         {/* Video Metadata Header */}
         <div className="video-detail__meta flex-shrink-0 px-4 py-3 border-b border-border bg-background">
           {videoMeta}
         </div>
 
         {/* Tab Content Container - fills remaining space above bottom nav */}
-        <div className="video-detail__panels flex-grow relative pb-16">
+        <div className="video-detail__panels flex-1 min-h-0 relative pb-16">
           {/* Playlist Panel */}
           {playlistPanel && (
             <div

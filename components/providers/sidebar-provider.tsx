@@ -271,6 +271,7 @@ export function SidebarProvider({
     <SidebarContext.Provider value={value}>
       <div
         data-sidebar-wrapper
+        className="flex flex-col flex-1 min-h-0"
         style={
           {
             "--sidebar-left-width": leftWidth,
