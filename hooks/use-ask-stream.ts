@@ -19,11 +19,41 @@ export interface ChatMessage {
   };
 }
 
-type StreamMessage = 
-  | { type: "chunk"; content: string }
-  | { type: "clarification"; content: ClarificationResponse }
-  | { type: "complete"; content: SynthesizedResponse }
-  | { type: "error"; content: string };
+interface ChunkMessage {
+  type: "chunk";
+  content: string;
+}
+
+interface ClarificationMessage {
+  type: "clarification";
+  success: boolean;
+  mode: string;
+  needs_clarification: boolean;
+  clarifying_questions: string[];
+  missing_dimensions: string[];
+  conversation_id: string;
+}
+
+interface CompleteMessage {
+  type: "complete";
+  success: boolean;
+  mode: string;
+  conversation_id: string;
+  answer: {
+    text: string;
+    citations: AskCitation[];
+    confidence: string;
+    model_used: string;
+  };
+  expanded_queries?: string[];
+}
+
+interface ErrorMessage {
+  type: "error";
+  content: string;
+}
+
+type StreamMessage = ChunkMessage | ClarificationMessage | CompleteMessage | ErrorMessage;
 
 interface UseAskStreamOptions {
   onComplete?: (response: SynthesizedResponse) => void;
@@ -228,49 +258,72 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                 }
                 break;
 
-              case "clarification":
+              case "clarification": {
                 receivedCompleteEvent = true;
-                if (message.content.conversation_id) {
-                  conversationIdRef.current = message.content.conversation_id;
-                  setConversationId(message.content.conversation_id);
+                const clarificationMsg = message as ClarificationMessage;
+                
+                if (clarificationMsg.conversation_id) {
+                  conversationIdRef.current = clarificationMsg.conversation_id;
+                  setConversationId(clarificationMsg.conversation_id);
                 }
 
                 setIsWaitingForClarification(true);
 
+                const clarificationResponse: ClarificationResponse = {
+                  success: true,
+                  mode: "clarification",
+                  needs_clarification: true,
+                  clarifying_questions: clarificationMsg.clarifying_questions,
+                  missing_dimensions: clarificationMsg.missing_dimensions,
+                  original_query: query,
+                  conversation_id: clarificationMsg.conversation_id
+                };
+
                 addAssistantMessage(
                   "",
                   "clarification",
-                  { clarificationResponse: message.content }
+                  { clarificationResponse }
                 );
 
-                options.onClarification?.(message.content);
+                options.onClarification?.(clarificationResponse);
                 break;
+              }
 
-              case "complete":
+              case "complete": {
                 receivedCompleteEvent = true;
+                const completeMsg = message as CompleteMessage;
                 console.log('[useAskStream] Complete event received, final text length:', accumulatedText.length, 'chunk count:', chunkCount);
 
-                if (message.content.conversation_id) {
-                  conversationIdRef.current = message.content.conversation_id;
-                  setConversationId(message.content.conversation_id);
+                if (completeMsg.conversation_id) {
+                  conversationIdRef.current = completeMsg.conversation_id;
+                  setConversationId(completeMsg.conversation_id);
                 }
 
                 setIsWaitingForClarification(false);
 
                 const processedCitations = processCitations(
-                  message.content.answer.citations || accumulatedCitations
+                  completeMsg.answer.citations || accumulatedCitations
                 );
 
-                const finalText = accumulatedText || message.content.answer?.text || "";
+                const finalText = accumulatedText || completeMsg.answer?.text || "";
 
                 const finalResponse: SynthesizedResponse = {
-                  ...message.content,
+                  success: true,
+                  mode: "synthesized",
+                  query,
+                  conversation_id: completeMsg.conversation_id,
+                  expanded_queries: completeMsg.expanded_queries || expandedQueries,
                   answer: {
-                    ...message.content.answer,
                     text: finalText,
-                    citations: processedCitations
+                    citations: processedCitations,
+                    confidence: completeMsg.answer.confidence as "high" | "medium" | "low",
+                    model_used: completeMsg.answer.model_used
                   },
-                  expanded_queries: message.content.expanded_queries || expandedQueries
+                  retrieval: {
+                    total: processedCitations.length,
+                    chunks: []
+                  },
+                  processing_time_ms: 0
                 };
 
                 console.log('[useAskStream] Sending final response to UI, text preview:', finalText.substring(0, 100) + '...');
@@ -283,16 +336,19 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
                 options.onComplete?.(finalResponse);
                 break;
+              }
 
-              case "error":
+              case "error": {
                 receivedCompleteEvent = true;
-                console.error('[useAskStream] Error event from server:', message.content);
+                const errorMsg = message as ErrorMessage;
+                console.error('[useAskStream] Error event from server:', errorMsg.content);
                 addAssistantMessage(
-                  `Error: ${message.content}`,
+                  `Error: ${errorMsg.content}`,
                   "error"
                 );
-                options.onError?.(message.content);
+                options.onError?.(errorMsg.content);
                 break;
+              }
 
               default:
                 console.warn('[useAskStream] Unknown message type:', (message as { type: string }).type);
