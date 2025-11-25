@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { useTransition } from "react";
-import { streamAskAction } from "@/app/actions/ask-stream";
 import {
   ClarificationResponse,
   SynthesizedResponse,
@@ -21,6 +19,12 @@ export interface ChatMessage {
   };
 }
 
+type StreamMessage = 
+  | { type: "chunk"; content: string }
+  | { type: "clarification"; content: ClarificationResponse }
+  | { type: "complete"; content: SynthesizedResponse }
+  | { type: "error"; content: string };
+
 interface UseAskStreamOptions {
   onComplete?: (response: SynthesizedResponse) => void;
   onClarification?: (response: ClarificationResponse) => void;
@@ -30,14 +34,12 @@ interface UseAskStreamOptions {
 export function useAskStream(options: UseAskStreamOptions = {}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [isPending] = useTransition();
   const conversationIdRef = useRef<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isWaitingForClarification, setIsWaitingForClarification] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
 
-  // Add a user message to the chat
   const addUserMessage = useCallback((content: string) => {
     const messageId = `user-${Date.now()}`;
     setMessages(prev => [...prev, {
@@ -49,7 +51,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
     return messageId;
   }, []);
 
-  // Add or update an assistant message
   const addAssistantMessage = useCallback((
     content: string | React.ReactNode, 
     type: ChatMessage["type"] = "text",
@@ -61,11 +62,9 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       const existingIndex = prev.findIndex(m => m.id === messageId);
       
       if (existingIndex >= 0) {
-        // Update existing message
         const newMessages = [...prev];
         const existingMessage = newMessages[existingIndex];
         
-        // If streaming text, append to existing content
         if (type === "text" && typeof content === "string" && typeof existingMessage.content === "string") {
           newMessages[existingIndex] = {
             ...existingMessage,
@@ -73,7 +72,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             metadata: metadata || existingMessage.metadata
           };
         } else {
-          // Replace content for other types
           newMessages[existingIndex] = {
             ...existingMessage,
             content,
@@ -83,7 +81,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
         }
         return newMessages;
       } else {
-        // Add new message
         streamingMessageIdRef.current = messageId;
         return [...prev, {
           id: messageId,
@@ -98,191 +95,264 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
     return messageId;
   }, []);
 
-  // Stream a question and handle responses
   const streamQuestion = useCallback(async (
     query: string,
     useConversationId: boolean = true
   ) => {
-    // Stream handling begins
-
-    // Abort any existing stream
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
-    // Create new abort controller
     abortControllerRef.current = new AbortController();
     
-    // Add user message
     addUserMessage(query);
-    
-    // Add loading message
     streamingMessageIdRef.current = null;
     addAssistantMessage("", "loading");
-    
     setIsStreaming(true);
 
     try {
-      // Use server action with streaming
-      const stream = await streamAskAction({
-        query,
-        conversationId: useConversationId ? conversationIdRef.current || undefined : undefined,
-        mode: "enhanced",
-        synthesize: true
+      const response = await fetch("/api/coach", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+        },
+        body: JSON.stringify({
+          message: query,
+          conversationId: useConversationId ? conversationIdRef.current || undefined : undefined,
+        }),
+        signal: abortControllerRef.current.signal,
       });
 
-      const reader = stream.getReader();
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "");
+        throw new Error(errorText || `Request failed with status ${response.status}`);
+      }
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
       let hasStartedStreaming = false;
       let accumulatedText = "";
       const accumulatedCitations: AskCitation[] = [];
       const expandedQueries: string[] = [];
-      
-      while (true) {
-        // Check if aborted
-        if (abortControllerRef.current?.signal.aborted) {
-          reader.cancel();
-          break;
+      let receivedCompleteEvent = false;
+      let chunkCount = 0;
+      let lastUpdateTime = 0;
+      const UPDATE_THROTTLE_MS = 50;
+
+      const shouldUpdateUI = () => {
+        const now = Date.now();
+        if (now - lastUpdateTime >= UPDATE_THROTTLE_MS) {
+          lastUpdateTime = now;
+          return true;
         }
+        return false;
+      };
 
-        const { done, value: message } = await reader.read();
-        if (done) break;
+      try {
+        while (true) {
+          if (abortControllerRef.current?.signal.aborted) {
+            console.log('[useAskStream] Aborted by user');
+            await reader.cancel();
+            break;
+          }
 
-        switch (message.type) {
-          case "chunk":
-            accumulatedText += message.content;
-            if (!hasStartedStreaming) {
-              // Start with answer type to show citations progressively
-              // Create placeholder citations for any [1], [2], etc. found in text
-              const placeholderCitations = createPlaceholderCitations(accumulatedText);
-              
-              addAssistantMessage(
-                message.content, 
-                "answer",
-                { 
-                  synthesizedResponse: {
-                    success: true,
-                    mode: "synthesized",
-                    query,
-                    expanded_queries: expandedQueries,
-                    conversation_id: conversationIdRef.current || "",
-                    answer: {
-                      text: accumulatedText,
-                      citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
-                      confidence: "medium",
-                      model_used: "unknown"
-                    },
-                    retrieval: {
-                      total: accumulatedCitations.length || placeholderCitations.length,
-                      chunks: []
-                    },
-                    processing_time_ms: 0
-                  }
+          const { done, value } = await reader.read();
+
+          if (done) {
+            console.log('[useAskStream] Stream done, total chunks:', chunkCount, 'receivedComplete:', receivedCompleteEvent);
+            break;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+
+            const dataStr = line.slice(6).trim();
+            if (!dataStr || dataStr === "[DONE]") continue;
+
+            let message: StreamMessage;
+            try {
+              message = JSON.parse(dataStr) as StreamMessage;
+            } catch {
+              console.warn('[useAskStream] Failed to parse SSE data:', dataStr);
+              continue;
+            }
+
+            switch (message.type) {
+              case "chunk":
+                chunkCount++;
+                accumulatedText += message.content;
+                
+                if (chunkCount % 100 === 0) {
+                  console.log('[useAskStream] Processed', chunkCount, 'chunks, text length:', accumulatedText.length);
                 }
-              );
-              hasStartedStreaming = true;
-            } else {
-              // Update with accumulated data
-              // Check for new citation references in accumulated text
-              const placeholderCitations = accumulatedCitations.length === 0 ? 
-                createPlaceholderCitations(accumulatedText) : [];
-              
-              addAssistantMessage(
-                message.content, 
-                "answer",
-                { 
-                  synthesizedResponse: {
-                    success: true,
-                    mode: "synthesized",
-                    query,
-                    expanded_queries: expandedQueries,
-                    conversation_id: conversationIdRef.current || "",
-                    answer: {
-                      text: accumulatedText,
-                      citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
-                      confidence: "medium",
-                      model_used: "unknown"
-                    },
-                    retrieval: {
-                      total: accumulatedCitations.length || placeholderCitations.length,
-                      chunks: []
-                    },
-                    processing_time_ms: 0
-                  }
+
+                if (!hasStartedStreaming || shouldUpdateUI()) {
+                  const placeholderCitations = accumulatedCitations.length === 0 ?
+                    createPlaceholderCitations(accumulatedText) : [];
+
+                  addAssistantMessage(
+                    accumulatedText,
+                    "answer",
+                    {
+                      synthesizedResponse: {
+                        success: true,
+                        mode: "synthesized",
+                        query,
+                        expanded_queries: expandedQueries,
+                        conversation_id: conversationIdRef.current || "",
+                        answer: {
+                          text: accumulatedText,
+                          citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
+                          confidence: "medium",
+                          model_used: "unknown"
+                        },
+                        retrieval: {
+                          total: accumulatedCitations.length || placeholderCitations.length,
+                          chunks: []
+                        },
+                        processing_time_ms: 0
+                      }
+                    }
+                  );
+                  hasStartedStreaming = true;
                 }
-              );
-            }
-            break;
+                break;
 
-          case "clarification":
-            // Update conversation ID
-            if (message.content.conversation_id) {
-              // Setting conversation ID from clarification
-              conversationIdRef.current = message.content.conversation_id;
-              setConversationId(message.content.conversation_id);
-            }
-            
-            // Mark that we're waiting for clarification
-            setIsWaitingForClarification(true);
-            
-            // Replace current message with clarification UI
-            addAssistantMessage(
-              "", // Content will be rendered by component
-              "clarification",
-              { clarificationResponse: message.content }
-            );
-            
-            options.onClarification?.(message.content);
-            break;
+              case "clarification":
+                receivedCompleteEvent = true;
+                if (message.content.conversation_id) {
+                  conversationIdRef.current = message.content.conversation_id;
+                  setConversationId(message.content.conversation_id);
+                }
 
-          case "complete":
-            // Update conversation ID
-            if (message.content.conversation_id) {
-              // Setting conversation ID from complete
-              conversationIdRef.current = message.content.conversation_id;
-              setConversationId(message.content.conversation_id);
-            }
-            
-            // Clear clarification waiting state
-            setIsWaitingForClarification(false);
-            
-            // Process citations to ensure proper format
-            const processedCitations = processCitations(
-              message.content.answer.citations || accumulatedCitations
-            );
-            
-            // Final update with complete data
-            const finalResponse = {
-              ...message.content,
-              answer: {
-                ...message.content.answer,
-                text: accumulatedText || message.content.answer.text,
-                citations: processedCitations
-              },
-              expanded_queries: message.content.expanded_queries || expandedQueries
-            };
-            
-            addAssistantMessage(
-              "",
-              "answer",
-              { synthesizedResponse: finalResponse }
-            );
-            
-            options.onComplete?.(finalResponse);
-            break;
+                setIsWaitingForClarification(true);
 
-          case "error":
-            addAssistantMessage(
-              `Error: ${message.content}`,
-              "error"
-            );
-            options.onError?.(message.content);
-            break;
+                addAssistantMessage(
+                  "",
+                  "clarification",
+                  { clarificationResponse: message.content }
+                );
+
+                options.onClarification?.(message.content);
+                break;
+
+              case "complete":
+                receivedCompleteEvent = true;
+                console.log('[useAskStream] Complete event received, final text length:', accumulatedText.length, 'chunk count:', chunkCount);
+
+                if (message.content.conversation_id) {
+                  conversationIdRef.current = message.content.conversation_id;
+                  setConversationId(message.content.conversation_id);
+                }
+
+                setIsWaitingForClarification(false);
+
+                const processedCitations = processCitations(
+                  message.content.answer.citations || accumulatedCitations
+                );
+
+                const finalText = accumulatedText || message.content.answer?.text || "";
+
+                const finalResponse: SynthesizedResponse = {
+                  ...message.content,
+                  answer: {
+                    ...message.content.answer,
+                    text: finalText,
+                    citations: processedCitations
+                  },
+                  expanded_queries: message.content.expanded_queries || expandedQueries
+                };
+
+                console.log('[useAskStream] Sending final response to UI, text preview:', finalText.substring(0, 100) + '...');
+
+                addAssistantMessage(
+                  finalText,
+                  "answer",
+                  { synthesizedResponse: finalResponse }
+                );
+
+                options.onComplete?.(finalResponse);
+                break;
+
+              case "error":
+                receivedCompleteEvent = true;
+                console.error('[useAskStream] Error event from server:', message.content);
+                addAssistantMessage(
+                  `Error: ${message.content}`,
+                  "error"
+                );
+                options.onError?.(message.content);
+                break;
+
+              default:
+                console.warn('[useAskStream] Unknown message type:', (message as { type: string }).type);
+                break;
+            }
+          }
+        }
+      } catch (loopError) {
+        if (loopError instanceof Error && loopError.name === 'AbortError') {
+          console.log('[useAskStream] Stream aborted');
+        } else {
+          console.error('[useAskStream] Error in stream loop:', loopError);
+          throw loopError;
         }
       }
-      
+
       reader.releaseLock();
+
+      if (!receivedCompleteEvent && accumulatedText && !abortControllerRef.current?.signal.aborted) {
+        console.warn('[useAskStream] Stream ended without complete event, finalizing partial response. Text length:', accumulatedText.length);
+        const placeholderCitations = createPlaceholderCitations(accumulatedText);
+        const partialResponse: SynthesizedResponse = {
+          success: true,
+          mode: "synthesized",
+          query,
+          expanded_queries: expandedQueries,
+          conversation_id: conversationIdRef.current || "",
+          answer: {
+            text: accumulatedText,
+            citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
+            confidence: "low",
+            model_used: "unknown"
+          },
+          retrieval: {
+            total: accumulatedCitations.length || placeholderCitations.length,
+            chunks: []
+          },
+          processing_time_ms: 0
+        };
+
+        addAssistantMessage(
+          "",
+          "answer",
+          { synthesizedResponse: partialResponse }
+        );
+
+        options.onComplete?.(partialResponse);
+      } else if (!receivedCompleteEvent && !accumulatedText && !abortControllerRef.current?.signal.aborted) {
+        addAssistantMessage(
+          "The response was interrupted. Please try again.",
+          "error"
+        );
+        options.onError?.("Response interrupted");
+      }
     } catch (error) {
-      // Handle stream error
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('[useAskStream] Request aborted');
+        return;
+      }
+      
       const errorMessage = error instanceof Error ? error.message : "Failed to stream response";
       
       addAssistantMessage(
@@ -297,13 +367,10 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
     }
   }, [addUserMessage, addAssistantMessage, options]);
 
-  // Handle clarification submission
   const submitClarification = useCallback((clarification: string) => {
-    // Stream with the existing conversation ID
     streamQuestion(clarification, true);
   }, [streamQuestion]);
 
-  // Reset the conversation
   const reset = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -316,7 +383,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
     streamingMessageIdRef.current = null;
   }, []);
 
-  // Stop streaming
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -327,7 +393,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
   return {
     messages,
     isStreaming,
-    isPending,
+    isPending: false,
     conversationId,
     isWaitingForClarification,
     streamQuestion,
