@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SettingsProvider } from "@/components/providers/settings-provider";
 import { ProgressProvider } from "@/components/providers/progress-provider";
 import { SidebarProvider } from "@/components/providers/sidebar-provider";
+import { SearchProvider } from "@/components/providers/search-provider";
 import type { Session } from "next-auth";
 import type { Settings } from "@boldvideo/bold-js";
 
@@ -35,7 +36,9 @@ export function AppProviders({
         <SettingsProvider settings={settings}>
           <ProgressProvider>
             <SidebarProvider>
-              {children}
+              <SearchProvider>
+                {children}
+              </SearchProvider>
             </SidebarProvider>
           </ProgressProvider>
         </SettingsProvider>

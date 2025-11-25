@@ -152,7 +152,7 @@ export function Transcript({
                 e.currentTarget.blur();
               }
             }}
-            className="pl-8 pr-8 py-1 text-sm bg-secondary/50 border border-transparent focus:border-primary rounded-md outline-none transition-all w-32 focus:w-48 placeholder:text-muted-foreground/70"
+            className="pl-8 pr-8 h-9 text-sm bg-background border border-input focus:border-primary rounded-lg outline-none transition-all w-32 focus:w-48 placeholder:text-muted-foreground/70"
           />
           {searchQuery && (
             <button

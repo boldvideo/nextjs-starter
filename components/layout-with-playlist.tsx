@@ -2,7 +2,7 @@
 
 import { ReactNode, Suspense } from "react";
 import { Header } from "@/components/header";
-import { SearchPreview } from "@/components/search-preview";
+import { SearchCommandDialog } from "@/components/search-command-dialog";
 import { PlaylistProvider } from "@/components/providers/playlist-provider";
 import type { Session } from "next-auth";
 import type { Settings } from "@boldvideo/bold-js";
@@ -26,9 +26,7 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
           className="h-18"
         />
       )}
-      <Suspense>
-        <SearchPreview />
-      </Suspense>
+      <SearchCommandDialog />
       <main className="flex-1 relative flex flex-col pt-[var(--header-height)]">{children}</main>
     </>
   );
