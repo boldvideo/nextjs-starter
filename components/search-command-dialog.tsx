@@ -295,7 +295,7 @@ export function SearchCommandDialog() {
               ) : query.trim() && results.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <Search className="h-8 w-8 opacity-20 mb-2" />
-                  <p>No results found for "{query}"</p>
+                  <p>No results found for &quot;{query}&quot;</p>
                 </div>
               ) : !query.trim() ? (
                 <div className="flex flex-col items-center justify-center py-16 text-muted-foreground/60">
@@ -411,7 +411,7 @@ export function SearchCommandDialog() {
                         onClick={handleClose}
                         className="flex items-center justify-center gap-2 w-full py-3 mt-2 text-sm font-medium text-primary hover:bg-muted rounded-lg transition-colors"
                     >
-                        See all results for "{query}"
+                        See all results for &quot;{query}&quot;
                         <ArrowRight size={16} />
                     </Link>
                   )}
