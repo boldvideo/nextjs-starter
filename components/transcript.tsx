@@ -134,10 +134,10 @@ export function Transcript({
 
   return (
     <TranscriptWrapper>
-      <TranscriptHeader className="sticky top-0 z-10 flex items-center justify-between bg-background/95 backdrop-blur py-4 border-b">
-        <TranscriptTitle className="text-2xl font-bold">
+      <TranscriptHeader className="sticky top-0 z-10 flex items-center justify-between bg-background/95 backdrop-blur pt-0 pb-4 mb-2 lg:py-4 lg:mb-8 lg:border-b">
+        <TranscriptTitle className="text-base lg:text-2xl font-bold">
           Transcript{" "}
-          <span className="text-gray-400 text-sm">(auto-generated)</span>
+          <span className="text-gray-400 text-xs lg:text-sm">(auto-generated)</span>
         </TranscriptTitle>
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />

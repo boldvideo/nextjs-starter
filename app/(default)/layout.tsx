@@ -263,7 +263,7 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className="bg-background flex flex-col min-h-screen" suppressHydrationWarning>
+      <body className="bg-background flex flex-col h-screen overflow-hidden lg:min-h-screen lg:h-auto lg:overflow-auto" suppressHydrationWarning>
         {showContent ? (
           <AppProviders
             session={session}

@@ -52,13 +52,13 @@ export function VideoMainContent({
   return (
     <div className="w-full mx-auto flex flex-col">
       <div className="flex flex-col flex-1 mt-6 min-h-[600px] pb-24 lg:pb-8">
-        {/* Title & Metadata */}
-        <div className="mb-2">
+        {/* Title & Metadata - hidden on mobile since videoMeta shows it */}
+        <div className="hidden lg:block mb-2">
           <h1 className="text-2xl lg:text-3xl font-bold line-clamp-2 leading-tight">
             {video.title}
           </h1>
         </div>
-        <div className="flex items-center gap-4 text-base text-muted-foreground mb-6">
+        <div className="hidden lg:flex items-center gap-4 text-base text-muted-foreground mb-6">
           <span>
             {video.published_at &&
               formatRelative(new Date(video.published_at), new Date())}

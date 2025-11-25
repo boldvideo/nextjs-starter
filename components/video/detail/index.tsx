@@ -3,19 +3,24 @@
 import { Player } from "@/components/players";
 import { useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 import type { Settings, Playlist } from "@boldvideo/bold-js";
 import { AIAssistantProvider } from "../chat/context";
 import { PlaylistSidebar } from "../navigation/playlist-sidebar";
 import { usePlaylist } from "@/components/providers/playlist-provider";
 import { useVideoProgress } from "@/hooks/use-video-progress";
 import type { ExtendedVideo } from "@/types/video-detail";
-import { FixedSidebarLayout } from "@/components/layout/fixed-sidebar-layout";
 import { VideoCompanionSidebar } from "../companion";
 import { VideoMainContent } from "./video-main-content";
+import { VideoDetailLayout } from "./video-detail-layout";
 import { usePlaylistNavigation } from "@/hooks/use-playlist-navigation";
 import { useScrollOutOfView } from "@/hooks/use-scroll-out-of-view";
-import MobileContentShell from "../mobile/mobile-content-shell";
-import { cn } from "@/lib/utils";
+import { formatDuration } from "@/util/format-duration";
+
+import PlaylistTab from "../mobile/playlist-tab";
+import InfoTab from "../mobile/info-tab";
+import ChaptersTab from "../mobile/chapters-tab";
+import ChatTab from "../mobile/chat-tab";
 
 interface VideoDetailProps {
   video: ExtendedVideo;
@@ -28,23 +33,20 @@ interface VideoDetailProps {
 export function VideoDetail({
   video,
   startTime,
-  className = "max-w-7xl",
+  className = "max-w-5xl",
   settings,
   playlist,
 }: VideoDetailProps): React.JSX.Element {
   const router = useRouter();
   const playerRef = useRef<HTMLVideoElement | null>(null);
 
-  // Playlist state
   const { setHasPlaylist, isAutoplay } = usePlaylist();
 
-  // Update playlist availability
   useEffect(() => {
     setHasPlaylist(!!playlist);
     return () => setHasPlaylist(false);
   }, [playlist, setHasPlaylist]);
 
-  // Progress tracking
   const { resumePosition } = useVideoProgress({
     videoId: video.id,
     duration: video.duration,
@@ -53,10 +55,8 @@ export function VideoDetail({
 
   const effectiveStartTime = startTime || resumePosition || undefined;
 
-  // Scroll behavior
   const isOutOfView = useScrollOutOfView(0.7);
 
-  // Player time control
   useEffect(() => {
     if (effectiveStartTime && playerRef.current) {
       playerRef.current.currentTime = effectiveStartTime;
@@ -71,7 +71,6 @@ export function VideoDetail({
     }
   }, []);
 
-  // Playlist navigation logic
   const {
     currentIndex: currentVideoIndex,
     hasPrevious: hasPreviousVideo,
@@ -88,47 +87,66 @@ export function VideoDetail({
 
   return (
     <AIAssistantProvider onTimeClick={handleTimeSelect}>
-      {/* Desktop Layout (>= lg) */}
-      <div className="hidden lg:flex flex-1 flex-col min-h-0">
-        <FixedSidebarLayout
-          leftSidebar={
-            playlist ? (
-              <PlaylistSidebar
-                playlist={playlist}
-                currentVideoId={video.id}
-                className="z-30"
-                mode="collapse"
-              />
-            ) : undefined
-          }
-          rightSidebar={
-            <VideoCompanionSidebar
-              videoId={video.id}
-              playbackId={video.playback_id}
-              chaptersWebVTT={video.chapters || ""}
-              aiName={settings?.ai_name || "AI Assistant"}
-              aiAvatar={settings?.ai_avatar || "/default-avatar.png"}
-              subdomain={""}
-              greeting={settings?.ai_greeting}
-              onChapterClick={handleTimeSelect}
-              hasChapters={Boolean(video.chapters)}
-              className="z-[35]"
+      <VideoDetailLayout
+        hasPlaylist={!!playlist}
+        className={className}
+        player={
+          <Player
+            video={video as any}
+            autoPlay={true}
+            ref={playerRef}
+            startTime={effectiveStartTime}
+            className="w-full h-full"
+            isOutOfView={isOutOfView}
+            onEnded={handleVideoEnded}
+          />
+        }
+        videoMeta={
+          <>
+            <h1 className="text-lg font-semibold line-clamp-2">{video.title}</h1>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+              {video.published_at && (
+                <span>{format(new Date(video.published_at), "MMM d, yyyy")}</span>
+              )}
+              {video.duration && (
+                <>
+                  <span>•</span>
+                  <span>{formatDuration(video.duration)}</span>
+                </>
+              )}
+            </div>
+          </>
+        }
+        leftSidebar={
+          playlist ? (
+            <PlaylistSidebar
+              playlist={playlist}
+              currentVideoId={video.id}
+              className="z-30"
+              mode="collapse"
             />
-          }
-          className={className}
-        >
-          <div className="w-full bg-black aspect-video relative lg:rounded-lg overflow-hidden shadow-lg z-20">
-            <Player
-              video={video as any}
-              autoPlay={true}
-              ref={playerRef}
-              startTime={effectiveStartTime}
-              className="w-full h-full"
-              isOutOfView={isOutOfView}
-              onEnded={handleVideoEnded}
-            />
-          </div>
-
+          ) : undefined
+        }
+        rightSidebar={
+          <VideoCompanionSidebar
+            videoId={video.id}
+            playbackId={video.playback_id}
+            chaptersWebVTT={video.chapters || ""}
+            aiName={settings?.ai_name || "AI Assistant"}
+            aiAvatar={settings?.ai_avatar || "/default-avatar.png"}
+            subdomain={""}
+            greeting={settings?.ai_greeting}
+            onChapterClick={handleTimeSelect}
+            hasChapters={Boolean(video.chapters)}
+            className="z-[35]"
+          />
+        }
+        playlistPanel={
+          playlist ? (
+            <PlaylistTab playlist={playlist} currentVideoId={video.id} />
+          ) : undefined
+        }
+        infoPanel={
           <VideoMainContent
             video={video}
             playlist={playlist}
@@ -140,32 +158,16 @@ export function VideoDetail({
             onTimeSelect={handleTimeSelect}
             playerRef={playerRef}
           />
-        </FixedSidebarLayout>
-      </div>
-
-      {/* Mobile Layout (< lg) */}
-      <div className="lg:hidden flex flex-col min-h-screen">
-        <div className="w-full bg-black aspect-video relative overflow-hidden shadow-lg">
-          <Player
-            video={video as any}
-            autoPlay={true}
-            ref={playerRef}
-            startTime={effectiveStartTime}
-            className="w-full h-full"
-            isOutOfView={isOutOfView}
-            onEnded={handleVideoEnded}
+        }
+        chaptersPanel={
+          <ChaptersTab
+            chaptersWebVTT={video.chapters || ""}
+            playbackId={video.playback_id}
+            onChapterClick={handleTimeSelect}
           />
-        </div>
-
-        <MobileContentShell
-          video={video}
-          playlist={playlist}
-          playerRef={playerRef}
-          onChapterClick={handleTimeSelect}
-          onTimeSelect={handleTimeSelect}
-          settings={settings}
-        />
-      </div>
+        }
+        chatPanel={<ChatTab video={video} settings={settings} />}
+      />
     </AIAssistantProvider>
   );
 }
