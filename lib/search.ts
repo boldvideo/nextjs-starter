@@ -42,7 +42,7 @@ export type SearchResponse = {
 export async function searchVideos(
   query: string,
   slug: string,
-  token: string
+  _token: string
 ): Promise<SearchResponse> {
   if (!query || query.trim().length < 2) {
     return {

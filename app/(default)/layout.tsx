@@ -3,15 +3,17 @@ import "./globals.css";
 
 import { bold } from "@/client";
 import type { Settings } from "@boldvideo/bold-js";
-import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LayoutWithPlaylist } from "@/components/layout-with-playlist";
 import { SettingsProvider } from "@/components/providers/settings-provider";
+import { AppProviders } from "@/components/providers/app-providers";
 import { getPortalConfig } from "@/lib/portal-config";
-import { ProgressProvider } from "@/components/providers/progress-provider";
 import { auth } from "@/auth";
-import { SessionProvider } from "next-auth/react";
 import { isAuthEnabled } from "@/config/auth";
 import SignIn from "@/components/auth/sign-in";
+import type {
+  ExtendedThemeConfig,
+  ExtendedMetaData,
+} from "@/types/bold-extensions";
 
 // Default metadata values
 const defaultMetadata = {
@@ -54,13 +56,13 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
-  const meta = settings?.meta_data;
+  const meta = settings?.meta_data as ExtendedMetaData | undefined;
   const title = meta?.title
     ? `${meta.title}${meta.title_suffix || ""}`
     : defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
   const ogImageUrl =
-    (meta as any)?.social_graph_image_url ||
+    meta?.social_graph_image_url ||
     `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(title)}${
       meta?.image ? `&img=${encodeURIComponent(meta.image)}` : ""
     }`;
@@ -106,7 +108,7 @@ export default async function RootLayout({
     console.error("Failed to fetch settings for layout:", error);
   }
 
-  const theme = settings?.theme_config;
+  const theme = settings?.theme_config as ExtendedThemeConfig | undefined;
 
   // Get portal configuration to determine if we should show header
   const config = getPortalConfig(settings);
@@ -154,9 +156,9 @@ export default async function RootLayout({
                 --muted-foreground: ${
                   theme.light["muted-foreground"] || "hsl(215.4 16.3% 46.9%)"
                 };
-                --accent: ${(theme.light as any).accent || "hsl(210 40% 96.1%)"};
+                --accent: ${theme.light.accent || "hsl(210 40% 96.1%)"};
                 --accent-foreground: ${
-                  (theme.light as any)["accent-foreground"] || "hsl(222.2 47.4% 11.2%)"
+                  theme.light["accent-foreground"] || "hsl(222.2 47.4% 11.2%)"
                 };
                 --destructive: ${
                   theme.light.destructive || "hsl(0 84.2% 60.2%)"
@@ -168,30 +170,30 @@ export default async function RootLayout({
                 --input: ${theme.light.input || "hsl(214.3 31.8% 91.4%)"};
                 --ring: ${theme.light.ring || "hsl(222.2 84% 4.9%)"};
                 --sidebar: ${
-                  (theme.light as any).sidebar || "hsl(0 0% 100%)"
-                }; /* Example fallback */
+                  theme.light.sidebar || "hsl(0 0% 100%)"
+                };
                 --sidebar-foreground: ${
-                  (theme.light as any)["sidebar-foreground"] || "hsl(222.2 84% 4.9%)"
-                }; /* Example fallback */
+                  theme.light["sidebar-foreground"] || "hsl(222.2 84% 4.9%)"
+                };
                 --sidebar-primary: ${
-                  (theme.light as any)["sidebar-primary"] || "hsl(222.2 47.4% 11.2%)"
-                }; /* Example fallback */
+                  theme.light["sidebar-primary"] || "hsl(222.2 47.4% 11.2%)"
+                };
                 --sidebar-primary-foreground: ${
-                  (theme.light as any)["sidebar-primary-foreground"] || "hsl(210 40% 98%)"
-                }; /* Example fallback */
+                  theme.light["sidebar-primary-foreground"] || "hsl(210 40% 98%)"
+                };
                 --sidebar-accent: ${
-                  (theme.light as any)["sidebar-accent"] || "hsl(210 40% 96.1%)"
-                }; /* Example fallback */
+                  theme.light["sidebar-accent"] || "hsl(210 40% 96.1%)"
+                };
                 --sidebar-accent-foreground: ${
-                  (theme.light as any)["sidebar-accent-foreground"] ||
+                  theme.light["sidebar-accent-foreground"] ||
                   "hsl(222.2 47.4% 11.2%)"
-                }; /* Example fallback */
+                };
                 --sidebar-border: ${
-                  (theme.light as any)["sidebar-border"] || "hsl(214.3 31.8% 91.4%)"
-                }; /* Example fallback */
+                  theme.light["sidebar-border"] || "hsl(214.3 31.8% 91.4%)"
+                };
                 --sidebar-ring: ${
-                  (theme.light as any)["sidebar-ring"] || "hsl(222.2 84% 4.9%)"
-                }; /* Example fallback */
+                  theme.light["sidebar-ring"] || "hsl(222.2 84% 4.9%)"
+                };
               }
 
               .dark {
@@ -221,9 +223,9 @@ export default async function RootLayout({
                 --muted-foreground: ${
                   theme.dark["muted-foreground"] || "hsl(215 20.2% 65.1%)"
                 };
-                --accent: ${(theme.dark as any).accent || "hsl(217.2 32.6% 17.5%)"};
+                --accent: ${theme.dark.accent || "hsl(217.2 32.6% 17.5%)"};
                 --accent-foreground: ${
-                  (theme.dark as any)["accent-foreground"] || "hsl(210 40% 98%)"
+                  theme.dark["accent-foreground"] || "hsl(210 40% 98%)"
                 };
                 --destructive: ${
                   theme.dark.destructive || "hsl(0 62.8% 30.6%)"
@@ -235,58 +237,51 @@ export default async function RootLayout({
                 --input: ${theme.dark.input || "hsl(217.2 32.6% 17.5%)"};
                 --ring: ${theme.dark.ring || "hsl(212.7 26.8% 83.9%)"};
                 --sidebar: ${
-                  (theme.dark as any).sidebar || "hsl(222.2 84% 4.9%)"
-                }; /* Example fallback */
+                  theme.dark.sidebar || "hsl(222.2 84% 4.9%)"
+                };
                 --sidebar-foreground: ${
-                  (theme.dark as any)["sidebar-foreground"] || "hsl(210 40% 98%)"
-                }; /* Example fallback */
+                  theme.dark["sidebar-foreground"] || "hsl(210 40% 98%)"
+                };
                 --sidebar-primary: ${
-                  (theme.dark as any)["sidebar-primary"] || "hsl(210 40% 98%)"
-                }; /* Example fallback */
+                  theme.dark["sidebar-primary"] || "hsl(210 40% 98%)"
+                };
                 --sidebar-primary-foreground: ${
-                  (theme.dark as any)["sidebar-primary-foreground"] ||
+                  theme.dark["sidebar-primary-foreground"] ||
                   "hsl(222.2 47.4% 11.2%)"
-                }; /* Example fallback */
+                };
                 --sidebar-accent: ${
-                  (theme.dark as any)["sidebar-accent"] || "hsl(217.2 32.6% 17.5%)"
-                }; /* Example fallback */
+                  theme.dark["sidebar-accent"] || "hsl(217.2 32.6% 17.5%)"
+                };
                 --sidebar-accent-foreground: ${
-                  (theme.dark as any)["sidebar-accent-foreground"] || "hsl(210 40% 98%)"
-                }; /* Example fallback */
+                  theme.dark["sidebar-accent-foreground"] || "hsl(210 40% 98%)"
+                };
                 --sidebar-border: ${
-                  (theme.dark as any)["sidebar-border"] || "hsl(217.2 32.6% 17.5%)"
-                }; /* Example fallback */
+                  theme.dark["sidebar-border"] || "hsl(217.2 32.6% 17.5%)"
+                };
                 --sidebar-ring: ${
-                  (theme.dark as any)["sidebar-ring"] || "hsl(212.7 26.8% 83.9%)"
-                }; /* Example fallback */
+                  theme.dark["sidebar-ring"] || "hsl(212.7 26.8% 83.9%)"
+                };
               }
             `,
             }}
           />
         )}
       </head>
-      <body className="bg-background flex flex-col min-h-screen">
+      <body className="bg-background flex flex-col h-screen overflow-hidden lg:min-h-screen lg:h-auto lg:overflow-auto" suppressHydrationWarning>
         {showContent ? (
-          <SessionProvider session={session}>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme={config.theme.forcedTheme || "dark"}
-              enableSystem={!config.theme.forcedTheme}
-              {...(config.theme.forcedTheme && { forcedTheme: config.theme.forcedTheme })}
+          <AppProviders
+            session={session}
+            settings={settings}
+            themeConfig={config.theme}
+          >
+            <LayoutWithPlaylist
+              settings={settings}
+              session={session}
+              showHeader={showHeader}
             >
-              <SettingsProvider settings={settings}>
-                <ProgressProvider>
-                  <LayoutWithPlaylist
-                    settings={settings}
-                    session={session}
-                    showHeader={showHeader}
-                  >
-                    {children}
-                  </LayoutWithPlaylist>
-                </ProgressProvider>
-              </SettingsProvider>
-            </ThemeProvider>
-          </SessionProvider>
+              {children}
+            </LayoutWithPlaylist>
+          </AppProviders>
         ) : (
           <SettingsProvider settings={settings}>
             <SignIn settings={settings ?? undefined} />

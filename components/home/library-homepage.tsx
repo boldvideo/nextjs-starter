@@ -15,9 +15,9 @@ export function LibraryHomepage({ settings, videos }: LibraryHomepageProps) {
   const showPlaylists = settings?.portal?.layout?.show_playlists ?? true;
 
   return (
-    <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
-      {/* Videos Section - Commented out until /settings endpoint provides video data */}
-      {/* {hasVideos && (
+    <div className="p-5 md:p-10 max-w-screen-2xl mx-auto overflow-y-auto">
+      {/* Videos Section */}
+      {hasVideos && (
         <section>
           <h2 className="font-bold text-3xl mb-5" id="latest-videos">
             Latest Videos
@@ -33,7 +33,7 @@ export function LibraryHomepage({ settings, videos }: LibraryHomepageProps) {
             ))}
           </ul>
         </section>
-      )} */}
+      )}
 
       {/* Featured Playlists Section */}
       {hasPlaylists && showPlaylists && (

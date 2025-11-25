@@ -4,9 +4,10 @@ import { formatRelative } from "date-fns/formatRelative";
 import { formatDuration } from "util/format-duration";
 import { ProgressBar } from "../progress-bar";
 import { CompletionIndicator } from "../completion-indicator";
+import type { Video } from "@boldvideo/bold-js";
 
 interface VideoThumbnailProps {
-  video: any;
+  video: Video;
   prefetch?: boolean;
   playlistId?: string;
   progress?: {
