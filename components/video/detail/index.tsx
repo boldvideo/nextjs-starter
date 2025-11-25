@@ -18,7 +18,6 @@ import { useScrollOutOfView } from "@/hooks/use-scroll-out-of-view";
 import { formatDuration } from "@/util/format-duration";
 
 import PlaylistTab from "../mobile/playlist-tab";
-import InfoTab from "../mobile/info-tab";
 import ChaptersTab from "../mobile/chapters-tab";
 import ChatTab from "../mobile/chat-tab";
 
@@ -72,10 +71,7 @@ export function VideoDetail({
   }, []);
 
   const {
-    currentIndex: currentVideoIndex,
-    hasPrevious: hasPreviousVideo,
     hasNext: hasNextVideo,
-    previous: previousVideo,
     next: nextVideo,
   } = usePlaylistNavigation(playlist, video.id);
 
@@ -149,12 +145,6 @@ export function VideoDetail({
         infoPanel={
           <VideoMainContent
             video={video}
-            playlist={playlist}
-            currentVideoIndex={currentVideoIndex}
-            previousVideo={previousVideo}
-            nextVideo={nextVideo}
-            hasPreviousVideo={hasPreviousVideo}
-            hasNextVideo={hasNextVideo}
             onTimeSelect={handleTimeSelect}
             playerRef={playerRef}
           />

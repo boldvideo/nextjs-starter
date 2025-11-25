@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   Search,
-  X,
   Sparkles,
   ArrowRight,
   Command,
@@ -47,7 +46,7 @@ function parseHighlightedText(text: string) {
 
 export function SearchCommandDialog() {
   const router = useRouter();
-  const { isOpen, setIsOpen, mode, setMode } = useSearch();
+  const { isOpen, setIsOpen, mode } = useSearch();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
   const [isLoading, setIsLoading] = useState(false);

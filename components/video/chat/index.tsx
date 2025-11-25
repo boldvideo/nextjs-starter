@@ -10,7 +10,6 @@ import { useAIStream } from "./use-ai-stream";
 import { timestampToSeconds } from "@/lib/utils/time";
 import { useAIAssistantContext } from "./context";
 import { TimestampPill } from "@/components/timestamp-pill";
-import type { Message, SuggestedAction } from "./types";
 
 /**
  * Props for the AIAssistant component
@@ -48,7 +47,7 @@ const TextWithTimestamps: React.FC<{ children: string }> = ({ children }) => {
   let match;
   let key = 0;
 
-  const handleTimestampClick = (seconds: number, endSeconds?: number) => {
+  const handleTimestampClick = (seconds: number, _endSeconds?: number) => {
     // Call the onTimeClick callback to seek the video
     if (onTimeClick) {
       onTimeClick(seconds);

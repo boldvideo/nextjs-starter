@@ -95,7 +95,6 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
     currentTime,
     startTime,
     className = "",
-    isOutOfView = false,
     onEnded,
   }: MuxPlayerComponentProps,
   ref
@@ -116,6 +115,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
       const color = getComputedStyle(document.documentElement)
         .getPropertyValue("--primary")
         .trim();
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reading CSS variable on mount
       setPrimaryColor(color);
     }
   }, []);
@@ -126,6 +126,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
 
     // Check the cache first
     if (chaptersCache.has(video.chapters_url)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reading from cache
       setChapters(chaptersCache.get(video.chapters_url) || null);
       return;
     }

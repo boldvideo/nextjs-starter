@@ -24,7 +24,11 @@ export function SidebarToggle({ side, mode = "toggle", className }: SidebarToggl
   const handleClick = () => {
     if (sidebar.isMobile) {
       // Mobile: always toggle open/close
-      side === "left" ? sidebar.toggleLeft() : sidebar.toggleRight();
+      if (side === "left") {
+        sidebar.toggleLeft();
+      } else {
+        sidebar.toggleRight();
+      }
     } else {
       // Desktop
       if (mode === "collapse") {
@@ -33,7 +37,11 @@ export function SidebarToggle({ side, mode = "toggle", className }: SidebarToggl
         setCollapsed(!state.isCollapsed);
       } else {
         // Toggle open state
-        side === "left" ? sidebar.toggleLeft() : sidebar.toggleRight();
+        if (side === "left") {
+          sidebar.toggleLeft();
+        } else {
+          sidebar.toggleRight();
+        }
       }
     }
   };

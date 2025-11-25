@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, X, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Play, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 
@@ -32,45 +32,34 @@ interface CitationVideoPlayerProps {
 }
 
 export function CitationVideoPlayer({
-  videoId,
   playbackId,
   videoTitle,
   startTime,
   endTime,
   label,
-  speaker,
   isExpanded,
   onToggle,
-  transcriptExcerpt,
 }: CitationVideoPlayerProps) {
   const playerRef = useRef<any>(null);
   const [hasStarted, setHasStarted] = useState(false);
 
   // Auto-play when expanded and set start time
+  // Note: setState in effect is intentional here - tracking player state changes
   useEffect(() => {
-    console.log('[CitationVideoPlayer] Effect triggered:', {
-      isExpanded,
-      hasStarted,
-      playbackId,
-      startTime,
-      videoTitle,
-      label,
-      playerRef: playerRef.current
-    });
-    
     if (isExpanded && playerRef.current && !hasStarted) {
-      console.log('[CitationVideoPlayer] Attempting to play video at time:', startTime);
       // Set the start time
       playerRef.current.currentTime = startTime;
       // Play the video
-      playerRef.current.play().catch((err: any) => {
+      playerRef.current.play().catch((err: unknown) => {
         console.error("[CitationVideoPlayer] Autoplay failed:", err);
       });
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasStarted(true);
-    } else if (!isExpanded) {
+    } else if (!isExpanded && hasStarted) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasStarted(false);
     }
-  }, [isExpanded, startTime, hasStarted, playbackId, videoTitle, label]);
+  }, [isExpanded, startTime, hasStarted]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

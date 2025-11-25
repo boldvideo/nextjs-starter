@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -28,16 +27,11 @@ type Props = {
 export function MobileMenu({ menuItems, logo, logoDark }: Props) {
   const [isMobileMenu, setIsMobileMenu] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const settings = useSettings();
   const config = getPortalConfig(settings);
 
-  // Check if we're on the search page
-  const isSearchPage = pathname === "/s";
-
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration pattern
     setMounted(true);
   }, []);
 

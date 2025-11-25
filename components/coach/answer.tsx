@@ -160,7 +160,7 @@ export function AnswerCard({
               remarkPlugins={[remarkGfm]}
               components={{
                 p: ({ children, ...props }) => {
-                  const processedChildren = React.Children.map(children, (child, idx) => {
+                  const processedChildren = React.Children.map(children, (child) => {
                     if (typeof child === 'string') {
                       return renderTextWithCitations(child);
                     }

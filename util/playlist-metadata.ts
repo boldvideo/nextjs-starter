@@ -1,4 +1,4 @@
-import type { Playlist, Video } from "@boldvideo/bold-js";
+import type { Video } from "@boldvideo/bold-js";
 
 /**
  * Calculate the total duration of all videos in a playlist

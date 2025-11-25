@@ -2,13 +2,11 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useTransition } from "react";
-import { streamAskAction, StreamMessage } from "@/app/actions/ask-stream";
-import { 
-  ClarificationResponse, 
+import { streamAskAction } from "@/app/actions/ask-stream";
+import {
+  ClarificationResponse,
   SynthesizedResponse,
-  AskCitation,
-  isClarificationResponse,
-  isSynthesizedResponse 
+  AskCitation
 } from "@/lib/ask";
 import { createPlaceholderCitations, processCitations } from "@/lib/citation-helpers";
 
@@ -32,7 +30,7 @@ interface UseAskStreamOptions {
 export function useAskStream(options: UseAskStreamOptions = {}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isPending] = useTransition();
   const conversationIdRef = useRef<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isWaitingForClarification, setIsWaitingForClarification] = useState(false);
@@ -136,8 +134,8 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       const reader = stream.getReader();
       let hasStartedStreaming = false;
       let accumulatedText = "";
-      let accumulatedCitations: AskCitation[] = [];
-      let expandedQueries: string[] = [];
+      const accumulatedCitations: AskCitation[] = [];
+      const expandedQueries: string[] = [];
       
       while (true) {
         // Check if aborted

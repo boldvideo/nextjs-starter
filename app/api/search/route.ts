@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Common search processing function
-async function processSearch(query: string | null, request: NextRequest) {
+async function processSearch(query: string | null, _request: NextRequest) {
   if (!query) {
     return NextResponse.json(
       { error: "Missing query parameter" },
@@ -74,7 +74,7 @@ async function processSearch(query: string | null, request: NextRequest) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
+      await response.text(); // Consume error body
       return NextResponse.json(
         { error: `Search request failed with status ${response.status}` },
         { status: response.status }

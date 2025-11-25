@@ -25,7 +25,6 @@ export default function CoachPage() {
     messages,
     isStreaming,
     isWaitingForClarification,
-    conversationId,
     streamQuestion,
     submitClarification,
     stop,
@@ -35,7 +34,7 @@ export default function CoachPage() {
       // Clear input after successful response
       setQuery("");
     },
-    onError: (error) => {
+    onError: (_error) => {
       // Error is handled internally by the hook
     }
   });

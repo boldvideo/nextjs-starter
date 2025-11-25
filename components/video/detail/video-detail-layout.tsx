@@ -62,7 +62,7 @@ export function VideoDetailLayout({
     if (!isHydrated) return;
     try {
       localStorage.setItem(TAB_STORAGE_KEY, activeTab);
-    } catch (e) {}
+    } catch {}
   }, [activeTab, isHydrated]);
 
   const tabs = [

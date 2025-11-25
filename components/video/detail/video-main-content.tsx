@@ -1,40 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ChevronLeft, ChevronRight, FileText, Paperclip } from "lucide-react";
+import { FileText, Paperclip } from "lucide-react";
 import { formatRelative } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Transcript } from "@/components/transcript";
-import { AutoplayToggle } from "../navigation/autoplay-toggle";
 import { VideoDescription } from "@/components/video-description";
-import { SidebarToggle } from "@/components/ui/sidebar";
 import type { ExtendedVideo } from "@/types/video-detail";
-import type { Playlist } from "@boldvideo/bold-js";
 import { formatFileSize } from "@/util/format-file-size";
 
 interface VideoMainContentProps {
   video: ExtendedVideo;
-  playlist?: Playlist;
-  currentVideoIndex: number;
-  previousVideo?: Playlist["videos"][number] | null;
-  nextVideo?: Playlist["videos"][number] | null;
-  hasPreviousVideo: boolean;
-  hasNextVideo: boolean;
   onTimeSelect: (time: number) => void;
   playerRef: React.RefObject<HTMLVideoElement | null>;
 }
 
 export function VideoMainContent({
   video,
-  playlist,
-  currentVideoIndex,
-  previousVideo,
-  nextVideo,
-  hasPreviousVideo,
-  hasNextVideo,
   onTimeSelect,
   playerRef,
 }: VideoMainContentProps) {

@@ -1,6 +1,4 @@
-import { Suspense } from "react";
 import { SearchResults } from "@/components/search-results";
-import { SearchResultsFallback } from "@/components/search-fallback";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 

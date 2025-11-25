@@ -48,7 +48,7 @@ export function VideoCompanionSidebar({
   className,
   hasChapters = true,
 }: VideoCompanionSidebarProps) {
-  const { right, isMobile, setRightCollapsed, toggleRight, setRightOpen } =
+  const { right, isMobile, setRightCollapsed, setRightOpen } =
     useSidebar();
   const [activeTab, setActiveTab] = useState<CompanionTab>("chat");
   const [isHydrated, setIsHydrated] = useState(false);

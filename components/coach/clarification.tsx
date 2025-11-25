@@ -3,8 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { ClarificationResponse } from "@/lib/ask";
-import { HelpCircle, MessageCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { MessageCircle } from "lucide-react";
 
 interface ClarificationCardProps {
   response: ClarificationResponse;
@@ -16,8 +15,6 @@ interface ClarificationCardProps {
 
 export function ClarificationCard({
   response,
-  onSubmit,
-  disabled = false,
   aiName = "AI",
   aiAvatar = "/placeholder-avatar.png"
 }: ClarificationCardProps) {

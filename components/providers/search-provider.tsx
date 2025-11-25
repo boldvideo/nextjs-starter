@@ -37,6 +37,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
 
   // Close on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- close modal on navigation
     setIsOpen(false);
   }, [pathname]);
 

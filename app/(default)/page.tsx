@@ -1,8 +1,6 @@
 import React from "react";
 import { bold } from "@/client";
-import VideoThumbnail from "@/components/video-thumbnail";
-import { FeaturedPlaylist } from "@/components/featured-playlist";
-import type { Settings, Video, Playlist } from "@boldvideo/bold-js";
+import type { Video } from "@boldvideo/bold-js";
 import { getPortalConfig, PortalSettings } from "@/lib/portal-config";
 import { LibraryHomepage } from "@/components/home/library-homepage";
 import { AssistantHomepage } from "@/components/home/assistant-homepage";
