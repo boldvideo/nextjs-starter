@@ -22,6 +22,7 @@ export function createPlaceholderCitations(text: string): AskCitation[] {
       start_ms: 0,
       end_ms: 0,
       speaker: "Loading...",
+      text: "Citation details loading...",
       transcript_excerpt: "Citation details loading..."
     };
   });
@@ -43,6 +44,9 @@ export function processCitations(rawCitations: Partial<AskCitation>[]): AskCitat
     
     // Ensure formatted string exists
     const timestampStart = c.timestamp_start || formatAskTime(startMs / 1000);
+    
+    // Get text/transcript
+    const text = c.text || c.transcript_excerpt || "";
 
     return {
       id: c.id || `${c.video_id}_${startMs}`,
@@ -54,7 +58,8 @@ export function processCitations(rawCitations: Partial<AskCitation>[]): AskCitat
       timestamp_end: c.timestamp_end || "",
       video_title: videoTitle,
       speaker: c.speaker || "Speaker",
-      transcript_excerpt: c.transcript_excerpt || "",
+      text: text,
+      transcript_excerpt: text, // Keep alias synced
       start_ms: startMs,
       end_ms: c.end_ms || 0
     };

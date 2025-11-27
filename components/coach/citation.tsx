@@ -98,12 +98,12 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto">
           {/* Transcript */}
-          {citation.transcript_excerpt && (
+          {citation.text && (
             <div className="p-6 border-b">
               <div className="relative">
                 <Quote className="absolute -left-3 -top-2 h-6 w-6 text-muted-foreground/20 fill-current transform -scale-x-100" />
                 <blockquote className="pl-4 italic text-muted-foreground leading-relaxed border-l-2 border-primary/20">
-                  "{citation.transcript_excerpt}"
+                  "{citation.text}"
                 </blockquote>
               </div>
               <p className="mt-3 text-xs text-right text-muted-foreground font-medium uppercase tracking-wider">
