@@ -67,9 +67,9 @@ export async function streamAIQuestion(
                       answer: {
                         text: accumulatedAnswer,
                         citations: citations.map((c) => ({
-                          video_id: c.video_id,
-                          title: c.title,
-                          timestamp: Math.floor(c.timestamp_ms / 1000),
+                          video_id: c.video.internal_id,
+                          title: c.video.title,
+                          timestamp: Math.floor(c.start_ms / 1000),
                           text: c.text,
                         })),
                       },
