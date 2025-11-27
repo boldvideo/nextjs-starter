@@ -28,14 +28,6 @@ const chaptersCache = new Map<
 >();
 
 /**
- * Extended Video type with additional properties used in our application
- */
-interface ExtendedVideo extends Video {
-  chapters_url?: string;
-  playback_speed?: number;
-}
-
-/**
  * Convert timestamp strings to seconds
  * @param timestamp Timestamp string (e.g., "00:15", "00:00:15", "15")
  * @returns Number of seconds
