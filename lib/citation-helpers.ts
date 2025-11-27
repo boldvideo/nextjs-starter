@@ -1,16 +1,4 @@
 import { AskCitation, formatAskTime } from "./ask";
-import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
-
-/**
- * Converts a citation to a minimal video object for MuxPlayer
- */
-export function citationToMuxVideo(c: AskCitation): MuxPlayerVideoLike {
-  return {
-    id: c.video_id,
-    playback_id: c.playback_id,
-    title: c.video_title,
-  };
-}
 
 /**
  * Creates placeholder citations for citation references found in text

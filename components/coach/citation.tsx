@@ -5,8 +5,7 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
-import { MuxPlayerComponent } from "@/components/players/player-mux";
-import { citationToMuxVideo } from "@/lib/citation-helpers";
+import { MuxPlayerComponent, MuxPlayerVideoLike } from "@/components/players/player-mux";
 
 interface CitationModalProps {
   citation: AskCitation | null;
@@ -37,7 +36,13 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
 
   const startSeconds = citation.start_ms / 1000;
   const endSeconds = citation.end_ms / 1000;
-  const video = citationToMuxVideo(citation);
+
+  // Transform citation to minimal video object for player (colocated mapper)
+  const video: MuxPlayerVideoLike = {
+    id: citation.video_id,
+    playback_id: citation.playback_id,
+    title: citation.video_title,
+  };
 
   return (
     <>
