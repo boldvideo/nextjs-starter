@@ -94,12 +94,15 @@ export function AnswerCard({
       
       if (citation) {
         // Format timestamp for display
-        const formatTimestamp = (start: string, end: string) => {
-          if (start === "00:00" || !start) return "";
-          return end && end !== start ? `${start}-${end}` : start;
+        const formatTimestamp = (ms: number) => {
+            if (!ms && ms !== 0) return "";
+            const seconds = Math.floor(ms / 1000);
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, "0")}`;
         };
         
-        const timestamp = formatTimestamp(citation.timestamp_start, citation.timestamp_end);
+        const timestamp = formatTimestamp(citation.start_ms);
         
         parts.push(
           <button

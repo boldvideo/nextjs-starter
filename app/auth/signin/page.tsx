@@ -2,7 +2,7 @@ import SignIn from "@/components/auth/sign-in";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { isAuthEnabled } from "@/config/auth";
-import { bold } from "@/client";
+import { getTenantContext } from "@/lib/get-tenant-context";
 import type { Settings } from "@boldvideo/bold-js";
 
 // Extend Settings with logo properties
@@ -33,8 +33,10 @@ export default async function SignInPage({
   // Fetch settings for logo
   let settings = {} as ExtendedSettings;
   try {
-    const settingsResponse = await bold.settings();
-    settings = settingsResponse.data as ExtendedSettings;
+    const context = await getTenantContext();
+    if (context?.settings) {
+      settings = context.settings as ExtendedSettings;
+    }
   } catch (error) {
     console.error("Failed to fetch settings:", error);
   }

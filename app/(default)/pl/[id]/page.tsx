@@ -1,4 +1,4 @@
-import { bold } from "@/client";
+import { getTenantContext } from "@/lib/get-tenant-context";
 import { PlaylistVideoList } from "@/components/playlist-video-list";
 import { PlaylistMetadataSidebar } from "@/components/playlist-metadata-sidebar";
 import { SponsorBox } from "@/components/sponsor-box";
@@ -10,17 +10,9 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  try {
-    const { data: playlists } = await bold.playlists.list();
-    
-    return playlists.map((playlist) => ({
-      id: playlist.id,
-    }));
-  } catch (error) {
-    console.warn("Could not fetch playlists for static generation:", error);
-    // Return empty array to skip static generation if API is not available
-    return [];
-  }
+  // Static generation requires a consistent client - skip for now in multitenancy
+  // This could be enhanced to generate params per-tenant in hosted mode
+  return [];
 }
 
 export async function generateMetadata({
@@ -29,7 +21,10 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  const { data: playlist } = await bold.playlists.get(resolvedParams.id);
+  const context = await getTenantContext();
+  if (!context) return {};
+
+  const { data: playlist } = await context.client.playlists.get(resolvedParams.id);
   const first = playlist.videos[0];
   return {
     title: playlist.title,
@@ -40,7 +35,7 @@ export async function generateMetadata({
       images: [
         {
           url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
-            playlist.title,
+            playlist.title
           )}${first ? `&img=${encodeURIComponent(first.thumbnail)}` : ""}`,
           width: 1200,
           height: 630,
@@ -56,7 +51,10 @@ export default async function PlaylistPage({
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = await params;
-  const { data: playlist } = await bold.playlists.get(resolvedParams.id);
+  const context = await getTenantContext();
+  if (!context) notFound();
+
+  const { data: playlist } = await context.client.playlists.get(resolvedParams.id);
 
   if (!playlist) notFound();
 

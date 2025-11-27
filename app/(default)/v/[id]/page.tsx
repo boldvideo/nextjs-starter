@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { bold } from "@/client";
+import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
 import { VideoSchema } from "@/components/seo/video-schema";
 import type { Video, Settings } from "@boldvideo/bold-js";
@@ -15,7 +15,10 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { data } = await bold.videos.get(id);
+  const context = await getTenantContext();
+  if (!context) return {};
+
+  const { data } = await context.client.videos.get(id);
   return {
     title: data.title,
     description: data.description,
@@ -25,9 +28,9 @@ export async function generateMetadata({
       images: [
         {
           url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
-            data.title,
+            data.title
           )}&img=${encodeURIComponent(data.thumbnail)}&l=${encodeURIComponent(
-            formatDuration(data.duration),
+            formatDuration(data.duration)
           )}`,
           width: 1200,
           height: 630,
@@ -45,20 +48,15 @@ async function getVideoPageData(videoId: string): Promise<{
   settings: Settings | null;
   video: Video | null;
 }> {
-  try {
-    // Fetch settings and video in parallel
-    const [settingsData, videoResponse] = await Promise.all([
-      bold
-        .settings()
-        .then((response) => response?.data ?? null)
-        .catch((error) => {
-          console.warn("Unable to load Bold settings for video page:", error);
-          return null;
-        }),
-      bold.videos.get(videoId),
-    ]);
+  const context = await getTenantContext();
+  if (!context) {
+    notFound();
+  }
 
-    const settings = settingsData ?? null;
+  const { client, settings } = context;
+
+  try {
+    const videoResponse = await client.videos.get(videoId);
     const video = videoResponse?.data ?? null;
 
     // Handle 404 / logical "missing" case for video
@@ -69,8 +67,7 @@ async function getVideoPageData(videoId: string): Promise<{
     return { settings, video };
   } catch (error) {
     console.error("Failed to fetch video page data:", error);
-    // Let the Next.js error boundary handle the UI
-    throw error; // Re-throw to trigger the error boundary
+    throw error;
   }
 }
 

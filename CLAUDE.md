@@ -1,31 +1,72 @@
-# BOLD Next.js Tailwind Starter Commands & Guidelines
+# BOLD Next.js Video Portal
 
-## Build & Development
+Video portal starter kit for the Bold Video platform. Next.js 16, React 19, Tailwind CSS v4.
 
-- `bun dev` - Start development server
-- `bun run build` - Build for production
-- `bun start` - Start production server
-- `bun lint` - Run ESLint
+## Commands
 
-## Code Style Guidelines
+```bash
+bun dev          # Development server
+bun run build    # Production build
+bun start        # Start production
+bun lint         # ESLint
+```
 
-- **Imports**: External deps first, then Next.js imports, then local imports using absolute paths
-- **TypeScript**: Use explicit typing for function params and return types; define interfaces at component level
-- **Naming**:
-  - PascalCase for components and files (VideoThumbnail)
-  - camelCase for functions, variables, hooks (useCurrentPlayerTime)
-  - kebab-case for CSS classes and utility files
-- **Components**:
-  - Mark client components with "use client" directive
-  - Organize by functionality in components directory
-  - Follow Next.js App Router conventions
-- **Formatting**: 2-space indentation, semicolons, prefer arrow functions
-- **Styling**: Use Tailwind CSS for styling with className prop
-- **Error Handling**: Provide default values in destructuring, use optional chaining, null checks
+## Quick Reference
 
-## Communication & Documentation
+| What | Where |
+|------|-------|
+| Routes | `app/(default)/` |
+| Components | `components/` (route-aligned) |
+| Types | `types/bold-extensions.ts` |
+| Config | `lib/portal-config.ts` |
+| Hooks | `hooks/` |
+| API | `app/api/` |
 
-- **PR Descriptions**: Write objectively and concisely about WHAT the change is, not HOW or WHY we got there. No emojis.
-- **Commit Messages**: Focus on the change itself, not the decision process or context
-- **Style Reference**: Follow patterns from Guillermo Rauch, Ryan Florence, shadcn, Lee Robinson - direct and technical
+## Key Patterns
 
+**Server data fetching:**
+```typescript
+import { bold } from "@/client";
+const { data } = await bold.videos.get(id);
+```
+
+**Portal config:**
+```typescript
+import { getPortalConfig } from "@/lib/portal-config";
+const config = getPortalConfig(settings);
+```
+
+**Conditional classes:**
+```typescript
+import { cn } from "@/lib/utils";
+<div className={cn("base", condition && "extra")} />
+```
+
+## Code Style
+
+- **Imports**: External, Next.js, local (`@/`)
+- **TypeScript**: Explicit types
+- **Naming**: PascalCase (components), camelCase (functions)
+- **Client components**: `"use client"` directive
+- **Formatting**: 2-space indent, semicolons, arrow functions
+- **Styling**: Tailwind CSS
+
+## Gotchas
+
+- Video player: dynamic import with `ssr: false`
+- Use `@/` imports, not relative
+- Use `getPortalConfig()` for settings normalization
+- AI endpoints use SSE streaming
+
+## Docs
+
+- `AGENTS.md` - Full AI agent guide with codebase map
+- `ARCHITECTURE.md` - System architecture
+- `STATE_MANAGEMENT.md` - State patterns
+- `AUTH.md` - Auth setup
+- `thoughts/` - Research/planning
+
+## Communication
+
+- **PRs/Commits**: Concise, what not how, no emojis
+- **Style**: Direct, technical

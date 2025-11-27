@@ -1,5 +1,4 @@
-import { bold } from "@/client";
-// import { Player } from "components/embed-player";
+import { getTenantContext } from "@/lib/get-tenant-context";
 import { Player } from "@/components/players";
 import type { Video } from "@boldvideo/bold-js";
 import { formatDuration } from "util/format-duration";
@@ -18,7 +17,10 @@ export async function generateMetadata(props: {
   params: Promise<{ id: string }>;
 }) {
   const params = await props.params;
-  const { data: video } = await bold.videos.get(params.id);
+  const context = await getTenantContext();
+  if (!context) return {};
+
+  const { data: video } = await context.client.videos.get(params.id);
   return {
     title: video.title,
     description: video.description,
@@ -28,9 +30,9 @@ export async function generateMetadata(props: {
       images: [
         {
           url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
-            video.title,
+            video.title
           )}&img=${encodeURIComponent(video.thumbnail)}&l=${encodeURIComponent(
-            formatDuration(video.duration),
+            formatDuration(video.duration)
           )}`,
           width: 1200,
           height: 630,
@@ -42,7 +44,10 @@ export async function generateMetadata(props: {
 
 async function getVideo(id: string): Promise<ExtendedVideo | null> {
   try {
-    const { data } = await bold.videos.get(id);
+    const context = await getTenantContext();
+    if (!context) return null;
+
+    const { data } = await context.client.videos.get(id);
     return data as ExtendedVideo;
   } catch (error) {
     console.error("Failed to fetch video:", error);

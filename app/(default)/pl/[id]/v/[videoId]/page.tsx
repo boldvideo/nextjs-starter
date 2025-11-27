@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { bold } from "@/client";
+import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
@@ -8,21 +8,8 @@ import { formatDuration } from "util/format-duration";
 export const revalidate = 30;
 
 export async function generateStaticParams() {
-  // Generate static paths for all playlist/video combinations
-  const { data: playlists } = await bold.playlists.list();
-
-  const paths: { id: string; videoId: string }[] = [];
-
-  for (const playlist of playlists) {
-    for (const video of playlist.videos) {
-      paths.push({
-        id: playlist.id,
-        videoId: video.id,
-      });
-    }
-  }
-
-  return paths;
+  // Static generation requires a consistent client - skip for now in multitenancy
+  return [];
 }
 
 export async function generateMetadata({
@@ -31,11 +18,13 @@ export async function generateMetadata({
   params: Promise<{ id: string; videoId: string }>;
 }) {
   const { id: playlistId, videoId } = await params;
+  const context = await getTenantContext();
+  if (!context) return {};
 
   try {
     const [playlistResponse, videoResponse] = await Promise.all([
-      bold.playlists.get(playlistId),
-      bold.videos.get(videoId),
+      context.client.playlists.get(playlistId),
+      context.client.videos.get(videoId),
     ]);
 
     const playlist = playlistResponse?.data;
@@ -83,22 +72,21 @@ async function getPlaylistVideoData(
   video: Video | null;
   settings: Settings | null;
 }> {
+  const context = await getTenantContext();
+  if (!context) {
+    return { playlist: null, video: null, settings: null };
+  }
+
+  const { client, settings } = context;
+
   try {
-    const [playlistResponse, videoResponse, settingsData] = await Promise.all([
-      bold.playlists.get(playlistId),
-      bold.videos.get(videoId),
-      bold
-        .settings()
-        .then((response) => response?.data ?? null)
-        .catch((error) => {
-          console.warn("Unable to load Bold settings for playlist video page:", error);
-          return null;
-        }),
+    const [playlistResponse, videoResponse] = await Promise.all([
+      client.playlists.get(playlistId),
+      client.videos.get(videoId),
     ]);
 
     const playlist = playlistResponse?.data ?? null;
     const video = videoResponse?.data ?? null;
-    const settings = settingsData ?? null;
 
     return { playlist, video, settings };
   } catch (error) {

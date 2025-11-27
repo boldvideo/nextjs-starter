@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import "./globals.css";
 
-import { bold } from "@/client";
-import type { Settings } from "@boldvideo/bold-js";
+import { getTenantContext } from "@/lib/get-tenant-context";
+import { isHostedMode } from "@/lib/tenant";
 import { LayoutWithPlaylist } from "@/components/layout-with-playlist";
 import { SettingsProvider } from "@/components/providers/settings-provider";
 import { AppProviders } from "@/components/providers/app-providers";
+import { BoldProvider } from "@/components/providers/bold-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
@@ -15,26 +17,24 @@ import type {
   ExtendedMetaData,
 } from "@/types/bold-extensions";
 
+// Force dynamic rendering — tenant depends on hostname in hosted mode
+export const dynamic = "force-dynamic";
+
 // Default metadata values
 const defaultMetadata = {
   title: "Bold Video x Next.js Starter Kit",
   description:
     "Bold Video Starter Kit: Supercharge videos, rapid encoding/transcription.",
   ogImage: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
-    "Bold Video x Next.js Starter Kit",
+    "Bold Video x Next.js Starter Kit"
   )}`,
   siteUrl: "https://starter-demo.bold.video",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  let settings: Settings | null = null;
+  const context = await getTenantContext();
 
-  try {
-    const settingsResponse = await bold.settings();
-    settings = settingsResponse.data;
-  } catch (error) {
-    console.error("Failed to fetch settings for metadata:", error);
-    // Use default metadata if fetch fails
+  if (!context?.settings) {
     return {
       title: defaultMetadata.title,
       description: defaultMetadata.description,
@@ -56,7 +56,8 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
-  const meta = settings?.meta_data as ExtendedMetaData | undefined;
+  const settings = context.settings;
+  const meta = settings.meta_data as ExtendedMetaData | undefined;
   const title = meta?.title
     ? `${meta.title}${meta.title_suffix || ""}`
     : defaultMetadata.title;
@@ -73,7 +74,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: title,
       description: description,
-      url: defaultMetadata.siteUrl, // Assuming site URL is constant for now
+      url: defaultMetadata.siteUrl,
       siteName: title,
       images: [
         {
@@ -85,9 +86,8 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "en-US",
       type: "website",
     },
-    // Add dynamic icons
     icons: {
-      icon: settings?.favicon_url || "/favicon.ico", // Use fetched url or default
+      icon: settings.favicon_url || "/favicon.ico",
     },
   };
 }
@@ -97,16 +97,25 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Resolve tenant context for the current request
+  const context = await getTenantContext();
+
+  // Handle missing tenant
+  if (!context) {
+    // In hosted mode, invalid domain returns 404
+    // In standalone mode, this is a config error
+    if (isHostedMode()) {
+      notFound();
+    }
+    throw new Error(
+      "BOLD_API_KEY is required in standalone mode. Check your environment configuration."
+    );
+  }
+
+  const { settings, tenantToken } = context;
+
   // Get auth session if auth is enabled
   const session = isAuthEnabled() ? await auth() : null;
-  let settings: Settings | null = null;
-
-  try {
-    const settingsResponse = await bold.settings();
-    settings = settingsResponse.data;
-  } catch (error) {
-    console.error("Failed to fetch settings for layout:", error);
-  }
 
   const theme = settings?.theme_config as ExtendedThemeConfig | undefined;
 
@@ -121,16 +130,12 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Favicon is now handled by generateMetadata */}
-        {/* {settings.favicon_url && (
-          <link rel="icon" href={settings.favicon_url} sizes="any" />
-        )} */}
         {theme && (
           <style
             dangerouslySetInnerHTML={{
               __html: `
               :root {
-                --radius: ${theme.radius || "0.5rem"}; /* Add fallback */
+                --radius: ${theme.radius || "0.5rem"};
 
                 --background: ${theme.light.background || "hsl(0 0% 100%)"};
                 --foreground: ${
@@ -169,9 +174,7 @@ export default async function RootLayout({
                 --border: ${theme.light.border || "hsl(214.3 31.8% 91.4%)"};
                 --input: ${theme.light.input || "hsl(214.3 31.8% 91.4%)"};
                 --ring: ${theme.light.ring || "hsl(222.2 84% 4.9%)"};
-                --sidebar: ${
-                  theme.light.sidebar || "hsl(0 0% 100%)"
-                };
+                --sidebar: ${theme.light.sidebar || "hsl(0 0% 100%)"};
                 --sidebar-foreground: ${
                   theme.light["sidebar-foreground"] || "hsl(222.2 84% 4.9%)"
                 };
@@ -236,9 +239,7 @@ export default async function RootLayout({
                 --border: ${theme.dark.border || "hsl(217.2 32.6% 17.5%)"};
                 --input: ${theme.dark.input || "hsl(217.2 32.6% 17.5%)"};
                 --ring: ${theme.dark.ring || "hsl(212.7 26.8% 83.9%)"};
-                --sidebar: ${
-                  theme.dark.sidebar || "hsl(222.2 84% 4.9%)"
-                };
+                --sidebar: ${theme.dark.sidebar || "hsl(222.2 84% 4.9%)"};
                 --sidebar-foreground: ${
                   theme.dark["sidebar-foreground"] || "hsl(210 40% 98%)"
                 };
@@ -267,26 +268,34 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className="bg-background flex flex-col h-screen overflow-hidden lg:min-h-screen lg:h-auto lg:overflow-auto" suppressHydrationWarning>
-        {showContent ? (
-          <AppProviders
-            session={session}
-            settings={settings}
-            themeConfig={config.theme}
-          >
-            <LayoutWithPlaylist
-              settings={settings}
+      <body
+        className="bg-background flex flex-col h-screen overflow-hidden lg:min-h-screen lg:h-auto lg:overflow-auto"
+        suppressHydrationWarning
+      >
+        <BoldProvider
+          token={tenantToken}
+          baseURL={process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1"}
+        >
+          {showContent ? (
+            <AppProviders
               session={session}
-              showHeader={showHeader}
+              settings={settings}
+              themeConfig={config.theme}
             >
-              {children}
-            </LayoutWithPlaylist>
-          </AppProviders>
-        ) : (
-          <SettingsProvider settings={settings}>
-            <SignIn settings={settings ?? undefined} />
-          </SettingsProvider>
-        )}
+              <LayoutWithPlaylist
+                settings={settings}
+                session={session}
+                showHeader={showHeader}
+              >
+                {children}
+              </LayoutWithPlaylist>
+            </AppProviders>
+          ) : (
+            <SettingsProvider settings={settings}>
+              <SignIn settings={settings ?? undefined} />
+            </SettingsProvider>
+          )}
+        </BoldProvider>
       </body>
     </html>
   );

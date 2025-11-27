@@ -13,7 +13,8 @@ export type AskCitation = {
   start_ms: number;
   end_ms: number;
   speaker: string;
-  transcript_excerpt: string;
+  text: string; // The relevant transcript excerpt
+  transcript_excerpt: string; // Backwards compatibility or alias
 };
 
 export type AskAnswer = {

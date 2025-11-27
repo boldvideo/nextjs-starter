@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/get-tenant-context";
 
 // Handle GET requests
 export async function GET(request: NextRequest) {
@@ -6,7 +7,7 @@ export async function GET(request: NextRequest) {
   // Support both 'q' and 'query' parameter names for compatibility
   const query = searchParams.get("q") || searchParams.get("query");
 
-  return processSearch(query, request);
+  return processSearch(query);
 }
 
 // Handle POST requests to avoid URL parsing issues
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const query = body.query || body.q;
 
-    return processSearch(query, request);
+    return processSearch(query);
   } catch (error) {
     console.error("[Search API] POST parsing error:", error);
     return NextResponse.json(
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Common search processing function
-async function processSearch(query: string | null, _request: NextRequest) {
+async function processSearch(query: string | null) {
   if (!query) {
     return NextResponse.json(
       { error: "Missing query parameter" },
@@ -34,15 +35,17 @@ async function processSearch(query: string | null, _request: NextRequest) {
     );
   }
 
-  const apiHost = process.env.BACKEND_URL || "https://api.boldvideo.io";
-  const apiKey = process.env.NEXT_PUBLIC_BOLD_API_KEY;
-
-  if (!apiKey) {
+  // Get tenant context for multitenancy support
+  const context = await getTenantContext();
+  if (!context) {
     return NextResponse.json(
-      { error: "Missing API configuration" },
-      { status: 500 }
+      { error: "Tenant not found" },
+      { status: 404 }
     );
   }
+
+  const apiHost = process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1";
+  const apiKey = context.tenantToken;
 
   // Simple validation that the API key has a reasonable format
   if (typeof apiKey !== "string" || apiKey.length < 20) {

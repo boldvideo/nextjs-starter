@@ -1,12 +1,13 @@
 # BOLD Video Portal
 
-> A video hosting and streaming platform built with Next.js. Browse videos, playlists, and courses with full transcripts and chapter markers.
+> A video hosting and streaming platform built with Next.js. Browse videos, playlists, and courses with full transcripts, chapter markers, and AI-powered Q&A.
 
 ## Main Resources
 
 - [Video Library](/): Browse all videos by category and topic
 - [Search](/s): Find videos by keyword, speaker, or topic
 - [Playlists](/pl): Curated video collections and courses
+- [AI Coach](/coach): Ask questions about all video content
 
 ## Content Types
 
@@ -14,15 +15,41 @@
 - **Playlists**: Organized collections of related videos
 - **Courses**: Structured learning paths with multiple videos
 
+## Routes
+
+```
+/                   Homepage (video library or AI assistant)
+/v/{id}             Individual video page
+/pl/{id}            Playlist overview
+/pl/{id}/v/{vid}    Video within playlist context
+/coach              AI coach (ask questions about content)
+/s?q={query}        Search results
+/e/{id}             Embedded video player
+```
+
+## Features
+
+- Full-text search across video titles, descriptions, and transcripts
+- Video chapters for navigation within content
+- AI-powered Q&A with timestamp-linked answers
+- Transcript access for accessibility
+- Progress tracking across sessions
+- Dark/light theme support
+
 ## Technical Details
 
 - Built with Next.js 16 and React 19
 - Server-side rendered for optimal performance
-- Full-text search across video titles and descriptions
-- Video chapters for navigation
-- Transcripts available for accessibility
+- Mux video player with HLS streaming
+- IndexedDB for client-side progress persistence
 
 ## API Access
 
-Video metadata and content is accessible via the BOLD Video API.
-Contact the site administrator for API access.
+Video metadata and content is accessible via the BOLD Video API. AI Q&A endpoints support streaming responses (SSE). Contact the site administrator for API access.
+
+## For AI Agents
+
+If you're an AI agent working with this codebase:
+- See `AGENTS.md` for comprehensive codebase documentation
+- See `CLAUDE.md` for quick reference
+- See `ARCHITECTURE.md` for system design details
