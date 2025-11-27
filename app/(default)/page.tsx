@@ -1,6 +1,6 @@
 import React from "react";
-import { bold } from "@/client";
 import type { Video } from "@boldvideo/bold-js";
+import { getTenantContext } from "@/lib/get-tenant-context";
 import { getPortalConfig, PortalSettings } from "@/lib/portal-config";
 import { LibraryHomepage } from "@/components/home/library-homepage";
 import { AssistantHomepage } from "@/components/home/assistant-homepage";
@@ -17,26 +17,24 @@ async function getHomeData(): Promise<{
   settings: PortalSettings | null;
   videos: Video[] | null;
 }> {
-  try {
-    const settingsResponse = await bold.settings(8);
-    const settings = settingsResponse?.data ?? null;
-    
-    // Get portal configuration
-    const config = getPortalConfig(settings);
-    
-    // Only fetch videos if we're showing the library layout
-    let videos: Video[] | null = null;
-    if (config.homepage.layout === 'library') {
-      const videosResponse = await bold.videos.list(config.homepage.videosLimit);
-      videos = videosResponse?.data ?? null;
-    }
-
-    return { settings, videos };
-  } catch (error) {
-    console.error("Failed to fetch home page data:", error);
-    // Let the Next.js error boundary handle the UI
-    throw error; // Re-throw to trigger the error boundary
+  const context = await getTenantContext();
+  if (!context) {
+    throw new Error("Tenant not found");
   }
+
+  const { client, settings } = context;
+
+  // Get portal configuration
+  const config = getPortalConfig(settings);
+
+  // Only fetch videos if we're showing the library layout
+  let videos: Video[] | null = null;
+  if (config.homepage.layout === 'library') {
+    const videosResponse = await client.videos.list(config.homepage.videosLimit);
+    videos = videosResponse?.data ?? null;
+  }
+
+  return { settings, videos };
 }
 
 /**

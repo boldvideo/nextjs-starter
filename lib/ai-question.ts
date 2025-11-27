@@ -1,107 +1,113 @@
 "use server";
 
+import { getTenantContext } from "@/lib/get-tenant-context";
+import type { Citation } from "@boldvideo/bold-js";
+
 export type Message = {
   role: "user" | "assistant";
   content: string;
 };
 
 /**
- * Streams AI responses from the backend
+ * Streams AI responses from the backend using Bold JS SDK
  */
 export async function streamAIQuestion(
   videoId: string,
-  tenant: string,
+  _tenant: string, // kept for backwards compatibility, not used
   question: string,
-  conversationId?: string,
-  actionData?: { type: string; label: string }
+  _conversationId?: string, // SDK ask doesn't support conversation yet
+  _actionData?: { type: string; label: string } // not supported in SDK yet
 ) {
-  const apiHost = process.env.BACKEND_URL;
-  const apiKey = process.env.NEXT_PUBLIC_BOLD_API_KEY;
-
-  if (!apiHost || !apiKey) {
-    throw new Error("Missing API configuration");
+  // Get tenant context for multitenancy support
+  const context = await getTenantContext();
+  if (!context) {
+    throw new Error("Tenant not found");
   }
 
-  const apiUrl = apiHost.startsWith("http") ? apiHost : `https://${apiHost}`;
-  const endpoint = `${apiUrl}/videos/${videoId}/ask`;
-
-  const requestBody = actionData
-    ? {
-        conversation_id: conversationId,
-        type: actionData.type,
-        value: question,
-        label: actionData.label,
-      }
-    : {
-        q: question,
-        ...(conversationId && { conversation_id: conversationId }),
-      };
-
-  console.log('=== BACKEND REQUEST DEBUG ===');
-  console.log('Endpoint:', endpoint);
-  console.log('Is Action:', !!actionData);
-  console.log('Request Body:', JSON.stringify(requestBody, null, 2));
-  console.log('Headers:', {
-    'Content-Type': 'application/json',
-    Authorization: apiKey?.substring(0, 10) + '...',
-  });
-  console.log('============================');
-
   try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: apiKey,
-      },
-      body: JSON.stringify(requestBody),
+    // Use SDK's ai.ask() for streaming
+    const stream = await context.client.ai.ask(videoId, {
+      message: question,
     });
 
-    console.log('=== BACKEND RESPONSE DEBUG ===');
-    console.log('Status:', response.status, response.statusText);
-    console.log('Headers:', Object.fromEntries(response.headers.entries()));
-    console.log('==============================');
+    // Transform SDK's AsyncIterable to SSE Response
+    const encoder = new TextEncoder();
+    let accumulatedAnswer = "";
+    let citations: Citation[] = [];
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(
-        `Failed to fetch AI response: ${response.status} ${response.statusText}\n${errorText}`
-      );
-    }
-
-    // Transform the response stream
-    const stream = new ReadableStream({
+    const responseStream = new ReadableStream({
       async start(controller) {
-        const reader = response.body?.getReader();
-        if (!reader) {
-          controller.close();
-          return;
-        }
-
         try {
-          while (true) {
-            const { done, value } = await reader.read();
+          for await (const event of stream) {
+            switch (event.type) {
+              case "token":
+                accumulatedAnswer += event.content;
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({ type: "chunk", content: event.content })}\n\n`
+                  )
+                );
+                break;
 
-            if (done) {
-              controller.close();
-              break;
+              case "answer":
+                if (event.content && !accumulatedAnswer) {
+                  accumulatedAnswer = event.content;
+                }
+                if (event.citations) {
+                  citations = event.citations;
+                }
+                break;
+
+              case "complete":
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({
+                      type: "complete",
+                      success: true,
+                      answer: {
+                        text: accumulatedAnswer,
+                        citations: citations.map((c) => ({
+                          video_id: c.video_id,
+                          title: c.title,
+                          timestamp: Math.floor(c.timestamp_ms / 1000),
+                          text: c.text,
+                        })),
+                      },
+                    })}\n\n`
+                  )
+                );
+                break;
+
+              case "error":
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({
+                      type: "error",
+                      content: event.message || "Stream error",
+                    })}\n\n`
+                  )
+                );
+                break;
             }
-
-            // Pass through the SSE data directly
-            controller.enqueue(value);
           }
-        } catch (error: unknown) {
-          const errorEvent = `data: ${JSON.stringify({
-            type: "error",
-            content: error instanceof Error ? error.message : "Unknown error occurred",
-          })}\n\n`;
-          controller.enqueue(new TextEncoder().encode(errorEvent));
-          controller.error(error);
+
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        } catch (error) {
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({
+                type: "error",
+                content: error instanceof Error ? error.message : "Stream error",
+              })}\n\n`
+            )
+          );
+          controller.close();
         }
       },
     });
 
-    return new Response(stream, {
+    return new Response(responseStream, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",

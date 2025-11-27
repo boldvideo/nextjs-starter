@@ -1,6 +1,9 @@
-import { bold } from "@/client";
+import { getTenantContext } from "@/lib/get-tenant-context";
+import { BoldProvider } from "@/components/providers/bold-provider";
 import "./globals.css";
 import type { ExtendedThemeConfig } from "@/types/bold-extensions";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Bold Demo Site",
@@ -12,13 +15,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const context = await getTenantContext();
   let theme: ExtendedThemeConfig | undefined;
 
-  try {
-    const { data: settings } = await bold.settings();
-    theme = settings?.theme_config as ExtendedThemeConfig | undefined;
-  } catch (error) {
-    console.error("Failed to fetch settings:", error);
+  if (context?.settings) {
+    theme = context.settings.theme_config as ExtendedThemeConfig | undefined;
   }
 
   return (
@@ -94,7 +95,18 @@ export default async function RootLayout({
           />
         )}
       </head>
-      <body className="bg-background text-foreground">{children}</body>
+      <body className="bg-background text-foreground">
+        {context ? (
+          <BoldProvider
+            token={context.tenantToken}
+            baseURL={process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1"}
+          >
+            {children}
+          </BoldProvider>
+        ) : (
+          children
+        )}
+      </body>
     </html>
   );
 }
