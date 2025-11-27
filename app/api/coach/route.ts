@@ -1,8 +1,8 @@
-import { AskCitation } from "@/lib/ask";
-import { processCitations } from "@/lib/citation-helpers";
+import { getTenantContext } from "@/lib/get-tenant-context";
+import type { Citation, CoachEvent } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
-export const maxDuration = 300; // 5 minutes for long responses
+export const maxDuration = 300;
 
 interface CoachRequestBody {
   message: string;
@@ -10,16 +10,126 @@ interface CoachRequestBody {
 }
 
 /**
- * API Route for coach streaming - uses proper SSE instead of Server Actions
+ * Convert SDK events to SSE format
+ */
+function formatSSE(
+  event: CoachEvent,
+  state: { accumulatedAnswer: string; citations: Citation[]; conversationId?: string }
+): string | null {
+  switch (event.type) {
+    case "conversation_created":
+      state.conversationId = event.id;
+      return null;
+
+    case "token":
+      state.accumulatedAnswer += event.content;
+      return JSON.stringify({ type: "chunk", content: event.content });
+
+    case "answer":
+      if (event.content && !state.accumulatedAnswer) {
+        state.accumulatedAnswer = event.content;
+      }
+      if (event.citations) {
+        state.citations = event.citations;
+      }
+      return null;
+
+    case "clarification":
+      return JSON.stringify({
+        type: "clarification",
+        success: true,
+        mode: "clarification",
+        needs_clarification: true,
+        clarifying_questions: event.questions || [],
+        conversation_id: state.conversationId || "",
+      });
+
+    case "complete":
+      return JSON.stringify({
+        type: "complete",
+        success: true,
+        mode: "synthesized",
+        conversation_id: state.conversationId || "",
+        answer: {
+          text: state.accumulatedAnswer,
+          citations: state.citations.map((c) => ({
+            video_id: c.video_id,
+            video_title: c.title,
+            start_ms: c.timestamp_ms,
+            text: c.text,
+            playback_id: c.playback_id,
+          })),
+          confidence: "medium",
+        },
+      });
+
+    case "error":
+      return JSON.stringify({
+        type: "error",
+        content: event.message || "Stream error",
+      });
+
+    default:
+      return null;
+  }
+}
+
+/**
+ * Create a ReadableStream from an AsyncIterable that streams immediately
+ */
+function asyncIterableToStream(
+  iterable: AsyncIterable<CoachEvent>,
+  conversationId?: string
+): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  const state = {
+    accumulatedAnswer: "",
+    citations: [] as Citation[],
+    conversationId,
+  };
+
+  const iterator = iterable[Symbol.asyncIterator]();
+
+  return new ReadableStream({
+    async pull(controller) {
+      try {
+        const { done, value } = await iterator.next();
+
+        if (done) {
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+          return;
+        }
+
+        const sseData = formatSSE(value, state);
+        if (sseData) {
+          controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
+        }
+      } catch (error) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              type: "error",
+              content: error instanceof Error ? error.message : "Stream error",
+            })}\n\n`
+          )
+        );
+        controller.close();
+      }
+    },
+  });
+}
+
+/**
+ * API Route for coach streaming - uses Bold JS SDK
+ * Uses pull-based streaming for immediate event forwarding
  */
 export async function POST(request: Request) {
-  const apiHost = process.env.BACKEND_URL || "https://api.boldvideo.io";
-  const apiKey = process.env.BOLD_API_KEY;
-
-  if (!apiKey) {
+  const context = await getTenantContext();
+  if (!context) {
     return new Response(
-      JSON.stringify({ type: "error", content: "Missing API configuration" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ type: "error", content: "Tenant not found" }),
+      { status: 404, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -42,262 +152,21 @@ export async function POST(request: Request) {
     );
   }
 
-  // Construct backend URL
-  const baseUrl = apiHost.startsWith("http") ? apiHost : `https://${apiHost}`;
-  const apiPath = baseUrl.includes("/api/v1") ? "" : "/api/v1";
-  const endpoint = conversationId
-    ? `${baseUrl}${apiPath}/ask/${conversationId}`
-    : `${baseUrl}${apiPath}/ask`;
-
-
   try {
-    const backendResponse = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: apiKey,
-        Accept: "text/event-stream",
-      },
-      body: JSON.stringify({ message }),
-      cache: "no-store",
+    const stream = await context.client.ai.coach({
+      message,
+      conversationId,
     });
 
-    if (!backendResponse.ok) {
-      return new Response(
-        JSON.stringify({
-          type: "error",
-          content: conversationId
-            ? `Failed to continue conversation (${backendResponse.status})`
-            : `Request failed: ${backendResponse.status}`,
-        }),
-        { status: backendResponse.status, headers: { "Content-Type": "application/json" } }
-      );
-    }
+    // Convert AsyncIterable to ReadableStream with pull-based streaming
+    const responseStream = asyncIterableToStream(stream, conversationId);
 
-    const contentType = backendResponse.headers.get("content-type");
-
-    // If not streaming, handle as regular JSON response
-    if (!contentType?.includes("text/event-stream")) {
-      const data = await backendResponse.json();
-
-      // Return as SSE format for consistency
-      const encoder = new TextEncoder();
-      const stream = new ReadableStream({
-        start(controller) {
-          if (data.mode === "clarification" && data.needs_clarification) {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ type: "clarification", ...data })}\n\n`)
-            );
-          } else if (data.mode === "synthesized") {
-            // Send chunks for text
-            const text = data.answer?.text || "";
-            const chunkSize = 50;
-            for (let i = 0; i < text.length; i += chunkSize) {
-              controller.enqueue(
-                encoder.encode(
-                  `data: ${JSON.stringify({ type: "chunk", content: text.slice(i, i + chunkSize) })}\n\n`
-                )
-              );
-            }
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ type: "complete", ...data })}\n\n`)
-            );
-          } else if (data.error) {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ type: "error", content: data.error })}\n\n`)
-            );
-          }
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-        },
-      });
-
-      return new Response(stream, {
-        headers: {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
-          Connection: "keep-alive",
-        },
-      });
-    }
-
-    // Handle streaming response - transform backend SSE to our format
-    const reader = backendResponse.body?.getReader();
-    if (!reader) {
-      return new Response(
-        JSON.stringify({ type: "error", content: "No response body" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-    let buffer = "";
-    let accumulatedAnswer = "";
-    let citations: AskCitation[] = [];
-    let currentConversationId = conversationId;
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-
-            if (done) {
-              // Flush remaining buffer
-              buffer += decoder.decode();
-              if (buffer.trim()) {
-                processLine(buffer, controller);
-              }
-              break;
-            }
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              const shouldStop = processLine(line, controller);
-              if (shouldStop) {
-                controller.close();
-                return;
-              }
-            }
-          }
-
-          // If we got here without a complete event, send what we have
-          if (accumulatedAnswer) {
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({
-                  type: "complete",
-                  success: true,
-                  mode: "synthesized",
-                  conversation_id: currentConversationId || "",
-                  answer: {
-                    text: accumulatedAnswer,
-                    citations,
-                    confidence: "medium",
-                    model_used: "unknown",
-                  },
-                })}\n\n`
-              )
-            );
-          }
-
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-        } catch (error) {
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({
-                type: "error",
-                content: error instanceof Error ? error.message : "Stream error",
-              })}\n\n`
-            )
-          );
-          controller.close();
-        }
-      },
-    });
-
-    // Helper to process SSE lines from backend
-    const processLine = (
-      line: string,
-      controller: ReadableStreamDefaultController
-    ): boolean => {
-      if (!line.startsWith("data: ")) return false;
-
-      const dataStr = line.slice(6).trim();
-      if (!dataStr || dataStr === "[DONE]") return false;
-
-      try {
-        const data = JSON.parse(dataStr);
-
-        switch (data.type) {
-          case "conversation_created":
-            if (data.id) {
-              currentConversationId = data.id;
-            }
-            break;
-
-          case "token":
-            if (data.content) {
-              accumulatedAnswer += data.content;
-              controller.enqueue(
-                encoder.encode(
-                  `data: ${JSON.stringify({ type: "chunk", content: data.content })}\n\n`
-                )
-              );
-            }
-            break;
-
-          case "answer":
-            if (data.content && !accumulatedAnswer) {
-              accumulatedAnswer = data.content;
-            }
-            if (data.citations) {
-              citations = processCitations(data.citations);
-            }
-            break;
-
-          case "clarification":
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({
-                  type: "clarification",
-                  success: true,
-                  mode: "clarification",
-                  needs_clarification: true,
-                  clarifying_questions: data.questions || [],
-                  missing_dimensions: data.dimensions || [],
-                  conversation_id: data.conversation_id || currentConversationId || "",
-                })}\n\n`
-              )
-            );
-            return true; // Stop processing
-
-          case "complete":
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({
-                  type: "complete",
-                  success: true,
-                  mode: "synthesized",
-                  conversation_id: currentConversationId || "",
-                  answer: {
-                    text: accumulatedAnswer,
-                    citations,
-                    confidence: "medium",
-                    model_used: "unknown",
-                  },
-                })}\n\n`
-              )
-            );
-            return true; // Stop processing
-
-          case "error":
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({
-                  type: "error",
-                  content: data.message || "Stream error",
-                })}\n\n`
-              )
-            );
-            return true; // Stop processing
-        }
-      } catch {
-        // Non-JSON SSE lines (e.g., keep-alive, comments) are expected and safe to ignore
-      }
-      return false;
-    };
-
-    return new Response(stream, {
+    return new Response(responseStream, {
       headers: {
         "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
+        "Cache-Control": "no-cache, no-transform",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
       },
     });
   } catch (error) {

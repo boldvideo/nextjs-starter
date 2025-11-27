@@ -1,8 +1,9 @@
 "use client";
+
 import dynamic from "next/dynamic";
-import { bold } from "@/client";
 import { forwardRef, useEffect, useRef, useState, memo } from "react";
 import type { Video } from "@boldvideo/bold-js";
+import { useBold } from "@/components/providers/bold-provider";
 
 // Import MuxPlayer with SSR disabled to prevent hydration errors
 const MuxPlayer = dynamic(
@@ -62,12 +63,22 @@ const timestampToSeconds = (timestamp: string): number => {
   return 0;
 };
 
+// Define a minimal type that the component actually requires
+export interface MuxPlayerVideoLike {
+  id: string;
+  playback_id: string;
+  title: string;
+  thumbnail?: string;
+  chapters_url?: string;
+  playback_speed?: number;
+}
+
 /**
  * Interface for MuxPlayer component props
  */
 interface MuxPlayerComponentProps {
   /** The video object containing metadata and playback information */
-  video: ExtendedVideo;
+  video: MuxPlayerVideoLike;
   /** Whether to autoplay the video when it loads */
   autoPlay?: boolean;
   /** Callback for time update events */
@@ -99,6 +110,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
   }: MuxPlayerComponentProps,
   ref
 ) {
+  const bold = useBold();
   const playerRef = useRef<MuxPlayerRefElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);

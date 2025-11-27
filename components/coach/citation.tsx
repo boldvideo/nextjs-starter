@@ -1,16 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { X } from "lucide-react";
-import dynamic from "next/dynamic";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
-
-// Import MuxPlayer dynamically to avoid SSR issues
-const MuxPlayer = dynamic(
-  () => import("@mux/mux-player-react").then((mod) => mod.default),
-  { ssr: false }
-);
+import { MuxPlayerComponent } from "@/components/players/player-mux";
+import { citationToMuxVideo } from "@/lib/citation-helpers";
 
 interface CitationModalProps {
   citation: AskCitation | null;
@@ -19,9 +15,6 @@ interface CitationModalProps {
 }
 
 export function CitationModal({ citation, isOpen, onClose }: CitationModalProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer doesn't export proper ref types
-  const playerRef = useRef<any>(null);
-
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -33,18 +26,6 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
     }
   }, [isOpen, onClose]);
 
-  // Set playback time when citation changes
-  useEffect(() => {
-    if (playerRef.current && citation && isOpen) {
-      const startSeconds = citation.start_ms / 1000;
-      playerRef.current.currentTime = startSeconds;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer types not exported
-      playerRef.current.play().catch((err: any) => {
-        console.error("[CitationModal] Autoplay failed:", err);
-      });
-    }
-  }, [citation, isOpen]);
-
   if (!isOpen || !citation) return null;
 
   const formatTime = (ms: number) => {
@@ -53,6 +34,10 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  const startSeconds = citation.start_ms / 1000;
+  const endSeconds = citation.end_ms / 1000;
+  const video = citationToMuxVideo(citation);
 
   return (
     <>
@@ -88,23 +73,17 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
 
         {/* Video Player */}
         <div className="aspect-video bg-black">
-          <MuxPlayer
-            ref={playerRef}
-            playbackId={citation.playback_id}
-            startTime={citation.start_ms / 1000}
-            streamType="on-demand"
-            autoPlay={false}
-            muted={false}
-            style={{ width: "100%", height: "100%" }}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer event types not exported
-            onTimeUpdate={(e: any) => {
-              // Auto-pause at end time
-              if (e.target) {
-                const currentTime = e.target.currentTime;
-                const endSeconds = citation.end_ms / 1000;
-                if (currentTime >= endSeconds) {
-                  e.target.pause();
-                }
+          <MuxPlayerComponent
+            video={video}
+            startTime={startSeconds}
+            autoPlay={true}
+            className="w-full h-full"
+            onTimeUpdate={(e: Event) => {
+              const target = e.target as HTMLVideoElement | null;
+              if (!target) return;
+              // Auto-pause at end time if defined and greater than start time
+              if (endSeconds > startSeconds && target.currentTime >= endSeconds) {
+                target.pause();
               }
             }}
           />
@@ -121,6 +100,17 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
             </p>
           </div>
         )}
+
+        {/* Full video link */}
+        <div className="p-4 border-t bg-muted/30">
+          <Link 
+            href={`/v/${citation.video_id}`}
+            className="inline-flex items-center text-sm font-medium text-primary hover:underline"
+            target="_blank"
+          >
+            Watch full video
+          </Link>
+        </div>
       </div>
     </>
   );
