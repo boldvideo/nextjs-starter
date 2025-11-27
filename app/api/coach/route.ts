@@ -9,11 +9,6 @@ interface CoachRequestBody {
   conversationId?: string;
 }
 
-// Extend Citation type since playback_id is missing in SDK types but present in response
-interface ExtendedCitation extends Citation {
-  playback_id: string;
-}
-
 /**
  * Convert SDK events to SSE format
  */
@@ -58,11 +53,11 @@ function formatSSE(
         answer: {
           text: state.accumulatedAnswer,
           citations: state.citations.map((c) => ({
-            video_id: c.video_id,
-            video_title: c.title,
-            start_ms: c.timestamp_ms,
+            video_id: c.video.internal_id,
+            video_title: c.video.title,
+            start_ms: c.start_ms,
             text: c.text,
-            playback_id: (c as unknown as ExtendedCitation).playback_id || "",
+            playback_id: c.video.playback_id,
           })),
           confidence: "medium",
         },
