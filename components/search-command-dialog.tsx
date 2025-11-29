@@ -471,7 +471,19 @@ export function SearchCommandDialog() {
                 </div>
               )}
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
+                {config.ai.avatar && config.ai.avatar !== '/placeholder-avatar.png' ? (
+                  <div className="w-6 h-6 rounded-full overflow-hidden">
+                    <Image
+                      src={config.ai.avatar}
+                      alt={config.ai.name}
+                      width={24}
+                      height={24}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <Sparkles className="h-5 w-5 text-primary" />
+                )}
                 <span className="font-semibold text-foreground">{config.ai.name}</span>
               </div>
               <div className="ml-auto">
@@ -524,8 +536,18 @@ export function SearchCommandDialog() {
 
                   {/* AI Response */}
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Sparkles className="h-4 w-4 text-primary" />
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
+                      {config.ai.avatar && config.ai.avatar !== '/placeholder-avatar.png' ? (
+                        <Image
+                          src={config.ai.avatar}
+                          alt={config.ai.name}
+                          width={32}
+                          height={32}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Sparkles className="h-4 w-4 text-primary" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       {error ? (
