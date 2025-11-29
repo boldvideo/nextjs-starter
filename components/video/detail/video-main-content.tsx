@@ -99,7 +99,7 @@ export function VideoMainContent({
             <div className="space-y-6 animate-in fade-in slide-in-from-left-1 duration-300">
               <VideoDescription text={video.description || ""} />
               {video.cta && (
-                <div className="rounded-lg border border-border p-6 bg-card">
+                <div className="rounded-lg border border-border p-6 bg-muted">
                   <h2 className="text-lg font-bold mb-2">{video.cta.title}</h2>
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
@@ -152,7 +152,7 @@ export function VideoMainContent({
                   href={attachment.file_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
+                  className="flex items-center gap-3 p-4 rounded-lg border border-border bg-muted hover:bg-accent/50 transition-colors"
                 >
                   <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                     {attachment.mime_type === "application/pdf" ? (

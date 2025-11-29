@@ -12,10 +12,7 @@ import { getPortalConfig } from "@/lib/portal-config";
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
 import SignIn from "@/components/auth/sign-in";
-import type {
-  ExtendedThemeConfig,
-  ExtendedMetaData,
-} from "@/types/bold-extensions";
+import type { ExtendedMetaData } from "@/types/bold-extensions";
 
 // Force dynamic rendering — tenant depends on hostname in hosted mode
 export const dynamic = "force-dynamic";
@@ -117,7 +114,7 @@ export default async function RootLayout({
   // Get auth session if auth is enabled
   const session = isAuthEnabled() ? await auth() : null;
 
-  const theme = settings?.theme_config as ExtendedThemeConfig | undefined;
+  const theme = settings?.theme_config;
 
   // Get portal configuration to determine if we should show header
   const config = getPortalConfig(settings);
@@ -136,132 +133,26 @@ export default async function RootLayout({
               __html: `
               :root {
                 --radius: ${theme.radius || "0.5rem"};
-
-                --background: ${theme.light.background || "hsl(0 0% 100%)"};
-                --foreground: ${
-                  theme.light.foreground || "hsl(222.2 84% 4.9%)"
-                };
-                --card: ${theme.light.card || "hsl(0 0% 100%)"};
-                --popover: ${theme.light.popover || "hsl(0 0% 100%)"};
-                --card-foreground: ${
-                  theme.light["card-foreground"] || "hsl(222.2 84% 4.9%)"
-                };
-                --popover-foreground: ${
-                  theme.light["popover-foreground"] || "hsl(222.2 84% 4.9%)"
-                };
-                --primary: ${theme.light.primary || "hsl(222.2 47.4% 11.2%)"};
-                --primary-foreground: ${
-                  theme.light["primary-foreground"] || "hsl(210 40% 98%)"
-                };
-                --secondary: ${theme.light.secondary || "hsl(210 40% 96.1%)"};
-                --secondary-foreground: ${
-                  theme.light["secondary-foreground"] || "hsl(222.2 47.4% 11.2%)"
-                };
-                --muted: ${theme.light.muted || "hsl(210 40% 96.1%)"};
-                --muted-foreground: ${
-                  theme.light["muted-foreground"] || "hsl(215.4 16.3% 46.9%)"
-                };
-                --accent: ${theme.light.accent || "hsl(210 40% 96.1%)"};
-                --accent-foreground: ${
-                  theme.light["accent-foreground"] || "hsl(222.2 47.4% 11.2%)"
-                };
-                --destructive: ${
-                  theme.light.destructive || "hsl(0 84.2% 60.2%)"
-                };
-                --destructive-foreground: ${
-                  theme.light["destructive-foreground"] || "hsl(0 0% 100%)"
-                };
-                --border: ${theme.light.border || "hsl(214.3 31.8% 91.4%)"};
-                --input: ${theme.light.input || "hsl(214.3 31.8% 91.4%)"};
-                --ring: ${theme.light.ring || "hsl(222.2 84% 4.9%)"};
-                --sidebar: ${theme.light.sidebar || "hsl(0 0% 100%)"};
-                --sidebar-foreground: ${
-                  theme.light["sidebar-foreground"] || "hsl(222.2 84% 4.9%)"
-                };
-                --sidebar-primary: ${
-                  theme.light["sidebar-primary"] || "hsl(222.2 47.4% 11.2%)"
-                };
-                --sidebar-primary-foreground: ${
-                  theme.light["sidebar-primary-foreground"] || "hsl(210 40% 98%)"
-                };
-                --sidebar-accent: ${
-                  theme.light["sidebar-accent"] || "hsl(210 40% 96.1%)"
-                };
-                --sidebar-accent-foreground: ${
-                  theme.light["sidebar-accent-foreground"] ||
-                  "hsl(222.2 47.4% 11.2%)"
-                };
-                --sidebar-border: ${
-                  theme.light["sidebar-border"] || "hsl(214.3 31.8% 91.4%)"
-                };
-                --sidebar-ring: ${
-                  theme.light["sidebar-ring"] || "hsl(222.2 84% 4.9%)"
-                };
+                --background: ${theme.light?.background || ""};
+                --foreground: ${theme.light?.foreground || ""};
+                --muted: ${theme.light?.muted || ""};
+                --muted-foreground: ${theme.light?.["muted-foreground"] || ""};
+                --border: ${theme.light?.border || ""};
+                --ring: ${theme.light?.ring || ""};
+                --surface: ${theme.light?.surface || ""};
+                --accent: ${theme.light?.accent || ""};
+                --accent-foreground: ${theme.light?.["accent-foreground"] || ""};
               }
-
               .dark {
-                 --background: ${
-                   theme.dark.background || "hsl(222.2 84% 4.9%)"
-                 };
-                --foreground: ${theme.dark.foreground || "hsl(210 40% 98%)"};
-                --card: ${theme.dark.card || "hsl(222.2 84% 4.9%)"};
-                --card-foreground: ${
-                  theme.dark["card-foreground"] || "hsl(210 40% 98%)"
-                };
-                --popover: ${theme.dark.popover || "hsl(222.2 84% 4.9%)"};
-                --popover-foreground: ${
-                  theme.dark["popover-foreground"] || "hsl(210 40% 98%)"
-                };
-                --primary: ${theme.dark.primary || "hsl(210 40% 98%)"};
-                --primary-foreground: ${
-                  theme.dark["primary-foreground"] || "hsl(222.2 47.4% 11.2%)"
-                };
-                --secondary: ${
-                  theme.dark.secondary || "hsl(217.2 32.6% 17.5%)"
-                };
-                --secondary-foreground: ${
-                  theme.dark["secondary-foreground"] || "hsl(210 40% 98%)"
-                };
-                --muted: ${theme.dark.muted || "hsl(217.2 32.6% 17.5%)"};
-                --muted-foreground: ${
-                  theme.dark["muted-foreground"] || "hsl(215 20.2% 65.1%)"
-                };
-                --accent: ${theme.dark.accent || "hsl(217.2 32.6% 17.5%)"};
-                --accent-foreground: ${
-                  theme.dark["accent-foreground"] || "hsl(210 40% 98%)"
-                };
-                --destructive: ${
-                  theme.dark.destructive || "hsl(0 62.8% 30.6%)"
-                };
-                --destructive-foreground: ${
-                  theme.dark["destructive-foreground"] || "hsl(0 0% 100%)"
-                };
-                --border: ${theme.dark.border || "hsl(217.2 32.6% 17.5%)"};
-                --input: ${theme.dark.input || "hsl(217.2 32.6% 17.5%)"};
-                --ring: ${theme.dark.ring || "hsl(212.7 26.8% 83.9%)"};
-                --sidebar: ${theme.dark.sidebar || "hsl(222.2 84% 4.9%)"};
-                --sidebar-foreground: ${
-                  theme.dark["sidebar-foreground"] || "hsl(210 40% 98%)"
-                };
-                --sidebar-primary: ${
-                  theme.dark["sidebar-primary"] || "hsl(210 40% 98%)"
-                };
-                --sidebar-primary-foreground: ${
-                  theme.dark["sidebar-primary-foreground"] ||
-                  "hsl(222.2 47.4% 11.2%)"
-                };
-                --sidebar-accent: ${
-                  theme.dark["sidebar-accent"] || "hsl(217.2 32.6% 17.5%)"
-                };
-                --sidebar-accent-foreground: ${
-                  theme.dark["sidebar-accent-foreground"] || "hsl(210 40% 98%)"
-                };
-                --sidebar-border: ${
-                  theme.dark["sidebar-border"] || "hsl(217.2 32.6% 17.5%)"
-                };
-                --sidebar-ring: ${
-                  theme.dark["sidebar-ring"] || "hsl(212.7 26.8% 83.9%)"
-                };
+                --background: ${theme.dark?.background || ""};
+                --foreground: ${theme.dark?.foreground || ""};
+                --muted: ${theme.dark?.muted || ""};
+                --muted-foreground: ${theme.dark?.["muted-foreground"] || ""};
+                --border: ${theme.dark?.border || ""};
+                --ring: ${theme.dark?.ring || ""};
+                --surface: ${theme.dark?.surface || ""};
+                --accent: ${theme.dark?.accent || ""};
+                --accent-foreground: ${theme.dark?.["accent-foreground"] || ""};
               }
             `,
             }}

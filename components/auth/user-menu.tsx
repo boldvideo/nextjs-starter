@@ -60,7 +60,7 @@ export default function UserMenu({ session }: UserMenuProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-popover border border-border animate-in fade-in-0 zoom-in-95">
+        <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-muted border border-border animate-in fade-in-0 zoom-in-95">
           <div className="p-2">
             {/* User Info */}
             <div className="px-3 py-2 border-b border-border">

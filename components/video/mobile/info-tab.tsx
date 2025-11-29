@@ -90,7 +90,7 @@ export default function InfoTab({
             
             {/* CTA if exists */}
             {video.cta && (
-              <div className="rounded-lg border border-border p-4 bg-card text-sm">
+              <div className="rounded-lg border border-border p-4 bg-muted text-sm">
                 <h2 className="font-bold mb-2">{video.cta.title}</h2>
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
@@ -145,7 +145,7 @@ export default function InfoTab({
                 href={attachment.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted hover:bg-accent/50 transition-colors"
               >
                 <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                   {attachment.mime_type === "application/pdf" ? (

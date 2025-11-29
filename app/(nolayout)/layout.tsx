@@ -1,7 +1,6 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { BoldProvider } from "@/components/providers/bold-provider";
 import "./globals.css";
-import type { ExtendedThemeConfig } from "@/types/bold-extensions";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +15,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const context = await getTenantContext();
-  let theme: ExtendedThemeConfig | undefined;
-
-  if (context?.settings) {
-    theme = context.settings.theme_config as ExtendedThemeConfig | undefined;
-  }
+  const theme = context?.settings?.theme_config;
 
   return (
     <html lang="en">
@@ -31,64 +26,26 @@ export default async function RootLayout({
               __html: `
               :root {
                 --radius: ${theme.radius || "0.5rem"};
-
-                --background: ${theme.light.background};
-                --foreground: ${theme.light.foreground};
-                --card: ${theme.light.card};
-                --popover: ${theme.light.popover};
-                --card-foreground: ${theme.light["card-foreground"]};
-                --popover-foreground: ${theme.light["popover-foreground"]};
-                --primary: ${theme.light.primary};
-                --primary-foreground: ${theme.light["primary-foreground"]};
-                --secondary: ${theme.light.secondary};
-                --secondary-foreground: ${theme.light["secondary-foreground"]};
-                --muted: ${theme.light.muted || "hsl(210 40% 96.1%)"};
-                --muted-foreground: ${theme.light["muted-foreground"] || "hsl(215.4 16.3% 46.9%)"};
-                --accent: ${theme.light.accent || theme.light.muted || "hsl(210 40% 96.1%)"};
-                --accent-foreground: ${theme.light["accent-foreground"] || theme.light.foreground};
-                --destructive-foreground: ${theme.light["destructive-foreground"]};
-                --destructive: ${theme.light.destructive};
-                --border: ${theme.light.border};
-                --input: ${theme.light.input};
-                --ring: ${theme.light.ring};
-                --sidebar: ${theme.light.sidebar || theme.light.background};
-                --sidebar-foreground: ${theme.light["sidebar-foreground"] || theme.light.foreground};
-                --sidebar-primary: ${theme.light["sidebar-primary"] || theme.light.primary};
-                --sidebar-primary-foreground: ${theme.light["sidebar-primary-foreground"] || theme.light["primary-foreground"]};
-                --sidebar-accent: ${theme.light["sidebar-accent"] || theme.light.muted || "hsl(210 40% 96.1%)"};
-                --sidebar-accent-foreground: ${theme.light["sidebar-accent-foreground"] || theme.light.foreground};
-                --sidebar-border: ${theme.light["sidebar-border"] || theme.light.border};
-                --sidebar-ring: ${theme.light["sidebar-ring"] || theme.light.ring};
+                --background: ${theme.light?.background || ""};
+                --foreground: ${theme.light?.foreground || ""};
+                --muted: ${theme.light?.muted || ""};
+                --muted-foreground: ${theme.light?.["muted-foreground"] || ""};
+                --border: ${theme.light?.border || ""};
+                --ring: ${theme.light?.ring || ""};
+                --surface: ${theme.light?.surface || ""};
+                --accent: ${theme.light?.accent || ""};
+                --accent-foreground: ${theme.light?.["accent-foreground"] || ""};
               }
-
               .dark {
-                --background: ${theme.dark.background};
-                --foreground: ${theme.dark.foreground};
-                --card: ${theme.dark.card};
-                --card-foreground: ${theme.dark["card-foreground"]};
-                --popover: ${theme.dark.popover};
-                --popover-foreground: ${theme.dark["popover-foreground"]};
-                --primary: ${theme.dark.primary};
-                --primary-foreground: ${theme.dark["primary-foreground"]};
-                --secondary: ${theme.dark.secondary};
-                --secondary-foreground: ${theme.dark["secondary-foreground"]};
-                --muted: ${theme.dark.muted || "hsl(217.2 32.6% 17.5%)"};
-                --muted-foreground: ${theme.dark["muted-foreground"] || "hsl(215 20.2% 65.1%)"};
-                --accent: ${theme.dark.accent || theme.dark.muted || "hsl(217.2 32.6% 17.5%)"};
-                --accent-foreground: ${theme.dark["accent-foreground"] || theme.dark.foreground};
-                --destructive-foreground: ${theme.dark["destructive-foreground"]};
-                --destructive: ${theme.dark.destructive};
-                --border: ${theme.dark.border};
-                --input: ${theme.dark.input};
-                --ring: ${theme.dark.ring};
-                --sidebar: ${theme.dark.sidebar || theme.dark.background};
-                --sidebar-foreground: ${theme.dark["sidebar-foreground"] || theme.dark.foreground};
-                --sidebar-primary: ${theme.dark["sidebar-primary"] || theme.dark.primary};
-                --sidebar-primary-foreground: ${theme.dark["sidebar-primary-foreground"] || theme.dark["primary-foreground"]};
-                --sidebar-accent: ${theme.dark["sidebar-accent"] || theme.dark.muted || "hsl(217.2 32.6% 17.5%)"};
-                --sidebar-accent-foreground: ${theme.dark["sidebar-accent-foreground"] || theme.dark.foreground};
-                --sidebar-border: ${theme.dark["sidebar-border"] || theme.dark.border};
-                --sidebar-ring: ${theme.dark["sidebar-ring"] || theme.dark.ring};
+                --background: ${theme.dark?.background || ""};
+                --foreground: ${theme.dark?.foreground || ""};
+                --muted: ${theme.dark?.muted || ""};
+                --muted-foreground: ${theme.dark?.["muted-foreground"] || ""};
+                --border: ${theme.dark?.border || ""};
+                --ring: ${theme.dark?.ring || ""};
+                --surface: ${theme.dark?.surface || ""};
+                --accent: ${theme.dark?.accent || ""};
+                --accent-foreground: ${theme.dark?.["accent-foreground"] || ""};
               }
             `,
             }}
