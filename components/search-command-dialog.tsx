@@ -321,8 +321,11 @@ export function SearchCommandDialog() {
               });
               break;
           }
-        } catch {
-          // Skip malformed JSON - this is expected for partial chunks
+        } catch (err) {
+          // Malformed JSON is expected for partial SSE chunks, but log other errors in dev
+          if (process.env.NODE_ENV === "development" && !(err instanceof SyntaxError)) {
+            console.warn("[AI Search] Unexpected error parsing SSE:", err);
+          }
         }
       };
 
@@ -395,7 +398,8 @@ export function SearchCommandDialog() {
 
   const hasAIContent = aiResponse || aiSources.length > 0 || isStreaming || submittedQuery;
 
-  // Pick 4 random conversation starters (memoized per dialog open)
+  // Pick 4 random conversation starters when dialog opens in ask mode
+  // We only want this to run once when the dialog opens, not on every render
   const [randomStarters, setRandomStarters] = useState<string[]>([]);
   useEffect(() => {
     if (isOpen && mode === "ask" && !hasAIContent) {
@@ -412,7 +416,8 @@ export function SearchCommandDialog() {
         setRandomStarters(shuffled.slice(0, 4));
       }
     }
-  }, [isOpen, mode, hasAIContent, config.ai.conversationStarters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- config.ai.conversationStarters is stable from API, but creates new array reference each render. We only want to pick starters once when dialog opens.
+  }, [isOpen, mode, hasAIContent]);
 
   if (!mounted) return null;
 
