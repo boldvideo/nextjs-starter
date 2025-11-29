@@ -11,6 +11,7 @@ export interface PortalConfig {
     avatar: string;
     greeting: string;
     showInHeader: boolean;
+    conversationStarters: string[];
   };
   homepage: {
     layout: 'none' | 'library' | 'assistant';
@@ -86,7 +87,8 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
         name: 'AI Assistant',
         avatar: '/placeholder-avatar.png',
         greeting: 'Hello! How can I help you today?',
-        showInHeader: false
+        showInHeader: false,
+        conversationStarters: []
       },
       homepage: {
         layout: 'library',
@@ -117,21 +119,47 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
 
   // Determine AI configuration (with backward compatibility for legacy fields)
   const aiEnabled = settings.account?.ai?.enabled ?? settings.has_ai ?? false;
-  const aiName = settings.account?.ai?.name ?? settings.ai_name ?? 'AI Assistant';
   const aiAvatarRaw = settings.account?.ai?.avatar_url ?? settings.ai_avatar;
   const aiAvatar = ensureAbsoluteUrl(aiAvatarRaw);
-  const aiGreeting = settings.account?.ai?.greeting ?? settings.ai_greeting ?? 'Hello! How can I help you today?';
+
+  // New AI Search visibility check (replaces show_ai_search from portal.navigation)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const aiSearchEnabled = (settings.account as any)?.ai_search?.enabled ??
+                          settings.portal?.navigation?.show_ai_search ??
+                          false;
+
+  // Persona configuration (new in bold-js 1.0.1)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const persona = (settings.account as any)?.persona;
+  const personaEnabled = persona?.enabled === true;
+
+  // Override AI name/greeting from persona if enabled, with fallbacks
+  const legacyAiName = settings.account?.ai?.name ?? settings.ai_name ?? 'AI Assistant';
+  const legacyAiGreeting = settings.account?.ai?.greeting ?? settings.ai_greeting ?? 'Hello! How can I help you today?';
+  
+  const aiName = personaEnabled && persona.name ? persona.name : legacyAiName;
+  const aiGreeting = personaEnabled && persona.greeting ? persona.greeting : legacyAiGreeting;
+  
+  // Conversation starters: persona first, then assistant_config, then defaults
+  const defaultStarters = [
+    'How can I improve my product?',
+    'What are best practices for scaling?',
+    'How do I manage my team better?'
+  ];
+  const conversationStarters = personaEnabled && persona.conversation_starters?.length > 0
+    ? persona.conversation_starters
+    : settings.portal?.layout?.assistant_config?.suggestions ?? defaultStarters;
 
   // Determine homepage layout
   const homepageLayout = (layoutOverride ?? settings.portal?.layout?.type ?? 'library') as 'none' | 'library' | 'assistant';
 
   // Smart derivation: Show AI toggle in header if:
   // 1. AI is enabled
-  // 2. AI is NOT the primary homepage (to avoid duplication)
-  // 3. Portal settings allow it
+  // 2. AI search is enabled
+  // 3. AI is NOT the primary homepage (to avoid duplication)
   const showAiInHeader = aiEnabled &&
-                         homepageLayout !== 'assistant' &&
-                         (settings.portal?.navigation?.show_ai_search ?? false);
+                         aiSearchEnabled &&
+                         homepageLayout !== 'assistant';
 
   // Smart header visibility:
   // 1. Use explicit show_header setting from API (SDK 0.6.0+)
@@ -149,7 +177,8 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
       name: aiName,
       avatar: aiAvatar,
       greeting: aiGreeting,
-      showInHeader: showAiInHeader
+      showInHeader: showAiInHeader,
+      conversationStarters: conversationStarters
     },
     homepage: {
       layout: homepageLayout,

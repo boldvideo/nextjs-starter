@@ -3,6 +3,7 @@
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { SearchBar } from "./search-bar";
+import { AskAiButton } from "./ask-ai-button";
 
 interface HeaderSearchProps {
   className?: string;
@@ -12,15 +13,16 @@ export function HeaderSearch({ className }: HeaderSearchProps) {
   const settings = useSettings();
   const config = getPortalConfig(settings);
 
-  // Don't render if search is disabled
   if (!config.navigation.showSearch) {
     return null;
   }
 
   return (
-    <SearchBar
-      className={className}
-      showAiToggle={config.navigation.showAiToggle}
-    />
+    <div className="flex items-center gap-4">
+      {config.ai.showInHeader && (
+        <AskAiButton personaName={config.ai.name} />
+      )}
+      <SearchBar className={className} />
+    </div>
   );
 }

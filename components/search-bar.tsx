@@ -9,7 +9,6 @@ interface SearchBarProps {
   placeholder?: string;
   isMobile?: boolean;
   autoFocus?: boolean;
-  showAiToggle?: boolean;
 }
 
 export function SearchBar({

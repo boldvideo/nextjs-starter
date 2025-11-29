@@ -100,10 +100,7 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
               {config.navigation.showSearch && (
                 <div className="px-4 pb-4">
                   <Suspense>
-                    <SearchBar
-                      isMobile
-                      showAiToggle={config.navigation.showAiToggle}
-                    />
+                    <SearchBar isMobile />
                   </Suspense>
                 </div>
               )}

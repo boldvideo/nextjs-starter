@@ -36,7 +36,7 @@
     "typescript": "5.9.3"
   },
   "devDependencies": {
-    "@boldvideo/bold-js": "^1.0.0",
+    "@boldvideo/bold-js": "^1.0.1",
     "@changesets/cli": "^2.29.6",
     "@eslint/eslintrc": "^3.3.1",
     "@next/eslint-plugin-next": "^16.0.4",

@@ -134,4 +134,17 @@
   .animate-pulse-once {
     animation: pulse-once 1s cubic-bezier(0.4, 0, 0.6, 1) 2;
   }
+  
+  @keyframes shimmer-text {
+    0% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  .animate-shimmer-text {
+    animation: shimmer-text 3s ease-in-out infinite;
+  }
 }
