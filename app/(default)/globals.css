@@ -46,32 +46,32 @@
 :root {
   --radius: 0.625rem;
   --header-height: 73px;
-  /* Core 9 tokens */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --border: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --surface: oklch(0.985 0 0);
-  --accent: oklch(0.78 0.11 175);
-  --accent-foreground: oklch(0.26 0.04 183);
+  /* Core 9 tokens - Bold brand defaults */
+  --background: oklch(0.98 0.02 95);
+  --foreground: oklch(0.22 0.04 175);
+  --muted: oklch(0.96 0.01 95);
+  --muted-foreground: oklch(0.45 0.03 175);
+  --border: oklch(0.90 0.02 95);
+  --ring: oklch(0.73 0.12 175);
+  --surface: oklch(0.99 0.01 95);
+  --accent: oklch(0.73 0.12 175);
+  --accent-foreground: oklch(0.22 0.04 175);
   /* Derived tokens */
   --input: var(--border);
   --destructive: oklch(0.577 0.245 27.325);
 }
 
 .dark {
-  /* Core 9 tokens */
-  --background: oklch(0.21 0.01 286);
-  --foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --ring: oklch(0.556 0 0);
-  --surface: oklch(0.17 0 286);
-  --accent: oklch(0.78 0.11 175);
-  --accent-foreground: oklch(0.26 0.04 183);
+  /* Core 9 tokens - Bold brand defaults */
+  --background: oklch(0.18 0.02 175);
+  --foreground: oklch(0.96 0.01 95);
+  --muted: oklch(0.25 0.02 175);
+  --muted-foreground: oklch(0.65 0.03 175);
+  --border: oklch(0.30 0.02 175);
+  --ring: oklch(0.73 0.12 175);
+  --surface: oklch(0.22 0.02 175);
+  --accent: oklch(0.73 0.12 175);
+  --accent-foreground: oklch(0.18 0.02 175);
   /* Derived tokens */
   --input: oklch(1 0 0 / 15%);
   --destructive: oklch(0.704 0.191 22.216);
