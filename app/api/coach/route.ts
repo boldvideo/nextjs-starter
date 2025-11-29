@@ -1,5 +1,5 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
-import type { Citation, CoachEvent } from "@boldvideo/bold-js";
+import type { AIEvent, Source } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -13,25 +13,20 @@ interface CoachRequestBody {
  * Convert SDK events to SSE format
  */
 function formatSSE(
-  event: CoachEvent,
-  state: { accumulatedAnswer: string; citations: Citation[]; conversationId?: string }
+  event: AIEvent,
+  state: { accumulatedAnswer: string; sources: Source[]; conversationId?: string }
 ): string | null {
   switch (event.type) {
-    case "conversation_created":
+    case "message_start":
       state.conversationId = event.id;
       return null;
 
-    case "token":
-      state.accumulatedAnswer += event.content;
-      return JSON.stringify({ type: "chunk", content: event.content });
+    case "text_delta":
+      state.accumulatedAnswer += event.delta;
+      return JSON.stringify({ type: "chunk", content: event.delta });
 
-    case "answer":
-      if (event.content && !state.accumulatedAnswer) {
-        state.accumulatedAnswer = event.content;
-      }
-      if (event.citations) {
-        state.citations = event.citations;
-      }
+    case "sources":
+      state.sources = event.sources;
       return null;
 
     case "clarification":
@@ -44,20 +39,20 @@ function formatSSE(
         conversation_id: state.conversationId || "",
       });
 
-    case "complete":
+    case "message_complete":
       return JSON.stringify({
         type: "complete",
         success: true,
         mode: "synthesized",
         conversation_id: state.conversationId || "",
         answer: {
-          text: state.accumulatedAnswer,
-          citations: state.citations.map((c) => ({
-            video_id: c.video.internal_id,
-            video_title: c.video.title,
-            start_ms: c.start_ms,
-            text: c.text,
-            playback_id: c.video.playback_id,
+          text: event.content || state.accumulatedAnswer,
+          citations: (event.sources || state.sources).map((s) => ({
+            video_id: s.video_id,
+            video_title: s.title,
+            start_ms: s.timestamp * 1000, // Convert seconds to milliseconds
+            text: s.text,
+            playback_id: s.playback_id,
           })),
           confidence: "medium",
         },
@@ -78,13 +73,13 @@ function formatSSE(
  * Create a ReadableStream from an AsyncIterable that streams immediately
  */
 function asyncIterableToStream(
-  iterable: AsyncIterable<CoachEvent>,
+  iterable: AsyncIterable<AIEvent>,
   conversationId?: string
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   const state = {
     accumulatedAnswer: "",
-    citations: [] as Citation[],
+    sources: [] as Source[],
     conversationId,
   };
 
@@ -154,12 +149,12 @@ export async function POST(request: Request) {
 
   try {
     const stream = await context.client.ai.coach({
-      message,
+      prompt: message,
       conversationId,
     });
 
     // Convert AsyncIterable to ReadableStream with pull-based streaming
-    const responseStream = asyncIterableToStream(stream, conversationId);
+    const responseStream = asyncIterableToStream(stream as AsyncIterable<AIEvent>, conversationId);
 
     return new Response(responseStream, {
       headers: {

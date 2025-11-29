@@ -1,7 +1,7 @@
 "use server";
 
 import { getTenantContext } from "@/lib/get-tenant-context";
-import type { Citation } from "@boldvideo/bold-js";
+import type { AIEvent, Source } from "@boldvideo/bold-js";
 
 export type Message = {
   role: "user" | "assistant";
@@ -25,52 +25,47 @@ export async function streamAIQuestion(
   }
 
   try {
-    // Use SDK's ai.ask() for streaming
-    const stream = await context.client.ai.ask(videoId, {
-      message: question,
-    });
+    // Use SDK's ai.chat() for video-scoped streaming
+    const stream = await context.client.ai.chat(videoId, {
+      prompt: question,
+    }) as AsyncIterable<AIEvent>;
 
     // Transform SDK's AsyncIterable to SSE Response
     const encoder = new TextEncoder();
     let accumulatedAnswer = "";
-    let citations: Citation[] = [];
+    let sources: Source[] = [];
 
     const responseStream = new ReadableStream({
       async start(controller) {
         try {
           for await (const event of stream) {
             switch (event.type) {
-              case "token":
-                accumulatedAnswer += event.content;
+              case "text_delta":
+                accumulatedAnswer += event.delta;
                 controller.enqueue(
                   encoder.encode(
-                    `data: ${JSON.stringify({ type: "chunk", content: event.content })}\n\n`
+                    `data: ${JSON.stringify({ type: "chunk", content: event.delta })}\n\n`
                   )
                 );
                 break;
 
-              case "answer":
-                if (event.content && !accumulatedAnswer) {
-                  accumulatedAnswer = event.content;
-                }
-                if (event.citations) {
-                  citations = event.citations;
-                }
+              case "sources":
+                sources = event.sources;
                 break;
 
-              case "complete":
+              case "message_complete":
                 controller.enqueue(
                   encoder.encode(
                     `data: ${JSON.stringify({
                       type: "complete",
                       success: true,
                       answer: {
-                        text: accumulatedAnswer,
-                        citations: citations.map((c) => ({
-                          video_id: c.video.internal_id,
-                          title: c.video.title,
-                          timestamp: Math.floor(c.start_ms / 1000),
-                          text: c.text,
+                        text: event.content || accumulatedAnswer,
+                        citations: (event.sources || sources).map((s) => ({
+                          video_id: s.video_id,
+                          title: s.title,
+                          timestamp: s.timestamp,
+                          text: s.text,
                         })),
                       },
                     })}\n\n`

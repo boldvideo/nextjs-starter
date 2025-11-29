@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   Search,
@@ -11,13 +11,27 @@ import {
   Play,
   ChevronDown,
   ChevronUp,
+  Send,
+  Square,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearch } from "@/components/providers/search-provider";
+import { useSettings } from "@/components/providers/settings-provider";
+import { getPortalConfig } from "@/lib/portal-config";
 import { cn } from "@/lib/utils";
 import { SearchHit } from "@/lib/search";
+
+interface AISource {
+  video_id: string;
+  title: string;
+  timestamp: number;
+  timestamp_end?: number;
+  text: string;
+  playback_id?: string;
+  speaker?: string;
+}
 
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -44,9 +58,53 @@ function parseHighlightedText(text: string) {
   });
 }
 
+// Render response text with inline source buttons
+function renderResponseWithCitations(
+  text: string,
+  sources: AISource[],
+  onSourceClick: (source: AISource) => void
+) {
+  if (!sources.length) {
+    return <span>{text}</span>;
+  }
+
+  // Look for citation patterns like [1], [2], etc.
+  const citationRegex = /\[(\d+)\]/g;
+  const parts = text.split(citationRegex);
+
+  return (
+    <>
+      {parts.map((part, index) => {
+        // Every odd index is a citation number
+        if (index % 2 === 1) {
+          const sourceIndex = parseInt(part, 10) - 1;
+          const source = sources[sourceIndex];
+          if (source) {
+            return (
+              <button
+                key={index}
+                onClick={() => onSourceClick(source)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 bg-muted hover:bg-muted/80 rounded-full text-[11px] font-medium text-foreground border border-border hover:border-primary/30 transition-colors align-middle cursor-pointer"
+              >
+                <Play className="h-2.5 w-2.5 fill-current text-primary" />
+                <span className="truncate max-w-[100px]">{source.title}</span>
+                <span className="text-muted-foreground">{formatTime(source.timestamp)}</span>
+              </button>
+            );
+          }
+          return <span key={index}>[{part}]</span>;
+        }
+        return <span key={index}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 export function SearchCommandDialog() {
   const router = useRouter();
-  const { isOpen, setIsOpen, mode } = useSearch();
+  const settings = useSettings();
+  const config = getPortalConfig(settings);
+  const { isOpen, setIsOpen, mode, setMode } = useSearch();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,15 +116,37 @@ export function SearchCommandDialog() {
     {}
   );
 
+  // AI streaming state
+  const [aiResponse, setAiResponse] = useState("");
+  const [aiSources, setAiSources] = useState<AISource[]>([]);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const responseAreaRef = useRef<HTMLDivElement>(null);
+
   // Handle mounting for portal
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Reset AI state when mode changes or dialog closes
+  useEffect(() => {
+    if (!isOpen || mode === "search") {
+      setAiResponse("");
+      setAiSources([]);
+      setSubmittedQuery("");
+      setIsStreaming(false);
+      setError(undefined);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    }
+  }, [isOpen, mode]);
+
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
-      // Slightly longer delay to ensure render and transition
       const timer = setTimeout(() => {
         if (mode === "ask") {
           textareaRef.current?.focus();
@@ -75,13 +155,11 @@ export function SearchCommandDialog() {
         }
       }, 50);
 
-      // Lock body scroll
       document.body.style.overflow = "hidden";
       return () => clearTimeout(timer);
     } else {
       setQuery("");
       setResults([]);
-      // Unlock body scroll - remove inline style to let CSS classes take over
       document.body.style.removeProperty("overflow");
     }
     return () => {
@@ -89,7 +167,14 @@ export function SearchCommandDialog() {
     };
   }, [isOpen, mode]);
 
-  // Search logic
+  // Auto-scroll response area during streaming
+  useEffect(() => {
+    if (isStreaming && responseAreaRef.current) {
+      responseAreaRef.current.scrollTop = responseAreaRef.current.scrollHeight;
+    }
+  }, [aiResponse, isStreaming]);
+
+  // Search logic (only for search mode)
   useEffect(() => {
     if (!query.trim() || mode === "ask") {
       setResults([]);
@@ -121,12 +206,15 @@ export function SearchCommandDialog() {
       } finally {
         setIsLoading(false);
       }
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [query, mode]);
 
   const handleClose = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     setIsOpen(false);
   };
 
@@ -144,16 +232,153 @@ export function SearchCommandDialog() {
       : hit.segments.slice(0, 2);
   };
 
+  const stopStreaming = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsStreaming(false);
+    }
+  }, []);
+
+  const handleSourceClick = useCallback((source: AISource) => {
+    router.push(`/v/${source.video_id}?t=${Math.floor(source.timestamp)}`);
+    handleClose();
+  }, [router]);
+
+  const streamAISearch = useCallback(async (prompt: string) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+    setIsStreaming(true);
+    setAiResponse("");
+    setAiSources([]);
+    setSubmittedQuery(prompt);
+    setError(undefined);
+
+    try {
+      const response = await fetch("/api/ai-search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+        },
+        body: JSON.stringify({ prompt, limit: 5 }),
+        signal: abortControllerRef.current.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      const processLine = (line: string) => {
+        if (!line.startsWith("data: ")) return;
+
+        const dataStr = line.slice(6).trim();
+        if (!dataStr || dataStr === "[DONE]") return;
+
+        try {
+          const event = JSON.parse(dataStr);
+
+          switch (event.type) {
+            case "text_delta":
+              setAiResponse((prev) => prev + event.delta);
+              break;
+
+            case "sources":
+              setAiSources(event.sources || []);
+              break;
+
+            case "message_complete":
+              // Update sources from complete message if available
+              if (event.sources && event.sources.length > 0) {
+                setAiSources(event.sources);
+              }
+              // Note: We don't update aiResponse here since we accumulated it via text_delta
+              break;
+
+            case "error":
+              // Only set error if we don't already have a response
+              // Some backends send error events after successful completion
+              setAiResponse((currentResponse) => {
+                if (!currentResponse) {
+                  // No response yet, this is a real error
+                  setError(event.message || "An error occurred");
+                } else {
+                  // We already have content, log but ignore the error
+                  console.warn("[AI Search] Ignoring error after content received:", event.message);
+                }
+                return currentResponse;
+              });
+              break;
+          }
+        } catch (err) {
+          // Malformed JSON is expected for partial SSE chunks, but log other errors in dev
+          if (process.env.NODE_ENV === "development" && !(err instanceof SyntaxError)) {
+            console.warn("[AI Search] Unexpected error parsing SSE:", err);
+          }
+        }
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          // Process any remaining buffer
+          if (buffer.trim()) {
+            const remainingLines = buffer.split("\n");
+            for (const line of remainingLines) {
+              processLine(line);
+            }
+          }
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          processLine(line);
+        }
+      }
+
+      reader.releaseLock();
+    } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") {
+        return;
+      }
+      setError(err instanceof Error ? err.message : "Failed to get response");
+    } finally {
+      setIsStreaming(false);
+      abortControllerRef.current = null;
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
     if (mode === "ask") {
-      router.push(`/coach?c=${encodeURIComponent(query)}`);
+      streamAISearch(query);
+      setQuery("");
     } else {
       router.push(`/s?q=${encodeURIComponent(query)}`);
+      handleClose();
     }
-    handleClose();
+  };
+
+  const handleStarterClick = (starter: string) => {
+    streamAISearch(starter);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -171,12 +396,35 @@ export function SearchCommandDialog() {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   };
 
+  const hasAIContent = aiResponse || aiSources.length > 0 || isStreaming || submittedQuery;
+
+  // Pick 4 random conversation starters when dialog opens in ask mode
+  // We only want this to run once when the dialog opens, not on every render
+  const [randomStarters, setRandomStarters] = useState<string[]>([]);
+  useEffect(() => {
+    if (isOpen && mode === "ask" && !hasAIContent) {
+      const starters = config.ai.conversationStarters;
+      if (starters.length <= 4) {
+        setRandomStarters(starters);
+      } else {
+        // Fisher-Yates shuffle and take first 4
+        const shuffled = [...starters];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setRandomStarters(shuffled.slice(0, 4));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- config.ai.conversationStarters is stable from API, but creates new array reference each render. We only want to pick starters once when dialog opens.
+  }, [isOpen, mode, hasAIContent]);
+
   if (!mounted) return null;
 
   return createPortal(
     <div
       className={cn(
-        "fixed inset-0 z-50 flex items-start justify-center sm:pt-[15vh] p-4 transition-all duration-200 ease-out",
+        "fixed inset-0 z-50 flex items-start justify-center sm:pt-[8vh] p-4 transition-all duration-200 ease-out",
         isOpen
           ? "opacity-100 visible pointer-events-auto"
           : "opacity-0 invisible pointer-events-none"
@@ -191,102 +439,247 @@ export function SearchCommandDialog() {
       {/* Modal */}
       <div
         className={cn(
-          "relative w-full max-w-3xl bg-background rounded-xl shadow-2xl border border-border overflow-hidden flex flex-col max-h-[80vh] sm:max-h-[70vh] transition-all duration-200 ease-out",
+          "relative w-full max-w-3xl bg-background rounded-xl shadow-2xl border border-border overflow-hidden flex flex-col transition-all duration-200 ease-out",
+          mode === "ask" ? "h-[640px] max-h-[85vh]" : "max-h-[80vh] sm:max-h-[70vh]",
           isOpen ? "scale-100 opacity-100 translate-y-0" : "scale-95 opacity-0 -translate-y-4"
         )}
       >
-        {/* Input Area */}
-        <div className="flex items-center gap-3 p-5 border-b border-border/50 bg-muted/30">
-          {/* Mode Toggle - Temporarily disabled
-          <div className="flex items-center bg-background border border-border rounded-md p-0.5 shadow-sm">
-            <button
-              type="button"
-              onClick={() => setMode("search")}
-              className={cn(
-                "p-2 rounded transition-all duration-200",
-                mode === "search"
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+        {mode === "ask" ? (
+          /* ========== ASK MODE - Chat-style layout ========== */
+          <>
+            {/* Header with mode toggle */}
+            <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-muted/30 flex-shrink-0">
+              {config.ai.showInHeader && (
+                <div className="flex items-center bg-background border border-border rounded-md p-0.5 shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => setMode("search")}
+                    className={cn(
+                      "p-2 rounded transition-all duration-200",
+                      "text-muted-foreground hover:text-foreground"
+                    )}
+                    title="Search"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("ask")}
+                    className={cn(
+                      "p-2 rounded transition-all duration-200",
+                      "bg-primary/10 text-primary"
+                    )}
+                    title={`Ask ${config.ai.name}`}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                  </button>
+                </div>
               )}
-            >
-              <Search className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("ask")}
-              className={cn(
-                "p-2 rounded transition-all duration-200",
-                mode === "ask"
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Sparkles className="h-4 w-4" />
-            </button>
-          </div>
-          */}
-          
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-background border border-input shadow-sm text-muted-foreground flex-shrink-0">
-            <Search className="h-5 w-5" />
-          </div>
-
-          <div className="flex-1 relative">
-            {mode === "ask" ? (
-              <textarea
-                ref={textareaRef}
-                placeholder="Ask anything about your videos..."
-                className="w-full bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/20 text-lg placeholder:text-muted-foreground resize-none py-2 h-[44px] max-h-[120px] px-3 shadow-sm"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  handleTextareaResize(e);
-                }}
-                onKeyDown={handleKeyDown}
-                rows={1}
-              />
-            ) : (
-              <input
-                ref={inputElementRef}
-                type="text"
-                placeholder="Search videos, transcripts..."
-                className="w-full h-10 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/20 text-lg placeholder:text-muted-foreground px-3 shadow-sm"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded bg-muted text-xs text-muted-foreground font-medium border border-border">
-              <span className="text-[10px]">ESC</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Results Area */}
-        <div className="flex-1 overflow-y-auto min-h-[100px] p-2">
-          {mode === "ask" ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground px-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
-                <Sparkles className="h-6 w-6" />
+              <div className="flex items-center gap-2">
+                {config.ai.avatar && config.ai.avatar !== '/placeholder-avatar.png' ? (
+                  <div className="w-6 h-6 rounded-full overflow-hidden">
+                    <Image
+                      src={config.ai.avatar}
+                      alt={config.ai.name}
+                      width={24}
+                      height={24}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <Sparkles className="h-5 w-5 text-primary" />
+                )}
+                <span className="font-semibold text-foreground">{config.ai.name}</span>
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-1">Ask AI</h3>
-              <p className="text-sm max-w-sm mx-auto mb-6">
-                Ask questions about your video content and get instant answers based on the transcripts.
-              </p>
-              {query.trim() && (
-                 <button
-                 onClick={handleSubmit}
-                 className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium text-sm"
-               >
-                 <span>Ask AI</span>
-                 <ArrowRight className="h-4 w-4" />
-               </button>
+              <div className="ml-auto">
+                <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded bg-muted text-xs text-muted-foreground font-medium border border-border">
+                  <span className="text-[10px]">ESC</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Content Area - scrollable */}
+            <div 
+              ref={responseAreaRef}
+              className="flex-1 overflow-y-auto p-6"
+            >
+              {!hasAIContent ? (
+                /* Initial state - greeting and starters */
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <h2 className="text-2xl font-bold text-foreground mb-2">
+                    {config.ai.greeting}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-8">
+                    Choose a prompt or ask a question to get started
+                  </p>
+
+                  {randomStarters.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg w-full">
+                      {randomStarters.map((starter, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleStarterClick(starter)}
+                          className="flex items-start gap-3 p-3 text-left bg-muted/50 hover:bg-muted text-foreground rounded-lg border border-border hover:border-primary/30 transition-colors"
+                        >
+                          <Sparkles className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">{starter}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Response state */
+                <div className="space-y-4">
+                  {/* User query */}
+                  <div className="flex justify-end">
+                    <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2 max-w-[80%]">
+                      <p className="text-sm">{submittedQuery}</p>
+                    </div>
+                  </div>
+
+                  {/* AI Response */}
+                  <div className="flex gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
+                      {config.ai.avatar && config.ai.avatar !== '/placeholder-avatar.png' ? (
+                        <Image
+                          src={config.ai.avatar}
+                          alt={config.ai.name}
+                          width={32}
+                          height={32}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Sparkles className="h-4 w-4 text-primary" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {error ? (
+                        <div className="text-destructive text-sm">
+                          Error: {error}
+                        </div>
+                      ) : aiResponse ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <p className="whitespace-pre-wrap text-sm text-foreground leading-relaxed">
+                            {renderResponseWithCitations(aiResponse, aiSources, handleSourceClick)}
+                            {isStreaming && (
+                              <span className="inline-block w-2 h-4 bg-primary/50 ml-1 animate-pulse" />
+                            )}
+                          </p>
+                        </div>
+                      ) : isStreaming ? (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-sm">Thinking...</span>
+                        </div>
+                      ) : null}
+
+
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
-          ) : (
-            <>
+
+            {/* Input Area - at bottom */}
+            <div className="p-4 border-t border-border bg-muted/30 flex-shrink-0">
+              <form onSubmit={handleSubmit} className="flex items-end gap-3">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={textareaRef}
+                    placeholder="Ask a question..."
+                    className="w-full bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/20 text-sm placeholder:text-muted-foreground resize-none py-3 px-4 shadow-sm min-h-[48px] max-h-[120px]"
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      handleTextareaResize(e);
+                    }}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    disabled={isStreaming}
+                  />
+                </div>
+                {isStreaming ? (
+                  <button
+                    type="button"
+                    onClick={stopStreaming}
+                    className="flex items-center justify-center w-12 h-12 bg-muted text-muted-foreground rounded-full hover:bg-muted/80 transition-colors flex-shrink-0 border border-border"
+                  >
+                    <Square className="h-4 w-4 fill-current" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!query.trim()}
+                    className="flex items-center justify-center w-12 h-12 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                  >
+                    <Send className="h-5 w-5" />
+                  </button>
+                )}
+              </form>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                AI responses may be inaccurate. Verify important information.
+              </p>
+            </div>
+          </>
+        ) : (
+          /* ========== SEARCH MODE - Original layout ========== */
+          <>
+            {/* Input Area */}
+            <div className="flex items-center gap-3 p-5 border-b border-border/50 bg-muted/30">
+              {config.ai.showInHeader ? (
+                <div className="flex items-center bg-background border border-border rounded-md p-0.5 shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => setMode("search")}
+                    className={cn(
+                      "p-2 rounded transition-all duration-200",
+                      "bg-primary/10 text-primary"
+                    )}
+                    title="Search"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("ask")}
+                    className={cn(
+                      "p-2 rounded transition-all duration-200",
+                      "text-muted-foreground hover:text-foreground"
+                    )}
+                    title={`Ask ${config.ai.name}`}
+                  >
+                    <Sparkles className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-background border border-input shadow-sm text-muted-foreground flex-shrink-0">
+                  <Search className="h-5 w-5" />
+                </div>
+              )}
+
+              <div className="flex-1 relative">
+                <input
+                  ref={inputElementRef}
+                  type="text"
+                  placeholder="Search videos, transcripts..."
+                  className="w-full h-10 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/20 text-lg placeholder:text-muted-foreground px-3 shadow-sm"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded bg-muted text-xs text-muted-foreground font-medium border border-border">
+                  <span className="text-[10px]">ESC</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Results Area */}
+            <div className="flex-1 overflow-y-auto min-h-[100px] p-2">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary/50 mb-2" />
@@ -351,10 +744,10 @@ export function SearchCommandDialog() {
                           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
                             <span>Video</span>
                             {hit.published_at && (
-                                <>
-                                    <span>•</span>
-                                    <span>{new Date(hit.published_at).toLocaleDateString()}</span>
-                                </>
+                              <>
+                                <span>•</span>
+                                <span>{new Date(hit.published_at).toLocaleDateString()}</span>
+                              </>
                             )}
                           </div>
                         </Link>
@@ -365,22 +758,18 @@ export function SearchCommandDialog() {
                             {getVisibleSegments(hit).map((segment, idx) => (
                               <Link
                                 key={`${hit.internal_id}-segment-${idx}`}
-                                href={`/v/${
-                                  hit.short_id || hit.internal_id
-                                }?t=${Math.floor(segment.start_time)}`}
+                                href={`/v/${hit.short_id || hit.internal_id}?t=${Math.floor(segment.start_time)}`}
                                 onClick={handleClose}
                                 className="flex items-start gap-2 p-1.5 rounded hover:bg-muted transition-colors group/segment"
                               >
                                 <div className="flex-shrink-0 mt-0.5">
-                                    <div className="flex items-center gap-0.5 bg-primary/10 text-primary text-[10px] font-medium px-1.5 py-0.5 rounded-full group-hover/segment:bg-primary group-hover/segment:text-primary-foreground transition-colors">
-                                        <Play size={8} className="fill-current" />
-                                        {formatTime(segment.start_time)}
-                                    </div>
+                                  <div className="flex items-center gap-0.5 bg-primary/10 text-primary text-[10px] font-medium px-1.5 py-0.5 rounded-full group-hover/segment:bg-primary group-hover/segment:text-primary-foreground transition-colors">
+                                    <Play size={8} className="fill-current" />
+                                    {formatTime(segment.start_time)}
+                                  </div>
                                 </div>
                                 <p className="text-sm text-muted-foreground group-hover/segment:text-foreground line-clamp-2">
-                                  {parseHighlightedText(
-                                    segment.highlighted_text || segment.text
-                                  )}
+                                  {parseHighlightedText(segment.highlighted_text || segment.text)}
                                 </p>
                               </Link>
                             ))}
@@ -408,41 +797,41 @@ export function SearchCommandDialog() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {results.length > 0 && (
                     <Link
-                        href={`/s?q=${encodeURIComponent(query)}`}
-                        onClick={handleClose}
-                        className="flex items-center justify-center gap-2 w-full py-3 mt-2 text-sm font-medium text-primary hover:bg-muted rounded-lg transition-colors"
+                      href={`/s?q=${encodeURIComponent(query)}`}
+                      onClick={handleClose}
+                      className="flex items-center justify-center gap-2 w-full py-3 mt-2 text-sm font-medium text-primary hover:bg-muted rounded-lg transition-colors"
                     >
-                        See all results for &quot;{query}&quot;
-                        <ArrowRight size={16} />
+                      See all results for &quot;{query}&quot;
+                      <ArrowRight size={16} />
                     </Link>
                   )}
                 </div>
               )}
-            </>
-          )}
-        </div>
-        
-        {/* Footer */}
-        <div className="p-3 border-t border-border bg-muted/30 flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
+            </div>
+
+            {/* Footer */}
+            <div className="p-3 border-t border-border bg-muted/30 flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
-                    <kbd className="px-1.5 py-0.5 rounded bg-background border border-border shadow-sm font-sans">↵</kbd>
-                    <span>to select</span>
+                  <kbd className="px-1.5 py-0.5 rounded bg-background border border-border shadow-sm font-sans">↵</kbd>
+                  <span>to select</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <kbd className="px-1.5 py-0.5 rounded bg-background border border-border shadow-sm font-sans">esc</kbd>
-                    <span>to close</span>
+                  <kbd className="px-1.5 py-0.5 rounded bg-background border border-border shadow-sm font-sans">esc</kbd>
+                  <span>to close</span>
                 </div>
+              </div>
+              <div>
+                {results.length > 0 && !isLoading && (
+                  <span>{results.length} results found</span>
+                )}
+              </div>
             </div>
-            <div>
-               {results.length > 0 && !isLoading && (
-                 <span>{results.length} results found</span>
-               )}
-            </div>
-        </div>
+          </>
+        )}
       </div>
     </div>,
     document.body
