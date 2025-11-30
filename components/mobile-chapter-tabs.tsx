@@ -102,7 +102,7 @@ export function MobileChapterTabs({
                     onChapterClick(chapter.startTime);
                   }}
                   className={cn(
-                    "w-full text-left px-4 py-3 transition-colors hover:bg-accent group cursor-pointer",
+                    "w-full text-left px-4 py-3 transition-colors hover:bg-primary/50 group cursor-pointer",
                     activeChapter === index && "bg-primary/10"
                   )}
                 >
@@ -114,7 +114,7 @@ export function MobileChapterTabs({
                   </div>
 
                   {/* Chapter Title */}
-                  <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  <div className="text-sm font-medium text-foreground transition-colors">
                     {chapter.title}
                   </div>
                 </button>

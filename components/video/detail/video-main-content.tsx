@@ -5,11 +5,11 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { FileText, Paperclip } from "lucide-react";
 import { formatRelative } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Transcript } from "@/components/transcript";
 import { VideoDescription } from "@/components/video-description";
 import type { ExtendedVideo } from "@/types/video-detail";
 import { formatFileSize } from "@/util/format-file-size";
+import { PillTab, PillTabs } from "@/components/ui/pill-tabs";
 
 interface VideoMainContentProps {
   video: ExtendedVideo;
@@ -50,48 +50,33 @@ export function VideoMainContent({
         </div>
 
         {/* Main Pills Navigation */}
-        <div className="flex items-center gap-2 border-b border-border mb-6 pb-4 overflow-x-auto no-scrollbar">
-          <button
+        <PillTabs className="border-b border-border mb-6 pb-4">
+          <PillTab
+            active={activeMainTab === "description"}
             onClick={() => setActiveMainTab("description")}
-            className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-              activeMainTab === "description"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            )}
           >
             Description
-          </button>
+          </PillTab>
           {hasTranscript && (
-            <button
+            <PillTab
+              active={activeMainTab === "transcript"}
               onClick={() => setActiveMainTab("transcript")}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                activeMainTab === "transcript"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              )}
             >
               Transcript
-            </button>
+            </PillTab>
           )}
           {hasAttachments && (
-            <button
+            <PillTab
+              active={activeMainTab === "attachments"}
               onClick={() => setActiveMainTab("attachments")}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                activeMainTab === "attachments"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              )}
             >
               Attachments
               <span className="ml-2 text-xs opacity-80">
                 {video.attachments?.length}
               </span>
-            </button>
+            </PillTab>
           )}
-        </div>
+        </PillTabs>
 
         {/* Tab Content */}
         <div className="flex-1 min-h-0">

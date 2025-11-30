@@ -6,9 +6,9 @@ import { Transcript } from "@/components/transcript";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { RefObject, useState } from "react";
-import { cn } from "@/lib/utils";
 import { FileText, Paperclip } from "lucide-react";
 import { formatFileSize } from "@/util/format-file-size";
+import { PillTab, PillTabs } from "@/components/ui/pill-tabs";
 
 interface InfoTabProps {
   video: ExtendedVideo;
@@ -36,50 +36,35 @@ export default function InfoTab({
     <div className="flex flex-col min-h-0 pb-20">
       {/* Pill Tabs Navigation */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 py-3">
-          <button
+        <PillTabs className="px-4 py-3">
+          <PillTab
+            active={activeTab === "description"}
             onClick={() => setActiveTab("description")}
-            className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-              activeTab === "description"
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            )}
           >
             Description
-          </button>
+          </PillTab>
           
           {hasTranscript && (
-            <button
+            <PillTab
+              active={activeTab === "transcript"}
               onClick={() => setActiveTab("transcript")}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                activeTab === "transcript"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              )}
             >
               Transcript
-            </button>
+            </PillTab>
           )}
 
           {hasAttachments && (
-            <button
+            <PillTab
+              active={activeTab === "attachments"}
               onClick={() => setActiveTab("attachments")}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
-                activeTab === "attachments"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              )}
             >
               Attachments
               <span className="ml-2 text-xs opacity-80">
                 {video.attachments?.length}
               </span>
-            </button>
+            </PillTab>
           )}
-        </div>
+        </PillTabs>
       </div>
 
       {/* Tab Content */}

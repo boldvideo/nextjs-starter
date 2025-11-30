@@ -137,7 +137,9 @@ export function Transcript({
       <TranscriptHeader className="sticky top-0 z-10 flex items-center justify-between bg-background/95 backdrop-blur pt-0 pb-4 mb-2 lg:py-4 lg:mb-8 lg:border-b">
         <TranscriptTitle className="text-base lg:text-2xl font-bold">
           Transcript{" "}
-          <span className="text-gray-400 text-xs lg:text-sm">(auto-generated)</span>
+          <span className="text-gray-400 text-xs lg:text-sm">
+            (auto-generated)
+          </span>
         </TranscriptTitle>
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -166,34 +168,36 @@ export function Transcript({
         </div>
       </TranscriptHeader>
       <TranscriptContent>
-        {filteredUtterances.map(({ u, index }) => (
-          <UtteranceItem
-            key={index}
-            active={index === activeUtteranceIndex}
-            onClick={() => onCueClick?.(u.start)}
-          >
-            <UtteranceLabel>
-              <UtteranceSpeaker>
-                {transcript.metadata.speakers[u.speaker] ??
-                  `Speaker ${u.speaker}`}
-              </UtteranceSpeaker>
-              <TimestampPill
-                timestamp={formatTimestamp(u.start)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCueClick?.(Math.max(0, u.start - 1));
-                }}
-              />
-            </UtteranceLabel>
-            <Utterance
-              className={`text-lg hover:bg-primary/10 ${
-                index === activeUtteranceIndex ? "bg-primary/10" : ""
-              }`}
+        <div className="max-w-[65ch]">
+          {filteredUtterances.map(({ u, index }) => (
+            <UtteranceItem
+              key={index}
+              active={index === activeUtteranceIndex}
+              onClick={() => onCueClick?.(u.start)}
             >
-              {highlightMatches(u.text, highlightRegexes)}
-            </Utterance>
-          </UtteranceItem>
-        ))}
+              <UtteranceLabel>
+                <UtteranceSpeaker>
+                  {transcript.metadata.speakers[u.speaker] ??
+                    `Speaker ${u.speaker}`}
+                </UtteranceSpeaker>
+                <TimestampPill
+                  timestamp={formatTimestamp(u.start)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCueClick?.(Math.max(0, u.start - 1));
+                  }}
+                />
+              </UtteranceLabel>
+              <Utterance
+                className={`text-lg hover:bg-primary/10 ${
+                  index === activeUtteranceIndex ? "bg-primary/10" : ""
+                }`}
+              >
+                {highlightMatches(u.text, highlightRegexes)}
+              </Utterance>
+            </UtteranceItem>
+          ))}
+        </div>
         {filteredUtterances.length === 0 && (
           <div className="p-8 text-center text-muted-foreground">
             No matches found for &quot;{searchQuery}&quot;
