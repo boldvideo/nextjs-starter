@@ -1,5 +1,13 @@
 import { AskCitation, formatAskTime } from "./ask";
 
+// Legacy fields that may come from API for backwards compatibility
+interface LegacyCitationFields {
+  title?: string;
+  timestamp?: number;
+}
+
+type RawCitation = Partial<AskCitation> & LegacyCitationFields;
+
 /**
  * Creates placeholder citations for citation references found in text
  * Used while real citation data is loading
@@ -31,15 +39,15 @@ export function createPlaceholderCitations(text: string): AskCitation[] {
 /**
  * Processes raw citation data to ensure all required fields are present
  */
-export function processCitations(rawCitations: Partial<AskCitation>[]): AskCitation[] {
+export function processCitations(rawCitations: RawCitation[]): AskCitation[] {
   return rawCitations.map((c, idx) => {
     // Handle legacy/mismatched fields for robustness
-    const videoTitle = c.video_title || (c as any).title || "Untitled";
-    
+    const videoTitle = c.video_title || c.title || "Untitled";
+
     // Handle time fields - prioritize start_ms, fallback to timestamp (seconds)
     let startMs = c.start_ms || 0;
-    if (!startMs && (c as any).timestamp) {
-      startMs = (c as any).timestamp * 1000;
+    if (!startMs && c.timestamp) {
+      startMs = c.timestamp * 1000;
     }
     
     // Ensure formatted string exists

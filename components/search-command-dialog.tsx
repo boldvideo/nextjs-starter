@@ -211,12 +211,12 @@ export function SearchCommandDialog() {
     return () => clearTimeout(timer);
   }, [query, mode]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     setIsOpen(false);
-  };
+  }, [setIsOpen]);
 
   const toggleExpand = (videoId: string) => {
     setExpandedVideos((prev) => ({
@@ -243,7 +243,7 @@ export function SearchCommandDialog() {
   const handleSourceClick = useCallback((source: AISource) => {
     router.push(`/v/${source.video_id}?t=${Math.floor(source.timestamp)}`);
     handleClose();
-  }, [router]);
+  }, [router, handleClose]);
 
   const streamAISearch = useCallback(async (prompt: string) => {
     if (abortControllerRef.current) {
