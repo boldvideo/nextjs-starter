@@ -1,6 +1,11 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { BoldProvider } from "@/components/providers/bold-provider";
 import { getAllFontVariables, getFontVar } from "@/lib/fonts";
+import {
+  getThemeFromSettings,
+  getCssOverrides,
+  generateThemeCss,
+} from "@/lib/theme-css";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -16,8 +21,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const context = await getTenantContext();
-  // bold-js 1.2.0: theme tokens consolidated into portal.theme, fallback to theme_config
-  const theme = context?.settings?.portal?.theme || context?.settings?.theme_config;
+  const settings = context?.settings;
+
+  // Theme configuration (BOLD-925)
+  // Note: No header in nolayout routes (embed only), so header_size is not needed
+  const theme = getThemeFromSettings(settings);
+  const cssOverrides = getCssOverrides(settings);
 
   // Get fonts from settings
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,47 +43,22 @@ export default async function RootLayout({
               :root {
                 --font-heading: ${fontHeaderVar};
                 --font-body: ${fontBodyVar};
-                --radius: ${theme?.radius || "0.5rem"};
-                --background: ${
-                  theme?.light?.background || "oklch(0.98 0.02 95)"
-                };
-                --foreground: ${
-                  theme?.light?.foreground || "oklch(0.22 0.04 175)"
-                };
-                --muted: ${theme?.light?.muted || "oklch(0.96 0.01 95)"};
-                --muted-foreground: ${
-                  theme?.light?.muted_foreground || "oklch(0.45 0.03 175)"
-                };
-                --border: ${theme?.light?.border || "oklch(0.90 0.02 95)"};
-                --ring: ${theme?.light?.ring || "oklch(0.73 0.12 175)"};
-                --surface: ${theme?.light?.surface || "oklch(0.99 0.01 95)"};
-                --accent: ${theme?.light?.accent || "oklch(0.73 0.12 175)"};
-                --accent-foreground: ${
-                  theme?.light?.accent_foreground || "oklch(0.22 0.04 175)"
-                };
-              }
-              .dark {
-                --background: ${
-                  theme?.dark?.background || "oklch(0.18 0.02 175)"
-                };
-                --foreground: ${
-                  theme?.dark?.foreground || "oklch(0.96 0.01 95)"
-                };
-                --muted: ${theme?.dark?.muted || "oklch(0.25 0.02 175)"};
-                --muted-foreground: ${
-                  theme?.dark?.muted_foreground || "oklch(0.65 0.03 175)"
-                };
-                --border: ${theme?.dark?.border || "oklch(0.30 0.02 175)"};
-                --ring: ${theme?.dark?.ring || "oklch(0.73 0.12 175)"};
-                --surface: ${theme?.dark?.surface || "oklch(0.22 0.02 175)"};
-                --accent: ${theme?.dark?.accent || "oklch(0.73 0.12 175)"};
-                --accent-foreground: ${
-                  theme?.dark?.accent_foreground || "oklch(0.18 0.02 175)"
-                };
               }
             `,
           }}
         />
+        {theme && (
+          <style
+            dangerouslySetInnerHTML={{ __html: generateThemeCss(theme) }}
+          />
+        )}
+        {cssOverrides && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: cssOverrides,
+            }}
+          />
+        )}
       </head>
       <body className="bg-background text-foreground">
         {context ? (
