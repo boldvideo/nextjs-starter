@@ -17,7 +17,7 @@ export default function PlaylistTab({
   currentVideoId,
 }: PlaylistTabProps) {
   return (
-    <div className="divide-y divide-border pb-20">
+    <div className="divide-y divide-border pb-[60px]">
       {/* Playlist Header */}
       <div className="p-4 bg-muted/50">
         <Link

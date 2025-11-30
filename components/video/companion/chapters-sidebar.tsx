@@ -25,34 +25,34 @@ function timeToSeconds(timeString: string): number {
 }
 
 function parseWebVTT(vttText: string): Chapter[] {
-    const lines = vttText.split("\n");
-    const chapters: Chapter[] = [];
-    let currentChapter: Partial<Chapter> = {};
+  const lines = vttText.split("\n");
+  const chapters: Chapter[] = [];
+  let currentChapter: Partial<Chapter> = {};
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
 
-      // Time range line (e.g., "00:00:00.000 --> 00:00:10.000")
-      if (line.includes("-->")) {
-        const [start, end] = line.split("-->").map((t) => t.trim());
-        currentChapter.startTime = timeToSeconds(start);
-        currentChapter.endTime = timeToSeconds(end);
-      }
-      // Title line (non-empty line after time range)
-      else if (
-        line &&
-        !line.startsWith("WEBVTT") &&
-        !line.match(/^\d+$/) &&
-        currentChapter.startTime !== undefined
-      ) {
-        currentChapter.title = line;
-        chapters.push(currentChapter as Chapter);
-        currentChapter = {};
-      }
+    // Time range line (e.g., "00:00:00.000 --> 00:00:10.000")
+    if (line.includes("-->")) {
+      const [start, end] = line.split("-->").map((t) => t.trim());
+      currentChapter.startTime = timeToSeconds(start);
+      currentChapter.endTime = timeToSeconds(end);
     }
-
-    return chapters;
+    // Title line (non-empty line after time range)
+    else if (
+      line &&
+      !line.startsWith("WEBVTT") &&
+      !line.match(/^\d+$/) &&
+      currentChapter.startTime !== undefined
+    ) {
+      currentChapter.title = line;
+      chapters.push(currentChapter as Chapter);
+      currentChapter = {};
+    }
   }
+
+  return chapters;
+}
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -104,14 +104,14 @@ export function ChaptersSidebar({
                     onChapterClick(chapter.startTime);
                   }}
                   className={cn(
-                    "w-full text-left px-4 py-3 transition-colors hover:bg-accent group cursor-pointer flex items-start gap-2.5",
-                    activeChapter === index && "bg-primary/10"
+                    "w-full text-left px-4 py-3 transition-colors hover:bg-primary/20 text-foreground group cursor-pointer flex items-start gap-2.5",
+                    activeChapter === index && "bg-primary/10 text-primary"
                   )}
                 >
                   <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
                     {formatTime(chapter.startTime)}
                   </span>
-                  <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  <div className="text-sm font-medium transition-colors">
                     {chapter.title}
                   </div>
                 </button>

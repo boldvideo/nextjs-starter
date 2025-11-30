@@ -14,7 +14,7 @@ export default function ChaptersTab({
   onChapterClick,
 }: ChaptersTabProps) {
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col pb-[60px]">
       <ChaptersSidebar
         chaptersWebVTT={chaptersWebVTT}
         playbackId={playbackId}

@@ -25,7 +25,7 @@ export function VideoDescription({ text }: VideoDescriptionProps) {
   );
 
   return (
-    <div className="min-h-[100px] prose max-w-none dark:prose-invert">
+    <div className="min-h-[100px] prose  dark:prose-invert">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
