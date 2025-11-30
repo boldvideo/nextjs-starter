@@ -4,15 +4,22 @@ import type { AIEvent, Source } from "@boldvideo/bold-js";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+interface AIContextMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 interface AISearchRequestBody {
   prompt: string;
   limit?: number;
+  context?: AIContextMessage[];
 }
 
 interface StreamState {
   accumulatedAnswer: string;
   sources: Source[];
   messageId?: string;
+  context?: AIContextMessage[];
 }
 
 function formatSSE(event: AIEvent, state: StreamState): string | null {
@@ -41,10 +48,12 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       });
 
     case "message_complete":
+    case "answer":
+      state.context = (event as unknown as { context?: AIContextMessage[] }).context;
       return JSON.stringify({
         type: "message_complete",
-        content: event.content || state.accumulatedAnswer,
-        sources: (event.sources || state.sources).map((s) => ({
+        content: (event as unknown as { content?: string }).content || state.accumulatedAnswer,
+        sources: ((event as unknown as { sources?: Source[] }).sources || state.sources).map((s) => ({
           video_id: s.video_id,
           title: s.title,
           timestamp: s.timestamp,
@@ -53,7 +62,8 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
           playback_id: s.playback_id,
           speaker: s.speaker,
         })),
-        usage: event.usage,
+        context: state.context,
+        usage: (event as unknown as { usage?: unknown }).usage,
       });
 
     case "error":
@@ -133,7 +143,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { prompt, limit = 5 } = body;
+  const { prompt, limit = 5, context: conversationContext } = body;
 
   if (!prompt || typeof prompt !== "string") {
     return new Response(
@@ -146,6 +156,7 @@ export async function POST(request: Request) {
     const stream = await context.client.ai.search({
       prompt,
       limit,
+      context: conversationContext,
     });
 
     const responseStream = asyncIterableToStream(stream as AsyncIterable<AIEvent>);

@@ -13,10 +13,13 @@ import {
   ChevronUp,
   Send,
   Square,
+  RotateCcw,
+  User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 import { useSearch } from "@/components/providers/search-provider";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
@@ -31,6 +34,19 @@ interface AISource {
   text: string;
   playback_id?: string;
   speaker?: string;
+}
+
+interface AIContextMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+interface ChatTurn {
+  id: string;
+  query: string;
+  response: string;
+  sources: AISource[];
+  isStreaming?: boolean;
 }
 
 function formatTime(seconds: number) {
@@ -58,7 +74,6 @@ function parseHighlightedText(text: string) {
   });
 }
 
-// Render response text with inline source buttons
 function renderResponseWithCitations(
   text: string,
   sources: AISource[],
@@ -68,14 +83,12 @@ function renderResponseWithCitations(
     return <span>{text}</span>;
   }
 
-  // Look for citation patterns like [1], [2], etc.
   const citationRegex = /\[(\d+)\]/g;
   const parts = text.split(citationRegex);
 
   return (
     <>
       {parts.map((part, index) => {
-        // Every odd index is a citation number
         if (index % 2 === 1) {
           const sourceIndex = parseInt(part, 10) - 1;
           const source = sources[sourceIndex];
@@ -100,6 +113,81 @@ function renderResponseWithCitations(
   );
 }
 
+function ChatMessage({
+  turn,
+  config,
+  onSourceClick,
+  isLatest,
+}: {
+  turn: ChatTurn;
+  config: ReturnType<typeof getPortalConfig>;
+  onSourceClick: (source: AISource) => void;
+  isLatest: boolean;
+}) {
+  return (
+    <div className="space-y-3">
+      {/* User message */}
+      <div className="flex items-start gap-3 justify-end">
+        <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]">
+          <p className="text-sm">{turn.query}</p>
+        </div>
+        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+          <User className="w-4 h-4 text-muted-foreground" />
+        </div>
+      </div>
+
+      {/* AI response */}
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
+          {config.ai.avatar && config.ai.avatar !== '/placeholder-avatar.png' ? (
+            <Image
+              src={config.ai.avatar}
+              alt={config.ai.name}
+              width={32}
+              height={32}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Sparkles className="h-4 w-4 text-primary" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          {turn.response ? (
+            <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-relaxed">
+              <ReactMarkdown
+                components={{
+                  p: ({ children }) => {
+                    const processChildren = (child: React.ReactNode): React.ReactNode => {
+                      if (typeof child === "string") {
+                        return renderResponseWithCitations(child, turn.sources, onSourceClick);
+                      }
+                      return child;
+                    };
+                    const processed = Array.isArray(children) 
+                      ? children.map(processChildren) 
+                      : processChildren(children);
+                    return <p>{processed}</p>;
+                  },
+                }}
+              >
+                {turn.response}
+              </ReactMarkdown>
+              {turn.isStreaming && isLatest && (
+                <span className="inline-block w-2 h-4 bg-primary/50 ml-1 animate-pulse" />
+              )}
+            </div>
+          ) : turn.isStreaming ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Thinking...</span>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SearchCommandDialog() {
   const router = useRouter();
   const settings = useSettings();
@@ -112,39 +200,43 @@ export function SearchCommandDialog() {
   const [mounted, setMounted] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inputElementRef = useRef<HTMLInputElement>(null);
-  const [expandedVideos, setExpandedVideos] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [expandedVideos, setExpandedVideos] = useState<Record<string, boolean>>({});
 
-  // AI streaming state
-  const [aiResponse, setAiResponse] = useState("");
-  const [aiSources, setAiSources] = useState<AISource[]>([]);
+  // Conversation state
+  const [conversation, setConversation] = useState<ChatTurn[]>([]);
+  const [context, setContext] = useState<AIContextMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [submittedQuery, setSubmittedQuery] = useState("");
   const abortControllerRef = useRef<AbortController | null>(null);
   const responseAreaRef = useRef<HTMLDivElement>(null);
 
-  // Handle mounting for portal
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Reset AI state when mode changes or dialog closes
-  useEffect(() => {
-    if (!isOpen || mode === "search") {
-      setAiResponse("");
-      setAiSources([]);
-      setSubmittedQuery("");
-      setIsStreaming(false);
-      setError(undefined);
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
+  const clearConversation = useCallback(() => {
+    setConversation([]);
+    setContext([]);
+    setError(undefined);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
     }
-  }, [isOpen, mode]);
+    setIsStreaming(false);
+  }, []);
 
-  // Focus input when opened
+  useEffect(() => {
+    if (!isOpen) {
+      clearConversation();
+      setQuery("");
+    }
+  }, [isOpen, clearConversation]);
+
+  useEffect(() => {
+    if (mode === "search") {
+      clearConversation();
+    }
+  }, [mode, clearConversation]);
+
   useEffect(() => {
     if (isOpen) {
       const timer = setTimeout(() => {
@@ -167,14 +259,12 @@ export function SearchCommandDialog() {
     };
   }, [isOpen, mode]);
 
-  // Auto-scroll response area during streaming
   useEffect(() => {
     if (isStreaming && responseAreaRef.current) {
       responseAreaRef.current.scrollTop = responseAreaRef.current.scrollHeight;
     }
-  }, [aiResponse, isStreaming]);
+  }, [conversation, isStreaming]);
 
-  // Search logic (only for search mode)
   useEffect(() => {
     if (!query.trim() || mode === "ask") {
       setResults([]);
@@ -237,6 +327,11 @@ export function SearchCommandDialog() {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
       setIsStreaming(false);
+      setConversation(prev => 
+        prev.map((turn, idx) => 
+          idx === prev.length - 1 ? { ...turn, isStreaming: false } : turn
+        )
+      );
     }
   }, []);
 
@@ -250,11 +345,18 @@ export function SearchCommandDialog() {
       abortControllerRef.current.abort();
     }
 
+    const turnId = `turn-${Date.now()}`;
+    const newTurn: ChatTurn = {
+      id: turnId,
+      query: prompt,
+      response: "",
+      sources: [],
+      isStreaming: true,
+    };
+
+    setConversation(prev => [...prev, newTurn]);
     abortControllerRef.current = new AbortController();
     setIsStreaming(true);
-    setAiResponse("");
-    setAiSources([]);
-    setSubmittedQuery(prompt);
     setError(undefined);
 
     try {
@@ -264,7 +366,11 @@ export function SearchCommandDialog() {
           "Content-Type": "application/json",
           Accept: "text/event-stream",
         },
-        body: JSON.stringify({ prompt, limit: 5 }),
+        body: JSON.stringify({ 
+          prompt, 
+          limit: 5,
+          context: context.length > 0 ? context : undefined,
+        }),
         signal: abortControllerRef.current.signal,
       });
 
@@ -279,6 +385,9 @@ export function SearchCommandDialog() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let accumulatedResponse = "";
+      let accumulatedSources: AISource[] = [];
+      let newContext: AIContextMessage[] = [];
 
       const processLine = (line: string) => {
         if (!line.startsWith("data: ")) return;
@@ -291,38 +400,59 @@ export function SearchCommandDialog() {
 
           switch (event.type) {
             case "text_delta":
-              setAiResponse((prev) => prev + event.delta);
+              accumulatedResponse += event.delta;
+              setConversation(prev =>
+                prev.map(turn =>
+                  turn.id === turnId
+                    ? { ...turn, response: accumulatedResponse }
+                    : turn
+                )
+              );
               break;
 
             case "sources":
-              setAiSources(event.sources || []);
+              accumulatedSources = event.sources || [];
+              setConversation(prev =>
+                prev.map(turn =>
+                  turn.id === turnId
+                    ? { ...turn, sources: accumulatedSources }
+                    : turn
+                )
+              );
               break;
 
             case "message_complete":
-              // Update sources from complete message if available
               if (event.sources && event.sources.length > 0) {
-                setAiSources(event.sources);
+                accumulatedSources = event.sources;
               }
-              // Note: We don't update aiResponse here since we accumulated it via text_delta
+              if (event.context) {
+                newContext = event.context;
+              }
+              setConversation(prev =>
+                prev.map(turn =>
+                  turn.id === turnId
+                    ? { 
+                        ...turn, 
+                        sources: accumulatedSources, 
+                        isStreaming: false,
+                        response: accumulatedResponse || turn.response,
+                      }
+                    : turn
+                )
+              );
+              if (newContext.length > 0) {
+                setContext(newContext);
+              }
+              setIsStreaming(false);
               break;
 
             case "error":
-              // Only set error if we don't already have a response
-              // Some backends send error events after successful completion
-              setAiResponse((currentResponse) => {
-                if (!currentResponse) {
-                  // No response yet, this is a real error
-                  setError(event.message || "An error occurred");
-                } else {
-                  // We already have content, log but ignore the error
-                  console.warn("[AI Search] Ignoring error after content received:", event.message);
-                }
-                return currentResponse;
-              });
+              if (!accumulatedResponse) {
+                setError(event.message || "An error occurred");
+              }
               break;
           }
         } catch (err) {
-          // Malformed JSON is expected for partial SSE chunks, but log other errors in dev
           if (process.env.NODE_ENV === "development" && !(err instanceof SyntaxError)) {
             console.warn("[AI Search] Unexpected error parsing SSE:", err);
           }
@@ -333,7 +463,6 @@ export function SearchCommandDialog() {
         const { done, value } = await reader.read();
 
         if (done) {
-          // Process any remaining buffer
           if (buffer.trim()) {
             const remainingLines = buffer.split("\n");
             for (const line of remainingLines) {
@@ -358,11 +487,18 @@ export function SearchCommandDialog() {
         return;
       }
       setError(err instanceof Error ? err.message : "Failed to get response");
+      setConversation(prev =>
+        prev.map(turn =>
+          turn.id === turnId
+            ? { ...turn, isStreaming: false }
+            : turn
+        )
+      );
     } finally {
       setIsStreaming(false);
       abortControllerRef.current = null;
     }
-  }, []);
+  }, [context]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -378,6 +514,7 @@ export function SearchCommandDialog() {
   };
 
   const handleStarterClick = (starter: string) => {
+    clearConversation();
     streamAISearch(starter);
   };
 
@@ -396,18 +533,15 @@ export function SearchCommandDialog() {
     textarea.style.height = `${Math.min(textarea.scrollHeight, 120)}px`;
   };
 
-  const hasAIContent = aiResponse || aiSources.length > 0 || isStreaming || submittedQuery;
+  const hasConversation = conversation.length > 0;
 
-  // Pick 4 random conversation starters when dialog opens in ask mode
-  // We only want this to run once when the dialog opens, not on every render
   const [randomStarters, setRandomStarters] = useState<string[]>([]);
   useEffect(() => {
-    if (isOpen && mode === "ask" && !hasAIContent) {
+    if (isOpen && mode === "ask" && !hasConversation) {
       const starters = config.ai.conversationStarters;
       if (starters.length <= 4) {
         setRandomStarters(starters);
       } else {
-        // Fisher-Yates shuffle and take first 4
         const shuffled = [...starters];
         for (let i = shuffled.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -416,8 +550,7 @@ export function SearchCommandDialog() {
         setRandomStarters(shuffled.slice(0, 4));
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- config.ai.conversationStarters is stable from API, but creates new array reference each render. We only want to pick starters once when dialog opens.
-  }, [isOpen, mode, hasAIContent]);
+  }, [isOpen, mode, hasConversation, config.ai.conversationStarters]);
 
   if (!mounted) return null;
 
@@ -445,9 +578,9 @@ export function SearchCommandDialog() {
         )}
       >
         {mode === "ask" ? (
-          /* ========== ASK MODE - Chat-style layout ========== */
+          /* ========== ASK MODE - Conversational Chat UI ========== */
           <>
-            {/* Header with mode toggle */}
+            {/* Header */}
             <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-muted/30 flex-shrink-0">
               {config.ai.showInHeader && (
                 <div className="flex items-center bg-background border border-border rounded-md p-0.5 shadow-sm">
@@ -491,6 +624,20 @@ export function SearchCommandDialog() {
                 )}
                 <span className="font-semibold text-foreground">{config.ai.name}</span>
               </div>
+              
+              {/* New Search button - only show when there's conversation */}
+              {hasConversation && (
+                <button
+                  type="button"
+                  onClick={clearConversation}
+                  className="ml-2 flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors"
+                  title="Start new conversation"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  <span className="hidden sm:inline">New chat</span>
+                </button>
+              )}
+              
               <div className="ml-auto">
                 <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded bg-muted text-xs text-muted-foreground font-medium border border-border">
                   <span className="text-[10px]">ESC</span>
@@ -498,12 +645,12 @@ export function SearchCommandDialog() {
               </div>
             </div>
 
-            {/* Content Area - scrollable */}
+            {/* Content Area */}
             <div 
               ref={responseAreaRef}
               className="flex-1 overflow-y-auto p-6"
             >
-              {!hasAIContent ? (
+              {!hasConversation ? (
                 /* Initial state - greeting and starters */
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <h2 className="text-2xl font-bold text-foreground mb-2">
@@ -530,65 +677,39 @@ export function SearchCommandDialog() {
                   )}
                 </div>
               ) : (
-                /* Response state */
-                <div className="space-y-4">
-                  {/* User query */}
-                  <div className="flex justify-end">
-                    <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2 max-w-[80%]">
-                      <p className="text-sm">{submittedQuery}</p>
+                /* Conversation thread */
+                <div className="space-y-6">
+                  {conversation.map((turn, index) => (
+                    <ChatMessage
+                      key={turn.id}
+                      turn={turn}
+                      config={config}
+                      onSourceClick={handleSourceClick}
+                      isLatest={index === conversation.length - 1}
+                    />
+                  ))}
+                  
+                  {error && (
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                        <Sparkles className="h-4 w-4 text-destructive" />
+                      </div>
+                      <div className="text-destructive text-sm py-2">
+                        {error}
+                      </div>
                     </div>
-                  </div>
-
-                  {/* AI Response */}
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
-                      {config.ai.avatar && config.ai.avatar !== '/placeholder-avatar.png' ? (
-                        <Image
-                          src={config.ai.avatar}
-                          alt={config.ai.name}
-                          width={32}
-                          height={32}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Sparkles className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      {error ? (
-                        <div className="text-destructive text-sm">
-                          Error: {error}
-                        </div>
-                      ) : aiResponse ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <p className="whitespace-pre-wrap text-sm text-foreground leading-relaxed">
-                            {renderResponseWithCitations(aiResponse, aiSources, handleSourceClick)}
-                            {isStreaming && (
-                              <span className="inline-block w-2 h-4 bg-primary/50 ml-1 animate-pulse" />
-                            )}
-                          </p>
-                        </div>
-                      ) : isStreaming ? (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span className="text-sm">Thinking...</span>
-                        </div>
-                      ) : null}
-
-
-                    </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
 
-            {/* Input Area - at bottom */}
+            {/* Input Area */}
             <div className="p-4 border-t border-border bg-muted/30 flex-shrink-0">
               <form onSubmit={handleSubmit} className="flex items-end gap-3">
                 <div className="flex-1 relative">
                   <textarea
                     ref={textareaRef}
-                    placeholder="Ask a question..."
+                    placeholder={hasConversation ? "Ask a follow-up..." : "Ask a question..."}
                     className="w-full bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-ring/20 text-sm placeholder:text-muted-foreground resize-none py-3 px-4 shadow-sm min-h-[48px] max-h-[120px]"
                     value={query}
                     onChange={(e) => {
@@ -619,7 +740,9 @@ export function SearchCommandDialog() {
                 )}
               </form>
               <p className="text-xs text-muted-foreground mt-2 text-center">
-                AI responses may be inaccurate. Verify important information.
+                {hasConversation 
+                  ? "Ask follow-up questions to dive deeper" 
+                  : "AI responses may be inaccurate. Verify important information."}
               </p>
             </div>
           </>
