@@ -114,7 +114,8 @@ export default async function RootLayout({
   // Get auth session if auth is enabled
   const session = isAuthEnabled() ? await auth() : null;
 
-  const theme = settings?.theme_config;
+  // bold-js 1.2.0: theme tokens consolidated into portal.theme, fallback to theme_config
+  const theme = settings?.portal?.theme || settings?.theme_config;
 
   // Get portal configuration to determine if we should show header
   const config = getPortalConfig(settings);

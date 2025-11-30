@@ -101,7 +101,7 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
           {citation.text && (
             <div className="p-6">
               <blockquote className="italic text-muted-foreground leading-relaxed border-l-2 border-primary/20 pl-4">
-                "{citation.text}"
+                &ldquo;{citation.text}&rdquo;
               </blockquote>
             </div>
           )}

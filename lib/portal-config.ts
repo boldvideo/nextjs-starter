@@ -166,8 +166,8 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // 2. Default to true (show header)
   const showHeader = settings.portal?.navigation?.show_header ?? true;
 
-  // Theme configuration
-  const colorScheme = (settings.portal?.color_scheme ?? 'toggle') as 'toggle' | 'light' | 'dark';
+  // Theme configuration (bold-js 1.2.0: color_scheme consolidated into portal.theme)
+  const colorScheme = (settings.portal?.theme?.color_scheme ?? settings.portal?.color_scheme ?? 'toggle') as 'toggle' | 'light' | 'dark';
   const forcedTheme = colorScheme === 'toggle' ? null : colorScheme;
   const showToggle = colorScheme === 'toggle';
 

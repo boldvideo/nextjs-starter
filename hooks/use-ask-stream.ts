@@ -171,7 +171,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       const accumulatedCitations: AskCitation[] = [];
       const expandedQueries: string[] = [];
       let receivedCompleteEvent = false;
-      let chunkCount = 0;
       let lastUpdateTime = 0;
       const UPDATE_THROTTLE_MS = 50;
 
@@ -216,7 +215,6 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
             switch (message.type) {
               case "chunk":
-                chunkCount++;
                 accumulatedText += message.content;
                 
                 if (!hasStartedStreaming || shouldUpdateUI()) {

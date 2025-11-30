@@ -15,7 +15,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const context = await getTenantContext();
-  const theme = context?.settings?.theme_config;
+  // bold-js 1.2.0: theme tokens consolidated into portal.theme, fallback to theme_config
+  const theme = context?.settings?.portal?.theme || context?.settings?.theme_config;
 
   return (
     <html lang="en">

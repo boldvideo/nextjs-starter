@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { forwardRef, useEffect, useRef, useState, memo } from "react";
-import type { Video } from "@boldvideo/bold-js";
 import { useBold } from "@/components/providers/bold-provider";
 
 // Import MuxPlayer with SSR disabled to prevent hydration errors
