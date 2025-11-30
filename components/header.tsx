@@ -28,15 +28,16 @@ export function Header({
   const settings = useSettings();
   const config = getPortalConfig(settings);
 
-  // Check if we should use larger header size for wide/short logos
-  const useLargeHeader = process.env.NEXT_PUBLIC_LARGE_HEADER === "true";
-  const desktopLogoClass = useLargeHeader ? "h-20" : "h-10";
-  const mobileLogoClass = useLargeHeader ? "h-16" : "h-8";
+  // Logo scales with header height (minus padding)
+  // Desktop: header height - 24px (12px padding each side)
+  // Mobile: fixed 32px (h-8)
+  const desktopLogoClass = "h-[calc(var(--header-height)-24px)]";
+  const mobileLogoClass = "h-8";
 
   return (
     <>
       <header
-        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5  py-4 border-b border-border transition-all ${
+        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5 border-b border-border transition-all h-[var(--header-height)] flex items-center ${
           className || ""
         }`}
       >

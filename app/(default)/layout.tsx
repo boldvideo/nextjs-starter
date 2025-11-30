@@ -117,6 +117,19 @@ export default async function RootLayout({
   // bold-js 1.2.0: theme tokens consolidated into portal.theme, fallback to theme_config
   const theme = settings?.portal?.theme || settings?.theme_config;
 
+  // CSS overrides from page builder (BOLD-925)
+  const cssOverrides = settings?.portal?.theme?.css_overrides;
+
+  // Header size from page builder (BOLD-924)
+  // Maps sm/md/lg to pixel values, applied only on md+ breakpoints
+  const headerSizeMap: Record<string, string> = {
+    sm: "57px",
+    md: "73px",
+    lg: "97px",
+  };
+  const headerSize = settings?.portal?.theme?.header_size;
+  const headerHeight = headerSize ? headerSizeMap[headerSize] || "73px" : null;
+
   // Get portal configuration to determine if we should show header
   const config = getPortalConfig(settings);
   const showHeader = config.navigation.showHeader;
@@ -172,6 +185,26 @@ export default async function RootLayout({
                 };
               }
             `,
+            }}
+          />
+        )}
+        {headerHeight && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+              @media (min-width: 768px) {
+                :root {
+                  --header-height: ${headerHeight};
+                }
+              }
+            `,
+            }}
+          />
+        )}
+        {cssOverrides && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: cssOverrides,
             }}
           />
         )}
