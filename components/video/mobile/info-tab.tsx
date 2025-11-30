@@ -33,9 +33,9 @@ export default function InfoTab({
   >("description");
 
   return (
-    <div className="flex flex-col min-h-0 pb-20">
-      {/* Pill Tabs Navigation */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Pill Tabs Navigation - Fixed at top */}
+      <div className="flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <PillTabs className="px-4 py-3">
           <PillTab
             active={activeTab === "description"}
@@ -67,8 +67,8 @@ export default function InfoTab({
         </PillTabs>
       </div>
 
-      {/* Tab Content */}
-      <div className="p-4">
+      {/* Tab Content - Scrollable area */}
+      <div className="flex-1 overflow-y-auto p-4 pb-[60px]">
         {activeTab === "description" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-left-1 duration-300">
             <VideoDescription text={video.description || ""} />
@@ -112,13 +112,11 @@ export default function InfoTab({
 
         {activeTab === "transcript" && hasTranscript && (
           <div className="animate-in fade-in slide-in-from-right-1 duration-300">
-            <div className="max-h-[60vh] overflow-y-auto rounded-md border border-border">
-              <Transcript
-                url={video.transcript?.json?.url || ""}
-                onCueClick={onTimeSelect}
-                playerRef={playerRef}
-              />
-            </div>
+            <Transcript
+              url={video.transcript?.json?.url || ""}
+              onCueClick={onTimeSelect}
+              playerRef={playerRef}
+            />
           </div>
         )}
 

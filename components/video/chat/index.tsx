@@ -498,7 +498,7 @@ export const AIAssistant = ({
       <div
         className={cn(
           isEmbedded
-            ? "mt-auto bg-background border-t p-4 pb-20 shadow-lg"
+            ? "mt-auto bg-background border-t p-4 pb-16 md:pb-4 shadow-lg"
             : "p-4 bg-background-muted border-t border-background-muted"
         )}
       >
