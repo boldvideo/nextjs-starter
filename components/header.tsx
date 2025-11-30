@@ -28,8 +28,8 @@ export function Header({
   const settings = useSettings();
   const config = getPortalConfig(settings);
 
-  // Logo scales with header height (minus padding)
-  // Desktop: header height - 24px (12px padding each side)
+  // Logo scales with header height
+  // Desktop: header height minus 24px for visual breathing room
   // Mobile: fixed 32px (h-8)
   const desktopLogoClass = "h-[calc(var(--header-height)-24px)]";
   const mobileLogoClass = "h-8";
