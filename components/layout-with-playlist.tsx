@@ -23,7 +23,6 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
           logoDark={settings?.logo_dark_url}
           menuItems={settings?.menu_items || []}
           session={session}
-          className="h-18"
         />
       )}
       <SearchCommandDialog />
