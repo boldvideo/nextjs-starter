@@ -61,11 +61,14 @@ export async function generateMetadata(): Promise<Metadata> {
   // Fix upload URLs - ensure they point to the correct bucket
   const fixUploadUrl = (url: string | undefined) => {
     if (!url) return undefined;
-    // Handle relative paths
+    // Handle relative paths (with or without leading slash)
+    if (url.startsWith("uploads/")) {
+      return `https://uploads.eu1.boldvideo.io/${url}`;
+    }
     if (url.startsWith("/uploads/")) {
       return `https://uploads.eu1.boldvideo.io${url}`;
     }
-    // Handle legacy domain
+    // Handle any domain with /uploads/ path
     if (url.includes("/uploads/")) {
       return url.replace(/^https?:\/\/[^/]+\/uploads\//, "https://uploads.eu1.boldvideo.io/uploads/");
     }
