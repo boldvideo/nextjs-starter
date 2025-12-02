@@ -25,19 +25,16 @@ import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 // Force dynamic rendering — tenant depends on hostname in hosted mode
 export const dynamic = "force-dynamic";
 
-// Default metadata values
+// Default metadata values - only used as fallback when settings unavailable
 const defaultMetadata = {
-  title: "Bold Video x Next.js Starter Kit",
-  description:
-    "Bold Video Starter Kit: Supercharge videos, rapid encoding/transcription.",
-  ogImage: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
-    "Bold Video x Next.js Starter Kit"
-  )}`,
-  siteUrl: "https://starter-demo.bold.video",
+  title: "Video Portal",
+  description: "",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
   const context = await getTenantContext();
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
 
   if (!context?.settings) {
     return {
@@ -46,15 +43,8 @@ export async function generateMetadata(): Promise<Metadata> {
       openGraph: {
         title: defaultMetadata.title,
         description: defaultMetadata.description,
-        url: defaultMetadata.siteUrl,
+        url: baseUrl,
         siteName: defaultMetadata.title,
-        images: [
-          {
-            url: defaultMetadata.ogImage,
-            width: 1200,
-            height: 630,
-          },
-        ],
         locale: "en-US",
         type: "website",
       },
@@ -67,10 +57,20 @@ export async function generateMetadata(): Promise<Metadata> {
     ? `${meta.title}${meta.title_suffix || ""}`
     : defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
+  
+  // Fix incorrect upload domain if present (legacy data issue)
+  const fixUploadUrl = (url: string | undefined) => {
+    if (!url) return undefined;
+    return url.replace(
+      "https://bold-portal.vercel.app/uploads/",
+      "https://uploads.eu1.boldvideo.io/uploads/"
+    );
+  };
+  
   const ogImageUrl =
-    meta?.social_graph_image_url ||
+    fixUploadUrl(meta?.social_graph_image_url) ||
     `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(title)}${
-      meta?.image ? `&img=${encodeURIComponent(meta.image)}` : ""
+      meta?.image ? `&img=${encodeURIComponent(fixUploadUrl(meta.image) || meta.image)}` : ""
     }`;
 
   return {
@@ -79,7 +79,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: title,
       description: description,
-      url: defaultMetadata.siteUrl,
+      url: baseUrl,
       siteName: title,
       images: [
         {

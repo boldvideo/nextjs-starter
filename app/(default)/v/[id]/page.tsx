@@ -4,7 +4,6 @@ import { VideoDetail } from "@/components/video/detail";
 import { VideoSchema } from "@/components/seo/video-schema";
 import type { Video, Settings } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
-import { formatDuration } from "util/format-duration";
 
 export const revalidate = 30;
 
@@ -19,19 +18,18 @@ export async function generateMetadata({
   if (!context) return {};
 
   const { data } = await context.client.videos.get(id);
+  const video = data as ExtendedVideo;
+  const description = video.teaser || video.description || "";
+  
   return {
-    title: data.title,
-    description: data.description,
+    title: video.title,
+    description,
     openGraph: {
-      title: data.title,
-      description: data.description,
+      title: video.title,
+      description,
       images: [
         {
-          url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
-            data.title
-          )}&img=${encodeURIComponent(data.thumbnail)}&l=${encodeURIComponent(
-            formatDuration(data.duration)
-          )}`,
+          url: video.thumbnail,
           width: 1200,
           height: 630,
         },

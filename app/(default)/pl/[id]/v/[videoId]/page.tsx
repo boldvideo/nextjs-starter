@@ -3,7 +3,6 @@ import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
-import { formatDuration } from "util/format-duration";
 
 export const revalidate = 30;
 
@@ -32,19 +31,18 @@ export async function generateMetadata({
 
     if (!video) return {};
 
+    const extVideo = video as ExtendedVideo;
+    const description = extVideo.teaser || extVideo.description || "";
+
     return {
       title: `${video.title} - ${playlist?.title || "Playlist"}`,
-      description: video.description,
+      description,
       openGraph: {
         title: video.title,
-        description: video.description,
+        description,
         images: [
           {
-            url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
-              video.title
-            )}&img=${encodeURIComponent(video.thumbnail)}&l=${encodeURIComponent(
-              formatDuration(video.duration)
-            )}`,
+            url: video.thumbnail,
             width: 1200,
             height: 630,
           },
