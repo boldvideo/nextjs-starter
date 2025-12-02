@@ -9,12 +9,13 @@ interface PlaylistProps {
   playlist: {
     id: string;
     title: string;
-    videos: Video[];
+    videos?: Video[];
   };
 }
 
 export function FeaturedPlaylist({ playlist }: PlaylistProps) {
   const playlistId = `playlist-${playlist.id}`;
+  const videos = playlist.videos ?? [];
 
   return (
     <section aria-labelledby={playlistId}>
@@ -23,7 +24,7 @@ export function FeaturedPlaylist({ playlist }: PlaylistProps) {
           <Link href={`/pl/${playlist.id}`} className="flex items-center">
             <span className="hover:text-primary">{playlist.title}</span>
             <span className="font-normal text-base text-foreground ml-3 px-3 py-1 hover:text-primary  hover:cursor-pointer border border-border rounded-full">
-              {playlist.videos.length} Videos
+              {videos.length} Videos
             </span>
           </Link>
         </h2>
@@ -36,7 +37,7 @@ export function FeaturedPlaylist({ playlist }: PlaylistProps) {
         </Link>
       </div>
       <ul className="mb-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10">
-        {playlist.videos.slice(0, 8).map((video) => (
+        {videos.slice(0, 8).map((video) => (
           <li key={video.id}>
             <VideoThumbnail video={video} playlistId={playlist.id} />
           </li>

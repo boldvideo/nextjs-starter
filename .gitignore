@@ -42,3 +42,4 @@ CLAUDE.md
 .claude
 hack
 thoughts
+.env*.local

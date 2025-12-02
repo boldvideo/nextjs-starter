@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
+import { get } from "@vercel/edge-config";
 
 /**
  * Check if running in hosted mode (edge-compatible version).
- * Does not use "server-only" imports.
  */
 function isHostedMode(): boolean {
   const tenantToken =
@@ -14,52 +14,57 @@ function isHostedMode(): boolean {
 
 /**
  * Get the effective hostname for tenant resolution.
- * On localhost, uses DEV_TENANT_SUBDOMAIN directly.
+ * Handles localhost, *.bold.video subdomains, and custom domains via Edge Config.
  */
-function getEffectiveHostname(host: string | null): string {
+async function getEffectiveHostname(host: string | null): Promise<string> {
   if (!host) return "";
 
-  // Handle localhost in development - just use the dev subdomain directly
+  // Handle localhost in development
   if (host.includes("localhost") || host.includes("127.0.0.1")) {
     return process.env.DEV_TENANT_SUBDOMAIN || "";
   }
 
-  return host;
+  // Standard subdomain pattern: tenant.bold.video
+  if (host.endsWith(".bold.video")) {
+    return host.split(".")[0];
+  }
+
+  // Custom domain: look up in Edge Config
+  // Keys use underscores (video_goatmire_com -> goatmire)
+  const edgeKey = host.replace(/\./g, "_");
+  const tenant = await get<string>(edgeKey);
+
+  return tenant || "";
 }
 
-export default auth((req) => {
-  // In hosted mode, inject hostname header for getTenantContext to read
+export default auth(async (req) => {
   if (isHostedMode()) {
     const requestHeaders = new Headers(req.headers);
-    const effectiveHostname = getEffectiveHostname(req.headers.get("host"));
+    const effectiveHostname = await getEffectiveHostname(
+      req.headers.get("host")
+    );
+
+    // No tenant found for this domain
+    if (!effectiveHostname) {
+      return new NextResponse("Unknown domain", { status: 404 });
+    }
+
     requestHeaders.set("x-bold-hostname", effectiveHostname);
 
-    // If auth is disabled, just pass through with headers
     if (!isAuthEnabled()) {
       return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
-    // Auth is enabled — continue with auth logic but with modified headers
-    // The auth callback handles authentication automatically
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  // Standalone mode: Skip middleware if auth is disabled
   if (!isAuthEnabled()) {
     return;
   }
-
-  // Auth is enabled, the auth callback handles authentication automatically
 });
 
 export const config = {
-  // Matcher configuration - protect all routes except:
-  // - api routes (except auth)
-  // - static files
-  // - auth routes
   matcher: [
-    // "/((?!api/auth|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     "/((?!auth|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-
