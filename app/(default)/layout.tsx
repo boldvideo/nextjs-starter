@@ -58,13 +58,18 @@ export async function generateMetadata(): Promise<Metadata> {
     : defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
   
-  // Fix incorrect upload domain if present (legacy data issue)
+  // Fix upload URLs - ensure they point to the correct bucket
   const fixUploadUrl = (url: string | undefined) => {
     if (!url) return undefined;
-    return url.replace(
-      "https://bold-portal.vercel.app/uploads/",
-      "https://uploads.eu1.boldvideo.io/uploads/"
-    );
+    // Handle relative paths
+    if (url.startsWith("/uploads/")) {
+      return `https://uploads.eu1.boldvideo.io${url}`;
+    }
+    // Handle legacy domain
+    if (url.includes("/uploads/")) {
+      return url.replace(/^https?:\/\/[^/]+\/uploads\//, "https://uploads.eu1.boldvideo.io/uploads/");
+    }
+    return url;
   };
   
   const ogImageUrl =
