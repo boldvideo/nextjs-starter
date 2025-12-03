@@ -181,10 +181,10 @@ export function SearchPreview() {
                                 href={`/v/${
                                   hit.short_id || hit.internal_id
                                 }?t=${Math.floor(segment.start_time)}`}
-                                className="block py-1.5 hover:bg-accent rounded-md -mx-2 px-2"
+                                className="block py-1.5 hover:bg-primary/10 dark:hover:bg-primary/20 rounded-md -mx-2 px-2"
                               >
                                 <div className="flex items-start gap-2.5">
-                                  <div className="flex items-center gap-1.5 bg-accent text-accent-foreground text-xs px-2.5 py-1 rounded-full mt-0.5">
+                                  <div className="flex items-center gap-1.5 bg-primary/10 dark:bg-primary/20 text-primary text-xs px-2.5 py-1 rounded-full mt-0.5">
                                     <Play size={12} className="ml-0.5" />
                                     <span>
                                       {formatTime(segment.start_time)}

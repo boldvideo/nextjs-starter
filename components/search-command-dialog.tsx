@@ -128,7 +128,7 @@ function ChatMessage({
     <div className="space-y-3">
       {/* User message */}
       <div className="flex items-start gap-3 justify-end">
-        <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]">
+        <div className="bg-primary/10 dark:bg-primary/20 text-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]">
           <p className="text-sm">{turn.query}</p>
         </div>
         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -153,7 +153,7 @@ function ChatMessage({
         </div>
         <div className="flex-1 min-w-0">
           {turn.response ? (
-            <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-relaxed">
+            <div className="prose dark:prose-invert max-w-none prose-p:my-2 prose-p:leading-relaxed prose-headings:text-base prose-headings:font-bold prose-headings:my-2">
               <ReactMarkdown
                 components={{
                   p: ({ children }) => {

@@ -117,7 +117,7 @@ export function PlaylistSidebar({
                   <Link
                     href={`/pl/${playlist.id}/v/${video.id}`}
                     className={cn(
-                      "w-full flex gap-3 p-3 hover:bg-primary/20 transition-colors text-left cursor-pointer relative",
+                      "w-full flex gap-3 p-3 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors text-left cursor-pointer relative",
                       isCurrent && "bg-primary/10 border-l-4 border-l-primary"
                     )}
                   >

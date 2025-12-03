@@ -61,10 +61,10 @@ function SearchResult({ hit }: { hit: SearchHit }) {
                   href={`/v/${hit.short_id || hit.internal_id}?t=${Math.floor(
                     segment.start_time
                   )}`}
-                  className="block py-2 hover:bg-accent rounded-md -mx-2 px-2"
+                  className="block py-2 hover:bg-primary/10 dark:hover:bg-primary/20 rounded-md -mx-2 px-2"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex items-center gap-2 bg-accent text-accent-foreground text-sm px-3 py-1.5 rounded-full mt-0.5">
+                    <div className="flex items-center gap-2 bg-primary/10 dark:bg-primary/20 text-primary text-sm px-3 py-1.5 rounded-full mt-0.5">
                       <Play size={14} className="ml-0.5" />
                       <span>{formatTime(segment.start_time)}</span>
                     </div>

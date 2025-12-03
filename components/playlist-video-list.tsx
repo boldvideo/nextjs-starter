@@ -46,7 +46,7 @@ export function PlaylistVideoList({
           <li key={video.id}>
             <Link
               href={`/pl/${playlistId}/v/${video.id}`}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-2 sm:p-3 hover:bg-accent transition-colors rounded-lg group"
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-2 sm:p-3 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors rounded-lg group"
             >
               {/* Thumbnail */}
               <div className="relative flex-shrink-0 w-full sm:w-40 md:w-48 aspect-video bg-muted rounded-lg overflow-hidden">
