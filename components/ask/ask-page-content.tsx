@@ -31,7 +31,13 @@ export function AskPageContent() {
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
   const greeting = config.ai.greeting || "How can I help you today?";
-  const suggestions = config.homepage.assistantConfig?.suggestions || [];
+  
+  const suggestions = useMemo(() => {
+    const starters = config.ai.conversationStarters || [];
+    if (starters.length <= 4) return starters;
+    const shuffled = [...starters].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 4);
+  }, [config.ai.conversationStarters]);
 
   const { messages, isStreaming, streamQuestion, stop, reset } =
     useAIAskStream();

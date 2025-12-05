@@ -101,6 +101,20 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         conversationId: state.conversationId,
       });
 
+    case "clarification": {
+      const clarificationEvent = event as unknown as {
+        content?: string;
+        questions?: string[];
+        needs_response?: boolean;
+      };
+      return JSON.stringify({
+        type: "clarification",
+        content: clarificationEvent.content || "",
+        questions: clarificationEvent.questions || [],
+        needs_response: clarificationEvent.needs_response ?? true,
+      });
+    }
+
     case "error":
       return JSON.stringify({
         type: "error",

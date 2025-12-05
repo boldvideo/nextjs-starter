@@ -196,6 +196,29 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 console.debug("[AI Ask] complete event received, marking stream as done");
                 break;
 
+              case "clarification": {
+                const clarificationContent = event.content || "";
+                accumulatedResponse = clarificationContent;
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === messageId
+                      ? {
+                          ...msg,
+                          content: clarificationContent,
+                          type: "answer",
+                        }
+                      : msg
+                  )
+                );
+                if (!didInvokeOnComplete) {
+                  didInvokeOnComplete = true;
+                  options.onComplete?.(clarificationContent, []);
+                }
+                seenTerminalEvent = true;
+                console.debug("[AI Ask] clarification received, marking stream as done");
+                break;
+              }
+
               case "error":
                 if (!accumulatedResponse) {
                   setMessages((prev) =>
