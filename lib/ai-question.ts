@@ -8,105 +8,115 @@ export type Message = {
   content: string;
 };
 
+interface StreamState {
+  accumulatedAnswer: string;
+  sources: Source[];
+}
+
+function formatSSE(event: AIEvent, state: StreamState): string | null {
+  switch (event.type) {
+    case "text_delta":
+      state.accumulatedAnswer += event.delta;
+      return JSON.stringify({ type: "chunk", content: event.delta });
+
+    case "sources":
+      state.sources = event.sources;
+      return null;
+
+    case "message_complete":
+      return JSON.stringify({
+        type: "complete",
+        success: true,
+        answer: {
+          text: event.content || state.accumulatedAnswer,
+          citations: (event.sources || state.sources).map((s) => ({
+            video_id: s.video_id,
+            title: s.title,
+            timestamp: s.timestamp,
+            text: s.text,
+          })),
+        },
+      });
+
+    case "error":
+      return JSON.stringify({
+        type: "error",
+        content: event.message || "Stream error",
+      });
+
+    default:
+      return null;
+  }
+}
+
+function asyncIterableToStream(iterable: AsyncIterable<AIEvent>): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  const state: StreamState = {
+    accumulatedAnswer: "",
+    sources: [],
+  };
+
+  const iterator = iterable[Symbol.asyncIterator]();
+
+  return new ReadableStream({
+    async pull(controller) {
+      try {
+        const { done, value } = await iterator.next();
+
+        if (done) {
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+          return;
+        }
+
+        const sseData = formatSSE(value, state);
+        if (sseData) {
+          controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
+        }
+      } catch (error) {
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({
+              type: "error",
+              content: error instanceof Error ? error.message : "Stream error",
+            })}\n\n`
+          )
+        );
+        controller.close();
+      }
+    },
+  });
+}
+
 /**
  * Streams AI responses from the backend using Bold JS SDK
+ * Uses pull-based streaming for immediate event forwarding
  */
 export async function streamAIQuestion(
   videoId: string,
-  _tenant: string, // kept for backwards compatibility, not used
+  _tenant: string,
   question: string,
-  _conversationId?: string, // SDK ask doesn't support conversation yet
-  _actionData?: { type: string; label: string } // not supported in SDK yet
+  _conversationId?: string,
+  _actionData?: { type: string; label: string }
 ) {
-  // Get tenant context for multitenancy support
   const context = await getTenantContext();
   if (!context) {
     throw new Error("Tenant not found");
   }
 
   try {
-    // Use SDK's ai.chat() for video-scoped streaming
     const stream = await context.client.ai.chat(videoId, {
       prompt: question,
     }) as AsyncIterable<AIEvent>;
 
-    // Transform SDK's AsyncIterable to SSE Response
-    const encoder = new TextEncoder();
-    let accumulatedAnswer = "";
-    let sources: Source[] = [];
-
-    const responseStream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const event of stream) {
-            switch (event.type) {
-              case "text_delta":
-                accumulatedAnswer += event.delta;
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({ type: "chunk", content: event.delta })}\n\n`
-                  )
-                );
-                break;
-
-              case "sources":
-                sources = event.sources;
-                break;
-
-              case "message_complete":
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({
-                      type: "complete",
-                      success: true,
-                      answer: {
-                        text: event.content || accumulatedAnswer,
-                        citations: (event.sources || sources).map((s) => ({
-                          video_id: s.video_id,
-                          title: s.title,
-                          timestamp: s.timestamp,
-                          text: s.text,
-                        })),
-                      },
-                    })}\n\n`
-                  )
-                );
-                break;
-
-              case "error":
-                controller.enqueue(
-                  encoder.encode(
-                    `data: ${JSON.stringify({
-                      type: "error",
-                      content: event.message || "Stream error",
-                    })}\n\n`
-                  )
-                );
-                break;
-            }
-          }
-
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-        } catch (error) {
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({
-                type: "error",
-                content: error instanceof Error ? error.message : "Stream error",
-              })}\n\n`
-            )
-          );
-          controller.close();
-        }
-      },
-    });
+    const responseStream = asyncIterableToStream(stream);
 
     return new Response(responseStream, {
       headers: {
         "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
+        "Cache-Control": "no-cache, no-transform",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
       },
     });
   } catch (error) {

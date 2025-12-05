@@ -24,6 +24,11 @@ async function getHomeData(): Promise<{
 
   const { client, settings } = context;
 
+  // Debug: log full settings payload
+  console.log("=== SETTINGS PAYLOAD ===");
+  console.log(JSON.stringify(settings, null, 2));
+  console.log("=== END SETTINGS PAYLOAD ===");
+
   // Get portal configuration
   const config = getPortalConfig(settings);
 

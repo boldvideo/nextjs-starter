@@ -1,8 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSearch } from "@/components/providers/search-provider";
 
 interface AskAiButtonProps {
   personaName: string;
@@ -10,11 +10,10 @@ interface AskAiButtonProps {
 }
 
 export function AskAiButton({ personaName, className }: AskAiButtonProps) {
-  const { setIsOpen, setMode } = useSearch();
+  const router = useRouter();
 
   const handleClick = () => {
-    setMode("ask");
-    setIsOpen(true);
+    router.push("/ask");
   };
 
   return (

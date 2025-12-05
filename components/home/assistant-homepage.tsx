@@ -25,8 +25,7 @@ export function AssistantHomepage({ config }: AssistantHomepageProps) {
       
       setIsSubmitting(true);
 
-      // Navigate to coach page with query parameter (using 'c' to avoid conflict with global search 'q')
-      router.push(`/coach?c=${encodeURIComponent(trimmedQuery)}`);
+      router.push(`/ask?q=${encodeURIComponent(trimmedQuery)}`);
     },
     [query, isSubmitting, router]
   );
