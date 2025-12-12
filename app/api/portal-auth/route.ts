@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     if (platformKey) {
       const response = await fetch(
-        `${INTERNAL_API_BASE}/i/v1/sites/${tenant}/auth/verify`,
+        `${INTERNAL_API_BASE}/i/v1/sites/${tenant}/auth`,
         {
           method: "POST",
           headers: {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
       if (response.ok) {
         const data = await response.json();
-        isValid = data.valid === true;
+        isValid = !!data.token;
       }
     } else if (tenantToken) {
       const response = await fetch(
