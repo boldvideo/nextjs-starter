@@ -1,61 +1,175 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
 import { get } from "@vercel/edge-config";
+import {
+  verifyPortalSessionEdge,
+  getPortalSessionFromRequest,
+  isPortalAuthRequired,
+} from "@/lib/portal-auth-edge";
+import { DEFAULT_INTERNAL_API_BASE_URL } from "@boldvideo/bold-js";
 
-/**
- * Check if running in hosted mode (edge-compatible version).
- */
+const INTERNAL_API_BASE =
+  process.env.BACKEND_URL ||
+  DEFAULT_INTERNAL_API_BASE_URL.replace("/i/v1/", "");
+
 function isHostedMode(): boolean {
   const tenantToken =
     process.env.BOLD_API_KEY || process.env.NEXT_PUBLIC_BOLD_API_KEY;
   return !tenantToken && !!process.env.BOLD_PLATFORM_KEY;
 }
 
-/**
- * Get the effective hostname for tenant resolution.
- * Handles localhost, *.bold.video subdomains, and custom domains via Edge Config.
- */
 async function getEffectiveHostname(host: string | null): Promise<string> {
   if (!host) return "";
 
-  // Handle localhost in development
   if (host.includes("localhost") || host.includes("127.0.0.1")) {
     return process.env.DEV_TENANT_SUBDOMAIN || "";
   }
 
-  // Standard subdomain pattern: tenant.bold.video
   if (host.endsWith(".bold.video")) {
     return host.split(".")[0];
   }
 
-  // Custom domain: look up in Edge Config
-  // Keys use underscores (video_goatmire_com -> goatmire)
   const edgeKey = host.replace(/\./g, "_");
   const tenant = await get<string>(edgeKey);
 
   return tenant || "";
 }
 
-export default auth(async (req) => {
+async function fetchTenantSettings(subdomain: string): Promise<unknown> {
+  const platformKey = process.env.BOLD_PLATFORM_KEY;
+  const tenantToken =
+    process.env.BOLD_API_KEY || process.env.NEXT_PUBLIC_BOLD_API_KEY;
+
+  try {
+    if (platformKey) {
+      const url = `${INTERNAL_API_BASE}/i/v1/sites/${subdomain}`;
+      const response = await fetch(url, {
+        headers: {
+          "x-internal-api-key": platformKey.trim(),
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      });
+
+      if (!response.ok) return null;
+
+      const json = await response.json();
+      return json.data || json;
+    }
+
+    if (tenantToken) {
+      const baseUrl = process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1";
+      const url = baseUrl.endsWith("/api/v1")
+        ? `${baseUrl}/settings`
+        : `${baseUrl}/api/v1/settings`;
+      const response = await fetch(url, {
+        headers: {
+          Authorization: tenantToken,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      });
+
+      if (!response.ok) return null;
+
+      const json = await response.json();
+      return json.data || json;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function shouldSkipPortalAuth(pathname: string): boolean {
+  const skipPaths = [
+    "/login",
+    "/api/portal-auth",
+    "/api/auth",
+    "/_next",
+    "/favicon.ico",
+  ];
+
+  return skipPaths.some((path) => pathname.startsWith(path));
+}
+
+export default auth(async (req: NextRequest) => {
+  const pathname = req.nextUrl.pathname;
+
   if (isHostedMode()) {
     const requestHeaders = new Headers(req.headers);
     const effectiveHostname = await getEffectiveHostname(
       req.headers.get("host")
     );
 
-    // No tenant found for this domain
     if (!effectiveHostname) {
       return new NextResponse("Unknown domain", { status: 404 });
     }
 
     requestHeaders.set("x-bold-hostname", effectiveHostname);
 
+    if (!shouldSkipPortalAuth(pathname)) {
+      const settings = await fetchTenantSettings(effectiveHostname);
+
+      if (isPortalAuthRequired(settings)) {
+        const sessionToken = getPortalSessionFromRequest(req);
+
+        if (!sessionToken) {
+          const loginUrl = new URL("/login", req.url);
+          loginUrl.searchParams.set("redirect", pathname + req.nextUrl.search);
+          return NextResponse.redirect(loginUrl);
+        }
+
+        const session = await verifyPortalSessionEdge(
+          sessionToken,
+          effectiveHostname
+        );
+
+        if (!session) {
+          const loginUrl = new URL("/login", req.url);
+          loginUrl.searchParams.set("redirect", pathname + req.nextUrl.search);
+          const response = NextResponse.redirect(loginUrl);
+          response.cookies.delete("portal_session");
+          return response;
+        }
+      }
+    }
+
     if (!isAuthEnabled()) {
       return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
     return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  if (!shouldSkipPortalAuth(pathname)) {
+    const tenant = process.env.DEV_TENANT_SUBDOMAIN || "standalone";
+    const settings = await fetchTenantSettings(tenant);
+    const portalAuthRequired =
+      isPortalAuthRequired(settings) ||
+      process.env.PORTAL_AUTH_REQUIRED === "true";
+
+    if (portalAuthRequired) {
+      const sessionToken = getPortalSessionFromRequest(req);
+
+      if (!sessionToken) {
+        const loginUrl = new URL("/login", req.url);
+        loginUrl.searchParams.set("redirect", pathname + req.nextUrl.search);
+        return NextResponse.redirect(loginUrl);
+      }
+
+      const session = await verifyPortalSessionEdge(sessionToken, tenant);
+
+      if (!session) {
+        const loginUrl = new URL("/login", req.url);
+        loginUrl.searchParams.set("redirect", pathname + req.nextUrl.search);
+        const response = NextResponse.redirect(loginUrl);
+        response.cookies.delete("portal_session");
+        return response;
+      }
+    }
   }
 
   if (!isAuthEnabled()) {
@@ -65,6 +179,6 @@ export default auth(async (req) => {
 
 export const config = {
   matcher: [
-    "/((?!auth|_next/static|_next/image|favicon.ico|auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
