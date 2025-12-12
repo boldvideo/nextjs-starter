@@ -7,7 +7,7 @@ import {
 } from "@/lib/portal-auth";
 
 const INTERNAL_API_BASE =
-  process.env.BACKEND_URL ||
+  process.env.BOLD_INTERNAL_API_URL ||
   DEFAULT_INTERNAL_API_BASE_URL.replace("/i/v1/", "");
 
 function getApiBaseUrl(): string {

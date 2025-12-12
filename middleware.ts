@@ -10,7 +10,7 @@ import {
 import { DEFAULT_INTERNAL_API_BASE_URL } from "@boldvideo/bold-js";
 
 const INTERNAL_API_BASE =
-  process.env.BACKEND_URL ||
+  process.env.BOLD_INTERNAL_API_URL ||
   DEFAULT_INTERNAL_API_BASE_URL.replace("/i/v1/", "");
 
 function isHostedMode(): boolean {
