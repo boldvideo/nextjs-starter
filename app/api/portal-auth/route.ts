@@ -6,7 +6,9 @@ import {
   setPortalSessionCookie,
 } from "@/lib/portal-auth";
 
-const INTERNAL_API_BASE = DEFAULT_INTERNAL_API_BASE_URL.replace("/i/v1/", "");
+const INTERNAL_API_BASE =
+  process.env.BACKEND_URL ||
+  DEFAULT_INTERNAL_API_BASE_URL.replace("/i/v1/", "");
 
 function getApiBaseUrl(): string {
   const backendUrl = process.env.BACKEND_URL;
