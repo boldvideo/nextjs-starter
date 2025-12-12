@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     let isValid = false;
 
     if (platformKey) {
-      const url = `${INTERNAL_API_BASE}/i/v1/sites/${tenant}/auth`;
+      const url = `${INTERNAL_API_BASE}/i/v1/sites/${tenant}/portal/auth`;
       console.log("[Portal Auth] Hosted mode request:", {
         url,
         tenant,
