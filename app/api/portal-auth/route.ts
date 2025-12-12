@@ -53,21 +53,35 @@ export async function POST(request: NextRequest) {
     let isValid = false;
 
     if (platformKey) {
-      const response = await fetch(
-        `${INTERNAL_API_BASE}/i/v1/sites/${tenant}/auth`,
-        {
-          method: "POST",
-          headers: {
-            "x-internal-api-key": platformKey,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ password }),
-        }
-      );
+      const url = `${INTERNAL_API_BASE}/i/v1/sites/${tenant}/auth`;
+      console.log("[Portal Auth] Hosted mode request:", {
+        url,
+        tenant,
+        hasInternalApiUrl: !!process.env.BOLD_INTERNAL_API_URL,
+        internalApiBase: INTERNAL_API_BASE,
+      });
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "x-internal-api-key": platformKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      });
+
+      console.log("[Portal Auth] Response:", {
+        status: response.status,
+        ok: response.ok,
+      });
 
       if (response.ok) {
         const data = await response.json();
+        console.log("[Portal Auth] Response data:", { hasToken: !!data.token, keys: Object.keys(data) });
         isValid = !!data.token;
+      } else {
+        const text = await response.text();
+        console.log("[Portal Auth] Error response:", text);
       }
     } else if (tenantToken) {
       const response = await fetch(
