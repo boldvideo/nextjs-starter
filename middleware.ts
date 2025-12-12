@@ -49,7 +49,7 @@ async function fetchTenantSettings(subdomain: string): Promise<unknown> {
           "x-internal-api-key": platformKey.trim(),
           "Content-Type": "application/json",
         },
-        next: { revalidate: 60 },
+        cache: "no-store",
       });
 
       if (!response.ok) return null;
@@ -68,7 +68,7 @@ async function fetchTenantSettings(subdomain: string): Promise<unknown> {
           Authorization: tenantToken,
           "Content-Type": "application/json",
         },
-        next: { revalidate: 60 },
+        cache: "no-store",
       });
 
       if (!response.ok) return null;

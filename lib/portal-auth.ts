@@ -52,7 +52,7 @@ export async function setPortalSessionCookie(token: string): Promise<void> {
   cookieStore.set(PORTAL_SESSION_COOKIE, token, {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "none", // Required for portal embedding in Bold dashboard iframe
     path: "/",
     maxAge: 60 * 60 * 24,
   });

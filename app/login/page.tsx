@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { PortalLoginForm } from "@/components/portal-auth/login-form";
 import { isPortalAuthRequired } from "@/lib/portal-auth";
+import { getSafeRedirect } from "@/lib/portal-redirect";
 
 interface ExtendedSettings {
   logo_url?: string;
@@ -31,7 +32,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     process.env.PORTAL_AUTH_REQUIRED === "true";
 
   if (!authRequired) {
-    redirect(params.redirect || "/");
+    redirect(getSafeRedirect(params.redirect));
   }
 
   const logoUrl = settings?.logo_url || "/bold-logo.svg";

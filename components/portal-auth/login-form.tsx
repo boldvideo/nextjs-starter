@@ -3,11 +3,12 @@
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { getSafeRedirect } from "@/lib/portal-redirect";
 
 export function PortalLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams?.get("redirect") || "/";
+  const redirectTo = getSafeRedirect(searchParams?.get("redirect"));
 
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
