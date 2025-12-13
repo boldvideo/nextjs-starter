@@ -26,7 +26,7 @@ async function getEffectiveHostname(host: string | null): Promise<string> {
     return process.env.DEV_TENANT_SUBDOMAIN || "";
   }
 
-  if (host.endsWith(".bold.video")) {
+  if (host.endsWith(".bold.video") || host.endsWith(".bld.af")) {
     return host.split(".")[0];
   }
 
