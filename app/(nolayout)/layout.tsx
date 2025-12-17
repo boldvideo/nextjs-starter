@@ -1,5 +1,7 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { BoldProvider } from "@/components/providers/bold-provider";
+import { SettingsProvider } from "@/components/providers/settings-provider";
+import { ProgressProvider } from "@/components/providers/progress-provider";
 import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 import {
   getThemeFromSettings,
@@ -68,7 +70,11 @@ export default async function RootLayout({
               process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1"
             }
           >
-            {children}
+            <SettingsProvider settings={settings ?? null}>
+              <ProgressProvider>
+                {children}
+              </ProgressProvider>
+            </SettingsProvider>
           </BoldProvider>
         ) : (
           children

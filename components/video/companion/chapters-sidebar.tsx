@@ -14,6 +14,8 @@ interface ChaptersSidebarProps {
   playbackId: string;
   onChapterClick: (time: number) => void;
   className?: string;
+  /** Compact mode for embeds - hides header */
+  compact?: boolean;
 }
 
 function timeToSeconds(timeString: string): number {
@@ -64,6 +66,7 @@ export function ChaptersSidebar({
   chaptersWebVTT,
   onChapterClick,
   className,
+  compact = false,
 }: ChaptersSidebarProps) {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [activeChapter, setActiveChapter] = useState<number>(0);
@@ -79,14 +82,17 @@ export function ChaptersSidebar({
   return (
     <div
       className={cn(
-        "bg-sidebar rounded-lg border border-border overflow-hidden flex flex-col h-full",
+        "rounded-lg border border-border overflow-hidden flex flex-col h-full",
+        compact ? "bg-zinc-900" : "bg-sidebar",
         className
       )}
     >
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border">
-        <h3 className="font-semibold text-sidebar-foreground">Chapters</h3>
-      </div>
+      {!compact && (
+        <div className="px-4 py-3 border-b border-border">
+          <h3 className="font-semibold text-sidebar-foreground">Chapters</h3>
+        </div>
+      )}
 
       {/* Chapter List */}
       <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -95,7 +101,7 @@ export function ChaptersSidebar({
             Loading chapters...
           </div>
         ) : (
-          <ol className="divide-y divide-border">
+          <ol className={cn("divide-y", compact ? "divide-zinc-800" : "divide-border")}>
             {chapters.map((chapter, index) => (
               <li key={index}>
                 <button
@@ -104,14 +110,23 @@ export function ChaptersSidebar({
                     onChapterClick(chapter.startTime);
                   }}
                   className={cn(
-                    "w-full text-left px-4 py-3 transition-colors hover:bg-primary/20 text-foreground group cursor-pointer flex items-start gap-2.5",
+                    "w-full text-left transition-colors group cursor-pointer flex items-start",
+                    compact 
+                      ? "px-3 py-1.5 gap-2 text-zinc-100 hover:bg-zinc-800" 
+                      : "px-4 py-3 gap-2.5 text-foreground hover:bg-primary/20",
                     activeChapter === index && "bg-primary/10 text-primary"
                   )}
                 >
-                  <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
+                  <span className={cn(
+                    "shrink-0",
+                    compact ? "text-[11px] mt-px text-zinc-400" : "text-xs mt-0.5 text-muted-foreground"
+                  )}>
                     {formatTime(chapter.startTime)}
                   </span>
-                  <div className="text-sm font-medium transition-colors">
+                  <div className={cn(
+                    "font-medium transition-colors",
+                    compact ? "text-xs" : "text-sm"
+                  )}>
                     {chapter.title}
                   </div>
                 </button>
