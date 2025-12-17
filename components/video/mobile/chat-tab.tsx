@@ -9,9 +9,10 @@ import { Settings } from "@boldvideo/bold-js";
 interface ChatTabProps {
   video: ExtendedVideo;
   settings: Settings | null;
+  compact?: boolean;
 }
 
-export default function ChatTab({ video, settings }: ChatTabProps) {
+export default function ChatTab({ video, settings, compact = false }: ChatTabProps) {
   const { setHasUnreadMessage, hasUnreadMessage } = useAIAssistantContext();
 
   // Clear unread badge when user views chat tab
@@ -33,9 +34,10 @@ export default function ChatTab({ video, settings }: ChatTabProps) {
         name={settings?.ai_name || "AI Assistant"}
         avatar={settings?.ai_avatar || "/default-avatar.png"}
         subdomain={""}
-        userName={undefined} // Optional, could be threaded if needed
+        userName={undefined}
         greeting={settings?.ai_greeting}
         isEmbedded={true}
+        compact={compact}
         className="flex-1 h-full border-none shadow-none"
       />
     </div>

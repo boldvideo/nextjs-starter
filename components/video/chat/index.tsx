@@ -33,6 +33,8 @@ interface AIAssistantProps {
   endpoint?: string;
   /** Whether the assistant should be embedded in the page layout rather than floating */
   isEmbedded?: boolean;
+  /** Compact mode for embeds - hides avatar header, uses minimal styling */
+  compact?: boolean;
 }
 
 /**
@@ -176,6 +178,7 @@ export const AIAssistant = ({
   className,
   endpoint,
   isEmbedded = false, // Default to floating mode
+  compact = false, // Compact mode for embeds
 }: AIAssistantProps) => {
   const { onTimeClick } = useAIAssistantContext();
 
@@ -359,37 +362,40 @@ export const AIAssistant = ({
         ref={scrollContainerRef}
         className={cn(
           "flex-1 min-h-0 overflow-y-auto",
-          isEmbedded ? "px-4" : ""
+          isEmbedded ? "px-4" : "",
+          compact && "thin-scrollbar"
         )}
         onClick={handleTimestampInteraction}
       >
-        <div className={cn("mb-4", isEmbedded ? "pt-4" : "px-4 pt-4")}>
-          <div className="flex items-center mb-2">
-            <Image
-              src={avatar}
-              alt={name}
-              width={40}
-              height={40}
-              className="rounded-full mr-2"
-            />
-            <strong>{name}</strong>
+        {!compact && (
+          <div className={cn("mb-4", isEmbedded ? "pt-4" : "px-4 pt-4")}>
+            <div className="flex items-center mb-2">
+              <Image
+                src={avatar}
+                alt={name}
+                width={40}
+                height={40}
+                className="rounded-full mr-2"
+              />
+              <strong>{name}</strong>
+            </div>
+            <div
+              className={cn(
+                isEmbedded
+                  ? "rounded-lg p-3 bg-muted text-foreground ml-4"
+                  : ""
+              )}
+            >
+              <p>
+                {greeting && greeting.trim() !== ""
+                  ? greeting
+                  : `${
+                      userName ? `Hi ${userName}!` : "Hello there!"
+                    } I'm ${name}, your AI assistant. How can I help you with this video?`}
+              </p>
+            </div>
           </div>
-          <div
-            className={cn(
-              isEmbedded
-                ? "rounded-lg p-3 bg-muted text-foreground ml-4"
-                : ""
-            )}
-          >
-            <p>
-              {greeting && greeting.trim() !== ""
-                ? greeting
-                : `${
-                    userName ? `Hi ${userName}!` : "Hello there!"
-                  } I'm ${name}, your AI assistant. How can I help you with this video?`}
-            </p>
-          </div>
-        </div>
+        )}
 
         {messages.map((message, index) => (
           <div key={index} className="mb-4">
@@ -398,9 +404,11 @@ export const AIAssistant = ({
                 "rounded-lg p-3 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
                 message.role === "user"
                   ? "bg-muted/50 text-foreground border border-border/50"
-                  : "bg-muted text-foreground ml-4",
+                  : "bg-muted text-foreground",
                 message.role === "user" && !isEmbedded ? "mr-8" : "",
-                message.role !== "user" && !isEmbedded ? "ml-8" : ""
+                message.role !== "user" && !isEmbedded ? "ml-8" : "",
+                message.role !== "user" && isEmbedded && !compact ? "ml-4" : "",
+                compact && "text-sm"
               )}
             >
               {message.content ? (
@@ -499,33 +507,56 @@ export const AIAssistant = ({
         className={cn(
           isEmbedded
             ? "mt-auto bg-background border-t p-4 pb-16 md:pb-4 shadow-lg"
-            : "p-4 bg-background-muted border-t border-background-muted"
+            : "p-4 bg-background-muted border-t border-background-muted",
+          compact && "p-2 pb-2 md:pb-2"
         )}
       >
-        <div className="relative flex items-end gap-2" ref={inputContainerRef}>
-          <textarea
-            ref={textareaRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-            placeholder="Ask me something about this video..."
-            rows={2}
-            className={cn(
-              "w-full rounded-2xl py-3 px-4 resize-none overflow-hidden min-h-[64px]",
-              "focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm",
-              isEmbedded
-                ? "bg-muted text-foreground"
-                : "bg-background text-foreground"
-            )}
-          />
+        <div className={cn("relative flex gap-2", compact ? "items-center" : "items-end")} ref={inputContainerRef}>
+          {compact ? (
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
+              placeholder="Ask about this video..."
+              className={cn(
+                "w-full rounded-full py-2 px-4 text-sm",
+                "focus:outline-none focus:ring-2 focus:ring-primary/50",
+                "bg-muted text-foreground placeholder:text-muted-foreground"
+              )}
+            />
+          ) : (
+            <textarea
+              ref={textareaRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
+              placeholder="Ask me something about this video..."
+              rows={2}
+              className={cn(
+                "w-full rounded-2xl resize-none overflow-hidden",
+                "focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm",
+                isEmbedded
+                  ? "bg-muted text-foreground"
+                  : "bg-background text-foreground",
+                "py-3 px-4 min-h-[64px]"
+              )}
+            />
+          )}
           <button
             className={cn(
-              "flex-shrink-0 p-3 rounded-full transition-colors mb-1",
+              "flex-shrink-0 rounded-full transition-colors",
+              compact ? "p-2" : "p-3 mb-1",
               inputValue.trim()
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
@@ -533,7 +564,7 @@ export const AIAssistant = ({
             onClick={() => handleSubmit()}
             disabled={isPending || !inputValue.trim()}
           >
-            <Send size={18} />
+            <Send size={compact ? 16 : 18} />
           </button>
         </div>
         {!isEmbedded && (
