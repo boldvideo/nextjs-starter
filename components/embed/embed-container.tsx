@@ -60,27 +60,29 @@ export function EmbedContainer({
       )}
 
       {/* Video Player */}
-      <div className={enhanced ? "flex-shrink-0 aspect-video" : "flex-1"}>
+      <div className={enhanced ? "h-1/2 min-h-0" : "flex-1"}>
         <Player
           ref={playerRef}
           video={video}
           autoPlay={false}
           startTime={startTime}
-          className="w-full h-full"
+          className="w-full h-full object-contain"
         />
       </div>
 
       {/* Tab Panel */}
       {enhanced && enabledTabs.length > 0 && (
-        <EmbedTabs
-          video={video}
-          settings={settings}
-          enabledTabs={enabledTabs as EmbedTab[]}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onTimeSelect={handleTimeSelect}
-          playerRef={playerRef}
-        />
+        <div className="h-1/2 min-h-0 flex flex-col">
+          <EmbedTabs
+            video={video}
+            settings={settings}
+            enabledTabs={enabledTabs as EmbedTab[]}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onTimeSelect={handleTimeSelect}
+            playerRef={playerRef}
+          />
+        </div>
       )}
     </div>
   );
