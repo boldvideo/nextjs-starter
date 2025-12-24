@@ -8,7 +8,6 @@ import {
 } from "@boldvideo/bold-js";
 import { getPortalMode, getHostnameFromHeaders } from "./tenant";
 import { resolveSiteConfig } from "./internal-fetcher";
-import { camelizeKeys } from "./camelize-keys";
 
 // BoldClient type from bold-js
 type BoldClient = ReturnType<typeof createClient>;
@@ -84,26 +83,36 @@ export async function getTenantContext(): Promise<TenantContext | null> {
     return null;
   }
 
-  // In hosted mode:
-  // - Use site config response directly as settings (internal API doesn't have /settings endpoint)
-  // - Use public API with tenant_token for videos/playlists (SDK's normal flow)
-  const client = createClient(siteConfig.data.tenant_token, {
+  const tenantToken = siteConfig.data.tenant_token;
+  const subdomain = siteConfig.data.subdomain || siteConfig.data.account?.subdomain;
+
+  // Create SDK client with resolved tenant token
+  const client = createClient(tenantToken, {
     baseURL,
     debug: false,
   });
 
-  // The site config response IS the settings - map it to Settings type
-  // The /i/v1/sites/{subdomain} response contains all the portal/theme/meta data
-  // Transform snake_case keys to camelCase to match SDK's behavior
-  const settings = camelizeKeys<Settings>(siteConfig.data);
-
-  return {
-    client,
-    settings,
-    tenantToken: siteConfig.data.tenant_token,
-    mode: "hosted",
-    subdomain: siteConfig.data.subdomain || siteConfig.data.account?.subdomain,
-  };
+  // Use SDK to fetch settings - this ensures consistent camelCase transformation
+  // and uses the same code path as standalone mode
+  try {
+    const { data: settings } = await client.settings();
+    return {
+      client,
+      settings,
+      tenantToken,
+      mode: "hosted",
+      subdomain,
+    };
+  } catch (error) {
+    console.error("[Tenant Context] Failed to fetch settings in hosted mode:", error);
+    return {
+      client,
+      settings: null,
+      tenantToken,
+      mode: "hosted",
+      subdomain,
+    };
+  }
 }
 
 /**
