@@ -19,8 +19,8 @@ export interface SiteConfig {
   // Additional fields from the settings API
   metaData?: Record<string, unknown>;
   themeConfig?: Record<string, unknown>;
-  favicon_url?: string;
-  logo_url?: string;
+  faviconUrl?: string;
+  logoUrl?: string;
 }
 
 export interface SiteConfigResponse {
