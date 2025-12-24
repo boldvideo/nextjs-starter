@@ -8,6 +8,7 @@ import {
 } from "@boldvideo/bold-js";
 import { getPortalMode, getHostnameFromHeaders } from "./tenant";
 import { resolveSiteConfig } from "./internal-fetcher";
+import { camelizeKeys } from "./camelize-keys";
 
 // BoldClient type from bold-js
 type BoldClient = ReturnType<typeof createClient>;
@@ -93,7 +94,8 @@ export async function getTenantContext(): Promise<TenantContext | null> {
 
   // The site config response IS the settings - map it to Settings type
   // The /i/v1/sites/{subdomain} response contains all the portal/theme/meta data
-  const settings = siteConfig.data as unknown as Settings;
+  // Transform snake_case keys to camelCase to match SDK's behavior
+  const settings = camelizeKeys<Settings>(siteConfig.data);
 
   return {
     client,
