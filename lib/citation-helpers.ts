@@ -20,18 +20,18 @@ export function createPlaceholderCitations(text: string): AskCitation[] {
     const num = parseInt(match.replace(/[\[\]]/g, ''));
     return {
       id: `placeholder_${num}`,
-      relevance_score: 0.5,
-      relevance_rank: num,
-      video_id: `pending_${num}`,
-      playback_id: "",
-      video_title: "Loading...",
-      timestamp_start: "00:00",
-      timestamp_end: "00:00",
-      start_ms: 0,
-      end_ms: 0,
+      relevanceScore: 0.5,
+      relevanceRank: num,
+      videoId: `pending_${num}`,
+      playbackId: "",
+      videoTitle: "Loading...",
+      timestampStart: "00:00",
+      timestampEnd: "00:00",
+      startMs: 0,
+      endMs: 0,
       speaker: "Loading...",
       text: "Citation details loading...",
-      transcript_excerpt: "Citation details loading..."
+      transcriptExcerpt: "Citation details loading..."
     };
   });
 }
@@ -42,34 +42,34 @@ export function createPlaceholderCitations(text: string): AskCitation[] {
 export function processCitations(rawCitations: RawCitation[]): AskCitation[] {
   return rawCitations.map((c, idx) => {
     // Handle legacy/mismatched fields for robustness
-    const videoTitle = c.video_title || c.title || "Untitled";
+    const videoTitle = c.videoTitle || c.title || "Untitled";
 
-    // Handle time fields - prioritize start_ms, fallback to timestamp (seconds)
-    let startMs = c.start_ms || 0;
+    // Handle time fields - prioritize startMs, fallback to timestamp (seconds)
+    let startMs = c.startMs || 0;
     if (!startMs && c.timestamp) {
       startMs = c.timestamp * 1000;
     }
-    
+
     // Ensure formatted string exists
-    const timestampStart = c.timestamp_start || formatAskTime(startMs / 1000);
-    
+    const timestampStart = c.timestampStart || formatAskTime(startMs / 1000);
+
     // Get text/transcript
-    const text = c.text || c.transcript_excerpt || "";
+    const text = c.text || c.transcriptExcerpt || "";
 
     return {
-      id: c.id || `${c.video_id}_${startMs}`,
-      relevance_score: c.relevance_score ?? 0.5,
-      relevance_rank: c.relevance_rank ?? (idx + 1),
-      video_id: c.video_id || "",
-      playback_id: c.playback_id || "",
-      timestamp_start: timestampStart,
-      timestamp_end: c.timestamp_end || "",
-      video_title: videoTitle,
+      id: c.id || `${c.videoId}_${startMs}`,
+      relevanceScore: c.relevanceScore ?? 0.5,
+      relevanceRank: c.relevanceRank ?? (idx + 1),
+      videoId: c.videoId || "",
+      playbackId: c.playbackId || "",
+      timestampStart: timestampStart,
+      timestampEnd: c.timestampEnd || "",
+      videoTitle: videoTitle,
       speaker: c.speaker || "Speaker",
       text: text,
-      transcript_excerpt: text, // Keep alias synced
-      start_ms: startMs,
-      end_ms: c.end_ms || 0
+      transcriptExcerpt: text, // Keep alias synced
+      startMs: startMs,
+      endMs: c.endMs || 0
     };
   });
 }

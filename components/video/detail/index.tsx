@@ -102,8 +102,8 @@ export function VideoDetail({
           <>
             <h1 className="text-lg font-semibold line-clamp-2">{video.title}</h1>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              {video.published_at && (
-                <span>{format(new Date(video.published_at), "MMM d, yyyy")}</span>
+              {video.publishedAt && (
+                <span>{format(new Date(video.publishedAt), "MMM d, yyyy")}</span>
               )}
               {video.duration && (
                 <>
@@ -127,12 +127,12 @@ export function VideoDetail({
         rightSidebar={
           <VideoCompanionSidebar
             videoId={video.id}
-            playbackId={video.playback_id}
+            playbackId={video.playbackId}
             chaptersWebVTT={video.chapters || ""}
-            aiName={settings?.ai_name || "AI Assistant"}
-            aiAvatar={settings?.ai_avatar || "/default-avatar.png"}
+            aiName={settings?.aiName || "AI Assistant"}
+            aiAvatar={settings?.aiAvatar || "/default-avatar.png"}
             subdomain={""}
-            greeting={settings?.ai_greeting}
+            greeting={settings?.aiGreeting}
             onChapterClick={handleTimeSelect}
             hasChapters={Boolean(video.chapters)}
             className="z-[35]"
@@ -153,7 +153,7 @@ export function VideoDetail({
         chaptersPanel={
           <ChaptersTab
             chaptersWebVTT={video.chapters || ""}
-            playbackId={video.playback_id}
+            playbackId={video.playbackId}
             onChapterClick={handleTimeSelect}
           />
         }

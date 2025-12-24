@@ -355,18 +355,18 @@ export function askSourceToCitation(
 
   return {
     id: `${source.video_id}_${startMs}_${index}`,
-    relevance_score: 1 - index * 0.1,
-    relevance_rank: index + 1,
-    video_id: source.video_id,
-    playback_id: source.playback_id || "",
-    video_title: source.title,
-    timestamp_start: formatTimestamp(startMs),
-    timestamp_end: formatTimestamp(endMs),
-    start_ms: startMs,
-    end_ms: endMs,
+    relevanceScore: 1 - index * 0.1,
+    relevanceRank: index + 1,
+    videoId: source.video_id,
+    playbackId: source.playback_id || "",
+    videoTitle: source.title,
+    timestampStart: formatTimestamp(startMs),
+    timestampEnd: formatTimestamp(endMs),
+    startMs: startMs,
+    endMs: endMs,
     speaker: source.speaker || "Speaker",
     text: source.text,
-    transcript_excerpt: source.text,
+    transcriptExcerpt: source.text,
   };
 }
 

@@ -17,8 +17,8 @@ export interface SiteConfig {
     subdomain: string;
   };
   // Additional fields from the settings API
-  meta_data?: Record<string, unknown>;
-  theme_config?: Record<string, unknown>;
+  metaData?: Record<string, unknown>;
+  themeConfig?: Record<string, unknown>;
   favicon_url?: string;
   logo_url?: string;
 }

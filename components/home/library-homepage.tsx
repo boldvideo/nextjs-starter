@@ -11,8 +11,8 @@ interface LibraryHomepageProps {
 
 export function LibraryHomepage({ settings, videos }: LibraryHomepageProps) {
   const hasVideos = videos && videos.length > 0;
-  const hasPlaylists = settings?.featured_playlists && settings.featured_playlists.length > 0;
-  const showPlaylists = settings?.portal?.layout?.show_playlists ?? true;
+  const hasPlaylists = settings?.featuredPlaylists && settings.featuredPlaylists.length > 0;
+  const showPlaylists = settings?.portal?.layout?.showPlaylists ?? true;
 
   return (
     <div className="p-5 md:p-10 max-w-screen-2xl mx-auto overflow-y-auto">
@@ -38,7 +38,7 @@ export function LibraryHomepage({ settings, videos }: LibraryHomepageProps) {
       {/* Featured Playlists Section */}
       {hasPlaylists && showPlaylists && (
         <section>
-          {settings.featured_playlists.map((playlist: Playlist) => (
+          {settings.featuredPlaylists.map((playlist: Playlist) => (
             <FeaturedPlaylist key={playlist.id} playlist={playlist} />
           ))}
         </section>

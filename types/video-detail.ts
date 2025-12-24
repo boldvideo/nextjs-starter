@@ -8,24 +8,24 @@ export interface CTA {
   name: string;
   description: string;
   title: string;
-  button_text?: string;
-  button_url?: string;
+  buttonText?: string;
+  buttonUrl?: string;
 }
 
 /**
  * Extended Video type with additional properties used in our application
  */
 export interface ExtendedVideo extends Omit<Video, "cta" | "attachments"> {
-  chapters_url?: string;
-  ai_avatar?: string;
-  ai_name?: string;
+  chaptersUrl?: string;
+  aiAvatar?: string;
+  aiName?: string;
   cta?: CTA | null;
   attachments?: {
     id: number;
     description: string | null;
     title: string;
-    file_size: number;
-    file_url: string;
-    mime_type: string;
+    fileSize: number;
+    fileUrl: string;
+    mimeType: string;
   }[];
 }

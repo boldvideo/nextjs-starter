@@ -30,7 +30,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         answer: {
           text: event.content || state.accumulatedAnswer,
           citations: (event.sources || state.sources).map((s) => ({
-            video_id: s.video_id,
+            video_id: s.videoId,
             title: s.title,
             timestamp: s.timestamp,
             text: s.text,
@@ -105,7 +105,8 @@ export async function streamAIQuestion(
   }
 
   try {
-    const stream = await context.client.ai.chat(videoId, {
+    const stream = await context.client.ai.chat({
+      videoId,
       prompt: question,
     }) as AsyncIterable<AIEvent>;
 

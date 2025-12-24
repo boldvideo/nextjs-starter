@@ -83,13 +83,13 @@ export function AskMessageCard({
         const citation = citations.find((c) => c.id === citationId);
 
         if (citation) {
-          const videoTitle = citation.video_title || "Untitled";
-          const title = videoTitle.length > 30 
-            ? videoTitle.slice(0, 30) + "..." 
+          const videoTitle = citation.videoTitle || "Untitled";
+          const title = videoTitle.length > 30
+            ? videoTitle.slice(0, 30) + "..."
             : videoTitle;
-          
-          const hasValidTimestamp = citation.start_ms > 0;
-          
+
+          const hasValidTimestamp = citation.startMs > 0;
+
           parts.push(
             <button
               key={`cite-${citationId}-${match.index}`}
@@ -102,7 +102,7 @@ export function AskMessageCard({
                 "transition-colors cursor-pointer",
                 "border border-primary/20"
               )}
-              title={hasValidTimestamp ? `${citation.video_title} at ${citation.timestamp_start}` : citation.video_title}
+              title={hasValidTimestamp ? `${citation.videoTitle} at ${citation.timestampStart}` : citation.videoTitle}
             >
               <span
                 className={cn(
@@ -117,7 +117,7 @@ export function AskMessageCard({
               </span>
               <span className="font-medium">{title}</span>
               {hasValidTimestamp && (
-                <span className="text-muted-foreground text-xs">{citation.timestamp_start}</span>
+                <span className="text-muted-foreground text-xs">{citation.timestampStart}</span>
               )}
             </button>
           );

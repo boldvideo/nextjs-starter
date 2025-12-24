@@ -44,8 +44,8 @@ export function VideoMainContent({
         </div>
         <div className="hidden lg:flex items-center gap-4 text-base text-muted-foreground mb-6">
           <span>
-            {video.published_at &&
-              formatRelative(new Date(video.published_at), new Date())}
+            {video.publishedAt &&
+              formatRelative(new Date(video.publishedAt), new Date())}
           </span>
         </div>
 
@@ -104,14 +104,14 @@ export function VideoMainContent({
                   >
                     {video.cta.description}
                   </ReactMarkdown>
-                  {video.cta.button_text && video.cta.button_url && (
+                  {video.cta.buttonText && video.cta.buttonUrl && (
                     <a
                       className="mt-4 inline-flex bg-foreground text-background rounded-md px-4 py-2 items-center justify-center hover:opacity-90 transition-opacity"
-                      href={video.cta.button_url}
+                      href={video.cta.buttonUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {video.cta.button_text}
+                      {video.cta.buttonText}
                     </a>
                   )}
                 </div>
@@ -134,13 +134,13 @@ export function VideoMainContent({
               {video.attachments?.map((attachment) => (
                 <a
                   key={attachment.id}
-                  href={attachment.file_url}
+                  href={attachment.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 rounded-lg border border-border bg-muted hover:bg-accent/50 transition-colors"
                 >
                   <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                    {attachment.mime_type === "application/pdf" ? (
+                    {attachment.mimeType === "application/pdf" ? (
                       <FileText className="h-6 w-6 text-muted-foreground" />
                     ) : (
                       <Paperclip className="h-6 w-6 text-muted-foreground" />
@@ -151,7 +151,7 @@ export function VideoMainContent({
                       {attachment.title}
                     </p>
                     <p className="text-sm text-muted-foreground truncate">
-                      {formatFileSize(attachment.file_size)} • {attachment.mime_type.split('/')[1]?.toUpperCase() || 'FILE'}
+                      {formatFileSize(attachment.fileSize)} • {attachment.mimeType.split('/')[1]?.toUpperCase() || 'FILE'}
                     </p>
                   </div>
                 </a>

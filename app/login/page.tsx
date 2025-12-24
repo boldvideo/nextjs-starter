@@ -6,8 +6,8 @@ import { isPortalAuthRequired } from "@/lib/portal-auth";
 import { getSafeRedirect } from "@/lib/portal-redirect";
 
 interface ExtendedSettings {
-  logo_url?: string;
-  logo_dark_url?: string;
+  logoUrl?: string;
+  logoDarkUrl?: string;
   account?: {
     name?: string;
   };
@@ -35,8 +35,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(getSafeRedirect(params.redirect));
   }
 
-  const logoUrl = settings?.logo_url || "/bold-logo.svg";
-  const logoDark = settings?.logo_dark_url;
+  const logoUrl = settings?.logoUrl || "/bold-logo.svg";
+  const logoDark = settings?.logoDarkUrl;
   const portalName = settings?.account?.name || "Portal";
 
   return (

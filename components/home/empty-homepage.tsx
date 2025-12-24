@@ -6,7 +6,7 @@ interface EmptyHomepageProps {
 }
 
 export function EmptyHomepage({ settings }: EmptyHomepageProps) {
-  const accountName = settings?.account?.name || settings?.meta_data?.channel_name || "";
+  const accountName = settings?.account?.name || settings?.metaData?.channelName || "";
 
   return (
     <div className="flex items-center justify-center min-h-[60vh]">

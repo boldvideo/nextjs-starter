@@ -268,11 +268,11 @@ export function SearchCommandDialog() {
                       </h3>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
                         <span>Video</span>
-                        {hit.published_at && (
+                        {hit.publishedAt && (
                           <>
                             <span>•</span>
                             <span>
-                              {new Date(hit.published_at).toLocaleDateString()}
+                              {new Date(hit.publishedAt).toLocaleDateString()}
                             </span>
                           </>
                         )}

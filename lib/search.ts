@@ -8,7 +8,7 @@ export type SearchHit = {
   thumbnail: string | null;
   description: string | null;
   duration: number;
-  published_at: string;
+  publishedAt: string;
   has_metadata_match: boolean;
   metadata_matches: {
     title: boolean;

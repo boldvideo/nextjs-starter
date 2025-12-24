@@ -53,9 +53,9 @@ export function VideoThumbnail({
         </Link>
       </h3>
       <p className="text-gray-500 text-sm">
-        {video.teaser && video.teaser.trim() !== "" 
-          ? video.teaser 
-          : formatRelative(new Date(video.published_at), new Date())}
+        {video.teaser && video.teaser.trim() !== ""
+          ? video.teaser
+          : formatRelative(new Date(video.publishedAt), new Date())}
       </p>
     </div>
   );

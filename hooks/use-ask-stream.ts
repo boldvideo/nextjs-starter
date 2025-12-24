@@ -229,19 +229,19 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                         success: true,
                         mode: "synthesized",
                         query,
-                        expanded_queries: expandedQueries,
-                        conversation_id: conversationIdRef.current || "",
+                        expandedQueries: expandedQueries,
+                        conversationId: conversationIdRef.current || "",
                         answer: {
                           text: accumulatedText,
                           citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
                           confidence: "medium",
-                          model_used: "unknown"
+                          modelUsed: "unknown"
                         },
                         retrieval: {
                           total: accumulatedCitations.length || placeholderCitations.length,
                           chunks: []
                         },
-                        processing_time_ms: 0
+                        processingTimeMs: 0
                       }
                     }
                   );
@@ -263,11 +263,11 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                 const clarificationResponse: ClarificationResponse = {
                   success: true,
                   mode: "clarification",
-                  needs_clarification: true,
-                  clarifying_questions: clarificationMsg.clarifying_questions,
-                  missing_dimensions: clarificationMsg.missing_dimensions,
-                  original_query: query,
-                  conversation_id: clarificationMsg.conversation_id
+                  needsClarification: true,
+                  clarifyingQuestions: clarificationMsg.clarifying_questions,
+                  missingDimensions: clarificationMsg.missing_dimensions,
+                  originalQuery: query,
+                  conversationId: clarificationMsg.conversation_id
                 };
 
                 addAssistantMessage(
@@ -301,19 +301,19 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                   success: true,
                   mode: "synthesized",
                   query,
-                  conversation_id: completeMsg.conversation_id,
-                  expanded_queries: completeMsg.expanded_queries || expandedQueries,
+                  conversationId: completeMsg.conversation_id,
+                  expandedQueries: completeMsg.expanded_queries || expandedQueries,
                   answer: {
                     text: finalText,
                     citations: processedCitations,
                     confidence: completeMsg.answer.confidence as "high" | "medium" | "low",
-                    model_used: completeMsg.answer.model_used
+                    modelUsed: completeMsg.answer.model_used
                   },
                   retrieval: {
                     total: processedCitations.length,
                     chunks: []
                   },
-                  processing_time_ms: 0
+                  processingTimeMs: 0
                 };
 
                 addAssistantMessage(
@@ -358,19 +358,19 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
           success: true,
           mode: "synthesized",
           query,
-          expanded_queries: expandedQueries,
-          conversation_id: conversationIdRef.current || "",
+          expandedQueries: expandedQueries,
+          conversationId: conversationIdRef.current || "",
           answer: {
             text: accumulatedText,
             citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
             confidence: "low",
-            model_used: "unknown"
+            modelUsed: "unknown"
           },
           retrieval: {
             total: accumulatedCitations.length || placeholderCitations.length,
             chunks: []
           },
-          processing_time_ms: 0
+          processingTimeMs: 0
         };
 
         addAssistantMessage(

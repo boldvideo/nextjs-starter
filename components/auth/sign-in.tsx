@@ -6,8 +6,8 @@ import type { Settings } from "@boldvideo/bold-js";
 
 // Extend Settings with logo properties
 interface ExtendedSettings extends Settings {
-  logo_url?: string;
-  logo_dark_url?: string;
+  logoUrl?: string;
+  logoDarkUrl?: string;
 }
 
 interface SignInProps {
@@ -52,8 +52,8 @@ export default async function SignIn({ searchParams, settings }: SignInProps) {
   const showBothButtons = hasDual && showTeamAccess;
 
   // Determine logo to use
-  const logoUrl = settings?.logo_url || "/bold-logo.svg";
-  const logoDark = settings?.logo_dark_url;
+  const logoUrl = settings?.logoUrl || "/bold-logo.svg";
+  const logoDark = settings?.logoDarkUrl;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
