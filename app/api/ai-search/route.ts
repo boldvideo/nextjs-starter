@@ -25,8 +25,8 @@ interface StreamState {
 function formatSSE(event: AIEvent, state: StreamState): string | null {
   switch (event.type) {
     case "message_start":
-      state.messageId = event.id;
-      return JSON.stringify({ type: "message_start", id: event.id });
+      state.messageId = event.conversationId;
+      return JSON.stringify({ type: "message_start", id: event.conversationId });
 
     case "text_delta":
       state.accumulatedAnswer += event.delta;
@@ -37,29 +37,27 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       return JSON.stringify({
         type: "sources",
         sources: event.sources.map((s) => ({
-          video_id: s.video_id,
+          video_id: s.videoId,
           title: s.title,
           timestamp: s.timestamp,
-          timestamp_end: s.timestamp_end,
+          timestamp_end: s.timestampEnd,
           text: s.text,
-          playback_id: s.playback_id,
+          playback_id: s.playbackId,
           speaker: s.speaker,
         })),
       });
 
     case "message_complete":
-    case "answer":
-      state.context = (event as unknown as { context?: AIContextMessage[] }).context;
       return JSON.stringify({
         type: "message_complete",
-        content: (event as unknown as { content?: string }).content || state.accumulatedAnswer,
-        sources: ((event as unknown as { sources?: Source[] }).sources || state.sources).map((s) => ({
-          video_id: s.video_id,
+        content: event.content || state.accumulatedAnswer,
+        sources: (event.sources || state.sources).map((s) => ({
+          video_id: s.videoId,
           title: s.title,
           timestamp: s.timestamp,
-          timestamp_end: s.timestamp_end,
+          timestamp_end: s.timestampEnd,
           text: s.text,
-          playback_id: s.playback_id,
+          playback_id: s.playbackId,
           speaker: s.speaker,
         })),
         context: state.context,

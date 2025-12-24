@@ -3,18 +3,18 @@
 export type AskCitation = {
   // API v2.0 citation format
   id: string;  // Unique identifier like "vid1_5000"
-  relevance_score: number;  // 0.0 to 1.0
-  relevance_rank: number;  // 1 = most relevant, 2 = second most, etc.
-  video_id: string;
-  playback_id: string;
-  video_title: string;
-  timestamp_start: string;  // "00:05" format
-  timestamp_end: string;    // "07:45" format
-  start_ms: number;
-  end_ms: number;
+  relevanceScore: number;  // 0.0 to 1.0
+  relevanceRank: number;  // 1 = most relevant, 2 = second most, etc.
+  videoId: string;
+  playbackId: string;
+  videoTitle: string;
+  timestampStart: string;  // "00:05" format
+  timestampEnd: string;    // "07:45" format
+  startMs: number;
+  endMs: number;
   speaker: string;
   text: string; // The relevant transcript excerpt
-  transcript_excerpt: string; // Backwards compatibility or alias
+  transcriptExcerpt: string; // Backwards compatibility or alias
 };
 
 export type AskAnswer = {
@@ -22,22 +22,22 @@ export type AskAnswer = {
   citations: AskCitation[];
   confidence: "high" | "medium" | "low";
   limitations?: string | null;
-  model_used: string;
+  modelUsed: string;
 };
 
 export type AskChunk = {
   id: string;
   text: string;
-  video_id: string;
-  playback_id?: string;
-  video_title?: string;
+  videoId: string;
+  playbackId?: string;
+  videoTitle?: string;
   speaker: string;
-  timestamp_start_ms: number;
-  timestamp_end_ms: number;
-  duration_ms: number | null;
-  highlighted_text: string;
-  rrf_score: number;
-  appearance_count?: number;
+  timestampStartMs: number;
+  timestampEndMs: number;
+  durationMs: number | null;
+  highlightedText: string;
+  rrfScore: number;
+  appearanceCount?: number;
 };
 
 export type AskRetrieval = {
@@ -49,11 +49,11 @@ export type AskRetrieval = {
 export type ClarificationResponse = {
   success: true;
   mode: "clarification";
-  needs_clarification: true;
-  clarifying_questions: string[];
-  missing_dimensions: string[];
-  original_query: string;
-  conversation_id: string;
+  needsClarification: true;
+  clarifyingQuestions: string[];
+  missingDimensions: string[];
+  originalQuery: string;
+  conversationId: string;
 };
 
 // Synthesized answer response type
@@ -61,11 +61,11 @@ export type SynthesizedResponse = {
   success: true;
   mode: "synthesized";
   query: string;
-  expanded_queries: string[];
-  conversation_id: string;
+  expandedQueries: string[];
+  conversationId: string;
   answer: AskAnswer;
   retrieval: AskRetrieval;
-  processing_time_ms: number;
+  processingTimeMs: number;
 };
 
 // Retrieval only response type
@@ -73,9 +73,9 @@ export type RetrievalOnlyResponse = {
   success: true;
   mode: "retrieval_only";
   query: string;
-  expanded_queries: string[];
+  expandedQueries: string[];
   retrieval: AskRetrieval;
-  processing_time_ms: number;
+  processingTimeMs: number;
 };
 
 // Error response type
@@ -86,9 +86,9 @@ export type ErrorResponse = {
 };
 
 // Union type for all possible responses
-export type AskResponse = 
-  | ClarificationResponse 
-  | SynthesizedResponse 
+export type AskResponse =
+  | ClarificationResponse
+  | SynthesizedResponse
   | RetrievalOnlyResponse
   | ErrorResponse;
 
@@ -98,7 +98,7 @@ export function formatAskTime(time: string | number): string {
   if (typeof time === "string" && time.includes(":")) {
     return time;
   }
-  
+
   // Otherwise convert seconds to mm:ss format
   const seconds = typeof time === "string" ? parseInt(time) : time;
   const minutes = Math.floor(seconds / 60);
@@ -111,7 +111,7 @@ export function timeStringToSeconds(timeStr: string | undefined | null): number 
   if (!timeStr) {
     return 0;
   }
-  
+
   const parts = timeStr.split(":");
   if (parts.length === 2) {
     const [minutes, seconds] = parts.map(Number);
@@ -124,24 +124,24 @@ export function timeStringToSeconds(timeStr: string | undefined | null): number 
 export function isClarificationResponse(
   response: AskResponse
 ): response is ClarificationResponse {
-  return response.success === true && 
-         response.mode === "clarification" && 
-         "needs_clarification" in response;
+  return response.success === true &&
+         response.mode === "clarification" &&
+         "needsClarification" in response;
 }
 
 export function isSynthesizedResponse(
   response: AskResponse
 ): response is SynthesizedResponse {
-  return response.success === true && 
-         response.mode === "synthesized" && 
+  return response.success === true &&
+         response.mode === "synthesized" &&
          "answer" in response;
 }
 
 export function isRetrievalOnlyResponse(
   response: AskResponse
 ): response is RetrievalOnlyResponse {
-  return response.success === true && 
-         response.mode === "retrieval_only" && 
+  return response.success === true &&
+         response.mode === "retrieval_only" &&
          !("answer" in response);
 }
 

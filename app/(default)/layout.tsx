@@ -52,9 +52,9 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   const settings = context.settings;
-  const meta = settings.meta_data as ExtendedMetaData | undefined;
+  const meta = settings.metaData as ExtendedMetaData | undefined;
   const title = meta?.title
-    ? `${meta.title}${meta.title_suffix || ""}`
+    ? `${meta.title}${meta.titleSuffix || ""}`
     : defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
   
@@ -76,7 +76,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
   
   const ogImageUrl =
-    fixUploadUrl(meta?.social_graph_image_url) ||
+    fixUploadUrl(meta?.socialGraphImageUrl) ||
     `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(title)}${
       meta?.image ? `&img=${encodeURIComponent(fixUploadUrl(meta.image) || meta.image)}` : ""
     }`;
@@ -100,7 +100,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
     },
     icons: {
-      icon: settings.favicon_url || "/favicon.ico",
+      icon: settings.faviconUrl || "/favicon.ico",
     },
   };
 }

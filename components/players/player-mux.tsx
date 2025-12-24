@@ -57,11 +57,11 @@ const timestampToSeconds = (timestamp: string): number => {
 // Define a minimal type that the component actually requires
 export interface MuxPlayerVideoLike {
   id: string;
-  playback_id: string;
+  playbackId: string;
   title: string;
   thumbnail?: string;
-  chapters_url?: string;
-  playback_speed?: number;
+  chaptersUrl?: string;
+  playbackSpeed?: number;
 }
 
 /**
@@ -125,19 +125,19 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
 
   // Fetch and parse chapters
   useEffect(() => {
-    if (!video.chapters_url) return;
+    if (!video.chaptersUrl) return;
 
     // Check the cache first
-    if (chaptersCache.has(video.chapters_url)) {
+    if (chaptersCache.has(video.chaptersUrl)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- reading from cache
-      setChapters(chaptersCache.get(video.chapters_url) || null);
+      setChapters(chaptersCache.get(video.chaptersUrl) || null);
       return;
     }
 
     const fetchChapters = async () => {
       try {
-        const chaptersUrl = video.chapters_url;
-        // Video.chapters_url is guaranteed to be defined here because of the check above
+        const chaptersUrl = video.chaptersUrl;
+        // Video.chaptersUrl is guaranteed to be defined here because of the check above
         if (!chaptersUrl) return;
 
         const response = await fetch(chaptersUrl);
@@ -198,8 +198,8 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
         }
 
         // Store in cache
-        if (video.chapters_url) {
-          chaptersCache.set(video.chapters_url, parsedChapters);
+        if (video.chaptersUrl) {
+          chaptersCache.set(video.chaptersUrl, parsedChapters);
         }
 
         // Set state
@@ -210,7 +210,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
     };
 
     fetchChapters();
-  }, [video.chapters_url]);
+  }, [video.chaptersUrl]);
 
   // Apply chapters to player whenever chapters or player ref changes
   useEffect(() => {
@@ -312,7 +312,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
               }, 100);
             }
           }}
-          playbackId={video.playback_id}
+          playbackId={video.playbackId}
           metadata={{
             video_id: video.id,
             video_title: video.title,
@@ -343,10 +343,10 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
           }}
           playsInline
           currentTime={startTime || currentTime}
-          playbackRate={video.playback_speed || 1}
+          playbackRate={video.playbackSpeed || 1}
           storyboardSrc={
-            video.playback_id
-              ? `https://image.mux.com/${video.playback_id}/storyboard.vtt`
+            video.playbackId
+              ? `https://image.mux.com/${video.playbackId}/storyboard.vtt`
               : undefined
           }
           defaultHiddenCaptions={false}
@@ -363,7 +363,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
 export const MuxPlayerComponent = memo(MuxPlayerComponentBase, (prevProps, nextProps) => {
   // Only re-render if essential video properties change
   return (
-    prevProps.video.playback_id === nextProps.video.playback_id &&
+    prevProps.video.playbackId === nextProps.video.playbackId &&
     prevProps.video.id === nextProps.video.id &&
     prevProps.startTime === nextProps.startTime &&
     prevProps.autoPlay === nextProps.autoPlay &&

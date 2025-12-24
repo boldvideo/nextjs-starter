@@ -70,8 +70,8 @@ export default function MobileContentShell({
       <div className="flex-shrink-0 px-4 py-3 border-b border-border bg-background">
         <h1 className="text-lg font-semibold line-clamp-2">{video.title}</h1>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-          {video.published_at && (
-            <span>{format(new Date(video.published_at), "MMM d, yyyy")}</span>
+          {video.publishedAt && (
+            <span>{format(new Date(video.publishedAt), "MMM d, yyyy")}</span>
           )}
           {video.duration && (
             <>

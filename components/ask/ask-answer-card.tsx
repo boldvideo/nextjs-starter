@@ -23,7 +23,7 @@ export function AskAnswerCard({
   onCitationClick,
 }: AskAnswerCardProps) {
   const [showRelatedQuestions, setShowRelatedQuestions] = useState(false);
-  const { answer, expanded_queries } = response;
+  const { answer, expandedQueries } = response;
 
   const citationMap = React.useMemo(() => {
     if (!answer.citations) return new Map<number, AskCitation>();
@@ -86,7 +86,7 @@ export function AskAnswerCard({
             return `${mins}:${secs.toString().padStart(2, "0")}`;
           };
 
-          const timestamp = formatTimestamp(citation.start_ms);
+          const timestamp = formatTimestamp(citation.startMs);
 
           parts.push(
             <button
@@ -97,7 +97,7 @@ export function AskAnswerCard({
             >
               <PlayCircle className="w-3.5 h-3.5" />
               <span className="underline decoration-dotted underline-offset-2">
-                {citation.video_title}
+                {citation.videoTitle}
                 {timestamp && (
                   <span className="text-muted-foreground ml-1">
                     ({timestamp})
@@ -223,7 +223,7 @@ export function AskAnswerCard({
             </ReactMarkdown>
           </div>
 
-          {expanded_queries && expanded_queries.length > 0 && (
+          {expandedQueries && expandedQueries.length > 0 && (
             <div className="ml-3">
               <button
                 onClick={() => setShowRelatedQuestions(!showRelatedQuestions)}
@@ -234,7 +234,7 @@ export function AskAnswerCard({
               >
                 <MessageSquare className="w-3 h-3" />
                 <span className="uppercase tracking-wider">
-                  Related questions ({expanded_queries.length})
+                  Related questions ({expandedQueries.length})
                 </span>
                 {showRelatedQuestions ? (
                   <ChevronUp className="w-3 h-3" />
@@ -245,7 +245,7 @@ export function AskAnswerCard({
 
               {showRelatedQuestions && (
                 <div className="mt-2 space-y-1">
-                  {expanded_queries.map((relatedQuery, idx) => (
+                  {expandedQueries.map((relatedQuery, idx) => (
                     <Link
                       key={idx}
                       href={`/ask?q=${encodeURIComponent(relatedQuery)}`}

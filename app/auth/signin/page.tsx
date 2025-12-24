@@ -7,8 +7,8 @@ import type { Settings } from "@boldvideo/bold-js";
 
 // Extend Settings with logo properties
 interface ExtendedSettings extends Settings {
-  logo_url?: string;
-  logo_dark_url?: string;
+  logoUrl?: string;
+  logoDarkUrl?: string;
 }
 
 export default async function SignInPage({

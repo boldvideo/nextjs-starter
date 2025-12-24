@@ -31,11 +31,11 @@ export default function ChatTab({ video, settings, compact = false }: ChatTabPro
     <div className="h-full flex flex-col flex-1 min-h-0">
       <AIAssistant
         videoId={video.id}
-        name={settings?.ai_name || "AI Assistant"}
-        avatar={settings?.ai_avatar || "/default-avatar.png"}
+        name={settings?.aiName || "AI Assistant"}
+        avatar={settings?.aiAvatar || "/default-avatar.png"}
         subdomain={""}
         userName={undefined}
-        greeting={settings?.ai_greeting}
+        greeting={settings?.aiGreeting}
         isEmbedded={true}
         compact={compact}
         className="flex-1 h-full border-none shadow-none"

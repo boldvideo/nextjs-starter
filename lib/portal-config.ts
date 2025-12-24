@@ -52,22 +52,22 @@ export function normalizeSettings(settings: Settings | null): Settings | null {
  */
 function ensureAbsoluteUrl(url: string | undefined): string {
   if (!url) return '/placeholder-avatar.png';
-  
+
   // If it's already an absolute URL, return as-is
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
-  
+
   // If it starts with uploads/ (relative path from API), prepend the base URL
   if (url.startsWith('uploads/')) {
     return `https://uploads.eu1.boldvideo.io/${url}`;
   }
-  
+
   // If it starts with /, assume it's a local asset
   if (url.startsWith('/')) {
     return url;
   }
-  
+
   // Otherwise, assume it needs the uploads prefix
   return `https://uploads.eu1.boldvideo.io/${url}`;
 }
@@ -118,14 +118,14 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     : undefined;
 
   // Determine AI configuration (with backward compatibility for legacy fields)
-  const aiEnabled = settings.account?.ai?.enabled ?? settings.has_ai ?? false;
-  const aiAvatarRaw = settings.account?.ai?.avatar_url ?? settings.ai_avatar;
+  const aiEnabled = settings.account?.ai?.enabled ?? settings.hasAi ?? false;
+  const aiAvatarRaw = settings.account?.ai?.avatarUrl ?? settings.aiAvatar;
   const aiAvatar = ensureAbsoluteUrl(aiAvatarRaw);
 
-  // New AI Search visibility check (replaces show_ai_search from portal.navigation)
+  // New AI Search visibility check (replaces showAiSearch from portal.navigation)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const aiSearchEnabled = (settings.account as any)?.ai_search?.enabled ??
-                          settings.portal?.navigation?.show_ai_search ??
+  const aiSearchEnabled = (settings.account as any)?.aiSearch?.enabled ??
+                          settings.portal?.navigation?.showAiSearch ??
                           false;
 
   // Persona configuration (new in bold-js 1.0.1)
@@ -134,21 +134,21 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   const personaEnabled = persona?.enabled === true;
 
   // Override AI name/greeting from persona if enabled, with fallbacks
-  const legacyAiName = settings.account?.ai?.name ?? settings.ai_name ?? 'AI Assistant';
-  const legacyAiGreeting = settings.account?.ai?.greeting ?? settings.ai_greeting ?? 'Hello! How can I help you today?';
-  
+  const legacyAiName = settings.account?.ai?.name ?? settings.aiName ?? 'AI Assistant';
+  const legacyAiGreeting = settings.account?.ai?.greeting ?? settings.aiGreeting ?? 'Hello! How can I help you today?';
+
   const aiName = personaEnabled && persona.name ? persona.name : legacyAiName;
   const aiGreeting = personaEnabled && persona.greeting ? persona.greeting : legacyAiGreeting;
-  
+
   // Conversation starters: persona first, then assistant_config, then defaults
   const defaultStarters = [
     'How can I improve my product?',
     'What are best practices for scaling?',
     'How do I manage my team better?'
   ];
-  const conversationStarters = personaEnabled && persona.conversation_starters?.length > 0
-    ? persona.conversation_starters
-    : settings.portal?.layout?.assistant_config?.suggestions ?? defaultStarters;
+  const conversationStarters = personaEnabled && persona.conversationStarters?.length > 0
+    ? persona.conversationStarters
+    : settings.portal?.layout?.assistantConfig?.suggestions ?? defaultStarters;
 
   // Determine homepage layout
   const homepageLayout = (layoutOverride ?? settings.portal?.layout?.type ?? 'library') as 'none' | 'library' | 'assistant';
@@ -162,12 +162,12 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
                          homepageLayout !== 'assistant';
 
   // Smart header visibility:
-  // 1. Use explicit show_header setting from API (SDK 0.6.0+)
+  // 1. Use explicit showHeader setting from API (SDK 0.6.0+)
   // 2. Default to true (show header)
-  const showHeader = settings.portal?.navigation?.show_header ?? true;
+  const showHeader = settings.portal?.navigation?.showHeader ?? true;
 
-  // Theme configuration (bold-js 1.2.0: color_scheme consolidated into portal.theme)
-  const colorScheme = (settings.portal?.theme?.color_scheme ?? settings.portal?.color_scheme ?? 'toggle') as 'toggle' | 'light' | 'dark';
+  // Theme configuration (bold-js 1.2.0: colorScheme consolidated into portal.theme)
+  const colorScheme = (settings.portal?.theme?.colorScheme ?? settings.portal?.colorScheme ?? 'toggle') as 'toggle' | 'light' | 'dark';
   const forcedTheme = colorScheme === 'toggle' ? null : colorScheme;
   const showToggle = colorScheme === 'toggle';
 
@@ -182,14 +182,14 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     },
     homepage: {
       layout: homepageLayout,
-      videosLimit: settings.portal?.layout?.videos_limit ?? 12,
-      showPlaylists: settings.portal?.layout?.show_playlists ?? true,
+      videosLimit: settings.portal?.layout?.videosLimit ?? 12,
+      showPlaylists: settings.portal?.layout?.showPlaylists ?? true,
       assistantConfig: homepageLayout === 'assistant' ? {
-        headline: settings.portal?.layout?.assistant_config?.headline ??
+        headline: settings.portal?.layout?.assistantConfig?.headline ??
                  'Get 1,000 hours of coaching in 60 seconds.',
-        subheadline: settings.portal?.layout?.assistant_config?.subheadline ??
+        subheadline: settings.portal?.layout?.assistantConfig?.subheadline ??
                     'Our AI assistant is here to help you.',
-        suggestions: settings.portal?.layout?.assistant_config?.suggestions ?? [
+        suggestions: settings.portal?.layout?.assistantConfig?.suggestions ?? [
           'How can I improve my product?',
           'What are best practices for scaling?',
           'How do I manage my team better?'
@@ -197,13 +197,13 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
       } : undefined
     },
     navigation: {
-      showSearch: settings.portal?.navigation?.show_search ?? true,
+      showSearch: settings.portal?.navigation?.showSearch ?? true,
       showAiToggle: showAiInHeader,
       showHeader: showHeader
     },
     display: {
-      showTranscripts: settings.portal?.display?.show_transcripts ?? true,
-      showChapters: settings.portal?.display?.show_chapters ?? true
+      showTranscripts: settings.portal?.display?.showTranscripts ?? true,
+      showChapters: settings.portal?.display?.showChapters ?? true
     },
     theme: {
       colorScheme,

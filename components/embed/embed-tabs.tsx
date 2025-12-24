@@ -69,7 +69,7 @@ export function EmbedTabs({
           {activeTab === "chapters" && chaptersWebVTT && (
             <ChaptersTab
               chaptersWebVTT={chaptersWebVTT}
-              playbackId={video.playback_id}
+              playbackId={video.playbackId}
               onChapterClick={onTimeSelect}
               compact
             />

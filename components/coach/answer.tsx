@@ -23,7 +23,7 @@ export function AnswerCard({
 }: AnswerCardProps) {
   const [selectedCitation, setSelectedCitation] = useState<AskCitation | null>(null);
   const [showRelatedQuestions, setShowRelatedQuestions] = useState(false);
-  const { answer, expanded_queries } = response;
+  const { answer, expandedQueries } = response;
 
   // Create a map of citation numbers for sparse arrays
   const citationMap = React.useMemo(() => {
@@ -46,7 +46,7 @@ export function AnswerCard({
     uniqueNumbers.forEach((num, index) => {
       if (index < answer.citations.length) {
         map.set(num, answer.citations[index]);
-        console.log(`[AnswerCard] Mapping [${num}] to citation:`, answer.citations[index].video_title);
+        console.log(`[AnswerCard] Mapping [${num}] to citation:`, answer.citations[index].videoTitle);
       }
     });
     
@@ -102,8 +102,8 @@ export function AnswerCard({
             return `${mins}:${secs.toString().padStart(2, "0")}`;
         };
         
-        const timestamp = formatTimestamp(citation.start_ms);
-        
+        const timestamp = formatTimestamp(citation.startMs);
+
         parts.push(
           <button
             key={`cite-${citationId}-${match.index}`}
@@ -113,7 +113,7 @@ export function AnswerCard({
           >
             <PlayCircle className="w-3.5 h-3.5" />
             <span className="underline decoration-dotted underline-offset-2">
-              {citation.video_title}
+              {citation.videoTitle}
               {timestamp && <span className="text-muted-foreground ml-1">({timestamp})</span>}
             </span>
           </button>
@@ -227,7 +227,7 @@ export function AnswerCard({
           </div>
 
           {/* Related Questions */}
-          {expanded_queries && expanded_queries.length > 0 && (
+          {expandedQueries && expandedQueries.length > 0 && (
             <div className="ml-3">
               <button
                 onClick={() => setShowRelatedQuestions(!showRelatedQuestions)}
@@ -238,7 +238,7 @@ export function AnswerCard({
               >
                 <MessageSquare className="w-3 h-3" />
                 <span className="uppercase tracking-wider">
-                  Related questions ({expanded_queries.length})
+                  Related questions ({expandedQueries.length})
                 </span>
                 {showRelatedQuestions ? (
                   <ChevronUp className="w-3 h-3" />
@@ -246,10 +246,10 @@ export function AnswerCard({
                   <ChevronDown className="w-3 h-3" />
                 )}
               </button>
-              
+
               {showRelatedQuestions && (
                 <div className="mt-2 space-y-1">
-                  {expanded_queries.map((relatedQuery, idx) => (
+                  {expandedQueries.map((relatedQuery, idx) => (
                     <Link
                       key={idx}
                       href={`/ask?q=${encodeURIComponent(relatedQuery)}`}

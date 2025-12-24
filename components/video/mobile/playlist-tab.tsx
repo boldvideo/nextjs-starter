@@ -77,9 +77,9 @@ export default function PlaylistTab({
                       >
                         {video.title}
                       </h4>
-                      {video.published_at && (
+                      {video.publishedAt && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          {format(new Date(video.published_at), "MMM d, yyyy")}
+                          {format(new Date(video.publishedAt), "MMM d, yyyy")}
                         </p>
                       )}
                     </div>

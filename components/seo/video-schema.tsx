@@ -16,7 +16,7 @@ export function VideoSchema({ video, url }: VideoSchemaProps) {
     name: video.title,
     description: video.description || video.title,
     thumbnailUrl: video.thumbnail,
-    uploadDate: video.published_at,
+    uploadDate: video.publishedAt,
     duration: formatDurationISO8601(video.duration),
     contentUrl: url,
     embedUrl: `${url.replace("/v/", "/e/")}`,

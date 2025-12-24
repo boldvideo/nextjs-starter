@@ -40,8 +40,8 @@ export function AskVideosTab({
         <div className="space-y-3">
           {citations.map((citation) => {
             const isSelected = selectedCitationId === citation.id;
-            const thumbnailUrl = citation.playback_id
-              ? `https://image.mux.com/${citation.playback_id}/thumbnail.webp?time=${Math.floor(citation.start_ms / 1000)}`
+            const thumbnailUrl = citation.playbackId
+              ? `https://image.mux.com/${citation.playbackId}/thumbnail.webp?time=${Math.floor(citation.startMs / 1000)}`
               : null;
 
             return (
@@ -60,7 +60,7 @@ export function AskVideosTab({
                   {thumbnailUrl ? (
                     <Image
                       src={thumbnailUrl}
-                      alt={citation.video_title}
+                      alt={citation.videoTitle}
                       fill
                       className="object-cover"
                     />
@@ -70,34 +70,34 @@ export function AskVideosTab({
                     </div>
                   )}
                   <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-medium">
-                    {formatTime(citation.start_ms)}
+                    {formatTime(citation.startMs)}
                   </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-sm line-clamp-1 mb-1">
-                    {citation.video_title}
+                    {citation.videoTitle}
                   </h3>
                   <p className="text-xs text-muted-foreground mb-2">
-                    {citation.speaker} • {formatTime(citation.start_ms)} -{" "}
-                    {formatTime(citation.end_ms)}
+                    {citation.speaker} • {formatTime(citation.startMs)} -{" "}
+                    {formatTime(citation.endMs)}
                   </p>
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    {citation.text || citation.transcript_excerpt}
+                    {citation.text || citation.transcriptExcerpt}
                   </p>
                 </div>
 
-                {citation.relevance_rank && (
+                {citation.relevanceRank && (
                   <div className="flex-shrink-0">
                     <span
                       className={cn(
                         "inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium",
-                        citation.relevance_rank === 1
+                        citation.relevanceRank === 1
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground"
                       )}
                     >
-                      {citation.relevance_rank}
+                      {citation.relevanceRank}
                     </span>
                   </div>
                 )}

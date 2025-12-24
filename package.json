@@ -12,7 +12,7 @@
     "release": "changeset publish"
   },
   "dependencies": {
-    "@boldvideo/bold-js": "1.5.1",
+    "@boldvideo/bold-js": "^1.9.0",
     "@boldvideo/ui": "^0.2.0",
     "@mux/mux-player-react": "^3.6.1",
     "@types/node": "24.7.2",
@@ -33,6 +33,7 @@
     "next-themes": "^0.4.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "react-json-view-lite": "^2.5.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "swr": "^2.3.6",

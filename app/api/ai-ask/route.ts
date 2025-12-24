@@ -23,8 +23,8 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
 
   switch (event.type) {
     case "message_start":
-      state.conversationId = event.id;
-      return JSON.stringify({ type: "message_start", id: event.id });
+      state.conversationId = event.conversationId;
+      return JSON.stringify({ type: "message_start", id: event.conversationId });
 
     case "text_delta":
       state.accumulatedAnswer += event.delta;
@@ -35,83 +35,38 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       return JSON.stringify({
         type: "sources",
         sources: event.sources.map((s) => ({
-          video_id: s.video_id,
+          video_id: s.videoId,
           title: s.title,
           timestamp: s.timestamp,
-          timestamp_end: s.timestamp_end,
+          timestamp_end: s.timestampEnd,
           text: s.text,
-          playback_id: s.playback_id,
+          playback_id: s.playbackId,
           speaker: s.speaker,
         })),
       });
-
-    case "answer": {
-      const answerEvent = event as unknown as {
-        content?: string;
-        citations?: Array<{
-          text: string;
-          speaker?: string;
-          video?: { id: string; title: string; playback_id?: string };
-          start_ms: number;
-          end_ms: number;
-        }>;
-      };
-      
-      const mappedSources = (answerEvent.citations || [])
-        .filter((c) => c.video?.id)
-        .map((c) => ({
-          video_id: c.video!.id,
-          title: c.video!.title || "Untitled",
-          timestamp: (c.start_ms || 0) / 1000,
-          timestamp_end: (c.end_ms || 0) / 1000,
-          text: c.text || "",
-          playback_id: c.video!.playback_id || "",
-          speaker: c.speaker || "",
-        }));
-      
-      return JSON.stringify({
-        type: "message_complete",
-        content: answerEvent.content || state.accumulatedAnswer,
-        sources: mappedSources.length > 0 ? mappedSources : state.sources.map((s) => ({
-          video_id: s.video_id,
-          title: s.title,
-          timestamp: s.timestamp,
-          timestamp_end: s.timestamp_end,
-          text: s.text,
-          playback_id: s.playback_id,
-          speaker: s.speaker,
-        })),
-        conversationId: state.conversationId,
-      });
-    }
 
     case "message_complete":
       return JSON.stringify({
         type: "message_complete",
-        content: (event as unknown as { content?: string }).content || state.accumulatedAnswer,
-        sources: ((event as unknown as { sources?: Source[] }).sources || state.sources).map((s) => ({
-          video_id: s.video_id,
+        content: event.content || state.accumulatedAnswer,
+        sources: (event.sources || state.sources).map((s) => ({
+          video_id: s.videoId,
           title: s.title,
           timestamp: s.timestamp,
-          timestamp_end: s.timestamp_end,
+          timestamp_end: s.timestampEnd,
           text: s.text,
-          playback_id: s.playback_id,
+          playback_id: s.playbackId,
           speaker: s.speaker,
         })),
         conversationId: state.conversationId,
       });
 
     case "clarification": {
-      const clarificationEvent = event as unknown as {
-        content?: string;
-        questions?: string[];
-        needs_response?: boolean;
-      };
       return JSON.stringify({
         type: "clarification",
-        content: clarificationEvent.content || "",
-        questions: clarificationEvent.questions || [],
-        needs_response: clarificationEvent.needs_response ?? true,
+        content: event.content || "",
+        questions: event.questions || [],
+        needs_response: true,
       });
     }
 

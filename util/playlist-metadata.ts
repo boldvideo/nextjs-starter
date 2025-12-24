@@ -18,7 +18,7 @@ export function getLastUpdatedDate(videos: Video[]): Date | null {
   if (videos.length === 0) return null;
 
   const dates = videos
-    .map(v => v.published_at)
+    .map(v => v.publishedAt)
     .filter(Boolean)
     .map(dateStr => new Date(dateStr));
 

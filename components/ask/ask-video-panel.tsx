@@ -33,13 +33,13 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const startSeconds = citation.start_ms / 1000;
-  const endSeconds = citation.end_ms / 1000;
+  const startSeconds = citation.startMs / 1000;
+  const endSeconds = citation.endMs / 1000;
 
   const video: MuxPlayerVideoLike = {
-    id: citation.video_id,
-    playback_id: citation.playback_id,
-    title: citation.video_title,
+    id: citation.videoId,
+    playbackId: citation.playbackId,
+    title: citation.videoTitle,
   };
 
   return (
@@ -92,14 +92,14 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
         <div className="flex-1 overflow-y-auto p-6">
           {/* Video Title */}
           <h2 className="text-xl font-semibold mb-6">
-            {citation.video_title}
+            {citation.videoTitle}
           </h2>
 
           {/* Transcript Section */}
           {citation.text && (
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-muted-foreground">
-                Transcript at {formatTime(citation.start_ms)}
+                Transcript at {formatTime(citation.startMs)}
               </h4>
               <blockquote className="border-l-2 border-primary pl-4 text-muted-foreground leading-relaxed italic line-clamp-5">
                 &ldquo;{citation.text}&rdquo;
@@ -109,7 +109,7 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
 
           {/* Open Full Video Button */}
           <Link
-            href={`/v/${citation.video_id}?t=${Math.floor(citation.start_ms / 1000)}`}
+            href={`/v/${citation.videoId}?t=${Math.floor(citation.startMs / 1000)}`}
             className="mt-8 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-sm font-medium"
           >
             <ExternalLink className="h-4 w-4" />

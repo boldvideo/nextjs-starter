@@ -5,17 +5,17 @@ import type { Settings } from "@boldvideo/bold-js";
  */
 export interface ExtendedMetaData {
   title?: string;
-  title_suffix?: string;
+  titleSuffix?: string;
   description?: string;
   image?: string;
-  social_graph_image_url?: string;
+  socialGraphImageUrl?: string;
 }
 
 /**
  * Helper to cast metadata to extended type
  */
 export function asExtendedMetaData(
-  meta: Settings["meta_data"]
+  meta: Settings["metaData"]
 ): ExtendedMetaData | undefined {
   return meta as ExtendedMetaData | undefined;
 }

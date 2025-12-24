@@ -19,9 +19,9 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
     <>
       {showHeader && (
         <Header
-          logo={settings?.logo_url || "/bold-logo.svg"}
-          logoDark={settings?.logo_dark_url}
-          menuItems={settings?.menu_items || []}
+          logo={settings?.logoUrl || "/bold-logo.svg"}
+          logoDark={settings?.logoDarkUrl}
+          menuItems={settings?.menuItems || []}
           session={session}
         />
       )}

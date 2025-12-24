@@ -35,17 +35,17 @@ interface ThemeTokens {
 }
 
 export function getThemeFromSettings(settings: Settings | null | undefined): ThemeTokens | null {
-  return settings?.portal?.theme || settings?.theme_config || null;
+  return settings?.portal?.theme || settings?.themeConfig || null;
 }
 
 export function getHeaderHeight(settings: Settings | null | undefined): string | null {
-  const headerSize = settings?.portal?.theme?.header_size;
+  const headerSize = settings?.portal?.theme?.headerSize;
   if (!headerSize) return null;
   return HEADER_SIZE_MAP[headerSize] || DEFAULT_HEADER_HEIGHT;
 }
 
 export function getCssOverrides(settings: Settings | null | undefined): string | null {
-  return settings?.portal?.theme?.css_overrides || null;
+  return settings?.portal?.theme?.cssOverrides || null;
 }
 
 export function generateThemeCss(theme: ThemeTokens): string {

@@ -56,7 +56,7 @@ export default function MobileTabContent({
         <div className="absolute inset-0 overflow-hidden animate-in fade-in duration-200">
           <ChaptersTab
             chaptersWebVTT={video.chapters || ""}
-            playbackId={video.playback_id}
+            playbackId={video.playbackId}
             onChapterClick={onChapterClick}
           />
         </div>

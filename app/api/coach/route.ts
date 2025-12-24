@@ -18,7 +18,7 @@ function formatSSE(
 ): string | null {
   switch (event.type) {
     case "message_start":
-      state.conversationId = event.id;
+      state.conversationId = event.conversationId;
       return null;
 
     case "text_delta":
@@ -48,11 +48,11 @@ function formatSSE(
         answer: {
           text: event.content || state.accumulatedAnswer,
           citations: (event.sources || state.sources).map((s) => ({
-            video_id: s.video_id,
+            video_id: s.videoId,
             video_title: s.title,
             start_ms: s.timestamp * 1000, // Convert seconds to milliseconds
             text: s.text,
-            playback_id: s.playback_id,
+            playback_id: s.playbackId,
           })),
           confidence: "medium",
         },

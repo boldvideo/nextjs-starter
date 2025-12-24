@@ -34,14 +34,14 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const startSeconds = citation.start_ms / 1000;
-  const endSeconds = citation.end_ms / 1000;
+  const startSeconds = citation.startMs / 1000;
+  const endSeconds = citation.endMs / 1000;
 
   // Transform citation to minimal video object for player (colocated mapper)
   const video: MuxPlayerVideoLike = {
-    id: citation.video_id,
-    playback_id: citation.playback_id,
-    title: citation.video_title,
+    id: citation.videoId,
+    playbackId: citation.playbackId,
+    title: citation.videoTitle,
   };
 
   return (
@@ -62,10 +62,10 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex-1 mr-4">
             <h3 className="font-semibold text-lg line-clamp-1">
-              {citation.video_title}
+              {citation.videoTitle}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {citation.speaker} • {formatTime(citation.start_ms)} - {formatTime(citation.end_ms)}
+              {citation.speaker} • {formatTime(citation.startMs)} - {formatTime(citation.endMs)}
             </p>
           </div>
           <button
@@ -108,8 +108,8 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
 
           {/* Watch full video link */}
           <div className="px-6 pb-6">
-            <Link 
-              href={`/v/${citation.video_id}?t=${Math.floor(citation.start_ms / 1000)}`}
+            <Link
+              href={`/v/${citation.videoId}?t=${Math.floor(citation.startMs / 1000)}`}
               className="w-full flex items-center justify-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
             >
               Watch full video
