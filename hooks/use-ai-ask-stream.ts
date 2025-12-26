@@ -12,6 +12,7 @@ export interface AIAskMessage {
 }
 
 export interface AIAskSource {
+  id?: string;
   video_id: string;
   title: string;
   timestamp: number;
@@ -109,14 +110,12 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
           if (!dataStr) return;
 
           if (dataStr === "[DONE]") {
-            console.debug("[AI Ask] Received [DONE] signal");
             seenTerminalEvent = true;
             return;
           }
 
           try {
             const event = JSON.parse(dataStr);
-            console.debug("[AI Ask] Parsed event:", event.type);
 
             switch (event.type) {
               case "message_start":
@@ -148,74 +147,49 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 break;
 
               case "message_complete": {
-                // Always prefer accumulated response - backend content may be truncated
-                const eventContent = event.content || "";
-                console.debug("[AI Ask] message_complete - accumulated length:", accumulatedResponse.length, "event.content length:", eventContent.length);
-                
-                // Use accumulated response, ignore event.content entirely
-                const finalContent = accumulatedResponse;
-
-                // Don't overwrite accumulatedResponse
-
-                // Only use new sources if they have valid data (title and playback_id)
-                // Otherwise keep the accumulated sources from streaming
-                if (event.sources && event.sources.length > 0) {
-                  const hasValidSources = event.sources.some(
-                    (s: AIAskSource) => s.title && s.playback_id
-                  );
-                  if (hasValidSources) {
-                    accumulatedSources = event.sources;
-                  }
-                }
                 if (event.conversationId) {
                   setConversationId(event.conversationId);
                 }
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === messageId
-                      ? {
-                          ...msg,
-                          content: finalContent || msg.content,
-                          type: "answer",
-                          sources: accumulatedSources,
-                        }
-                      : msg
-                  )
-                );
-                if (!didInvokeOnComplete) {
-                  didInvokeOnComplete = true;
-                  options.onComplete?.(finalContent, accumulatedSources);
+
+                // Check if this is a clarification (camelCase from server)
+                if (event.responseType === "clarification") {
+                  // Clarification: the question is in content, no sources
+                  const clarificationContent = event.content || "";
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === messageId
+                        ? { ...msg, content: clarificationContent, type: "answer" }
+                        : msg
+                    )
+                  );
+                  if (!didInvokeOnComplete) {
+                    didInvokeOnComplete = true;
+                    options.onComplete?.(clarificationContent, []);
+                  }
+                } else {
+                  // Regular answer
+                  const finalContent = accumulatedResponse || event.content;
+                  if (event.sources && event.sources.length > 0) {
+                    accumulatedSources = event.sources;
+                  }
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === messageId
+                        ? {
+                            ...msg,
+                            content: finalContent || msg.content,
+                            type: "answer",
+                            sources: accumulatedSources,
+                          }
+                        : msg
+                    )
+                  );
+                  if (!didInvokeOnComplete) {
+                    didInvokeOnComplete = true;
+                    options.onComplete?.(finalContent, accumulatedSources);
+                  }
                 }
                 seenTerminalEvent = true;
-                console.debug("[AI Ask] message_complete received, marking stream as done");
-                break;
-              }
-
-              case "complete":
-                seenTerminalEvent = true;
-                console.debug("[AI Ask] complete event received, marking stream as done");
-                break;
-
-              case "clarification": {
-                const clarificationContent = event.content || "";
-                accumulatedResponse = clarificationContent;
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === messageId
-                      ? {
-                          ...msg,
-                          content: clarificationContent,
-                          type: "answer",
-                        }
-                      : msg
-                  )
-                );
-                if (!didInvokeOnComplete) {
-                  didInvokeOnComplete = true;
-                  options.onComplete?.(clarificationContent, []);
-                }
-                seenTerminalEvent = true;
-                console.debug("[AI Ask] clarification received, marking stream as done");
                 break;
               }
 
@@ -285,7 +259,6 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
           }
 
           if (seenTerminalEvent) {
-            console.debug("[AI Ask] Terminal event seen, closing stream");
             try {
               await reader.cancel();
             } catch {
@@ -354,7 +327,7 @@ export function askSourceToCitation(
   const endMs = (source.timestamp_end || source.timestamp || 0) * 1000;
 
   return {
-    id: `${source.video_id}_${startMs}_${index}`,
+    id: source.id || `${source.video_id}_${startMs}_${index}`,
     relevanceScore: 1 - index * 0.1,
     relevanceRank: index + 1,
     videoId: source.video_id,

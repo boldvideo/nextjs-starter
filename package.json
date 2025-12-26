@@ -12,7 +12,7 @@
     "release": "changeset publish"
   },
   "dependencies": {
-    "@boldvideo/bold-js": "^1.9.0",
+    "@boldvideo/bold-js": "1.11.0",
     "@boldvideo/ui": "^0.2.0",
     "@mux/mux-player-react": "^3.6.1",
     "@types/node": "24.7.2",

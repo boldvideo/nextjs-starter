@@ -1,5 +1,5 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
-import type { AIEvent, Source } from "@boldvideo/bold-js";
+import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -11,57 +11,63 @@ interface CoachRequestBody {
 
 /**
  * Convert SDK events to SSE format
+ * Aligned with ai-ask route for consistency
  */
 function formatSSE(
   event: AIEvent,
-  state: { accumulatedAnswer: string; sources: Source[]; conversationId?: string }
+  state: { accumulatedAnswer: string; sources: Segment[]; conversationId?: string }
 ): string | null {
   switch (event.type) {
     case "message_start":
       state.conversationId = event.conversationId;
-      return null;
+      return JSON.stringify({ type: "message_start", id: event.conversationId });
 
     case "text_delta":
       state.accumulatedAnswer += event.delta;
-      return JSON.stringify({ type: "chunk", content: event.delta });
+      return JSON.stringify({ type: "text_delta", delta: event.delta });
 
     case "sources":
       state.sources = event.sources;
-      return null;
-
-    case "clarification":
       return JSON.stringify({
-        type: "clarification",
-        success: true,
-        mode: "clarification",
-        needs_clarification: true,
-        clarifying_questions: event.questions || [],
-        conversation_id: state.conversationId || "",
+        type: "sources",
+        sources: event.sources.map((s) => ({
+          id: s.id,
+          video_id: s.videoId,
+          title: s.title,
+          timestamp: s.timestamp,
+          timestamp_end: s.timestampEnd,
+          text: s.text,
+          playback_id: s.playbackId,
+          speaker: s.speaker,
+        })),
       });
 
     case "message_complete":
       return JSON.stringify({
-        type: "complete",
-        success: true,
-        mode: "synthesized",
-        conversation_id: state.conversationId || "",
-        answer: {
-          text: event.content || state.accumulatedAnswer,
-          citations: (event.sources || state.sources).map((s) => ({
-            video_id: s.videoId,
-            video_title: s.title,
-            start_ms: s.timestamp * 1000, // Convert seconds to milliseconds
-            text: s.text,
-            playback_id: s.playbackId,
-          })),
-          confidence: "medium",
-        },
+        type: "message_complete",
+        responseType: event.responseType,
+        content: event.content || state.accumulatedAnswer,
+        sources: (event.citations || state.sources).map((s) => ({
+          id: s.id,
+          video_id: s.videoId,
+          title: s.title,
+          timestamp: s.timestamp,
+          timestamp_end: s.timestampEnd,
+          text: s.text,
+          playback_id: s.playbackId,
+          speaker: s.speaker,
+        })),
+        conversationId: event.conversationId || state.conversationId,
+        usage: event.usage,
+        context: event.context,
       });
 
     case "error":
       return JSON.stringify({
         type: "error",
-        content: event.message || "Stream error",
+        code: event.code,
+        message: event.message,
+        retryable: event.retryable,
       });
 
     default:
@@ -79,7 +85,7 @@ function asyncIterableToStream(
   const encoder = new TextEncoder();
   const state = {
     accumulatedAnswer: "",
-    sources: [] as Source[],
+    sources: [] as Segment[],
     conversationId,
   };
 

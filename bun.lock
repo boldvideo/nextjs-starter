@@ -5,7 +5,7 @@
     "": {
       "name": "bold-nextjs-tailwindcss-starter",
       "dependencies": {
-        "@boldvideo/bold-js": "^1.9.0",
+        "@boldvideo/bold-js": "1.11.0",
         "@boldvideo/ui": "^0.2.0",
         "@mux/mux-player-react": "^3.6.1",
         "@types/node": "24.7.2",
@@ -90,7 +90,7 @@
 
     "@babel/types": ["@babel/types@7.28.5", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA=="],
 
-    "@boldvideo/bold-js": ["@boldvideo/bold-js@1.9.0", "", { "dependencies": { "axios": "^1.3.6" } }, "sha512-GA3JpgmJS8H1SAV1RbY+KvGRpGP/XQv7CAoZh6Gg3r24xr4izA8Uyf8HNZnU5m/d/8pYjVfl0n4xmOND26bm+g=="],
+    "@boldvideo/bold-js": ["@boldvideo/bold-js@1.11.0", "", { "dependencies": { "axios": "^1.3.6" } }, "sha512-1EGiP/uM7vpmcnujXk30DffryZ5yLOBK+ilZDxSino9Qa38T7sMTa66J9ke3sLqurJRaqGlQ0iljj47mj61H/Q=="],
 
     "@boldvideo/ui": ["@boldvideo/ui@0.2.0", "", { "dependencies": { "clsx": "^2.1.1", "cva": "1.0.0-beta.3", "react-file-icon": "^1.6.0", "tailwind-merge": "^2.6.0" }, "peerDependencies": { "react": "^19.1.0", "react-dom": "^19.1.0" } }, "sha512-wnX2gG+fd7XcpfmuKtA4t1RbiW/kmVQQPyGd9QxvJBviPw5i9d8BfXR25gSYPCzky/yOaAegGLWsl1QTDOqT6w=="],
 

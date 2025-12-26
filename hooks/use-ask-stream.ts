@@ -6,7 +6,7 @@ import {
   SynthesizedResponse,
   AskCitation
 } from "@/lib/ask";
-import { createPlaceholderCitations, processCitations } from "@/lib/citation-helpers";
+import { createPlaceholderCitations } from "@/lib/citation-helpers";
 
 export interface ChatMessage {
   id: string;
@@ -19,46 +19,97 @@ export interface ChatMessage {
   };
 }
 
-interface ChunkMessage {
-  type: "chunk";
-  content: string;
+interface MessageStartMessage {
+  type: "message_start";
+  id: string;
 }
 
-interface ClarificationMessage {
-  type: "clarification";
-  success: boolean;
-  mode: string;
-  needs_clarification: boolean;
-  clarifying_questions: string[];
-  missing_dimensions: string[];
-  conversation_id: string;
+interface TextDeltaMessage {
+  type: "text_delta";
+  delta: string;
 }
 
-interface CompleteMessage {
-  type: "complete";
-  success: boolean;
-  mode: string;
-  conversation_id: string;
-  answer: {
+interface SourcesMessage {
+  type: "sources";
+  sources: Array<{
+    id?: string;
+    video_id: string;
+    title: string;
+    timestamp: number;
+    timestamp_end?: number;
     text: string;
-    citations: AskCitation[];
-    confidence: string;
-    model_used: string;
-  };
-  expanded_queries?: string[];
+    playback_id?: string;
+    speaker?: string;
+  }>;
+}
+
+interface MessageCompleteMessage {
+  type: "message_complete";
+  responseType: "answer" | "clarification"; // camelCase from server
+  content: string;
+  sources?: Array<{
+    id?: string;
+    video_id: string;
+    title: string;
+    timestamp: number;
+    timestamp_end?: number;
+    text: string;
+    playback_id?: string;
+    speaker?: string;
+  }>;
+  conversationId?: string;
+  usage?: unknown;
+  context?: unknown;
 }
 
 interface ErrorMessage {
   type: "error";
-  content: string;
+  code?: string;
+  message: string;
+  retryable?: boolean;
 }
 
-type StreamMessage = ChunkMessage | ClarificationMessage | CompleteMessage | ErrorMessage;
+type StreamMessage =
+  | MessageStartMessage
+  | TextDeltaMessage
+  | SourcesMessage
+  | MessageCompleteMessage
+  | ErrorMessage;
 
 interface UseAskStreamOptions {
   onComplete?: (response: SynthesizedResponse) => void;
   onClarification?: (response: ClarificationResponse) => void;
   onError?: (error: string) => void;
+}
+
+function formatTimestamp(ms: number): string {
+  const seconds = Math.floor(ms / 1000);
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+}
+
+function convertToCitation(
+  source: SourcesMessage["sources"][0],
+  index: number
+): AskCitation {
+  const startMs = source.timestamp * 1000;
+  const endMs = (source.timestamp_end || source.timestamp) * 1000;
+  return {
+    id: source.id || `${source.video_id}_${source.timestamp}_${index}`,
+    relevanceScore: 1 - index * 0.1,
+    relevanceRank: index + 1,
+    videoId: source.video_id,
+    playbackId: source.playback_id || "",
+    videoTitle: source.title,
+    timestampStart: formatTimestamp(startMs),
+    timestampEnd: formatTimestamp(endMs),
+    startMs,
+    endMs,
+    speaker: source.speaker || "Speaker",
+    text: source.text,
+    transcriptExcerpt: source.text,
+  };
 }
 
 export function useAskStream(options: UseAskStreamOptions = {}) {
@@ -214,126 +265,128 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             }
 
             switch (message.type) {
-              case "chunk":
-                accumulatedText += message.content;
-                
-                if (!hasStartedStreaming || shouldUpdateUI()) {
-                  const placeholderCitations = accumulatedCitations.length === 0 ?
-                    createPlaceholderCitations(accumulatedText) : [];
+              case "message_start":
+                if (message.id) {
+                  conversationIdRef.current = message.id;
+                  setConversationId(message.id);
+                }
+                break;
 
-                  addAssistantMessage(
-                    accumulatedText,
-                    "answer",
-                    {
-                      synthesizedResponse: {
-                        success: true,
-                        mode: "synthesized",
-                        query,
-                        expandedQueries: expandedQueries,
-                        conversationId: conversationIdRef.current || "",
-                        answer: {
-                          text: accumulatedText,
-                          citations: accumulatedCitations.length > 0 ? accumulatedCitations : placeholderCitations,
-                          confidence: "medium",
-                          modelUsed: "unknown"
-                        },
-                        retrieval: {
-                          total: accumulatedCitations.length || placeholderCitations.length,
-                          chunks: []
-                        },
-                        processingTimeMs: 0
-                      }
-                    }
-                  );
+              case "text_delta":
+                accumulatedText += message.delta;
+
+                if (!hasStartedStreaming || shouldUpdateUI()) {
+                  const placeholderCitations =
+                    accumulatedCitations.length === 0
+                      ? createPlaceholderCitations(accumulatedText)
+                      : [];
+
+                  addAssistantMessage(accumulatedText, "answer", {
+                    synthesizedResponse: {
+                      success: true,
+                      mode: "synthesized",
+                      query,
+                      expandedQueries: expandedQueries,
+                      conversationId: conversationIdRef.current || "",
+                      answer: {
+                        text: accumulatedText,
+                        citations:
+                          accumulatedCitations.length > 0
+                            ? accumulatedCitations
+                            : placeholderCitations,
+                        confidence: "medium",
+                        modelUsed: "unknown",
+                      },
+                      retrieval: {
+                        total:
+                          accumulatedCitations.length || placeholderCitations.length,
+                        chunks: [],
+                      },
+                      processingTimeMs: 0,
+                    },
+                  });
                   hasStartedStreaming = true;
                 }
                 break;
 
-              case "clarification": {
-                receivedCompleteEvent = true;
-                const clarificationMsg = message as ClarificationMessage;
-                
-                if (clarificationMsg.conversation_id) {
-                  conversationIdRef.current = clarificationMsg.conversation_id;
-                  setConversationId(clarificationMsg.conversation_id);
-                }
-
-                setIsWaitingForClarification(true);
-
-                const clarificationResponse: ClarificationResponse = {
-                  success: true,
-                  mode: "clarification",
-                  needsClarification: true,
-                  clarifyingQuestions: clarificationMsg.clarifying_questions,
-                  missingDimensions: clarificationMsg.missing_dimensions,
-                  originalQuery: query,
-                  conversationId: clarificationMsg.conversation_id
-                };
-
-                addAssistantMessage(
-                  "",
-                  "clarification",
-                  { clarificationResponse }
+              case "sources":
+                // Convert sources to citations and accumulate
+                accumulatedCitations.length = 0;
+                accumulatedCitations.push(
+                  ...message.sources.map((s, i) => convertToCitation(s, i))
                 );
-
-                options.onClarification?.(clarificationResponse);
                 break;
-              }
 
-              case "complete": {
+              case "message_complete": {
                 receivedCompleteEvent = true;
-                const completeMsg = message as CompleteMessage;
-
-                if (completeMsg.conversation_id) {
-                  conversationIdRef.current = completeMsg.conversation_id;
-                  setConversationId(completeMsg.conversation_id);
+                if (message.conversationId) {
+                  conversationIdRef.current = message.conversationId;
+                  setConversationId(message.conversationId);
                 }
 
-                setIsWaitingForClarification(false);
+                // Check responseType (camelCase from server)
+                if (message.responseType === "clarification") {
+                  // Clarification: content contains the clarifying question
+                  setIsWaitingForClarification(true);
 
-                const processedCitations = processCitations(
-                  completeMsg.answer.citations || accumulatedCitations
-                );
+                  const clarificationResponse: ClarificationResponse = {
+                    success: true,
+                    mode: "clarification",
+                    needsClarification: true,
+                    clarifyingQuestions: [message.content], // The content IS the question
+                    missingDimensions: [],
+                    originalQuery: query,
+                    conversationId: message.conversationId || "",
+                  };
 
-                const finalText = accumulatedText || completeMsg.answer?.text || "";
+                  addAssistantMessage(message.content, "clarification", {
+                    clarificationResponse,
+                  });
 
-                const finalResponse: SynthesizedResponse = {
-                  success: true,
-                  mode: "synthesized",
-                  query,
-                  conversationId: completeMsg.conversation_id,
-                  expandedQueries: completeMsg.expanded_queries || expandedQueries,
-                  answer: {
-                    text: finalText,
-                    citations: processedCitations,
-                    confidence: completeMsg.answer.confidence as "high" | "medium" | "low",
-                    modelUsed: completeMsg.answer.model_used
-                  },
-                  retrieval: {
-                    total: processedCitations.length,
-                    chunks: []
-                  },
-                  processingTimeMs: 0
-                };
+                  options.onClarification?.(clarificationResponse);
+                } else {
+                  // Regular answer
+                  setIsWaitingForClarification(false);
 
-                addAssistantMessage(
-                  finalText,
-                  "answer",
-                  { synthesizedResponse: finalResponse }
-                );
+                  const finalText = accumulatedText || message.content;
+                  const finalCitations =
+                    message.sources && message.sources.length > 0
+                      ? message.sources.map((s, i) => convertToCitation(s, i))
+                      : accumulatedCitations;
 
-                options.onComplete?.(finalResponse);
+                  const finalResponse: SynthesizedResponse = {
+                    success: true,
+                    mode: "synthesized",
+                    query,
+                    conversationId:
+                      message.conversationId || conversationIdRef.current || "",
+                    expandedQueries: expandedQueries,
+                    answer: {
+                      text: finalText,
+                      citations: finalCitations,
+                      confidence: "medium",
+                      modelUsed: "unknown",
+                    },
+                    retrieval: {
+                      total: finalCitations.length,
+                      chunks: [],
+                    },
+                    processingTimeMs: 0,
+                  };
+
+                  addAssistantMessage(finalText, "answer", {
+                    synthesizedResponse: finalResponse,
+                  });
+
+                  options.onComplete?.(finalResponse);
+                }
                 break;
               }
 
               case "error": {
                 receivedCompleteEvent = true;
-                const errorMsg = message as ErrorMessage;
-                addAssistantMessage(
-                  `Error: ${errorMsg.content}`,
-                  "error"
-                );
-                options.onError?.(errorMsg.content);
+                addAssistantMessage(`Error: ${message.message}`, "error");
+                options.onError?.(message.message);
                 break;
               }
 
