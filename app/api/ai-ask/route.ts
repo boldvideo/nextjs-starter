@@ -19,8 +19,6 @@ interface StreamState {
 }
 
 function formatSSE(event: AIEvent, state: StreamState): string | null {
-  console.debug("[ai-ask] Backend event:", event.type, event);
-
   switch (event.type) {
     case "message_start":
       state.conversationId = event.conversationId;
@@ -35,6 +33,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       return JSON.stringify({
         type: "sources",
         sources: event.sources.map((s) => ({
+          id: s.id,
           video_id: s.videoId,
           title: s.title,
           timestamp: s.timestamp,
@@ -45,11 +44,19 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         })),
       });
 
-    case "message_complete":
+    case "message_complete": {
+      const messageEvent = event as unknown as {
+        responseType?: string;
+        citations?: Source[];
+        usage?: unknown;
+        context?: unknown;
+      };
       return JSON.stringify({
         type: "message_complete",
+        responseType: messageEvent.responseType, // camelCase, pass through
         content: event.content || state.accumulatedAnswer,
-        sources: (event.sources || state.sources).map((s) => ({
+        sources: (messageEvent.citations || state.sources).map((s) => ({
+          id: s.id,
           video_id: s.videoId,
           title: s.title,
           timestamp: s.timestamp,
@@ -58,15 +65,9 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
           playback_id: s.playbackId,
           speaker: s.speaker,
         })),
-        conversationId: state.conversationId,
-      });
-
-    case "clarification": {
-      return JSON.stringify({
-        type: "clarification",
-        content: event.content || "",
-        questions: event.questions || [],
-        needs_response: true,
+        conversationId: event.conversationId || state.conversationId,
+        usage: messageEvent.usage,
+        context: messageEvent.context,
       });
     }
 
@@ -102,7 +103,6 @@ function asyncIterableToStream(
         const { done, value } = await iterator.next();
 
         if (done) {
-          console.debug("[ai-ask] Stream iterator done, sending [DONE]");
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
           return;

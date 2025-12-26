@@ -37,6 +37,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       return JSON.stringify({
         type: "sources",
         sources: event.sources.map((s) => ({
+          id: s.id,
           video_id: s.videoId,
           title: s.title,
           timestamp: s.timestamp,
@@ -47,11 +48,18 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         })),
       });
 
-    case "message_complete":
+    case "message_complete": {
+      const messageEvent = event as unknown as {
+        responseType?: string;
+        citations?: Source[];
+        usage?: unknown;
+      };
       return JSON.stringify({
         type: "message_complete",
+        responseType: messageEvent.responseType, // camelCase, pass through
         content: event.content || state.accumulatedAnswer,
-        sources: (event.sources || state.sources).map((s) => ({
+        sources: (messageEvent.citations || state.sources).map((s) => ({
+          id: s.id,
           video_id: s.videoId,
           title: s.title,
           timestamp: s.timestamp,
@@ -61,8 +69,9 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
           speaker: s.speaker,
         })),
         context: state.context,
-        usage: (event as unknown as { usage?: unknown }).usage,
+        usage: messageEvent.usage,
       });
+    }
 
     case "error":
       return JSON.stringify({
