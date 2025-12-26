@@ -1,7 +1,7 @@
 "use server";
 
 import { getTenantContext } from "@/lib/get-tenant-context";
-import type { AIEvent, Source } from "@boldvideo/bold-js";
+import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
 export type Message = {
   role: "user" | "assistant";
@@ -10,7 +10,7 @@ export type Message = {
 
 interface StreamState {
   accumulatedAnswer: string;
-  sources: Source[];
+  sources: Segment[];
 }
 
 function formatSSE(event: AIEvent, state: StreamState): string | null {
@@ -29,7 +29,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         success: true,
         answer: {
           text: event.content || state.accumulatedAnswer,
-          citations: (event.sources || state.sources).map((s) => ({
+          citations: (event.citations || state.sources).map((s) => ({
             video_id: s.videoId,
             title: s.title,
             timestamp: s.timestamp,

@@ -1,5 +1,5 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
-import type { AIEvent, Source } from "@boldvideo/bold-js";
+import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -17,7 +17,7 @@ interface AISearchRequestBody {
 
 interface StreamState {
   accumulatedAnswer: string;
-  sources: Source[];
+  sources: Segment[];
   messageId?: string;
   context?: AIContextMessage[];
 }
@@ -48,17 +48,12 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         })),
       });
 
-    case "message_complete": {
-      const messageEvent = event as unknown as {
-        responseType?: string;
-        citations?: Source[];
-        usage?: unknown;
-      };
+    case "message_complete":
       return JSON.stringify({
         type: "message_complete",
-        responseType: messageEvent.responseType, // camelCase, pass through
+        responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
-        sources: (messageEvent.citations || state.sources).map((s) => ({
+        sources: (event.citations || state.sources).map((s) => ({
           id: s.id,
           video_id: s.videoId,
           title: s.title,
@@ -69,9 +64,8 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
           speaker: s.speaker,
         })),
         context: state.context,
-        usage: messageEvent.usage,
+        usage: event.usage,
       });
-    }
 
     case "error":
       return JSON.stringify({

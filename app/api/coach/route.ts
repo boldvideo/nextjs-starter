@@ -1,5 +1,5 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
-import type { AIEvent, Source } from "@boldvideo/bold-js";
+import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -15,7 +15,7 @@ interface CoachRequestBody {
  */
 function formatSSE(
   event: AIEvent,
-  state: { accumulatedAnswer: string; sources: Source[]; conversationId?: string }
+  state: { accumulatedAnswer: string; sources: Segment[]; conversationId?: string }
 ): string | null {
   switch (event.type) {
     case "message_start":
@@ -42,18 +42,12 @@ function formatSSE(
         })),
       });
 
-    case "message_complete": {
-      const messageEvent = event as unknown as {
-        responseType?: string;
-        citations?: Source[];
-        usage?: unknown;
-        context?: unknown;
-      };
+    case "message_complete":
       return JSON.stringify({
         type: "message_complete",
-        responseType: messageEvent.responseType, // camelCase, pass through
+        responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
-        sources: (messageEvent.citations || state.sources).map((s) => ({
+        sources: (event.citations || state.sources).map((s) => ({
           id: s.id,
           video_id: s.videoId,
           title: s.title,
@@ -64,10 +58,9 @@ function formatSSE(
           speaker: s.speaker,
         })),
         conversationId: event.conversationId || state.conversationId,
-        usage: messageEvent.usage,
-        context: messageEvent.context,
+        usage: event.usage,
+        context: event.context,
       });
-    }
 
     case "error":
       return JSON.stringify({
@@ -92,7 +85,7 @@ function asyncIterableToStream(
   const encoder = new TextEncoder();
   const state = {
     accumulatedAnswer: "",
-    sources: [] as Source[],
+    sources: [] as Segment[],
     conversationId,
   };
 
