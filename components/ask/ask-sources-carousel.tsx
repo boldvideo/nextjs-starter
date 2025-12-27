@@ -76,7 +76,7 @@ export function AskSourcesCarousel({
                 )}
 
                 {/* Citation number badge - top left */}
-                <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium flex items-center justify-center">
+                <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-background text-primary text-xs font-medium flex items-center justify-center">
                   {index + 1}
                 </div>
 
