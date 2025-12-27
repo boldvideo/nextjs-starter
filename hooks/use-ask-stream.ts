@@ -40,6 +40,7 @@ interface SourcesMessage {
     text: string;
     playback_id?: string;
     speaker?: string;
+    cited?: boolean;
   }>;
 }
 
@@ -56,6 +57,7 @@ interface MessageCompleteMessage {
     text: string;
     playback_id?: string;
     speaker?: string;
+    cited?: boolean;
   }>;
   conversationId?: string;
   usage?: unknown;
@@ -109,6 +111,7 @@ function convertToCitation(
     speaker: source.speaker || "Speaker",
     text: source.text,
     transcriptExcerpt: source.text,
+    cited: source.cited ?? true,
   };
 }
 

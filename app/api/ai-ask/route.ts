@@ -41,15 +41,18 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
           text: s.text,
           playback_id: s.playbackId,
           speaker: s.speaker,
+          cited: s.cited,
         })),
       });
 
-    case "message_complete":
+    case "message_complete": {
+      // Use sources from event (SDK provides as citations), fall back to accumulated state
+      const completeSources = event.citations || state.sources;
       return JSON.stringify({
         type: "message_complete",
         responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
-        sources: (event.citations || state.sources).map((s) => ({
+        sources: completeSources.map((s: Segment) => ({
           id: s.id,
           video_id: s.videoId,
           title: s.title,
@@ -58,11 +61,13 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
           text: s.text,
           playback_id: s.playbackId,
           speaker: s.speaker,
+          cited: s.cited,
         })),
         conversationId: event.conversationId || state.conversationId,
         usage: event.usage,
         context: event.context,
       });
+    }
 
     case "error":
       return JSON.stringify({
