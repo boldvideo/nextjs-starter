@@ -19,6 +19,7 @@ export interface AISearchSource {
   text: string;
   playback_id?: string;
   speaker?: string;
+  cited?: boolean;
 }
 
 interface AIContextMessage {
@@ -284,6 +285,7 @@ export function sourceToCitation(
     speaker: source.speaker || "Speaker",
     text: source.text,
     transcriptExcerpt: source.text,
+    cited: source.cited ?? true,
   };
 }
 

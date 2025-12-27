@@ -15,6 +15,7 @@ export type AskCitation = {
   speaker: string;
   text: string; // The relevant transcript excerpt
   transcriptExcerpt: string; // Backwards compatibility or alias
+  cited?: boolean; // Whether this source is cited in the answer text
 };
 
 export type AskAnswer = {

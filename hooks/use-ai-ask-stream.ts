@@ -20,6 +20,7 @@ export interface AIAskSource {
   text: string;
   playback_id?: string;
   speaker?: string;
+  cited?: boolean;
 }
 
 interface UseAIAskStreamOptions {
@@ -340,6 +341,7 @@ export function askSourceToCitation(
     speaker: source.speaker || "Speaker",
     text: source.text,
     transcriptExcerpt: source.text,
+    cited: source.cited ?? true,
   };
 }
 

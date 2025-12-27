@@ -23,7 +23,10 @@ export function AskSourcesCarousel({
   onCitationClick,
   selectedCitationId,
 }: AskSourcesCarouselProps) {
-  if (citations.length === 0) {
+  // Filter to only show cited sources (those referenced in the answer)
+  const citedSources = citations.filter((c) => c.cited !== false);
+
+  if (citedSources.length === 0) {
     return null;
   }
 
@@ -35,13 +38,13 @@ export function AskSourcesCarousel({
           <Video className="h-4 w-4 text-primary" />
         </div>
         <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          {citations.length} Video Source{citations.length !== 1 ? "s" : ""}
+          {citedSources.length} Video Source{citedSources.length !== 1 ? "s" : ""}
         </span>
       </div>
 
       {/* Carousel */}
       <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-        {citations.map((citation, index) => {
+        {citedSources.map((citation, index) => {
           const isSelected = selectedCitationId === citation.id;
           const hasValidTimestamp = citation.startMs > 0;
           const thumbnailUrl = citation.playbackId
