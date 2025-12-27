@@ -61,6 +61,7 @@ export function generateThemeCss(theme: ThemeTokens): string {
       --surface: ${theme.light?.surface || "oklch(0.99 0.01 95)"};
       --accent: ${theme.light?.accent || "oklch(0.73 0.12 175)"};
       --accent-foreground: ${theme.light?.accent_foreground || "oklch(0.22 0.04 175)"};
+      --primary: ${theme.light?.accent || "oklch(0.73 0.12 175)"};
     }
     .dark {
       --background: ${theme.dark?.background || "oklch(0.18 0.02 175)"};
@@ -72,6 +73,7 @@ export function generateThemeCss(theme: ThemeTokens): string {
       --surface: ${theme.dark?.surface || "oklch(0.22 0.02 175)"};
       --accent: ${theme.dark?.accent || "oklch(0.73 0.12 175)"};
       --accent-foreground: ${theme.dark?.accent_foreground || "oklch(0.18 0.02 175)"};
+      --primary: ${theme.dark?.accent || "oklch(0.73 0.12 175)"};
     }
   `;
 }
