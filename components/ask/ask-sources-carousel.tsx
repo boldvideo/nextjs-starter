@@ -75,8 +75,8 @@ export function AskSourcesCarousel({
                   </div>
                 )}
 
-                {/* Citation number badge - top left like target */}
-                <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-primary/80 text-primary-foreground text-xs font-medium flex items-center justify-center">
+                {/* Citation number badge - top left */}
+                <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium flex items-center justify-center">
                   {index + 1}
                 </div>
 
@@ -93,13 +93,12 @@ export function AskSourcesCarousel({
                 <h4 className="text-sm font-medium line-clamp-2 leading-tight">
                   {citation.videoTitle}
                 </h4>
-                <p className="text-xs text-muted-foreground">{citation.speaker}</p>
-                {hasValidTimestamp && (
-                  <div className="flex items-center gap-1 text-primary">
-                    <Play className="h-3 w-3" />
+                <div className="flex items-center gap-1 text-primary">
+                  <Play className="h-3 w-3" />
+                  {hasValidTimestamp && (
                     <span className="text-xs">{formatTime(citation.startMs)}</span>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </button>
           );
