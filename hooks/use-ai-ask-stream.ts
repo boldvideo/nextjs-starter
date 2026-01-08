@@ -170,9 +170,28 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 } else {
                   // Regular answer
                   const finalContent = accumulatedResponse || event.content;
+                  
+                  // Merge final sources with accumulated sources to preserve titles/playback_id
+                  // Final sources have id/cited but may lack title; accumulated sources have full metadata
                   if (event.sources && event.sources.length > 0) {
-                    accumulatedSources = event.sources;
+                    const finalSources: AIAskSource[] = event.sources;
+                    // Merge: use final source but fill in missing fields from accumulated
+                    accumulatedSources = finalSources.map((finalSrc) => {
+                      // Find matching source from accumulated by video_id and text overlap
+                      const origSrc = accumulatedSources.find(
+                        (s) => s.video_id === finalSrc.video_id && s.text === finalSrc.text
+                      );
+                      return {
+                        ...origSrc,
+                        ...finalSrc,
+                        title: finalSrc.title || origSrc?.title || "Untitled",
+                        playback_id: finalSrc.playback_id || origSrc?.playback_id,
+                        timestamp: finalSrc.timestamp ?? origSrc?.timestamp ?? 0,
+                        timestamp_end: finalSrc.timestamp_end ?? origSrc?.timestamp_end,
+                      };
+                    });
                   }
+                  
                   setMessages((prev) =>
                     prev.map((msg) =>
                       msg.id === messageId
