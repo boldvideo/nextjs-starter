@@ -15,6 +15,7 @@
     "@boldvideo/bold-js": "1.11.1",
     "@boldvideo/ui": "^0.2.0",
     "@mux/mux-player-react": "^3.6.1",
+    "@types/mdast": "^4.0.4",
     "@types/node": "24.7.2",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
@@ -37,7 +38,8 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "swr": "^2.3.6",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.6",
