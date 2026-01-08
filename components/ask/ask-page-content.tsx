@@ -167,16 +167,24 @@ export function AskPageContent() {
         const displayMap = new Map<string, number>();
         
         if (assistantMsg?.content && citations.length > 0) {
-          const matches = Array.from(assistantMsg.content.matchAll(/\[(\d+)\]/g));
+          const matches = Array.from(assistantMsg.content.matchAll(/\[(\d+|c_[^\]]+)\]/g));
           const seenIds = new Set<string>();
           const ordered: AskCitation[] = [];
 
           for (const m of matches) {
-            const num = parseInt(m[1], 10);
-            const idx = num - 1;
-            if (Number.isNaN(num) || idx < 0 || idx >= citations.length) continue;
-            const citation = citations[idx];
-            if (seenIds.has(citation.id)) continue;
+            const ref = m[1];
+            let citation: AskCitation | undefined;
+
+            if (ref.startsWith("c_")) {
+              citation = citations.find((c) => c.id === ref);
+            } else {
+              const idx = parseInt(ref, 10) - 1;
+              if (idx >= 0 && idx < citations.length) {
+                citation = citations[idx];
+              }
+            }
+
+            if (!citation || seenIds.has(citation.id)) continue;
             seenIds.add(citation.id);
             ordered.push(citation);
           }

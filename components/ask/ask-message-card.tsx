@@ -27,19 +27,29 @@ export function AskMessageCard({
   citationDisplayNumberById,
 }: AskMessageCardProps) {
   const citationMap = React.useMemo(() => {
-    if (!citations.length) return new Map<number, AskCitation>();
+    if (!citations.length) return new Map<string, AskCitation>();
 
-    const map = new Map<number, AskCitation>();
-    // Match both [n] and [n](citation:n) formats
-    const citationMatches = Array.from(content.matchAll(/\[(\d+)\](?:\(citation:\d+\))?/g));
-    const uniqueNumbers = Array.from(
-      new Set(citationMatches.map((m) => parseInt(m[1])))
+    const map = new Map<string, AskCitation>();
+    // Match both [n] and [c_xxx] formats (with optional markdown link suffix)
+    const citationMatches = Array.from(
+      content.matchAll(/\[(\d+|c_[^\]]+)\](?:\(citation:[^\)]+\))?/g)
     );
+    const uniqueRefs = Array.from(new Set(citationMatches.map((m) => m[1])));
 
-    uniqueNumbers.forEach((num) => {
-      const citationIndex = num - 1;
-      if (citationIndex >= 0 && citationIndex < citations.length) {
-        map.set(num, citations[citationIndex]);
+    uniqueRefs.forEach((ref) => {
+      let citation: AskCitation | undefined;
+
+      if (ref.startsWith("c_")) {
+        citation = citations.find((c) => c.id === ref);
+      } else {
+        const idx = parseInt(ref, 10) - 1;
+        if (idx >= 0 && idx < citations.length) {
+          citation = citations[idx];
+        }
+      }
+
+      if (citation) {
+        map.set(ref, citation);
       }
     });
 
@@ -51,10 +61,11 @@ export function AskMessageCard({
 
     let processedText = content;
 
-    citationMap.forEach((citation, originalNum) => {
-      // Match both [n] and [n](citation:n) formats
-      const pattern = new RegExp(`\\[${originalNum}\\](?:\\(citation:\\d+\\))?`, "g");
-      const displayNum = citationDisplayNumberById?.get(citation.id) ?? originalNum;
+    citationMap.forEach((citation, ref) => {
+      // Match both [n] and [c_xxx] formats
+      const escapedRef = ref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const pattern = new RegExp(`\\[${escapedRef}\\](?:\\(citation:[^\\)]+\\))?`, "g");
+      const displayNum = citationDisplayNumberById?.get(citation.id) ?? (/^\d+$/.test(ref) ? parseInt(ref, 10) : 1);
       processedText = processedText.replace(
         pattern,
         `@@CITATION_${displayNum}_${citation.id}@@`
