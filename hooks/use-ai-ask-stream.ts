@@ -23,6 +23,19 @@ export interface AIAskSource {
   cited?: boolean;
 }
 
+interface ConversationHistoryMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  sources?: AIAskSource[];
+  inserted_at: string;
+}
+
+interface ConversationHistory {
+  conversation_id: string;
+  messages: ConversationHistoryMessage[];
+}
+
 interface UseAIAskStreamOptions {
   onComplete?: (answer: string, sources: AIAskSource[]) => void;
   onError?: (error: string) => void;
@@ -329,6 +342,34 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
     }
   }, []);
 
+  const loadConversation = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/ai-ask/${id}`);
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const data: ConversationHistory = await response.json();
+
+      // Convert history messages to our format
+      const loadedMessages: AIAskMessage[] = data.messages.map((msg) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        type: msg.role === "user" ? "text" : "answer",
+        sources: msg.sources,
+      }));
+
+      setMessages(loadedMessages);
+      setConversationId(data.conversation_id);
+      return true;
+    } catch (error) {
+      console.error("[useAIAskStream] Failed to load conversation:", error);
+      return false;
+    }
+  }, []);
+
   return {
     messages,
     isStreaming,
@@ -336,6 +377,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
     streamQuestion,
     reset,
     stop,
+    loadConversation,
   };
 }
 
