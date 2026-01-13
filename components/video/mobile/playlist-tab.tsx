@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ThumbnailImage } from "@/components/video-thumbnail/thumbnail-image";
 import { format } from "date-fns";
 import { formatDuration } from "@/util/format-duration";
+import { buildVideoUrl } from "@/lib/video-path";
 
 interface PlaylistTabProps {
   playlist: Playlist;
@@ -39,7 +40,7 @@ export default function PlaylistTab({
           return (
             <li key={video.id}>
               <Link
-                href={`/pl/${playlist.id}/v/${video.id}`}
+                href={buildVideoUrl(video, { playlistId: playlist.id })}
                 className={cn(
                   "flex gap-3 p-3 transition-colors",
                   isCurrent

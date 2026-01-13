@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Plus, Loader2, User } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import Image from "next/image";
 import {
   useAIAskStream,
@@ -18,8 +18,19 @@ import { AskSourcesCarousel } from "./ask-sources-carousel";
 import { AskVideoPanel } from "./ask-video-panel";
 import { AskEmptyState } from "./ask-empty-state";
 import { ChatInput } from "@/components/coach";
+import { AskLoadingState } from "./ask-loading-state";
 
-export function AskPageContent() {
+type PageState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ready" }
+  | { status: "error"; message: string };
+
+interface AskPageContentProps {
+  conversationId?: string;
+}
+
+export function AskPageContent({ conversationId: routeConversationId }: AskPageContentProps = {}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -39,7 +50,11 @@ export function AskPageContent() {
     return shuffled.slice(0, 4);
   }, [config.ai.conversationStarters]);
 
-  const { messages, isStreaming, streamQuestion, stop, reset } =
+  const [pageState, setPageState] = useState<PageState>(
+    routeConversationId ? { status: "loading" } : { status: "idle" }
+  );
+
+  const { messages, isStreaming, conversationId, streamQuestion, stop, reset, loadConversation } =
     useAIAskStream();
 
   const [selectedCitation, setSelectedCitation] = useState<AskCitation | null>(
@@ -47,34 +62,48 @@ export function AskPageContent() {
   );
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-  const allCitations = useMemo(() => {
-    const citations: AskCitation[] = [];
-    const seen = new Set<string>();
-    for (const msg of messages) {
-      if (msg.sources) {
-        for (let i = 0; i < msg.sources.length; i++) {
-          const citation = askSourceToCitation(msg.sources[i], i);
-          if (!seen.has(citation.id)) {
-            seen.add(citation.id);
-            citations.push(citation);
-          }
-        }
-      }
-    }
-    return citations;
-  }, [messages]);
-
-
-
   const hasInitializedRef = useRef(false);
 
+  // Load conversation from route (deep link only) OR process initial query
   useEffect(() => {
+    // If we have a route conversation ID AND no messages, we're deep linking - fetch
+    if (routeConversationId && messages.length === 0) {
+      setPageState({ status: "loading" });
+      loadConversation(routeConversationId).then((success) => {
+        if (success) {
+          setPageState({ status: "ready" });
+        } else {
+          // Conversation not found - redirect to /ask
+          router.replace("/ask", { scroll: false });
+        }
+      });
+      return;
+    }
+
+    // If we have routeConversationId but also have messages, we're already loaded
+    if (routeConversationId && messages.length > 0) {
+      setPageState({ status: "ready" });
+      return;
+    }
+
+    // No route conversation ID - check for query param
     const initialQuery = searchParams?.get("q");
     if (initialQuery && !hasInitializedRef.current && messages.length === 0) {
       hasInitializedRef.current = true;
       streamQuestion(initialQuery);
     }
-  }, [searchParams, messages.length, streamQuestion]);
+    setPageState({ status: "ready" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally minimal deps: runs once per route change
+  }, [routeConversationId]);
+
+  // Update URL when a new conversation starts - use History API to avoid navigation
+  // This keeps the component mounted with all state intact while making URL shareable
+  useEffect(() => {
+    // Only update if we have a conversation ID and we're not already on a conversation route
+    if (conversationId && !routeConversationId) {
+      window.history.replaceState(null, "", `/ask/${conversationId}`);
+    }
+  }, [conversationId, routeConversationId]);
 
   useEffect(() => {
     if (scrollToBottomRef.current && isStreaming) {
@@ -91,14 +120,10 @@ export function AskPageContent() {
       const trimmedQuery = query.trim();
       if (!trimmedQuery || isStreaming) return;
 
-      const url = new URL(window.location.href);
-      url.searchParams.set("q", trimmedQuery);
-      router.replace(url.pathname + url.search, { scroll: false });
-
       setQuery("");
       await streamQuestion(trimmedQuery);
     },
-    [query, isStreaming, streamQuestion, router]
+    [query, isStreaming, streamQuestion]
   );
 
   const handleStop = useCallback(() => {
@@ -106,13 +131,14 @@ export function AskPageContent() {
   }, [stop]);
 
   const handleReset = useCallback(() => {
-    hasInitializedRef.current = true;
-    router.replace("/ask", { scroll: false });
     reset();
     setQuery("");
     setSelectedCitation(null);
     setIsPanelOpen(false);
-  }, [reset, router]);
+    setPageState({ status: "idle" });
+    // Update URL without navigation - state is already cleared
+    window.history.replaceState(null, "", "/ask");
+  }, [reset]);
 
   const handleCitationClick = useCallback((citation: AskCitation) => {
     setSelectedCitation(citation);
@@ -123,34 +149,11 @@ export function AskPageContent() {
     setIsPanelOpen(false);
   }, []);
 
-
-
-  const placeholder = "Ask a follow up question";
-
-  const hasMessages = messages.length > 0;
-
-  if (!hasMessages) {
-    return (
-      <AskEmptyState
-        query={query}
-        setQuery={setQuery}
-        onSubmit={handleSubmit}
-        onStop={handleStop}
-        isStreaming={isStreaming}
-        aiName={aiName}
-        aiAvatar={aiAvatar}
-        greeting={greeting}
-        suggestions={suggestions}
-        placeholder="What's on your mind?"
-      />
-    );
-  }
-
   // Group messages into Q&A pairs for display
   const qaPairs = useMemo(() => {
     const pairs: Array<{
-      userMessage: typeof messages[0];
-      assistantMessage: typeof messages[0] | null;
+      userMessage: (typeof messages)[0];
+      assistantMessage: (typeof messages)[0] | null;
       citations: AskCitation[];
       orderedCitations: AskCitation[];
       citationDisplayNumberById: Map<string, number>;
@@ -159,15 +162,20 @@ export function AskPageContent() {
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
       if (msg.role === "user") {
-        const assistantMsg = messages[i + 1]?.role === "assistant" ? messages[i + 1] : null;
-        const citations = assistantMsg?.sources?.map((s, idx) => askSourceToCitation(s, idx)) || [];
-        
+        const assistantMsg =
+          messages[i + 1]?.role === "assistant" ? messages[i + 1] : null;
+        const citations =
+          assistantMsg?.sources?.map((s, idx) => askSourceToCitation(s, idx)) ||
+          [];
+
         // Compute citation ordering for this pair
         let orderedCitations = citations;
         const displayMap = new Map<string, number>();
-        
+
         if (assistantMsg?.content && citations.length > 0) {
-          const matches = Array.from(assistantMsg.content.matchAll(/\[(\d+|c_[^\]]+)\]/g));
+          const matches = Array.from(
+            assistantMsg.content.matchAll(/\[(\d+|c_[^\]]+)\]/g)
+          );
           const seenIds = new Set<string>();
           const ordered: AskCitation[] = [];
 
@@ -213,7 +221,30 @@ export function AskPageContent() {
     return pairs;
   }, [messages]);
 
-  const lastPair = qaPairs[qaPairs.length - 1];
+  const placeholder = "Ask a follow up question";
+
+  const hasMessages = messages.length > 0;
+
+  if (pageState.status === "loading") {
+    return <AskLoadingState />;
+  }
+
+  if (!hasMessages) {
+    return (
+      <AskEmptyState
+        query={query}
+        setQuery={setQuery}
+        onSubmit={handleSubmit}
+        onStop={handleStop}
+        isStreaming={isStreaming}
+        aiName={aiName}
+        aiAvatar={aiAvatar}
+        greeting={greeting}
+        suggestions={suggestions}
+        placeholder="What's on your mind?"
+      />
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-120px)] w-full">

@@ -20,6 +20,7 @@ import { formatDuration } from "@/util/format-duration";
 import PlaylistTab from "../mobile/playlist-tab";
 import ChaptersTab from "../mobile/chapters-tab";
 import ChatTab from "../mobile/chat-tab";
+import { buildVideoUrl } from "@/lib/video-path";
 
 interface VideoDetailProps {
   video: ExtendedVideo;
@@ -77,7 +78,7 @@ export function VideoDetail({
 
   const handleVideoEnded = useCallback(() => {
     if (isAutoplay && hasNextVideo && nextVideo && playlist) {
-      router.push(`/pl/${playlist.id}/v/${nextVideo.id}`);
+      router.push(buildVideoUrl(nextVideo, { playlistId: playlist.id }));
     }
   }, [isAutoplay, hasNextVideo, nextVideo, playlist, router]);
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { MuxPlayerComponent, MuxPlayerVideoLike } from "@/components/players/player-mux";
+import { getCanonicalVideoPath } from "@/lib/video-path";
 
 interface CitationModalProps {
   citation: AskCitation | null;
@@ -109,7 +110,7 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
           {/* Watch full video link */}
           <div className="px-6 pb-6">
             <Link
-              href={`/v/${citation.videoId}?t=${Math.floor(citation.startMs / 1000)}`}
+              href={`${getCanonicalVideoPath(citation.videoId)}?t=${Math.floor(citation.startMs / 1000)}`}
               className="w-full flex items-center justify-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
             >
               Watch full video

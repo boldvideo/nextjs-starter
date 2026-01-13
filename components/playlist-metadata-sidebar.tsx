@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useProgress } from "./providers/progress-provider";
 import { useMemo } from "react";
+import { buildVideoUrl } from "@/lib/video-path";
 
 interface PlaylistMetadataSidebarProps {
   playlist: Playlist;
@@ -103,7 +104,7 @@ export function PlaylistMetadataSidebar({
         {firstVideo && (
           <div className="pt-2">
             <Link
-              href={`/pl/${playlist.id}/v/${(continueVideo || firstVideo).id}`}
+              href={buildVideoUrl(continueVideo || firstVideo, { playlistId: playlist.id })}
               className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium text-sm transition-colors"
             >
               <Play className="w-4 h-4" />
