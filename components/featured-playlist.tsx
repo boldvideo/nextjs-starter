@@ -11,11 +11,18 @@ interface PlaylistProps {
     title: string;
     videos?: Video[];
   };
+  showAllVideos?: boolean;
+  useStandaloneLinks?: boolean;
 }
 
-export function FeaturedPlaylist({ playlist }: PlaylistProps) {
+export function FeaturedPlaylist({ 
+  playlist, 
+  showAllVideos = false,
+  useStandaloneLinks = false 
+}: PlaylistProps) {
   const playlistId = `playlist-${playlist.id}`;
   const videos = playlist.videos ?? [];
+  const displayVideos = showAllVideos ? videos : videos.slice(0, 8);
 
   return (
     <section aria-labelledby={playlistId}>
@@ -28,18 +35,23 @@ export function FeaturedPlaylist({ playlist }: PlaylistProps) {
             </span>
           </Link>
         </h2>
-        <Link
-          href={`/pl/${playlist.id}`}
-          className="font-bold text-[18px] text-primary px-3 py-1 border-2 border-primary rounded-lg"
-          aria-label={`View all videos in ${playlist.title}`}
-        >
-          View All
-        </Link>
+        {!showAllVideos && (
+          <Link
+            href={`/pl/${playlist.id}`}
+            className="font-bold text-[18px] text-primary px-3 py-1 border-2 border-primary rounded-lg"
+            aria-label={`View all videos in ${playlist.title}`}
+          >
+            View All
+          </Link>
+        )}
       </div>
       <ul className="mb-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10">
-        {videos.slice(0, 8).map((video) => (
+        {displayVideos.map((video) => (
           <li key={video.id}>
-            <VideoThumbnail video={video} playlistId={playlist.id} />
+            <VideoThumbnail 
+              video={video} 
+              playlistId={useStandaloneLinks ? undefined : playlist.id} 
+            />
           </li>
         ))}
       </ul>

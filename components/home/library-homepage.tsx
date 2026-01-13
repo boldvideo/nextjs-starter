@@ -7,9 +7,16 @@ import { PortalSettings } from "@/lib/portal-config";
 interface LibraryHomepageProps {
   settings: PortalSettings | null;
   videos: Video[] | null;
+  playlistShowAllVideos?: boolean;
+  playlistStandaloneLinks?: boolean;
 }
 
-export function LibraryHomepage({ settings, videos }: LibraryHomepageProps) {
+export function LibraryHomepage({ 
+  settings, 
+  videos,
+  playlistShowAllVideos = false,
+  playlistStandaloneLinks = false,
+}: LibraryHomepageProps) {
   const hasVideos = videos && videos.length > 0;
   const hasPlaylists = settings?.featuredPlaylists && settings.featuredPlaylists.length > 0;
   const showPlaylists = settings?.portal?.layout?.showPlaylists ?? true;
@@ -39,7 +46,12 @@ export function LibraryHomepage({ settings, videos }: LibraryHomepageProps) {
       {hasPlaylists && showPlaylists && (
         <section>
           {settings.featuredPlaylists.map((playlist: Playlist) => (
-            <FeaturedPlaylist key={playlist.id} playlist={playlist} />
+            <FeaturedPlaylist 
+              key={playlist.id} 
+              playlist={playlist}
+              showAllVideos={playlistShowAllVideos}
+              useStandaloneLinks={playlistStandaloneLinks}
+            />
           ))}
         </section>
       )}
