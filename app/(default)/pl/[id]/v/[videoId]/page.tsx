@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
+import { isUUID } from "@/util/is-uuid";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
 
@@ -48,9 +49,9 @@ export async function generateMetadata({
           },
         ],
       },
-      // Canonical URL pointing to standalone video page
+      // Canonical URL pointing to standalone video page (prefer slug)
       alternates: {
-        canonical: `/v/${videoId}`,
+        canonical: `/v/${video.slug || videoId}`,
       },
     };
   } catch (error) {
@@ -113,9 +114,16 @@ export default async function PlaylistVideoPage({
     notFound();
   }
 
+  // Redirect to slug-based URL if accessed by UUID and video has a slug
+  if (video.slug && isUUID(videoId)) {
+    const redirectUrl = t ? `/pl/${playlistId}/v/${video.slug}?t=${t}` : `/pl/${playlistId}/v/${video.slug}`;
+    redirect(redirectUrl);
+  }
+
   // If playlist doesn't exist or video is not in playlist, redirect to standalone video
-  if (!playlist || !playlist.videos.some((v) => v.id === videoId)) {
-    redirect(`/v/${videoId}`);
+  const videoIdentifier = video.slug || videoId;
+  if (!playlist || !playlist.videos.some((v) => v.id === video.id)) {
+    redirect(`/v/${videoIdentifier}`);
   }
 
   const startTime = t ? Number(t) : undefined;

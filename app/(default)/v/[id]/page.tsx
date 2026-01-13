@@ -1,7 +1,8 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
 import { VideoSchema } from "@/components/seo/video-schema";
+import { isUUID } from "@/util/is-uuid";
 import type { Video, Settings } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
 
@@ -34,6 +35,9 @@ export async function generateMetadata({
           height: 630,
         },
       ],
+    },
+    alternates: {
+      canonical: `/v/${video.slug || id}`,
     },
   };
 }
@@ -88,11 +92,18 @@ export default async function VideoPage({
     notFound();
   }
 
+  // Redirect to slug-based URL if accessed by UUID and video has a slug
+  if (video.slug && isUUID(id)) {
+    const redirectUrl = t ? `/v/${video.slug}?t=${t}` : `/v/${video.slug}`;
+    redirect(redirectUrl);
+  }
+
   const startTime = t ? Number(t) : undefined;
 
-  // Build URL for schema using environment variable
+  // Build URL for schema using slug when available, otherwise use id
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-  const videoUrl = baseUrl ? `${baseUrl}/v/${id}` : null;
+  const videoIdentifier = video.slug || id;
+  const videoUrl = baseUrl ? `${baseUrl}/v/${videoIdentifier}` : null;
 
   return (
     <>
