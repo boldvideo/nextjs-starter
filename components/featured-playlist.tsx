@@ -28,12 +28,16 @@ export function FeaturedPlaylist({
     <section aria-labelledby={playlistId}>
       <div className="flex justify-between items-center mb-5">
         <h2 className="font-bold text-3xl" id={playlistId}>
-          <Link href={`/pl/${playlist.id}`} className="flex items-center">
-            <span className="hover:text-primary">{playlist.title}</span>
-            <span className="font-normal text-base text-foreground ml-3 px-3 py-1 hover:text-primary  hover:cursor-pointer border border-border rounded-full">
-              {videos.length} Videos
-            </span>
-          </Link>
+          {showAllVideos ? (
+            <span>{playlist.title}</span>
+          ) : (
+            <Link href={`/pl/${playlist.id}`} className="flex items-center">
+              <span className="hover:text-primary">{playlist.title}</span>
+              <span className="font-normal text-base text-foreground ml-3 px-3 py-1 hover:text-primary hover:cursor-pointer border border-border rounded-full">
+                {videos.length} Videos
+              </span>
+            </Link>
+          )}
         </h2>
         {!showAllVideos && (
           <Link
