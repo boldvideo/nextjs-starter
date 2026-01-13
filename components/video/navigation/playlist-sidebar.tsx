@@ -15,6 +15,7 @@ import {
   SidebarToggle,
 } from "@/components/ui/sidebar";
 import { useSidebar } from "@/components/providers/sidebar-provider";
+import { buildVideoUrl } from "@/lib/video-path";
 
 interface PlaylistSidebarProps {
   playlist: Playlist;
@@ -115,7 +116,7 @@ export function PlaylistSidebar({
               return (
                 <li key={video.id}>
                   <Link
-                    href={`/pl/${playlist.id}/v/${video.id}`}
+                    href={buildVideoUrl(video, { playlistId: playlist.id })}
                     className={cn(
                       "w-full flex gap-3 p-3 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors text-left cursor-pointer relative",
                       isCurrent && "bg-primary/10 border-l-4 border-l-primary"
@@ -161,7 +162,7 @@ export function PlaylistSidebar({
               return (
                 <Link
                   key={video.id}
-                  href={`/pl/${playlist.id}/v/${video.id}`}
+                  href={buildVideoUrl(video, { playlistId: playlist.id })}
                   className={cn(
                     "relative w-10 h-10 rounded overflow-hidden hover:ring-2 hover:ring-primary transition-all",
                     isCurrent && "ring-2 ring-primary"

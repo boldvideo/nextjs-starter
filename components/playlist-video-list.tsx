@@ -6,6 +6,7 @@ import { formatDuration } from "util/format-duration";
 import { cn } from "@/lib/utils";
 import { ThumbnailImage } from "./video-thumbnail/thumbnail-image";
 import { useProgress } from "./providers/progress-provider";
+import { buildVideoUrl } from "@/lib/video-path";
 
 interface PlaylistVideoListProps {
   videos: Video[];
@@ -45,7 +46,7 @@ export function PlaylistVideoList({
         return (
           <li key={video.id}>
             <Link
-              href={`/pl/${playlistId}/v/${video.id}`}
+              href={buildVideoUrl(video, { playlistId })}
               className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-2 sm:p-3 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors rounded-lg group"
             >
               {/* Thumbnail */}

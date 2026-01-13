@@ -7,6 +7,7 @@ import { Play, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { SearchHit } from "@/lib/search";
 import { formatTime } from "@/lib/utils";
+import { getCanonicalVideoPath } from "@/lib/video-path";
 
 /**
  * Individual search result component
@@ -17,7 +18,7 @@ function SearchResult({ hit }: { hit: SearchHit }) {
       <div className="flex flex-col sm:flex-row items-start gap-6">
         <div className="relative flex-shrink-0 w-full sm:w-auto mb-3 sm:mb-0">
           <Link
-            href={`/v/${hit.short_id || hit.internal_id}`}
+            href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
             className="block group"
           >
             {hit.thumbnail ? (
@@ -40,7 +41,7 @@ function SearchResult({ hit }: { hit: SearchHit }) {
         </div>
         <div className="flex-1 min-w-0 w-full">
           <Link
-            href={`/v/${hit.short_id || hit.internal_id}`}
+            href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
             className="block group"
           >
             <h3 className="text-2xl font-semibold mb-3 group-hover:text-primary">
@@ -58,7 +59,7 @@ function SearchResult({ hit }: { hit: SearchHit }) {
               {hit.segments.map((segment, idx) => (
                 <Link
                   key={`${hit.internal_id}-segment-${idx}`}
-                  href={`/v/${hit.short_id || hit.internal_id}?t=${Math.floor(
+                  href={`${getCanonicalVideoPath(hit.short_id || hit.internal_id)}?t=${Math.floor(
                     segment.start_time
                   )}`}
                   className="block py-2 hover:bg-primary/10 dark:hover:bg-primary/20 rounded-md -mx-2 px-2"

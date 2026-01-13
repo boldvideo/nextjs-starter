@@ -5,6 +5,7 @@ import { formatDuration } from "util/format-duration";
 import { ProgressBar } from "../progress-bar";
 import { CompletionIndicator } from "../completion-indicator";
 import type { Video } from "@boldvideo/bold-js";
+import { buildVideoUrl } from "@/lib/video-path";
 
 interface VideoThumbnailProps {
   video: Video;
@@ -47,7 +48,7 @@ export function VideoThumbnail({
         )}
       </div>
       <h3 className="mt-4 font-semibold text-lg">
-        <Link href={playlistId ? `/pl/${playlistId}/v/${video.id}` : `/v/${video.id}`} prefetch={prefetch}>
+        <Link href={buildVideoUrl(video, { playlistId })} prefetch={prefetch}>
           <span className="absolute -inset-2.5 z-10"></span>
           <span>{video.title}</span>
         </Link>

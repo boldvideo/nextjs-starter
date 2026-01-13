@@ -6,6 +6,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { MuxPlayerComponent, MuxPlayerVideoLike } from "@/components/players/player-mux";
+import { getCanonicalVideoPath } from "@/lib/video-path";
 
 interface AskVideoPanelProps {
   citation: AskCitation | null;
@@ -109,7 +110,7 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
 
           {/* Open Full Video Button */}
           <Link
-            href={`/v/${citation.videoId}?t=${Math.floor(citation.startMs / 1000)}`}
+            href={`${getCanonicalVideoPath(citation.videoId)}?t=${Math.floor(citation.startMs / 1000)}`}
             className="mt-8 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-sm font-medium"
           >
             <ExternalLink className="h-4 w-4" />

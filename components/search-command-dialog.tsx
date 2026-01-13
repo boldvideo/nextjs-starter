@@ -20,6 +20,7 @@ import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { cn } from "@/lib/utils";
 import { SearchHit } from "@/lib/search";
+import { getCanonicalVideoPath } from "@/lib/video-path";
 
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -233,7 +234,7 @@ export function SearchCommandDialog() {
                 >
                   {/* Thumbnail */}
                   <Link
-                    href={`/v/${hit.short_id || hit.internal_id}`}
+                    href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
                     onClick={handleClose}
                     className="relative flex-shrink-0 w-full sm:w-48 aspect-video bg-muted rounded-md overflow-hidden border border-border/50"
                   >
@@ -259,7 +260,7 @@ export function SearchCommandDialog() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <Link
-                      href={`/v/${hit.short_id || hit.internal_id}`}
+                      href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
                       onClick={handleClose}
                       className="block"
                     >
@@ -285,7 +286,7 @@ export function SearchCommandDialog() {
                         {getVisibleSegments(hit).map((segment, idx) => (
                           <Link
                             key={`${hit.internal_id}-segment-${idx}`}
-                            href={`/v/${hit.short_id || hit.internal_id}?t=${Math.floor(segment.start_time)}`}
+                            href={`${getCanonicalVideoPath(hit.short_id || hit.internal_id)}?t=${Math.floor(segment.start_time)}`}
                             onClick={handleClose}
                             className="flex items-start gap-2 p-1.5 rounded hover:bg-muted transition-colors group/segment"
                           >
