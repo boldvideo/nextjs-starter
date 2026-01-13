@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
 import { isUUID } from "@/util/is-uuid";
+import { getCanonicalVideoPath } from "@/lib/video-path";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
 
@@ -51,7 +52,7 @@ export async function generateMetadata({
       },
       // Canonical URL pointing to standalone video page (prefer slug)
       alternates: {
-        canonical: `/v/${video.slug || videoId}`,
+        canonical: getCanonicalVideoPath(video.slug || videoId),
       },
     };
   } catch (error) {
@@ -123,7 +124,7 @@ export default async function PlaylistVideoPage({
   // If playlist doesn't exist or video is not in playlist, redirect to standalone video
   const videoIdentifier = video.slug || videoId;
   if (!playlist || !playlist.videos.some((v) => v.id === video.id)) {
-    redirect(`/v/${videoIdentifier}`);
+    redirect(getCanonicalVideoPath(videoIdentifier));
   }
 
   const startTime = t ? Number(t) : undefined;
