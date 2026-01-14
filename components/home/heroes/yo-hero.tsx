@@ -3,14 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import type { HeroProps } from "../hero-slot";
 import { getPortalConfig } from "@/lib/portal-config";
+
+function shuffleAndSlice(arr: string[], count: number): string[] {
+  if (arr.length <= count) return arr;
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
 
 export default function YoHero({ settings }: HeroProps) {
   const router = useRouter();
   const config = getPortalConfig(settings);
   
-  const conversationStarters = (() => {
+  const [conversationStarters] = useState(() => {
     const starters = config.ai.conversationStarters.length > 0
       ? config.ai.conversationStarters
       : [
@@ -18,10 +25,8 @@ export default function YoHero({ settings }: HeroProps) {
           "What advice do guests give about creating courses?",
           "How do designers figure out what to charge?",
         ];
-    if (starters.length <= 3) return starters;
-    const shuffled = [...starters].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 3);
-  })();
+    return shuffleAndSlice(starters, 3);
+  });
 
   const handleStarterClick = (question: string) => {
     router.push(`/ask?q=${encodeURIComponent(question)}`);

@@ -7,7 +7,28 @@ import {
   getPortalSessionFromRequest,
   isPortalAuthRequired,
 } from "@/lib/portal-auth-edge";
-import { DEFAULT_INTERNAL_API_BASE_URL } from "@boldvideo/bold-js";
+import { DEFAULT_INTERNAL_API_BASE_URL, type CustomRedirect, type Settings } from "@boldvideo/bold-js";
+
+type TenantSettings = Pick<Settings, 'portal'> | null | undefined;
+
+function tryCustomRedirect(
+  pathname: string,
+  settings: TenantSettings,
+  baseUrl: string | URL
+): NextResponse | null {
+  const redirects = settings?.portal?.customRedirects;
+  if (!redirects?.length) return null;
+
+  const match = redirects.find((r: CustomRedirect) => r.path === pathname);
+  if (!match) return null;
+
+  try {
+    const destination = new URL(match.url, baseUrl);
+    return NextResponse.redirect(destination, match.permanent ? 308 : 307);
+  } catch {
+    return null;
+  }
+}
 
 const INTERNAL_API_BASE =
   process.env.BOLD_INTERNAL_API_URL ||
@@ -113,6 +134,9 @@ export default auth(async (req: NextRequest) => {
     if (!shouldSkipPortalAuth(pathname)) {
       const settings = await fetchTenantSettings(effectiveHostname);
 
+      const redirectResponse = tryCustomRedirect(pathname, settings as TenantSettings, req.url);
+      if (redirectResponse) return redirectResponse;
+
       if (isPortalAuthRequired(settings)) {
         const sessionToken = getPortalSessionFromRequest(req);
 
@@ -147,6 +171,10 @@ export default auth(async (req: NextRequest) => {
   if (!shouldSkipPortalAuth(pathname)) {
     const tenant = process.env.DEV_TENANT_SUBDOMAIN || "standalone";
     const settings = await fetchTenantSettings(tenant);
+
+    const redirectResponse = tryCustomRedirect(pathname, settings as TenantSettings, req.url);
+    if (redirectResponse) return redirectResponse;
+
     const portalAuthRequired =
       isPortalAuthRequired(settings) ||
       process.env.PORTAL_AUTH_REQUIRED === "true";
