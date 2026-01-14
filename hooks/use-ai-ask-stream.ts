@@ -43,9 +43,17 @@ interface ConversationHistoryMessage {
   insertedAt: string;
 }
 
+interface ConversationMetadata {
+  originalQuery: string;
+  status?: string;
+  confidence?: string;
+  chunksFound?: number;
+}
+
 interface ConversationHistory {
   conversationId: string;
   messages: ConversationHistoryMessage[];
+  metadata?: ConversationMetadata;
 }
 
 function normalizeSegmentToSource(segment: SDKSegment): AIAskSource {
@@ -379,13 +387,29 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       const data: ConversationHistory = await response.json();
 
       // Convert history messages to our format, normalizing SDK camelCase sources to snake_case
-      const loadedMessages: AIAskMessage[] = data.messages.map((msg) => ({
-        id: msg.id,
-        role: msg.role,
-        content: msg.content,
-        type: msg.role === "user" ? "text" : "answer",
-        sources: msg.sources?.map(normalizeSegmentToSource),
-      }));
+      const loadedMessages: AIAskMessage[] = [];
+
+      // Backend may not include user messages - synthesize from metadata.originalQuery
+      // if the first message is an assistant message
+      const hasUserMessage = data.messages.some((m) => m.role === "user");
+      if (!hasUserMessage && data.metadata?.originalQuery) {
+        loadedMessages.push({
+          id: `user-${data.conversationId}`,
+          role: "user",
+          content: data.metadata.originalQuery,
+          type: "text",
+        });
+      }
+
+      for (const msg of data.messages) {
+        loadedMessages.push({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          type: msg.role === "user" ? "text" : "answer",
+          sources: msg.sources?.map(normalizeSegmentToSource),
+        });
+      }
 
       setMessages(loadedMessages);
       setConversationId(data.conversationId);
