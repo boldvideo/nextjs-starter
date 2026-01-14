@@ -110,18 +110,6 @@ function shouldSkipPortalAuth(pathname: string): boolean {
   return skipPaths.some((path) => pathname.startsWith(path));
 }
 
-function checkCustomRedirect(
-  settings: unknown,
-  pathname: string
-): { url: string; permanent: boolean } | null {
-  const redirects = (settings as { portal?: { customRedirects?: Array<{ path: string; url: string; permanent: boolean }> } }>)
-    ?.portal?.customRedirects;
-
-  if (!redirects) return null;
-
-  return redirects.find((r) => r.path === pathname) ?? null;
-}
-
 export default auth(async (req: NextRequest) => {
   const pathname = req.nextUrl.pathname;
 
