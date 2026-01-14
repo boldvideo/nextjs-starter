@@ -1,7 +1,7 @@
 export type VideoPathStyle = "root" | "v";
 
 export function getVideoPathStyle(): VideoPathStyle {
-  const style = process.env.VIDEO_PATH_STYLE ?? process.env.NEXT_PUBLIC_VIDEO_PATH_STYLE;
+  const style = process.env.NEXT_PUBLIC_VIDEO_PATH_STYLE;
   if (style === "root") return "root";
   return "v";
 }
