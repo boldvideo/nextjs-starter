@@ -9,6 +9,7 @@ import { SettingsProvider } from "@/components/providers/settings-provider";
 import { AppProviders } from "@/components/providers/app-providers";
 import { BoldProvider } from "@/components/providers/bold-provider";
 import { getPortalConfig } from "@/lib/portal-config";
+import { Analytics } from "@/components/analytics";
 import {
   getThemeFromSettings,
   getHeaderHeight,
@@ -186,6 +187,7 @@ export default async function RootLayout({
         className="bg-background flex flex-col h-screen overflow-hidden lg:min-h-screen lg:h-auto lg:overflow-auto"
         suppressHydrationWarning
       >
+        <Analytics config={config.analytics} />
         <BoldProvider
           token={tenantToken}
           baseURL={process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1"}

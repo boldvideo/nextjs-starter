@@ -1,7 +1,13 @@
-import type { Settings } from "@boldvideo/bold-js";
+import type { Settings, AnalyticsProvider } from "@boldvideo/bold-js";
 
 // Re-export Settings type from SDK (0.6.0+)
 export type PortalSettings = Settings;
+
+// Analytics configuration - valid only when both provider and id are present
+export interface AnalyticsConfig {
+  provider: AnalyticsProvider;
+  id: string;
+}
 
 // Configuration with smart defaults
 export interface PortalConfig {
@@ -41,6 +47,7 @@ export interface PortalConfig {
     enabled: boolean;
     type: 'none' | 'custom';
   };
+  analytics: AnalyticsConfig | null;
 }
 
 /**
@@ -116,7 +123,8 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
       hero: {
         enabled: false,
         type: 'none'
-      }
+      },
+      analytics: null
     };
   }
 
@@ -221,6 +229,16 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     hero: {
       enabled: (settings.portal?.hero?.type ?? 'none') !== 'none',
       type: (settings.portal?.hero?.type ?? 'none') as 'none' | 'custom'
-    }
+    },
+    analytics: parseAnalyticsConfig(settings)
   };
+}
+
+function parseAnalyticsConfig(settings: Settings): AnalyticsConfig | null {
+  const provider = settings.portal?.analyticsProvider;
+  const id = settings.portal?.analyticsId;
+
+  if (!provider || !id) return null;
+
+  return { provider, id };
 }
