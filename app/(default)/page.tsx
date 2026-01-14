@@ -64,6 +64,7 @@ export default async function Home(): Promise<React.JSX.Element> {
         <LibraryHomepage 
           settings={settings} 
           videos={videos}
+          config={config}
           playlistShowAllVideos={playlistShowAllVideos}
           playlistStandaloneLinks={playlistStandaloneLinks}
         />
@@ -78,6 +79,7 @@ export default async function Home(): Promise<React.JSX.Element> {
         <LibraryHomepage 
           settings={settings} 
           videos={videos}
+          config={config}
           playlistShowAllVideos={playlistShowAllVideos}
           playlistStandaloneLinks={playlistStandaloneLinks}
         />

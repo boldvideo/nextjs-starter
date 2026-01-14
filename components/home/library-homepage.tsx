@@ -1,12 +1,14 @@
 import React from "react";
 import { VideoThumbnail } from "@/components/video-thumbnail";
 import { FeaturedPlaylist } from "@/components/featured-playlist";
+import { HeroSlot } from "@/components/home/hero-slot";
 import type { Video, Playlist } from "@boldvideo/bold-js";
-import { PortalSettings } from "@/lib/portal-config";
+import type { PortalSettings, PortalConfig } from "@/lib/portal-config";
 
 interface LibraryHomepageProps {
   settings: PortalSettings | null;
   videos: Video[] | null;
+  config: PortalConfig;
   playlistShowAllVideos?: boolean;
   playlistStandaloneLinks?: boolean;
 }
@@ -14,6 +16,7 @@ interface LibraryHomepageProps {
 export function LibraryHomepage({ 
   settings, 
   videos,
+  config,
   playlistShowAllVideos = false,
   playlistStandaloneLinks = false,
 }: LibraryHomepageProps) {
@@ -23,6 +26,7 @@ export function LibraryHomepage({
 
   return (
     <div className="p-5 md:p-10 max-w-screen-2xl mx-auto overflow-y-auto">
+      <HeroSlot settings={settings} config={config} />
       {/* Videos Section */}
       {hasVideos && (
         <section>

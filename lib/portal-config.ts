@@ -37,6 +37,10 @@ export interface PortalConfig {
     forcedTheme: 'light' | 'dark' | null;
     showToggle: boolean;
   };
+  hero: {
+    enabled: boolean;
+    type: 'none' | 'custom';
+  };
 }
 
 /**
@@ -108,6 +112,10 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
         colorScheme: 'toggle',
         forcedTheme: null,
         showToggle: true
+      },
+      hero: {
+        enabled: false,
+        type: 'none'
       }
     };
   }
@@ -209,6 +217,10 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
       colorScheme,
       forcedTheme,
       showToggle
+    },
+    hero: {
+      enabled: (settings.portal?.hero?.type ?? 'none') !== 'none',
+      type: (settings.portal?.hero?.type ?? 'none') as 'none' | 'custom'
     }
   };
 }

@@ -27,7 +27,7 @@ export function FeaturedPlaylist({
   return (
     <section aria-labelledby={playlistId}>
       <div className="flex justify-between items-center mb-5">
-        <h2 className="font-bold text-3xl" id={playlistId}>
+        <h2 className="font-bold text-3xl tracking-tight" id={playlistId}>
           {showAllVideos ? (
             <span>{playlist.title}</span>
           ) : (

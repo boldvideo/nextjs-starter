@@ -47,7 +47,7 @@ export function VideoThumbnail({
           </span>
         )}
       </div>
-      <h3 className="mt-4 font-semibold text-lg">
+      <h3 className="mt-4 font-semibold text-lg tracking-tight leading-snug">
         <Link href={buildVideoUrl(video, { playlistId })} prefetch={prefetch}>
           <span className="absolute -inset-2.5 z-10"></span>
           <span>{video.title}</span>
