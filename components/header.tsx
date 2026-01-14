@@ -13,7 +13,7 @@ import type { Session } from "next-auth";
 interface HeaderProps {
   logo: StaticImageData | string;
   logoDark?: string;
-  menuItems: Array<{ url: string; label: string }>;
+  menuItems: Array<{ url: string; label: string; blank?: boolean }>;
   session?: Session | null;
   className?: string;
 }
@@ -88,6 +88,7 @@ export function Header({
                       className="text-sm px-3 py-2 rounded-md hover:bg-primary hover:text-primary-foreground transition-colors"
                       key={`${item.label}-${idx}`}
                       href={item.url}
+                      {...(item.blank ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     >
                       {item.label}
                     </Link>

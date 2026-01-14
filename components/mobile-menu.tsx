@@ -16,6 +16,7 @@ import { getPortalConfig } from "@/lib/portal-config";
 type MenuItem = {
   url: string;
   label: string;
+  blank?: boolean;
 };
 
 type Props = {
@@ -112,6 +113,7 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
                     href={item.url}
                     onClick={() => setIsMobileMenu(false)}
                     className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                    {...(item.blank ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   >
                     {item.label}
                   </Link>
