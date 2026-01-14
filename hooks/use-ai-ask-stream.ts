@@ -23,17 +23,43 @@ export interface AIAskSource {
   cited?: boolean;
 }
 
+interface SDKSegment {
+  id: string;
+  videoId: string;
+  title: string;
+  text: string;
+  timestamp: number;
+  timestampEnd: number;
+  playbackId: string;
+  speaker?: string;
+  cited?: boolean;
+}
+
 interface ConversationHistoryMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-  sources?: AIAskSource[];
-  inserted_at: string;
+  sources?: SDKSegment[];
+  insertedAt: string;
 }
 
 interface ConversationHistory {
-  conversation_id: string;
+  conversationId: string;
   messages: ConversationHistoryMessage[];
+}
+
+function normalizeSegmentToSource(segment: SDKSegment): AIAskSource {
+  return {
+    id: segment.id,
+    video_id: segment.videoId,
+    title: segment.title,
+    text: segment.text,
+    timestamp: segment.timestamp,
+    timestamp_end: segment.timestampEnd,
+    playback_id: segment.playbackId,
+    speaker: segment.speaker,
+    cited: segment.cited,
+  };
 }
 
 interface UseAIAskStreamOptions {
@@ -352,17 +378,17 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
 
       const data: ConversationHistory = await response.json();
 
-      // Convert history messages to our format
+      // Convert history messages to our format, normalizing SDK camelCase sources to snake_case
       const loadedMessages: AIAskMessage[] = data.messages.map((msg) => ({
         id: msg.id,
         role: msg.role,
         content: msg.content,
         type: msg.role === "user" ? "text" : "answer",
-        sources: msg.sources,
+        sources: msg.sources?.map(normalizeSegmentToSource),
       }));
 
       setMessages(loadedMessages);
-      setConversationId(data.conversation_id);
+      setConversationId(data.conversationId);
       return true;
     } catch (error) {
       console.error("[useAIAskStream] Failed to load conversation:", error);
