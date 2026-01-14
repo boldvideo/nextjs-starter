@@ -28,11 +28,11 @@ interface ConversationHistoryMessage {
   role: "user" | "assistant";
   content: string;
   sources?: AIAskSource[];
-  inserted_at: string;
+  insertedAt: string;
 }
 
 interface ConversationHistory {
-  conversation_id: string;
+  conversationId: string;
   messages: ConversationHistoryMessage[];
 }
 
@@ -362,7 +362,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       }));
 
       setMessages(loadedMessages);
-      setConversationId(data.conversation_id);
+      setConversationId(data.conversationId);
       return true;
     } catch (error) {
       console.error("[useAIAskStream] Failed to load conversation:", error);

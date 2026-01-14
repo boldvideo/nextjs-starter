@@ -1,5 +1,4 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
-import { DEFAULT_API_BASE_URL } from "@boldvideo/bold-js";
 
 export async function GET(
   request: Request,
@@ -15,30 +14,19 @@ export async function GET(
     );
   }
 
-  const baseURL = process.env.BACKEND_URL || DEFAULT_API_BASE_URL;
-
   try {
-    const response = await fetch(`${baseURL}/ai/chat/${conversationId}`, {
-      headers: {
-        Authorization: `Bearer ${context.tenantToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return Response.json(
-          { error: "Conversation not found" },
-          { status: 404 }
-        );
-      }
-      throw new Error(`Backend returned ${response.status}`);
-    }
-
-    const data = await response.json();
-    return Response.json(data);
+    const conversation = await context.client.ai.getConversation(conversationId);
+    return Response.json(conversation);
   } catch (error) {
     console.error("[AI Ask] Failed to fetch conversation:", error);
+    
+    if (error instanceof Error && error.message.includes("404")) {
+      return Response.json(
+        { error: "Conversation not found" },
+        { status: 404 }
+      );
+    }
+    
     return Response.json(
       { error: "Failed to fetch conversation" },
       { status: 500 }
