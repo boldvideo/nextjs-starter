@@ -107,7 +107,7 @@ export default function YoHero({ settings }: HeroProps) {
           </div>
           
           {/* Starter buttons */}
-          <div className="flex flex-col gap-2 items-center lg:items-end">
+          <div className="flex flex-col gap-2 items-center">
             {conversationStarters.map((starter, index) => (
               <button
                 key={index}
