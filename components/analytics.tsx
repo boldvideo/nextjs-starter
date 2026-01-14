@@ -1,10 +1,5 @@
 import Script from "next/script";
-import type { AnalyticsProvider } from "@boldvideo/bold-js";
-
-interface AnalyticsConfig {
-  provider: AnalyticsProvider;
-  id: string;
-}
+import type { AnalyticsConfig } from "@/lib/portal-config";
 
 interface AnalyticsProps {
   config?: AnalyticsConfig | null;
