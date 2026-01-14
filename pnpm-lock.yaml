@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@boldvideo/bold-js':
-        specifier: 1.13.0
-        version: 1.13.0
+        specifier: 1.14.0
+        version: 1.14.0
       '@boldvideo/ui':
         specifier: ^0.2.0
         version: 0.2.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
@@ -233,8 +233,8 @@ packages:
     resolution: {integrity: sha512-0ZrskXVEHSWIqZM/sQZ4EV3jZJXRkio/WCxaqKZP1g//CEWEPSfeZFcms4XeKBCHU0ZKnIkdJeU/kF+eRp5lBg==}
     engines: {node: '>=6.9.0'}
 
-  '@boldvideo/bold-js@1.13.0':
-    resolution: {integrity: sha512-MSYhKzYpiiTeLqmawsujHYYhWnN/8hVVOpsAzWDOQzhKfsMFA0H7gUj3zrd+XPxICd63tbenBF5+LTZ/mPw0tA==}
+  '@boldvideo/bold-js@1.14.0':
+    resolution: {integrity: sha512-6aCZb7pAsmQ0NJp3dEEmCZKIU67OHyHeOubQgXVIxE9VkUrchCJOMIMo07BJnycd4XyX+/kWSdir/wgj89D1QA==}
     engines: {node: '>=20.0.0'}
 
   '@boldvideo/ui@0.2.0':
@@ -3033,7 +3033,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@boldvideo/bold-js@1.13.0':
+  '@boldvideo/bold-js@1.14.0':
     dependencies:
       axios: 1.13.2
     transitivePeerDependencies:
