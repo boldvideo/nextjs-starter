@@ -20,11 +20,18 @@ export async function GET(
   } catch (error) {
     console.error("[AI Ask] Failed to fetch conversation:", error);
     
-    if (error instanceof Error && error.message.includes("404")) {
-      return Response.json(
-        { error: "Conversation not found" },
-        { status: 404 }
-      );
+    // SDK throws "AI request failed: {status} {statusText}" for HTTP errors
+    if (error instanceof Error) {
+      const statusMatch = error.message.match(/AI request failed: (\d+)/);
+      if (statusMatch) {
+        const status = parseInt(statusMatch[1], 10);
+        if (status === 404) {
+          return Response.json(
+            { error: "Conversation not found" },
+            { status: 404 }
+          );
+        }
+      }
     }
     
     return Response.json(
