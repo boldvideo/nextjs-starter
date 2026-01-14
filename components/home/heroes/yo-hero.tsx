@@ -10,13 +10,18 @@ export default function YoHero({ settings }: HeroProps) {
   const router = useRouter();
   const config = getPortalConfig(settings);
   
-  const conversationStarters = config.ai.conversationStarters.length > 0
-    ? config.ai.conversationStarters.slice(0, 3)
-    : [
-        "How do guests grow their newsletters?",
-        "What advice do guests give about creating courses?",
-        "How do designers figure out what to charge?",
-      ];
+  const conversationStarters = (() => {
+    const starters = config.ai.conversationStarters.length > 0
+      ? config.ai.conversationStarters
+      : [
+          "How do guests grow their newsletters?",
+          "What advice do guests give about creating courses?",
+          "How do designers figure out what to charge?",
+        ];
+    if (starters.length <= 3) return starters;
+    const shuffled = [...starters].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
+  })();
 
   const handleStarterClick = (question: string) => {
     router.push(`/ask?q=${encodeURIComponent(question)}`);
