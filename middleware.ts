@@ -7,7 +7,22 @@ import {
   getPortalSessionFromRequest,
   isPortalAuthRequired,
 } from "@/lib/portal-auth-edge";
-import { DEFAULT_INTERNAL_API_BASE_URL } from "@boldvideo/bold-js";
+import { DEFAULT_INTERNAL_API_BASE_URL, type CustomRedirect } from "@boldvideo/bold-js";
+
+type SettingsWithRedirects = {
+  portal?: {
+    customRedirects?: CustomRedirect[];
+  };
+};
+
+function findCustomRedirect(
+  pathname: string,
+  settings: SettingsWithRedirects | null | undefined
+): CustomRedirect | undefined {
+  const redirects = settings?.portal?.customRedirects;
+  if (!redirects?.length) return undefined;
+  return redirects.find((r) => r.path === pathname);
+}
 
 const INTERNAL_API_BASE =
   process.env.BOLD_INTERNAL_API_URL ||
@@ -95,6 +110,18 @@ function shouldSkipPortalAuth(pathname: string): boolean {
   return skipPaths.some((path) => pathname.startsWith(path));
 }
 
+function checkCustomRedirect(
+  settings: unknown,
+  pathname: string
+): { url: string; permanent: boolean } | null {
+  const redirects = (settings as { portal?: { customRedirects?: Array<{ path: string; url: string; permanent: boolean }> } }>)
+    ?.portal?.customRedirects;
+
+  if (!redirects) return null;
+
+  return redirects.find((r) => r.path === pathname) ?? null;
+}
+
 export default auth(async (req: NextRequest) => {
   const pathname = req.nextUrl.pathname;
 
@@ -112,6 +139,14 @@ export default auth(async (req: NextRequest) => {
 
     if (!shouldSkipPortalAuth(pathname)) {
       const settings = await fetchTenantSettings(effectiveHostname);
+
+      const customRedirect = findCustomRedirect(pathname, settings as SettingsWithRedirects);
+      if (customRedirect) {
+        return NextResponse.redirect(
+          new URL(customRedirect.url, req.url),
+          customRedirect.permanent ? 308 : 307
+        );
+      }
 
       if (isPortalAuthRequired(settings)) {
         const sessionToken = getPortalSessionFromRequest(req);
@@ -147,6 +182,15 @@ export default auth(async (req: NextRequest) => {
   if (!shouldSkipPortalAuth(pathname)) {
     const tenant = process.env.DEV_TENANT_SUBDOMAIN || "standalone";
     const settings = await fetchTenantSettings(tenant);
+
+    const customRedirect = findCustomRedirect(pathname, settings as SettingsWithRedirects);
+    if (customRedirect) {
+      return NextResponse.redirect(
+        new URL(customRedirect.url, req.url),
+        customRedirect.permanent ? 308 : 307
+      );
+    }
+
     const portalAuthRequired =
       isPortalAuthRequired(settings) ||
       process.env.PORTAL_AUTH_REQUIRED === "true";
