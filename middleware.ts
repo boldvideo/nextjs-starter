@@ -7,21 +7,27 @@ import {
   getPortalSessionFromRequest,
   isPortalAuthRequired,
 } from "@/lib/portal-auth-edge";
-import { DEFAULT_INTERNAL_API_BASE_URL, type CustomRedirect } from "@boldvideo/bold-js";
+import { DEFAULT_INTERNAL_API_BASE_URL, type CustomRedirect, type Settings } from "@boldvideo/bold-js";
 
-type SettingsWithRedirects = {
-  portal?: {
-    customRedirects?: CustomRedirect[];
-  };
-};
+type TenantSettings = Pick<Settings, 'portal'> | null | undefined;
 
-function findCustomRedirect(
+function tryCustomRedirect(
   pathname: string,
-  settings: SettingsWithRedirects | null | undefined
-): CustomRedirect | undefined {
+  settings: TenantSettings,
+  baseUrl: string | URL
+): NextResponse | null {
   const redirects = settings?.portal?.customRedirects;
-  if (!redirects?.length) return undefined;
-  return redirects.find((r) => r.path === pathname);
+  if (!redirects?.length) return null;
+
+  const match = redirects.find((r: CustomRedirect) => r.path === pathname);
+  if (!match) return null;
+
+  try {
+    const destination = new URL(match.url, baseUrl);
+    return NextResponse.redirect(destination, match.permanent ? 308 : 307);
+  } catch {
+    return null;
+  }
 }
 
 const INTERNAL_API_BASE =
@@ -128,13 +134,8 @@ export default auth(async (req: NextRequest) => {
     if (!shouldSkipPortalAuth(pathname)) {
       const settings = await fetchTenantSettings(effectiveHostname);
 
-      const customRedirect = findCustomRedirect(pathname, settings as SettingsWithRedirects);
-      if (customRedirect) {
-        return NextResponse.redirect(
-          new URL(customRedirect.url, req.url),
-          customRedirect.permanent ? 308 : 307
-        );
-      }
+      const redirectResponse = tryCustomRedirect(pathname, settings as TenantSettings, req.url);
+      if (redirectResponse) return redirectResponse;
 
       if (isPortalAuthRequired(settings)) {
         const sessionToken = getPortalSessionFromRequest(req);
@@ -171,13 +172,8 @@ export default auth(async (req: NextRequest) => {
     const tenant = process.env.DEV_TENANT_SUBDOMAIN || "standalone";
     const settings = await fetchTenantSettings(tenant);
 
-    const customRedirect = findCustomRedirect(pathname, settings as SettingsWithRedirects);
-    if (customRedirect) {
-      return NextResponse.redirect(
-        new URL(customRedirect.url, req.url),
-        customRedirect.permanent ? 308 : 307
-      );
-    }
+    const redirectResponse = tryCustomRedirect(pathname, settings as TenantSettings, req.url);
+    if (redirectResponse) return redirectResponse;
 
     const portalAuthRequired =
       isPortalAuthRequired(settings) ||
