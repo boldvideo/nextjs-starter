@@ -50,19 +50,37 @@ export default async function Home(): Promise<React.JSX.Element> {
   const { settings, videos } = await getHomeData();
   const config = getPortalConfig(settings);
   
+  // Check for playlist display overrides
+  const playlistShowAllVideos = process.env.PLAYLIST_SHOW_ALL_VIDEOS === 'true';
+  const playlistStandaloneLinks = process.env.PLAYLIST_STANDALONE_LINKS === 'true';
+
   // Render appropriate homepage based on configuration
   switch (config.homepage.layout) {
     case 'assistant':
       return <AssistantHomepage settings={settings} config={config} />;
     
     case 'library':
-      return <LibraryHomepage settings={settings} videos={videos} />;
+      return (
+        <LibraryHomepage 
+          settings={settings} 
+          videos={videos}
+          playlistShowAllVideos={playlistShowAllVideos}
+          playlistStandaloneLinks={playlistStandaloneLinks}
+        />
+      );
     
     case 'none':
       return <EmptyHomepage settings={settings} />;
     
     default:
       // Default to library layout
-      return <LibraryHomepage settings={settings} videos={videos} />;
+      return (
+        <LibraryHomepage 
+          settings={settings} 
+          videos={videos}
+          playlistShowAllVideos={playlistShowAllVideos}
+          playlistStandaloneLinks={playlistStandaloneLinks}
+        />
+      );
   }
 }
