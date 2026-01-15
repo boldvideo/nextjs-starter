@@ -23,14 +23,18 @@ export interface AIAskSource {
   cited?: boolean;
 }
 
-interface SDKSegment {
+interface BackendSource {
   id: string;
   videoId: string;
-  title: string;
+  videoTitle?: string;
+  title?: string;
   text: string;
-  timestamp: number;
-  timestampEnd: number;
-  playbackId: string;
+  timestampSeconds?: number;
+  timestamp?: number;
+  timestampEndSeconds?: number;
+  timestampEnd?: number;
+  muxPlaybackId?: string;
+  playbackId?: string;
   speaker?: string;
   cited?: boolean;
 }
@@ -39,7 +43,7 @@ interface ConversationHistoryMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
-  sources?: SDKSegment[];
+  sources?: BackendSource[];
   insertedAt: string;
 }
 
@@ -56,17 +60,17 @@ interface ConversationHistory {
   metadata?: ConversationMetadata;
 }
 
-function normalizeSegmentToSource(segment: SDKSegment): AIAskSource {
+function normalizeBackendSource(source: BackendSource): AIAskSource {
   return {
-    id: segment.id,
-    video_id: segment.videoId,
-    title: segment.title,
-    text: segment.text,
-    timestamp: segment.timestamp,
-    timestamp_end: segment.timestampEnd,
-    playback_id: segment.playbackId,
-    speaker: segment.speaker,
-    cited: segment.cited,
+    id: source.id,
+    video_id: source.videoId,
+    title: source.videoTitle || source.title || "",
+    text: source.text,
+    timestamp: source.timestampSeconds ?? source.timestamp ?? 0,
+    timestamp_end: source.timestampEndSeconds ?? source.timestampEnd,
+    playback_id: source.muxPlaybackId || source.playbackId,
+    speaker: source.speaker,
+    cited: source.cited,
   };
 }
 
@@ -407,7 +411,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
           role: msg.role,
           content: msg.content,
           type: msg.role === "user" ? "text" : "answer",
-          sources: msg.sources?.map(normalizeSegmentToSource),
+          sources: msg.sources?.map(normalizeBackendSource),
         });
       }
 
