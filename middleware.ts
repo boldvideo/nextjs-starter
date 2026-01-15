@@ -16,7 +16,9 @@ function tryCustomRedirect(
   settings: TenantSettings,
   baseUrl: string | URL
 ): NextResponse | null {
-  const redirects = settings?.portal?.customRedirects;
+  // Handle both camelCase (SDK) and snake_case (raw API response)
+  const portal = settings?.portal as Record<string, unknown> | undefined;
+  const redirects = (portal?.customRedirects ?? portal?.custom_redirects) as CustomRedirect[] | undefined;
   if (!redirects?.length) return null;
 
   const match = redirects.find((r: CustomRedirect) => r.path === pathname);
