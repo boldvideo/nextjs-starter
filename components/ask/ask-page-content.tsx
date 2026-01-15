@@ -63,6 +63,23 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const hasInitializedRef = useRef(false);
+  const prevRouteConversationIdRef = useRef<string | undefined>(routeConversationId);
+
+  // Reset when navigating from /ask/[id] to /ask (routeConversationId becomes undefined)
+  useEffect(() => {
+    const prevId = prevRouteConversationIdRef.current;
+    prevRouteConversationIdRef.current = routeConversationId;
+
+    // If we had a conversation ID and now we don't, user navigated to /ask - reset
+    if (prevId && !routeConversationId) {
+      reset();
+      setQuery("");
+      setSelectedCitation(null);
+      setIsPanelOpen(false);
+      setPageState({ status: "idle" });
+      hasInitializedRef.current = false;
+    }
+  }, [routeConversationId, reset]);
 
   // Load conversation from route (deep link only) OR process initial query
   useEffect(() => {
