@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
@@ -9,7 +9,6 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 import { ThemeToggle } from "./theme-toggle";
-import { SearchBar } from "./search-bar";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 
@@ -97,15 +96,6 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
               </button>
             </div>
             <div className="mt-6 flow-root">
-              {/* Search Bar - Mobile */}
-              {config.navigation.showSearch && (
-                <div className="px-4 pb-4">
-                  <Suspense>
-                    <SearchBar isMobile />
-                  </Suspense>
-                </div>
-              )}
-
               <div className="space-y-2 py-6">
                 {menuItems.map((item) => (
                   <Link
