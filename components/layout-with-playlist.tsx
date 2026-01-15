@@ -26,7 +26,7 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
         />
       )}
       <SearchCommandDialog />
-      <main className="flex-1 relative flex flex-col min-h-0 pt-[var(--header-height)]">{children}</main>
+      <main className="flex-1 relative flex flex-col min-h-0 overflow-hidden pt-[var(--header-height)]">{children}</main>
     </>
   );
 }

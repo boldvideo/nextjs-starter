@@ -31,7 +31,7 @@ export function AskSourcesCarousel({
   }
 
   return (
-    <div className="w-full min-w-0 space-y-3">
+    <div className="w-full space-y-3">
       {/* Header */}
       <div className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -43,7 +43,7 @@ export function AskSourcesCarousel({
       </div>
 
       {/* Carousel */}
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
         {citedSources.map((citation, index) => {
           const isSelected = selectedCitationId === citation.id;
           const hasValidTimestamp = citation.startMs > 0;

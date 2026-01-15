@@ -42,20 +42,36 @@ export function AskReadOnlyFooter({
               <Sparkles className="h-4 w-4" />
               <span>Or try one of these questions</span>
             </div>
-            <div className="flex flex-wrap justify-center gap-2">
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => onSuggestionClick(suggestion)}
-                  className={cn(
-                    "text-sm px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer",
-                    "border-border/60 hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm",
-                    "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {suggestion}
-                </button>
-              ))}
+            {/* Wrapper for full-bleed scroll + optional edge fades */}
+            <div className="relative">
+              {/* Scroller: horizontal scroll on mobile, wrap on desktop */}
+              <div
+                className={cn(
+                  "flex flex-nowrap gap-2 overflow-x-auto overflow-y-hidden no-scrollbar",
+                  "snap-x snap-mandatory scroll-px-4 px-4 -mx-4",
+                  "[webkit-overflow-scrolling:touch] overscroll-x-contain touch-pan-x",
+                  "md:overflow-visible md:px-0 md:mx-0 md:flex-wrap md:justify-center md:snap-none"
+                )}
+                aria-label="Suggested questions"
+              >
+                {suggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => onSuggestionClick(suggestion)}
+                    className={cn(
+                      "text-sm px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer",
+                      "border-border/60 hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm",
+                      "text-muted-foreground hover:text-foreground",
+                      "flex-none whitespace-nowrap snap-start"
+                    )}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+              {/* Edge fade hints (mobile only) */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-6 md:hidden bg-gradient-to-r from-background to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-6 md:hidden bg-gradient-to-l from-background to-transparent" />
             </div>
           </div>
         )}

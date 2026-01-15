@@ -6,6 +6,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
 import { HeaderSearch } from "@/components/header-search";
+import { MobileSearchButton } from "@/components/mobile-search-button";
+import { MobileAskButton } from "@/components/mobile-ask-button";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import type { Session } from "next-auth";
@@ -158,8 +160,18 @@ export function Header({
                   </Link>
                 </div>
 
-                {/* Right: User Menu */}
-                <div className="flex items-center">
+                {/* Right: Ask + Search + User Menu */}
+                <div className="flex items-center gap-1">
+                  {config.ai.showInHeader && (
+                    <Suspense>
+                      <MobileAskButton />
+                    </Suspense>
+                  )}
+                  {config.navigation.showSearch && (
+                    <Suspense>
+                      <MobileSearchButton />
+                    </Suspense>
+                  )}
                   {session !== undefined && (
                     <Suspense>
                       <UserMenu session={session} />

@@ -281,15 +281,15 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] w-full">
+    <div className="flex flex-1 min-h-0 w-full overflow-hidden">
       <div
         className={cn(
-          "flex flex-col flex-1 transition-all duration-300",
+          "flex flex-col flex-1 min-h-0 w-full transition-all duration-300",
           isPanelOpen ? "mr-0 lg:mr-[500px] xl:mr-[600px]" : ""
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border/50">
+        <div className="shrink-0 flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border/50">
           <div className="flex items-center gap-3">
             {aiAvatar && (
               <Image
@@ -317,14 +317,14 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         </div>
 
         {/* Scrollable content area */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+        <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto">
           <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-12">
             {qaPairs.map((pair, pairIndex) => {
               const isLastPair = pairIndex === qaPairs.length - 1;
               const isCurrentlyStreaming = isStreaming && isLastPair;
 
               return (
-                <div key={pair.userMessage.id} className="space-y-8 min-w-0">
+                <div key={pair.userMessage.id} className="space-y-8">
                   {/* User's question as title */}
                   <h2 className="text-2xl font-semibold">{pair.userMessage.content}</h2>
 
