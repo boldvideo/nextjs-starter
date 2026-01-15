@@ -16,6 +16,7 @@ interface ChatInputProps {
   suggestions?: string[];
   showSuggestions?: boolean;
   className?: string;
+  disclaimer?: string;
 }
 
 const MAX_HEIGHT = 360; // Max height before scrolling
@@ -31,7 +32,8 @@ export function ChatInput({
   autoFocus = false,
   suggestions = [],
   showSuggestions = false,
-  className
+  className,
+  disclaimer
 }: ChatInputProps) {
   const [isFocused, setIsFocused] = React.useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -145,6 +147,13 @@ export function ChatInput({
           </div>
         </div>
       </form>
+
+      {/* Disclaimer */}
+      {disclaimer && (
+        <p className="mt-3 text-center text-xs text-primary/70">
+          {disclaimer}
+        </p>
+      )}
 
       {/* Suggestions */}
       {showSuggestions && suggestions.length > 0 && !value && (

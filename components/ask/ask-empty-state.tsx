@@ -14,6 +14,7 @@ interface AskEmptyStateProps {
   greeting: string;
   suggestions: string[];
   placeholder: string;
+  disclaimer?: string;
 }
 
 export function AskEmptyState({
@@ -27,6 +28,7 @@ export function AskEmptyState({
   greeting,
   suggestions,
   placeholder,
+  disclaimer,
 }: AskEmptyStateProps) {
   return (
     <div className="flex h-[calc(100vh-120px)] w-full items-center justify-center px-4 md:px-6">
@@ -60,6 +62,7 @@ export function AskEmptyState({
           autoFocus={true}
           suggestions={suggestions}
           showSuggestions={true}
+          disclaimer={disclaimer}
         />
       </div>
     </div>
