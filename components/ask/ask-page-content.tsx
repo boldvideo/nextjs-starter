@@ -42,6 +42,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
   const greeting = config.ai.greeting || "How can I help you today?";
+  const chatDisclaimer = config.ai.chatDisclaimer;
   
   const suggestions = useMemo(() => {
     const starters = config.ai.conversationStarters || [];
@@ -259,6 +260,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         greeting={greeting}
         suggestions={suggestions}
         placeholder="What's on your mind?"
+        disclaimer={chatDisclaimer}
       />
     );
   }
@@ -376,6 +378,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
               autoFocus={false}
               suggestions={[]}
               showSuggestions={false}
+              disclaimer={chatDisclaimer}
             />
           </div>
         </div>

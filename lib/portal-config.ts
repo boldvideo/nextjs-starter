@@ -18,6 +18,7 @@ export interface PortalConfig {
     greeting: string;
     showInHeader: boolean;
     conversationStarters: string[];
+    chatDisclaimer?: string;
   };
   homepage: {
     layout: 'none' | 'library' | 'assistant';
@@ -99,7 +100,8 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
         avatar: '/placeholder-avatar.png',
         greeting: 'Hello! How can I help you today?',
         showInHeader: false,
-        conversationStarters: []
+        conversationStarters: [],
+        chatDisclaimer: undefined
       },
       homepage: {
         layout: 'library',
@@ -166,6 +168,9 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     ? persona.conversationStarters
     : settings.portal?.layout?.assistantConfig?.suggestions ?? defaultStarters;
 
+  // Chat disclaimer (bold-js 1.15.1+)
+  const chatDisclaimer = settings.chatDisclaimer;
+
   // Determine homepage layout
   const homepageLayout = (layoutOverride ?? settings.portal?.layout?.type ?? 'library') as 'none' | 'library' | 'assistant';
 
@@ -194,7 +199,8 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
       avatar: aiAvatar,
       greeting: aiGreeting,
       showInHeader: showAiInHeader,
-      conversationStarters: conversationStarters
+      conversationStarters: conversationStarters,
+      chatDisclaimer
     },
     homepage: {
       layout: homepageLayout,
