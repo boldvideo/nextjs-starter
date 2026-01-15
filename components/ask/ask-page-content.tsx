@@ -324,7 +324,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
               const isCurrentlyStreaming = isStreaming && isLastPair;
 
               return (
-                <div key={pair.userMessage.id} className="space-y-8">
+                <div key={pair.userMessage.id} className="space-y-8 min-w-0">
                   {/* User's question as title */}
                   <h2 className="text-2xl font-semibold">{pair.userMessage.content}</h2>
 
