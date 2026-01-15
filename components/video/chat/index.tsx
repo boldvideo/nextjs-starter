@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useEffect, useState, useLayoutEffect, useCallback } from "react";
+import React, { useRef, useEffect, useState, useLayoutEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -211,6 +211,15 @@ export const AIAssistant = ({
     }
   }, [isEmbedded, isOpen, toggleOpen]);
 
+  // Collapse greeting after first user message (compact mode optimization)
+  const greetingCollapsed = messages.length > 0;
+
+  // Compute greeting text once
+  const greetingText = useMemo(() => {
+    if (greeting && greeting.trim() !== "") return greeting;
+    return `${userName ? `Hi ${userName}!` : "Hey!"} I'm ${name}. Ask me anything about this video.`;
+  }, [greeting, userName, name]);
+
   /* ------------------------------------------------------------------ */
   /* Layout helpers                                                     */
   /* ------------------------------------------------------------------ */
@@ -367,7 +376,25 @@ export const AIAssistant = ({
         )}
         onClick={handleTimestampInteraction}
       >
-        {!compact && (
+        {compact ? (
+          <div
+            className={cn(
+              "overflow-hidden transition-all duration-300 ease-out motion-reduce:transition-none",
+              greetingCollapsed ? "max-h-0 opacity-0" : "max-h-24 opacity-100"
+            )}
+          >
+            <div className="flex items-center gap-2 px-1 py-3 text-sm text-muted-foreground">
+              <Image
+                src={avatar}
+                alt={name}
+                width={24}
+                height={24}
+                className="rounded-full flex-shrink-0"
+              />
+              <p className="line-clamp-2">{greetingText}</p>
+            </div>
+          </div>
+        ) : (
           <div className={cn("mb-4", isEmbedded ? "pt-4" : "px-4 pt-4")}>
             <div className="flex items-center mb-2">
               <Image
@@ -386,13 +413,7 @@ export const AIAssistant = ({
                   : ""
               )}
             >
-              <p>
-                {greeting && greeting.trim() !== ""
-                  ? greeting
-                  : `${
-                      userName ? `Hi ${userName}!` : "Hello there!"
-                    } I'm ${name}, your AI assistant. How can I help you with this video?`}
-              </p>
+              <p>{greetingText}</p>
             </div>
           </div>
         )}
@@ -506,9 +527,9 @@ export const AIAssistant = ({
       <div
         className={cn(
           isEmbedded
-            ? "mt-auto bg-background border-t p-4 pb-16 md:pb-4 shadow-lg"
+            ? "mt-auto bg-background border-t p-4 shadow-lg"
             : "p-4 bg-background-muted border-t border-background-muted",
-          compact && "p-2 pb-2 md:pb-2"
+          compact ? "p-2 pb-16" : "pb-16 lg:pb-4"
         )}
       >
         <div className={cn("relative flex gap-2", compact ? "items-center" : "items-end")} ref={inputContainerRef}>

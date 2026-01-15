@@ -34,8 +34,8 @@ export function VideoMainContent({
   const hasAttachments = video.attachments && video.attachments.length > 0;
 
   return (
-    <div className="w-full mx-auto flex flex-col">
-      <div className="flex flex-col flex-1 mt-6 min-h-[600px] pb-24 lg:pb-8">
+    <div className="w-full mx-auto flex flex-col flex-1 min-h-0">
+      <div className="flex flex-col flex-1 min-h-0 mt-6 pb-24 lg:pb-8">
         {/* Title & Metadata - hidden on mobile since videoMeta shows it */}
         <div className="hidden lg:block mb-2">
           <h1 className="text-2xl lg:text-3xl font-bold line-clamp-2 leading-tight">
@@ -50,7 +50,11 @@ export function VideoMainContent({
         </div>
 
         {/* Main Pills Navigation */}
-        <PillTabs className="border-b border-border mb-6 pb-4">
+        <PillTabs
+          className={`border-b border-border ${
+            activeMainTab === "transcript" ? "mb-0 pb-3" : "mb-6 pb-4"
+          }`}
+        >
           <PillTab
             active={activeMainTab === "description"}
             onClick={() => setActiveMainTab("description")}
@@ -79,9 +83,9 @@ export function VideoMainContent({
         </PillTabs>
 
         {/* Tab Content */}
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
           {activeMainTab === "description" && (
-            <div className="space-y-6 animate-in fade-in slide-in-from-left-1 duration-300">
+            <div className="space-y-6 animate-in fade-in slide-in-from-left-1 duration-300 pb-8">
               <VideoDescription text={video.description || ""} />
               {video.cta && (
                 <div className="rounded-lg border border-border p-6 bg-muted">
@@ -120,11 +124,12 @@ export function VideoMainContent({
           )}
 
           {activeMainTab === "transcript" && hasTranscript && (
-            <div className="min-h-[600px] max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar rounded-md animate-in fade-in slide-in-from-right-1 duration-300">
+            <div className="animate-in fade-in slide-in-from-right-1 duration-300 pb-8">
               <Transcript
                 url={video.transcript?.json?.url || ""}
                 onCueClick={onTimeSelect}
                 playerRef={playerRef}
+                compact
               />
             </div>
           )}

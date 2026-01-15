@@ -20,7 +20,9 @@ import { formatDuration } from "@/util/format-duration";
 import PlaylistTab from "../mobile/playlist-tab";
 import ChaptersTab from "../mobile/chapters-tab";
 import ChatTab from "../mobile/chat-tab";
+import InfoTab from "../mobile/info-tab";
 import { buildVideoUrl } from "@/lib/video-path";
+import { MobileVideoMeta } from "./mobile-video-meta";
 
 interface VideoDetailProps {
   video: ExtendedVideo;
@@ -100,20 +102,15 @@ export function VideoDetail({
           />
         }
         videoMeta={
-          <>
-            <h1 className="text-lg font-semibold line-clamp-2">{video.title}</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              {video.publishedAt && (
-                <span>{format(new Date(video.publishedAt), "MMM d, yyyy")}</span>
-              )}
-              {video.duration && (
-                <>
-                  <span>•</span>
-                  <span>{formatDuration(video.duration)}</span>
-                </>
-              )}
-            </div>
-          </>
+          <MobileVideoMeta
+            title={video.title}
+            publishedAt={
+              video.publishedAt
+                ? format(new Date(video.publishedAt), "MMM d, yyyy")
+                : null
+            }
+            durationLabel={video.duration ? formatDuration(video.duration) : null}
+          />
         }
         leftSidebar={
           playlist ? (
@@ -146,6 +143,13 @@ export function VideoDetail({
         }
         infoPanel={
           <VideoMainContent
+            video={video}
+            onTimeSelect={handleTimeSelect}
+            playerRef={playerRef}
+          />
+        }
+        mobileInfoPanel={
+          <InfoTab
             video={video}
             onTimeSelect={handleTimeSelect}
             playerRef={playerRef}

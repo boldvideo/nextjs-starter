@@ -12,7 +12,7 @@ interface ChatTabProps {
   compact?: boolean;
 }
 
-export default function ChatTab({ video, settings, compact = false }: ChatTabProps) {
+export default function ChatTab({ video, settings, compact = true }: ChatTabProps) {
   const { setHasUnreadMessage, hasUnreadMessage } = useAIAssistantContext();
 
   // Clear unread badge when user views chat tab

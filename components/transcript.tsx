@@ -99,12 +99,15 @@ export function Transcript({
   playerRef,
   onCueClick,
   compact = false,
+  mobile = false,
 }: {
   url: string;
   playerRef: React.RefObject<HTMLVideoElement | null>;
   onCueClick?: (time: number) => void;
   /** Compact mode for embeds - hides header and search */
   compact?: boolean;
+  /** Mobile mode - collapsed header with search-on-demand */
+  mobile?: boolean;
 }) {
   const { transcript, activeUtteranceIndex, isLoading } = useTranscript({
     url,
@@ -112,6 +115,7 @@ export function Transcript({
   });
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const { filterRegexes, highlightRegexes } = useMemo(() => {
     return {
@@ -137,7 +141,97 @@ export function Transcript({
 
   return (
     <TranscriptWrapper>
-      {!compact && (
+      {/* Mobile header - compact with search-on-demand */}
+      {mobile && (
+        <TranscriptHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur py-2 mb-2">
+          {mobileSearchOpen ? (
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search transcript..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setSearchQuery("");
+                      setMobileSearchOpen(false);
+                    }
+                  }}
+                  autoFocus
+                  className="w-full pl-8 pr-8 h-9 text-sm bg-muted border-0 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/70"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground p-0.5"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setMobileSearchOpen(false);
+                }}
+                className="text-sm text-primary px-2 py-1"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                {transcript.utterances.length} segments • Tap to jump
+              </span>
+              <button
+                onClick={() => setMobileSearchOpen(true)}
+                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground px-2 py-1 rounded-md hover:bg-muted transition-colors"
+              >
+                <Search className="w-4 h-4" />
+                Search
+              </button>
+            </div>
+          )}
+        </TranscriptHeader>
+      )}
+
+      {/* Compact header - just search, no title */}
+      {compact && !mobile && (
+        <TranscriptHeader className="sticky top-0 z-10 flex items-center justify-start bg-background border-b border-border px-1 py-3">
+          <div className="relative w-full max-w-72">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search transcript..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchQuery("");
+                  e.currentTarget.blur();
+                }
+              }}
+              className="w-full pl-8 pr-8 h-8 text-sm bg-muted border-0 rounded-lg outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/70"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
+                aria-label="Clear search"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </TranscriptHeader>
+      )}
+
+      {/* Desktop header - full version */}
+      {!compact && !mobile && (
         <TranscriptHeader className="sticky top-0 z-10 flex items-center justify-between bg-background/95 backdrop-blur pt-0 pb-4 mb-2 lg:py-4 lg:mb-8 lg:border-b">
           <TranscriptTitle className="text-base lg:text-2xl font-bold">
             Transcript{" "}
@@ -173,7 +267,7 @@ export function Transcript({
         </TranscriptHeader>
       )}
       <TranscriptContent>
-        <div className={compact ? "max-w-none" : "max-w-[65ch]"}>
+        <div className={compact || mobile ? "max-w-none" : "max-w-none lg:max-w-[65ch]"}>
           {filteredUtterances.map(({ u, index }) => (
             <UtteranceItem
               key={index}
@@ -181,7 +275,7 @@ export function Transcript({
               onClick={() => onCueClick?.(u.start)}
             >
               <UtteranceLabel>
-                <UtteranceSpeaker className={compact ? "text-xs" : undefined}>
+                <UtteranceSpeaker className={compact || mobile ? "text-xs" : undefined}>
                   {transcript.metadata.speakers[u.speaker] ??
                     `Speaker ${u.speaker}`}
                 </UtteranceSpeaker>
@@ -191,13 +285,13 @@ export function Transcript({
                     e.stopPropagation();
                     onCueClick?.(Math.max(0, u.start - 1));
                   }}
-                  className={compact ? "text-xs px-1.5 py-0.5" : undefined}
+                  className={compact || mobile ? "text-xs px-1.5 py-0.5" : undefined}
                 />
               </UtteranceLabel>
               <Utterance
                 className={`hover:bg-primary/10 ${
                   index === activeUtteranceIndex ? "bg-primary/10" : ""
-                } ${compact ? "text-sm" : "text-lg"}`}
+                } text-base`}
               >
                 {highlightMatches(u.text, highlightRegexes)}
               </Utterance>

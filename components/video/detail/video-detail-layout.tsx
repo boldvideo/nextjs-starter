@@ -14,6 +14,7 @@ interface VideoDetailLayoutProps {
   videoMeta: ReactNode;
   playlistPanel?: ReactNode;
   infoPanel: ReactNode;
+  mobileInfoPanel?: ReactNode;
   chaptersPanel?: ReactNode;
   chatPanel?: ReactNode;
   leftSidebar?: ReactNode;
@@ -27,6 +28,7 @@ export function VideoDetailLayout({
   videoMeta,
   playlistPanel,
   infoPanel,
+  mobileInfoPanel,
   chaptersPanel,
   chatPanel,
   leftSidebar,
@@ -119,7 +121,7 @@ export function VideoDetailLayout({
       {/* === MOBILE LAYOUT (<lg) === */}
       <div className="video-detail__mobile lg:hidden flex flex-col flex-1 min-h-0 bg-background">
         {/* Video Metadata Header */}
-        <div className="video-detail__meta flex-shrink-0 px-4 py-3 border-b border-border bg-background">
+        <div className="video-detail__meta flex-shrink-0 px-4 py-2 border-b border-border bg-background">
           {videoMeta}
         </div>
 
@@ -137,10 +139,10 @@ export function VideoDetailLayout({
 
           {/* Info Panel */}
           <div
-            className="video-detail__panel absolute inset-0 overflow-y-auto px-4"
+            className="video-detail__panel absolute inset-0 overflow-hidden"
             data-panel="info"
           >
-            {infoPanel}
+            {mobileInfoPanel || infoPanel}
           </div>
 
           {/* Chapters Panel */}
@@ -205,6 +207,11 @@ export function VideoDetailLayout({
         /* Mobile: Hide all panels by default, show active one */
         @media (max-width: 1023.98px) {
           .video-detail__panel {
+            display: none;
+          }
+
+          /* Hide video meta header when Chat tab is active - maximize chat space */
+          .video-detail[data-active-tab="chat"] .video-detail__meta {
             display: none;
           }
 
