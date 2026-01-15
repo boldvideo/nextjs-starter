@@ -61,7 +61,7 @@ export default function YoHero({ settings }: HeroProps) {
           <p className="text-base text-muted-foreground leading-relaxed">
             Now powered by{" "}
             <Link 
-              href="https://boldvideo.io" 
+              href="https://boldvideo.com" 
               className="underline hover:text-primary transition-colors"
               target="_blank"
               rel="noopener noreferrer"

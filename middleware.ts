@@ -43,6 +43,9 @@ function isHostedMode(): boolean {
 async function getEffectiveHostname(host: string | null): Promise<string> {
   if (!host) return "";
 
+  // Normalize: lowercase and strip port
+  host = host.toLowerCase().split(":")[0];
+
   if (host.includes("localhost") || host.includes("127.0.0.1")) {
     return process.env.DEV_TENANT_SUBDOMAIN || "";
   }
@@ -51,8 +54,17 @@ async function getEffectiveHostname(host: string | null): Promise<string> {
     return host.split(".")[0];
   }
 
-  const edgeKey = host.replace(/\./g, "_");
-  const tenant = await get<string>(edgeKey);
+  const tryLookup = async (h: string) => get<string>(h.replace(/\./g, "_"));
+
+  // Primary lookup
+  let tenant = await tryLookup(host);
+
+  // Fallback: treat www.* as equivalent to apex domain
+  // This handles Vercel's recommended www redirect setup where
+  // yo.fm → www.yo.fm but edge config only has yo_fm mapped
+  if (!tenant && host.startsWith("www.")) {
+    tenant = await tryLookup(host.slice(4));
+  }
 
   return tenant || "";
 }
