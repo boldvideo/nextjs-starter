@@ -19,6 +19,7 @@ import { AskVideoPanel } from "./ask-video-panel";
 import { AskEmptyState } from "./ask-empty-state";
 import { ChatInput } from "@/components/coach";
 import { AskLoadingState } from "./ask-loading-state";
+import { AskReadOnlyFooter } from "./ask-read-only-footer";
 
 type PageState =
   | { status: "idle" }
@@ -57,6 +58,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   const { messages, isStreaming, conversationId, streamQuestion, stop, reset, loadConversation } =
     useAIAskStream();
+
+  // Determine if this is a read-only historical view
+  // Read-only when: loaded from URL route parameter
+  const isReadOnly = Boolean(routeConversationId);
 
   const [selectedCitation, setSelectedCitation] = useState<AskCitation | null>(
     null
@@ -166,6 +171,16 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const handleClosePanel = useCallback(() => {
     setIsPanelOpen(false);
   }, []);
+
+  // Handle clicking a suggestion in read-only mode
+  // Navigates to /ask and triggers the question
+  const handleReadOnlySuggestionClick = useCallback(
+    (suggestion: string) => {
+      // Navigate to /ask with the question as a query param
+      router.push(`/ask?q=${encodeURIComponent(suggestion)}`, { scroll: false });
+    },
+    [router]
+  );
 
   // Group messages into Q&A pairs for display
   const qaPairs = useMemo(() => {
@@ -364,24 +379,32 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           </div>
         </div>
 
-        {/* Follow-up input at bottom */}
-        <div className="flex-shrink-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="w-full max-w-3xl mx-auto px-4 py-3 md:px-6 md:py-4">
-            <ChatInput
-              value={query}
-              onChange={setQuery}
-              onSubmit={handleSubmit}
-              onStop={handleStop}
-              placeholder={placeholder}
-              disabled={false}
-              isStreaming={isStreaming}
-              autoFocus={false}
-              suggestions={[]}
-              showSuggestions={false}
-              disclaimer={chatDisclaimer}
-            />
+        {/* Footer: Input for active conversations, CTA for read-only */}
+        {isReadOnly ? (
+          <AskReadOnlyFooter
+            onStartNew={handleReset}
+            suggestions={suggestions}
+            onSuggestionClick={handleReadOnlySuggestionClick}
+          />
+        ) : (
+          <div className="flex-shrink-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="w-full max-w-3xl mx-auto px-4 py-3 md:px-6 md:py-4">
+              <ChatInput
+                value={query}
+                onChange={setQuery}
+                onSubmit={handleSubmit}
+                onStop={handleStop}
+                placeholder={placeholder}
+                disabled={false}
+                isStreaming={isStreaming}
+                autoFocus={false}
+                suggestions={[]}
+                showSuggestions={false}
+                disclaimer={chatDisclaimer}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <AskVideoPanel

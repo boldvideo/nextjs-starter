@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useCallback } from "react";
 import { ArrowUp, Square } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
@@ -150,9 +151,9 @@ export function ChatInput({
 
       {/* Disclaimer */}
       {disclaimer && (
-        <p className="mt-3 text-center text-xs text-primary/70">
-          {disclaimer}
-        </p>
+        <div className="mt-3 text-center text-xs text-muted-foreground/70 mx-auto max-w-[80%] [&_a]:underline [&_a]:hover:text-primary [&_strong]:font-semibold">
+          <ReactMarkdown>{disclaimer}</ReactMarkdown>
+        </div>
       )}
 
       {/* Suggestions */}

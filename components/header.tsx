@@ -85,7 +85,7 @@ export function Header({
                 <div className="hidden lg:flex space-x-1">
                   {menuItems.map((item, idx) => (
                     <Link
-                      className="text-sm px-3 py-2 rounded-md hover:bg-primary hover:text-primary-foreground transition-colors"
+                      className="text-sm px-3 py-2 rounded-md border border-transparent hover:border-primary hover:text-primary transition-colors"
                       key={`${item.label}-${idx}`}
                       href={item.url}
                       {...(item.blank ? { target: "_blank", rel: "noopener noreferrer" } : {})}
