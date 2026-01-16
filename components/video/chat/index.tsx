@@ -575,7 +575,7 @@ export const AIAssistant = ({
               }}
               placeholder="Ask about this video..."
               className={cn(
-                "w-full rounded-full py-2 px-4 text-sm",
+                "w-full rounded-full py-2 px-4 text-base sm:text-sm",
                 "focus:outline-none focus:ring-2 focus:ring-primary/50",
                 "bg-muted text-foreground placeholder:text-muted-foreground"
               )}
@@ -595,7 +595,7 @@ export const AIAssistant = ({
               rows={2}
               className={cn(
                 "w-full rounded-2xl resize-none overflow-hidden",
-                "focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm",
+                "focus:outline-none focus:ring-2 focus:ring-primary/50 text-base sm:text-sm",
                 isEmbedded
                   ? "bg-muted text-foreground"
                   : "bg-background text-foreground",
