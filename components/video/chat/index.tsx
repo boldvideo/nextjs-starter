@@ -561,7 +561,7 @@ export const AIAssistant = ({
             onClick={jumpToLive}
           />
         </div>
-        <div className={cn("relative flex gap-2", compact ? "items-center" : "items-end")} ref={inputContainerRef}>
+        <div className={cn("relative flex gap-2", compact ? "items-center mb-2" : "items-end")} ref={inputContainerRef}>
           {compact ? (
             <input
               type="text"
