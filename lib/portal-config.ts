@@ -241,10 +241,12 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
 }
 
 function parseAnalyticsConfig(settings: Settings): AnalyticsConfig | null {
-  const provider = settings.portal?.analyticsProvider;
-  const id = settings.portal?.analyticsId;
+  // Handle both flat (SDK types) and nested (current API) structures
+  const analytics = (settings.portal as { analytics?: { provider?: string; siteId?: string } })?.analytics;
+  const provider = settings.portal?.analyticsProvider ?? analytics?.provider;
+  const id = settings.portal?.analyticsId ?? analytics?.siteId;
 
   if (!provider || !id) return null;
 
-  return { provider, id };
+  return { provider: provider as AnalyticsConfig["provider"], id };
 }
