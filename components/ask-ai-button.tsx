@@ -29,7 +29,8 @@ export function AskAiButton({ personaName, className }: AskAiButtonProps) {
     >
       <Sparkles className="h-4 w-4 text-primary" />
       <span className="whitespace-nowrap bg-gradient-to-r from-foreground via-muted-foreground to-foreground bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer-text">
-        Ask {personaName}
+        <span className="md:hidden">Ask</span>
+        <span className="hidden md:inline">{personaName}</span>
       </span>
     </button>
   );
