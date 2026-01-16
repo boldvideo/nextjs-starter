@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -20,6 +20,8 @@ import { AskEmptyState } from "./ask-empty-state";
 import { ChatInput } from "@/components/coach";
 import { AskLoadingState } from "./ask-loading-state";
 import { AskReadOnlyFooter } from "./ask-read-only-footer";
+import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
+import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 
 type PageState =
   | { status: "idle" }
@@ -35,8 +37,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollToBottomRef = useRef<HTMLDivElement>(null);
 
   const settings = useSettings();
   const config = getPortalConfig(settings);
@@ -58,6 +58,27 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   const { messages, isStreaming, conversationId, streamQuestion, stop, reset, loadConversation } =
     useAIAskStream();
+
+  // Generate stable streaming message ID for scroll behavior
+  const streamingMessageId = useMemo(() => {
+    if (!isStreaming) return null;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role === "assistant") {
+      return `streaming-${messages.length}`;
+    }
+    return null;
+  }, [isStreaming, messages]);
+
+  // Streaming scroll behavior - scrolls to message top, not bottom
+  const {
+    scrollContainerRef,
+    showScrollButton,
+    jumpToLive,
+  } = useStreamingScroll({
+    isStreaming,
+    streamingMessageId,
+    messageSelector: "[data-streaming-message]",
+  });
 
   // Determine if this is a read-only historical view
   // Read-only when: loaded from URL route parameter
@@ -128,14 +149,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     }
   }, [conversationId, routeConversationId]);
 
-  useEffect(() => {
-    if (scrollToBottomRef.current && isStreaming) {
-      scrollToBottomRef.current.scrollIntoView({
-        behavior: "auto",
-        block: "end",
-      });
-    }
-  }, [messages, isStreaming]);
+
 
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
@@ -324,7 +338,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
               const isCurrentlyStreaming = isStreaming && isLastPair;
 
               return (
-                <div key={pair.userMessage.id} className="space-y-8">
+                <div 
+                  key={pair.userMessage.id} 
+                  className="space-y-8"
+                  {...(isCurrentlyStreaming ? { "data-streaming-message": true } : {})}
+                >
                   {/* User's question as title */}
                   <h2 className="text-2xl font-semibold">{pair.userMessage.content}</h2>
 
@@ -372,10 +390,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 </div>
               );
             })}
-
-
-
-            <div ref={scrollToBottomRef} />
           </div>
         </div>
 
@@ -387,7 +401,15 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             onSuggestionClick={handleReadOnlySuggestionClick}
           />
         ) : (
-          <div className="flex-shrink-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="relative flex-shrink-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            {/* Scroll to live button */}
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-10">
+              <ScrollToLiveButton
+                visible={showScrollButton}
+                isStreaming={isStreaming}
+                onClick={jumpToLive}
+              />
+            </div>
             <div className="w-full max-w-3xl mx-auto px-4 py-3 md:px-6 md:py-4">
               <ChatInput
                 value={query}

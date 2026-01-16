@@ -10,6 +10,8 @@ import { useAIStream } from "./use-ai-stream";
 import { timestampToSeconds } from "@/lib/utils/time";
 import { useAIAssistantContext } from "./context";
 import { TimestampPill } from "@/components/timestamp-pill";
+import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
+import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 
 /**
  * Props for the AIAssistant component
@@ -229,7 +231,27 @@ export const AIAssistant = ({
 
   // Refs --------------------------------------------------------------
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Generate a stable ID for the current streaming message
+  const streamingMessageId = useMemo(() => {
+    if (!isPending) return null;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role === "assistant") {
+      return `streaming-${messages.length}`;
+    }
+    return null;
+  }, [isPending, messages]);
+
+  // Streaming scroll behavior - scrolls to message top, not bottom
+  const {
+    scrollContainerRef,
+    showScrollButton,
+    jumpToLive,
+  } = useStreamingScroll({
+    isStreaming: isPending,
+    streamingMessageId,
+    messageSelector: "[data-streaming-message]",
+  });
 
   // Breakpoint helper (desktop = md and above) ------------------------
   const [isDesktop, setIsDesktop] = useState<boolean>(true);
@@ -304,18 +326,7 @@ export const AIAssistant = ({
     }
   };
 
-  /** Auto‑scroll chat as it grows */
-  useEffect(() => {
-    if (!scrollContainerRef.current) return;
-    const el = scrollContainerRef.current;
-    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 80;
-    if (isPending || isNearBottom) {
-      el.scrollTo({
-        top: el.scrollHeight,
-        behavior: isPending ? "auto" : "smooth",
-      });
-    }
-  }, [messages, isPending]);
+
 
   /** Auto-resize textarea */
   const resizeTextarea = useCallback(() => {
@@ -418,8 +429,16 @@ export const AIAssistant = ({
           </div>
         )}
 
-        {messages.map((message, index) => (
-          <div key={index} className="mb-4">
+        {messages.map((message, index) => {
+          const isLastAssistant = message.role === "assistant" && index === messages.length - 1;
+          const isStreamingMessage = isLastAssistant && isPending;
+          
+          return (
+          <div 
+            key={index} 
+            className="mb-4"
+            {...(isStreamingMessage ? { "data-streaming-message": true } : {})}
+          >
             <div
               className={cn(
                 "rounded-lg p-3 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
@@ -521,17 +540,27 @@ export const AIAssistant = ({
                 )}
             </div>
           </div>
-        ))}
+        );
+        })}
       </div>
 
       <div
         className={cn(
+          "relative",
           isEmbedded
             ? "mt-auto bg-background border-t p-4 shadow-lg"
             : "p-4 bg-background-muted border-t border-background-muted",
           compact ? "p-2 pb-16" : "pb-16 lg:pb-4"
         )}
       >
+        {/* Scroll to live button */}
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-10">
+          <ScrollToLiveButton
+            visible={showScrollButton}
+            isStreaming={isPending}
+            onClick={jumpToLive}
+          />
+        </div>
         <div className={cn("relative flex gap-2", compact ? "items-center" : "items-end")} ref={inputContainerRef}>
           {compact ? (
             <input
