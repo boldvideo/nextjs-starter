@@ -130,6 +130,7 @@ function shouldSkipPortalAuth(pathname: string): boolean {
   return skipPaths.some((path) => pathname.startsWith(path));
 }
 
+// @ts-expect-error next-auth 5 beta types don't match Next.js 16 middleware signature yet
 export default auth(async (req: NextRequest) => {
   const pathname = req.nextUrl.pathname;
 
