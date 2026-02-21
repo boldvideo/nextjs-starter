@@ -93,24 +93,18 @@ function asyncIterableToStream(
     conversationId,
   };
 
-  const iterator = iterable[Symbol.asyncIterator]();
-
   return new ReadableStream({
-    async pull(controller) {
-      try {
-        const { done, value } = await iterator.next();
-
-        if (done) {
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-          return;
+    start(controller) {
+      (async () => {
+        for await (const event of iterable) {
+          const sseData = formatSSE(event, state);
+          if (sseData) {
+            controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
+          }
         }
-
-        const sseData = formatSSE(value, state);
-        if (sseData) {
-          controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
-        }
-      } catch (error) {
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+      })().catch((error) => {
         controller.enqueue(
           encoder.encode(
             `data: ${JSON.stringify({
@@ -122,7 +116,7 @@ function asyncIterableToStream(
           )
         );
         controller.close();
-      }
+      });
     },
   });
 }

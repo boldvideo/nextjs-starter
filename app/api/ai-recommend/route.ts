@@ -19,21 +19,16 @@ interface RecommendRequestBody {
 
 function asyncIterableToStream(iterable: AsyncIterable<AIEvent>): ReadableStream {
   const encoder = new TextEncoder();
-  const iterator = iterable[Symbol.asyncIterator]();
 
   return new ReadableStream({
-    async pull(controller) {
-      try {
-        const { done, value } = await iterator.next();
-
-        if (done) {
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-          return;
+    start(controller) {
+      (async () => {
+        for await (const event of iterable) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
         }
-
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(value)}\n\n`));
-      } catch (error) {
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+      })().catch((error) => {
         controller.enqueue(
           encoder.encode(
             `data: ${JSON.stringify({
@@ -43,7 +38,7 @@ function asyncIterableToStream(iterable: AsyncIterable<AIEvent>): ReadableStream
           )
         );
         controller.close();
-      }
+      });
     },
   });
 }
