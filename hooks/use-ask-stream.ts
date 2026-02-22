@@ -64,6 +64,12 @@ interface MessageCompleteMessage {
   context?: unknown;
 }
 
+interface ProgressMessage {
+  type: "progress";
+  stage?: string;
+  message?: string;
+}
+
 interface ErrorMessage {
   type: "error";
   code?: string;
@@ -76,6 +82,7 @@ type StreamMessage =
   | TextDeltaMessage
   | SourcesMessage
   | MessageCompleteMessage
+  | ProgressMessage
   | ErrorMessage;
 
 interface UseAskStreamOptions {
@@ -118,6 +125,7 @@ function convertToCitation(
 export function useAskStream(options: UseAskStreamOptions = {}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const conversationIdRef = useRef<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isWaitingForClarification, setIsWaitingForClarification] = useState(false);
@@ -275,7 +283,12 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                 }
                 break;
 
+              case "progress":
+                setStatusMessage(message.message ?? null);
+                break;
+
               case "text_delta":
+                setStatusMessage(null);
                 accumulatedText += message.delta;
 
                 if (!hasStartedStreaming || shouldUpdateUI()) {
@@ -313,6 +326,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                 break;
 
               case "sources":
+                setStatusMessage(null);
                 // Convert sources to citations and accumulate
                 accumulatedCitations.length = 0;
                 accumulatedCitations.push(
@@ -457,6 +471,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       options.onError?.(errorMessage);
     } finally {
       setIsStreaming(false);
+      setStatusMessage(null);
       streamingMessageIdRef.current = null;
       abortControllerRef.current = null;
     }
@@ -488,6 +503,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
   return {
     messages,
     isStreaming,
+    statusMessage,
     isPending: false,
     conversationId,
     isWaitingForClarification,

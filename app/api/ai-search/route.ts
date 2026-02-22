@@ -80,9 +80,14 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         retryable: event.retryable,
       });
 
+    case "progress":
+      return JSON.stringify({
+        type: "progress",
+        stage: event.stage,
+        message: event.message,
+      });
+
     default:
-      // Ignore unknown event types. The backend may emit legacy 'token' events
-      // for backwards compatibility, but we only use 'text_delta' as of bold-js 1.0.1
       return null;
   }
 }

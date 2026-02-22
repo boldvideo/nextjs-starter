@@ -14,6 +14,7 @@ interface AskAnswerTabProps {
   aiName: string;
   aiAvatar?: string;
   onCitationClick: (citation: AskCitation) => void;
+  statusMessage?: string | null;
 }
 
 export function AskAnswerTab({
@@ -22,6 +23,7 @@ export function AskAnswerTab({
   aiName,
   aiAvatar,
   onCitationClick,
+  statusMessage,
 }: AskAnswerTabProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollToBottomRef = useRef<HTMLDivElement>(null);
@@ -108,7 +110,7 @@ export function AskAnswerTab({
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm">Thinking...</span>
+                    <span className="text-sm">{statusMessage || "Thinking..."}</span>
                   </div>
                 </div>
               );

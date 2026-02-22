@@ -21,13 +21,15 @@ interface MessageBubbleProps {
   aiName?: string;
   aiAvatar?: string;
   isStreaming?: boolean;
+  statusMessage?: string | null;
 }
 
-export function MessageBubble({ 
-  message, 
+export function MessageBubble({
+  message,
   aiName = "AI",
   aiAvatar = "/placeholder-avatar.png",
-  isStreaming = false
+  isStreaming = false,
+  statusMessage,
 }: MessageBubbleProps) {
   const isUser = message.role === "user";
   const isError = message.type === "error";
@@ -107,7 +109,7 @@ export function MessageBubble({
                 </span>
               </div>
               <span className="text-base text-muted-foreground">
-                {LOADING_MESSAGES[loadingMessageIndex]}...
+                {statusMessage || `${LOADING_MESSAGES[loadingMessageIndex]}...`}
               </span>
             </div>
           ) : isError ? (

@@ -56,7 +56,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     routeConversationId ? { status: "loading" } : { status: "idle" }
   );
 
-  const { messages, isStreaming, conversationId, streamQuestion, stop, reset, loadConversation } =
+  const { messages, isStreaming, statusMessage, conversationId, streamQuestion, stop, reset, loadConversation } =
     useAIAskStream();
 
   // Generate stable streaming message ID for scroll behavior
@@ -350,7 +350,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   {pair.assistantMessage?.type === "loading" && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">Thinking...</span>
+                      <span className="text-sm">{statusMessage || "Thinking..."}</span>
                     </div>
                   )}
 

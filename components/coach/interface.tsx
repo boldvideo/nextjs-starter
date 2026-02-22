@@ -15,6 +15,7 @@ interface ChatInterfaceProps {
   className?: string;
   aiName?: string;
   aiAvatar?: string;
+  statusMessage?: string | null;
 }
 
 export function CoachInterface({
@@ -23,7 +24,8 @@ export function CoachInterface({
   isStreaming = false,
   className,
   aiName = "FounderWell AI",
-  aiAvatar = "/placeholder-avatar.png"
+  aiAvatar = "/placeholder-avatar.png",
+  statusMessage,
 }: ChatInterfaceProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollToBottomRef = useRef<HTMLDivElement>(null);
@@ -117,6 +119,7 @@ export function CoachInterface({
               aiName={aiName}
               aiAvatar={aiAvatar}
               isStreaming={isStreaming && message.type === "loading"}
+              statusMessage={message.type === "loading" ? statusMessage : undefined}
             />
           );
         })}

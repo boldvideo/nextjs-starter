@@ -35,6 +35,7 @@ interface UseAISearchStreamOptions {
 export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
   const [messages, setMessages] = useState<AISearchMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [context, setContext] = useState<AIContextMessage[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
@@ -118,7 +119,12 @@ export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
             const event = JSON.parse(dataStr);
 
             switch (event.type) {
+              case "progress":
+                setStatusMessage(event.message ?? null);
+                break;
+
               case "text_delta":
+                setStatusMessage(null);
                 accumulatedResponse += event.delta;
                 setMessages((prev) =>
                   prev.map((msg) =>
@@ -130,6 +136,7 @@ export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
                 break;
 
               case "sources":
+                setStatusMessage(null);
                 accumulatedSources = event.sources || [];
                 setMessages((prev) =>
                   prev.map((msg) =>
@@ -231,6 +238,7 @@ export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
         options.onError?.(errorMessage);
       } finally {
         setIsStreaming(false);
+        setStatusMessage(null);
         streamingMessageIdRef.current = null;
         abortControllerRef.current = null;
       }
@@ -258,6 +266,7 @@ export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
   return {
     messages,
     isStreaming,
+    statusMessage,
     streamQuestion,
     reset,
     stop,

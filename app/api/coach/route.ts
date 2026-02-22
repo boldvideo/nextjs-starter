@@ -75,6 +75,13 @@ function formatSSE(
         retryable: event.retryable,
       });
 
+    case "progress":
+      return JSON.stringify({
+        type: "progress",
+        stage: event.stage,
+        message: event.message,
+      });
+
     default:
       return null;
   }
