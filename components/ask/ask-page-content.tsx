@@ -37,9 +37,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [images, setImages] = useState<File[]>([]);
 
   const settings = useSettings();
   const config = getPortalConfig(settings);
+  const multimodal = config.ai.multimodal;
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
   const greeting = config.ai.greeting || "How can I help you today?";
@@ -290,6 +292,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         suggestions={suggestions}
         placeholder="What's on your mind?"
         disclaimer={chatDisclaimer}
+        multimodalEnabled={multimodal.enabled}
+        images={images}
+        onImagesChange={setImages}
+        maxImages={multimodal.maxImages}
+        acceptedMediaTypes={multimodal.acceptedMediaTypes}
       />
     );
   }
@@ -423,6 +430,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 suggestions={[]}
                 showSuggestions={false}
                 disclaimer={chatDisclaimer}
+                multimodalEnabled={multimodal.enabled}
+                images={images}
+                onImagesChange={setImages}
+                maxImages={multimodal.maxImages}
+                acceptedMediaTypes={multimodal.acceptedMediaTypes}
               />
             </div>
           </div>

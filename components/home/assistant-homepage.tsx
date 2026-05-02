@@ -13,17 +13,22 @@ interface AssistantHomepageProps {
 
 export function AssistantHomepage({ config }: AssistantHomepageProps) {
   const [query, setQuery] = useState("");
+  const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const multimodal = config.ai.multimodal;
 
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();
       const trimmedQuery = query.trim();
-      
+
       if (!trimmedQuery || isSubmitting) return;
-      
+
       setIsSubmitting(true);
+      // Images are dropped on navigation — submission from homepage is text-only.
+      // Full image submission is available on /ask (Phase 3).
+      setImages([]);
 
       router.push(`/ask?q=${encodeURIComponent(trimmedQuery)}`);
     },
@@ -32,9 +37,9 @@ export function AssistantHomepage({ config }: AssistantHomepageProps) {
 
   // Use AI name as headline, or custom headline if provided
   const aiName = config.ai.name;
-  const headline = config.homepage.assistantConfig?.headline || 
+  const headline = config.homepage.assistantConfig?.headline ||
                    `Ask ${aiName}`;
-  const subheadline = config.homepage.assistantConfig?.subheadline || 
+  const subheadline = config.homepage.assistantConfig?.subheadline ||
                       config.ai.greeting || "I can help with...";
   const suggestions = config.homepage.assistantConfig?.suggestions || [
     "How can I improve my product?",
@@ -50,8 +55,8 @@ export function AssistantHomepage({ config }: AssistantHomepageProps) {
           {/* AI Avatar */}
           {config.ai.avatar && (
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full overflow-hidden bg-primary/10">
-              <Image 
-                src={config.ai.avatar} 
+              <Image
+                src={config.ai.avatar}
                 alt={aiName}
                 width={64}
                 height={64}
@@ -79,6 +84,11 @@ export function AssistantHomepage({ config }: AssistantHomepageProps) {
             autoFocus={true}
             suggestions={suggestions}
             showSuggestions={true}
+            multimodalEnabled={multimodal.enabled}
+            images={images}
+            onImagesChange={setImages}
+            maxImages={multimodal.maxImages}
+            acceptedMediaTypes={multimodal.acceptedMediaTypes}
           />
         </div>
       </div>
