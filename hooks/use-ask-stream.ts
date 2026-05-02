@@ -70,6 +70,11 @@ interface ProgressMessage {
   message?: string;
 }
 
+interface ImageAnalysisMessage {
+  type: "image_analysis";
+  message?: string;
+}
+
 interface ErrorMessage {
   type: "error";
   code?: string;
@@ -83,6 +88,7 @@ type StreamMessage =
   | SourcesMessage
   | MessageCompleteMessage
   | ProgressMessage
+  | ImageAnalysisMessage
   | ErrorMessage;
 
 interface UseAskStreamOptions {
@@ -302,6 +308,10 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
               case "progress":
                 setStatusMessage(message.message ?? null);
+                break;
+
+              case "image_analysis":
+                setStatusMessage(message.message ?? "Analyzing your image…");
                 break;
 
               case "text_delta":

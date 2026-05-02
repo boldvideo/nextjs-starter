@@ -82,6 +82,14 @@ function formatSSE(
         message: event.message,
       });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    case "image_analysis" as any:
+      return JSON.stringify({
+        type: "image_analysis",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        message: (event as any).message,
+      });
+
     default:
       return null;
   }

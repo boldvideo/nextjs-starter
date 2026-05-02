@@ -193,6 +193,10 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 setStatusMessage(event.message ?? null);
                 break;
 
+              case "image_analysis":
+                setStatusMessage(event.message ?? "Analyzing your image…");
+                break;
+
               case "text_delta":
                 setStatusMessage(null);
                 accumulatedResponse += event.delta ?? "";
