@@ -137,17 +137,42 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: AskRequestBody;
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ type: "error", code: "INVALID_JSON", message: "Invalid JSON body" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  const contentType = request.headers.get("content-type") ?? "";
+  let prompt: string | undefined;
+  let conversationId: string | undefined;
+  let collectionId: string | undefined;
+  let images: File[] = [];
 
-  const { prompt, conversationId, collectionId } = body;
+  if (contentType.startsWith("multipart/form-data")) {
+    try {
+      const form = await request.formData();
+      const promptValue = form.get("prompt");
+      prompt = typeof promptValue === "string" ? promptValue : undefined;
+      const cid = form.get("conversationId");
+      conversationId = typeof cid === "string" ? cid : undefined;
+      const colId = form.get("collectionId");
+      collectionId = typeof colId === "string" ? colId : undefined;
+      images = form.getAll("image").filter((v): v is File => v instanceof File);
+    } catch {
+      return new Response(
+        JSON.stringify({ type: "error", code: "INVALID_MULTIPART", message: "Invalid multipart body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  } else {
+    let body: AskRequestBody;
+    try {
+      body = await request.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ type: "error", code: "INVALID_JSON", message: "Invalid JSON body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    prompt = body.prompt;
+    conversationId = body.conversationId;
+    collectionId = body.collectionId;
+  }
 
   if (!prompt || typeof prompt !== "string") {
     return new Response(
@@ -162,7 +187,9 @@ export async function POST(request: Request) {
       stream: true,
       conversationId,
       collectionId,
-    });
+      // BOLD-1449: pass images per the published SDK shape (cast until SDK types catch up)
+      ...(images.length > 0 ? { images } : {}),
+    } as Parameters<typeof context.client.ai.ask>[0]);
 
     const responseStream = asyncIterableToStream(
       stream as AsyncIterable<AIEvent>,

@@ -102,7 +102,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
   }, []);
 
   const streamQuestion = useCallback(
-    async (query: string) => {
+    async (query: string, images: File[] = []) => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -127,18 +127,30 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       setIsStreaming(true);
 
       try {
-        const response = await fetch("/api/ai-ask", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "text/event-stream",
-          },
-          body: JSON.stringify({
-            prompt: query,
-            conversationId,
-          }),
-          signal: abortControllerRef.current.signal,
-        });
+        const useMultipart = images.length > 0;
+        const init: RequestInit = useMultipart
+          ? {
+              method: "POST",
+              headers: { Accept: "text/event-stream" },
+              body: (() => {
+                const fd = new FormData();
+                fd.append("prompt", query);
+                if (conversationId) fd.append("conversationId", conversationId);
+                for (const f of images) fd.append("image", f, f.name);
+                return fd;
+              })(),
+              signal: abortControllerRef.current.signal,
+            }
+          : {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "text/event-stream",
+              },
+              body: JSON.stringify({ prompt: query, conversationId }),
+              signal: abortControllerRef.current.signal,
+            };
+        const response = await fetch("/api/ai-ask", init);
 
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);

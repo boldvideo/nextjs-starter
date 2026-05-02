@@ -189,32 +189,49 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
   const streamQuestion = useCallback(async (
     query: string,
-    useConversationId: boolean = true
+    useConversationId: boolean = true,
+    images: File[] = []
   ) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
     abortControllerRef.current = new AbortController();
-    
+
     addUserMessage(query);
     streamingMessageIdRef.current = null;
     addAssistantMessage("", "loading");
     setIsStreaming(true);
 
     try {
-      const response = await fetch("/api/coach", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "text/event-stream",
-        },
-        body: JSON.stringify({
-          message: query,
-          conversationId: useConversationId ? conversationIdRef.current || undefined : undefined,
-        }),
-        signal: abortControllerRef.current.signal,
-      });
+      const coachConversationId = useConversationId ? conversationIdRef.current || undefined : undefined;
+      const useMultipart = images.length > 0;
+      const init: RequestInit = useMultipart
+        ? {
+            method: "POST",
+            headers: { Accept: "text/event-stream" },
+            body: (() => {
+              const fd = new FormData();
+              fd.append("message", query);
+              if (coachConversationId) fd.append("conversationId", coachConversationId);
+              for (const f of images) fd.append("image", f, f.name);
+              return fd;
+            })(),
+            signal: abortControllerRef.current.signal,
+          }
+        : {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "text/event-stream",
+            },
+            body: JSON.stringify({
+              message: query,
+              conversationId: coachConversationId,
+            }),
+            signal: abortControllerRef.current.signal,
+          };
+      const response = await fetch("/api/coach", init);
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "");

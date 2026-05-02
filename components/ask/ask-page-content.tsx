@@ -157,12 +157,14 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     async (e?: React.FormEvent) => {
       e?.preventDefault();
       const trimmedQuery = query.trim();
-      if (!trimmedQuery || isStreaming) return;
+      if ((!trimmedQuery && images.length === 0) || isStreaming) return;
 
       setQuery("");
-      await streamQuestion(trimmedQuery);
+      const submittedImages = images;
+      setImages([]);
+      await streamQuestion(trimmedQuery, submittedImages);
     },
-    [query, isStreaming, streamQuestion]
+    [query, images, isStreaming, streamQuestion]
   );
 
   const handleStop = useCallback(() => {

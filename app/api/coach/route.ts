@@ -140,17 +140,38 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: CoachRequestBody;
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ type: "error", content: "Invalid JSON body" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  const contentType = request.headers.get("content-type") ?? "";
+  let message: string | undefined;
+  let conversationId: string | undefined;
+  let images: File[] = [];
 
-  const { message, conversationId } = body;
+  if (contentType.startsWith("multipart/form-data")) {
+    try {
+      const form = await request.formData();
+      const messageValue = form.get("message");
+      message = typeof messageValue === "string" ? messageValue : undefined;
+      const cid = form.get("conversationId");
+      conversationId = typeof cid === "string" ? cid : undefined;
+      images = form.getAll("image").filter((v): v is File => v instanceof File);
+    } catch {
+      return new Response(
+        JSON.stringify({ type: "error", content: "Invalid multipart body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  } else {
+    let body: CoachRequestBody;
+    try {
+      body = await request.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ type: "error", content: "Invalid JSON body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    message = body.message;
+    conversationId = body.conversationId;
+  }
 
   if (!message || typeof message !== "string") {
     return new Response(
@@ -163,7 +184,9 @@ export async function POST(request: Request) {
     const stream = await context.client.ai.coach({
       prompt: message,
       conversationId,
-    });
+      // BOLD-1449: pass images per the published SDK shape (cast until SDK types catch up)
+      ...(images.length > 0 ? { images } : {}),
+    } as Parameters<typeof context.client.ai.coach>[0]);
 
     // Convert AsyncIterable to ReadableStream with pull-based streaming
     const responseStream = asyncIterableToStream(stream as AsyncIterable<AIEvent>, conversationId);
