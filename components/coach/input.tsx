@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
-import { ArrowUp, Square } from "lucide-react";
+import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
+import { ArrowUp, Square, Paperclip, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 
@@ -18,9 +18,50 @@ interface ChatInputProps {
   showSuggestions?: boolean;
   className?: string;
   disclaimer?: string;
+  // Multimodal (Phase 2)
+  multimodalEnabled?: boolean;
+  images?: File[];
+  onImagesChange?: (images: File[]) => void;
+  maxImages?: number;
+  acceptedMediaTypes?: string[];
 }
 
 const MAX_HEIGHT = 360; // Max height before scrolling
+
+function ThumbnailRow({
+  images,
+  onRemove,
+}: {
+  images: File[];
+  onRemove: (index: number) => void;
+}) {
+  return (
+    <div className="flex gap-2 overflow-x-auto px-3 pt-3">
+      {images.map((file, i) => {
+        const url = URL.createObjectURL(file);
+        // Note: revocation handled by parent on submit/clear, not here.
+        return (
+          <div key={`${file.name}-${i}`} className="relative h-16 w-16 shrink-0">
+            {/* Plain <img> is acceptable here; this is a transient blob URL */}
+            <img
+              src={url}
+              alt={file.name}
+              className="h-16 w-16 rounded-lg object-cover border border-border"
+            />
+            <button
+              type="button"
+              onClick={() => onRemove(i)}
+              className="absolute -top-1 -right-1 rounded-full bg-foreground/80 text-background w-5 h-5 flex items-center justify-center hover:bg-foreground"
+              aria-label={`Remove ${file.name}`}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function ChatInput({
   value,
@@ -34,11 +75,23 @@ export function ChatInput({
   suggestions = [],
   showSuggestions = false,
   className,
-  disclaimer
+  disclaimer,
+  multimodalEnabled = false,
+  images: imagesProp,
+  onImagesChange,
+  maxImages: maxImagesProp,
+  acceptedMediaTypes: acceptedMediaTypesProp,
 }: ChatInputProps) {
   const [isFocused, setIsFocused] = React.useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const images = useMemo(() => imagesProp ?? [], [imagesProp]);
+  const maxImages = maxImagesProp ?? 0;
+  const acceptedMediaTypes = useMemo(() => acceptedMediaTypesProp ?? [], [acceptedMediaTypesProp]);
 
   // Auto-resize textarea
   const adjustHeight = useCallback(() => {
@@ -83,9 +136,114 @@ export function ChatInput({
     textareaRef.current?.focus();
   };
 
+  const addImages = useCallback(
+    (incoming: File[]) => {
+      if (!multimodalEnabled || !onImagesChange) return;
+
+      const accepted: File[] = [];
+      let typeRejected = false;
+      for (const f of incoming) {
+        if (acceptedMediaTypes.length && !acceptedMediaTypes.includes(f.type)) {
+          typeRejected = true;
+          continue;
+        }
+        accepted.push(f);
+      }
+
+      let next = [...images, ...accepted];
+      let capHit = false;
+      if (maxImages > 0 && next.length > maxImages) {
+        next = next.slice(0, maxImages);
+        capHit = true;
+      }
+
+      if (typeRejected) {
+        setValidationError(
+          `Unsupported file type. Allowed: ${acceptedMediaTypes.join(", ")}`
+        );
+      } else if (capHit) {
+        setValidationError(`You can attach at most ${maxImages} images.`);
+      } else {
+        setValidationError(null);
+      }
+
+      onImagesChange(next);
+    },
+    [multimodalEnabled, onImagesChange, images, maxImages, acceptedMediaTypes]
+  );
+
+  const removeImage = useCallback(
+    (index: number) => {
+      if (!onImagesChange) return;
+      const next = images.filter((_, i) => i !== index);
+      onImagesChange(next);
+      setValidationError(null);
+    },
+    [images, onImagesChange]
+  );
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      if (files.length) addImages(files);
+      e.target.value = ""; // reset so same file can be picked again
+    },
+    [addImages]
+  );
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      if (!multimodalEnabled) return;
+      const items = Array.from(e.clipboardData?.items ?? []);
+      const imageFiles = items
+        .filter((it) => it.kind === "file" && it.type.startsWith("image/"))
+        .map((it) => it.getAsFile())
+        .filter((f): f is File => f !== null);
+      if (imageFiles.length) {
+        e.preventDefault();
+        addImages(imageFiles);
+      }
+    },
+    [multimodalEnabled, addImages]
+  );
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent<HTMLFormElement>) => {
+      if (!multimodalEnabled) return;
+      if (Array.from(e.dataTransfer.types).includes("Files")) {
+        e.preventDefault();
+        setDragOver(true);
+      }
+    },
+    [multimodalEnabled]
+  );
+
+  const handleDragLeave = useCallback(() => setDragOver(false), []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLFormElement>) => {
+      if (!multimodalEnabled) return;
+      e.preventDefault();
+      setDragOver(false);
+      const files = Array.from(e.dataTransfer.files).filter((f) =>
+        f.type.startsWith("image/")
+      );
+      if (files.length) addImages(files);
+    },
+    [multimodalEnabled, addImages]
+  );
+
   return (
     <div className={cn("w-full", className)}>
-      <form ref={formRef} onSubmit={handleSubmit} className="relative">
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="relative"
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <div
           className={cn(
             "relative flex flex-col rounded-2xl border transition-all duration-200",
@@ -95,11 +253,22 @@ export function ChatInput({
             "bg-background"
           )}
         >
+          {multimodalEnabled && dragOver && (
+            <div className="pointer-events-none absolute inset-0 z-10 rounded-2xl border-2 border-dashed border-primary bg-primary/5 flex items-center justify-center text-primary text-sm">
+              Drop images to attach
+            </div>
+          )}
+
+          {multimodalEnabled && images.length > 0 && (
+            <ThumbnailRow images={images} onRemove={removeImage} />
+          )}
+
           <textarea
             ref={textareaRef}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholder}
@@ -115,8 +284,34 @@ export function ChatInput({
             aria-label="Ask your coach a question"
           />
 
-          {/* Bottom row with submit button */}
-          <div className="flex justify-end px-3 pb-3">
+          {/* Bottom row */}
+          <div className={cn("flex px-3 pb-3", multimodalEnabled ? "justify-between" : "justify-end")}>
+            {multimodalEnabled && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept={acceptedMediaTypes.join(",")}
+                  className="hidden"
+                  onChange={handleFileInputChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={disabled || isStreaming || (maxImages > 0 && images.length >= maxImages)}
+                  className={cn(
+                    "p-2.5 rounded-xl transition-all duration-200",
+                    "border border-border bg-background hover:bg-accent",
+                    "text-muted-foreground hover:text-foreground",
+                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                  )}
+                  aria-label="Attach images"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </button>
+              </>
+            )}
             {isStreaming && onStop ? (
               <button
                 type="button"
@@ -148,6 +343,10 @@ export function ChatInput({
           </div>
         </div>
       </form>
+
+      {validationError && (
+        <p className="mt-2 text-destructive text-xs px-3">{validationError}</p>
+      )}
 
       {/* Disclaimer */}
       {disclaimer && (

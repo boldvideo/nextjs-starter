@@ -1,7 +1,17 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
+
+export interface ChatAttachment {
+  id: string;
+  url?: string;
+  localPreviewUrl?: string;
+  mimeType: string;
+  width?: number;
+  height?: number;
+  name?: string;
+}
 
 export interface AIAskMessage {
   id: string;
@@ -9,6 +19,7 @@ export interface AIAskMessage {
   content: string;
   type: "text" | "answer" | "error" | "loading";
   sources?: AIAskSource[];
+  attachments?: ChatAttachment[];
 }
 
 export interface AIAskSource {
@@ -39,11 +50,33 @@ interface BackendSource {
   cited?: boolean;
 }
 
+interface BackendAttachment {
+  id: string;
+  url?: string;
+  mime_type?: string;
+  mimeType?: string;
+  width?: number;
+  height?: number;
+  name?: string;
+}
+
+function normalizeBackendAttachment(raw: BackendAttachment): ChatAttachment {
+  return {
+    id: raw.id,
+    url: raw.url,
+    mimeType: raw.mime_type ?? raw.mimeType ?? "image/*",
+    width: raw.width,
+    height: raw.height,
+    name: raw.name,
+  };
+}
+
 interface ConversationHistoryMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   sources?: BackendSource[];
+  attachments?: BackendAttachment[];
   insertedAt: string;
 }
 
@@ -87,7 +120,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
 
-  const addUserMessage = useCallback((content: string) => {
+  const addUserMessage = useCallback((content: string, attachments?: ChatAttachment[]) => {
     const messageId = `user-${Date.now()}`;
     setMessages((prev) => [
       ...prev,
@@ -96,13 +129,14 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
         role: "user",
         content,
         type: "text",
+        attachments,
       },
     ]);
     return messageId;
   }, []);
 
   const streamQuestion = useCallback(
-    async (query: string) => {
+    async (query: string, images: File[] = []) => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -111,7 +145,16 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       const messageId = `assistant-${Date.now()}`;
       streamingMessageIdRef.current = messageId;
 
-      addUserMessage(query);
+      const optimisticAttachments: ChatAttachment[] | undefined =
+        images.length > 0
+          ? images.map((file, i) => ({
+              id: `local-${Date.now()}-${i}`,
+              localPreviewUrl: URL.createObjectURL(file),
+              mimeType: file.type,
+              name: file.name,
+            }))
+          : undefined;
+      const userMessageId = addUserMessage(query, optimisticAttachments);
 
       setMessages((prev) => [
         ...prev,
@@ -127,18 +170,30 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       setIsStreaming(true);
 
       try {
-        const response = await fetch("/api/ai-ask", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "text/event-stream",
-          },
-          body: JSON.stringify({
-            prompt: query,
-            conversationId,
-          }),
-          signal: abortControllerRef.current.signal,
-        });
+        const useMultipart = images.length > 0;
+        const init: RequestInit = useMultipart
+          ? {
+              method: "POST",
+              headers: { Accept: "text/event-stream" },
+              body: (() => {
+                const fd = new FormData();
+                fd.append("prompt", query);
+                if (conversationId) fd.append("conversationId", conversationId);
+                for (const f of images) fd.append("image", f, f.name);
+                return fd;
+              })(),
+              signal: abortControllerRef.current.signal,
+            }
+          : {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "text/event-stream",
+              },
+              body: JSON.stringify({ prompt: query, conversationId }),
+              signal: abortControllerRef.current.signal,
+            };
+        const response = await fetch("/api/ai-ask", init);
 
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
@@ -179,6 +234,10 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
 
               case "progress":
                 setStatusMessage(event.message ?? null);
+                break;
+
+              case "image_analysis":
+                setStatusMessage(event.message ?? "Analyzing your image…");
                 break;
 
               case "text_delta":
@@ -267,6 +326,42 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                     options.onComplete?.(finalContent, accumulatedSources);
                   }
                 }
+
+                // BOLD-1463: swap optimistic local preview URLs to server-resolved URLs
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const serverAttachments = (event as any).user_attachments as Array<{
+                  id: string;
+                  url?: string;
+                  mime_type?: string;
+                  width?: number;
+                  height?: number;
+                  name?: string;
+                }> | undefined;
+                if (serverAttachments && serverAttachments.length > 0 && optimisticAttachments) {
+                  setMessages((prev) =>
+                    prev.map((msg) => {
+                      if (msg.id !== userMessageId || !msg.attachments) return msg;
+                      const next = msg.attachments.map((att, i) => {
+                        const server = serverAttachments[i];
+                        if (server?.url && att.localPreviewUrl) {
+                          URL.revokeObjectURL(att.localPreviewUrl);
+                          return {
+                            ...att,
+                            url: server.url,
+                            localPreviewUrl: undefined,
+                            mimeType: server.mime_type ?? att.mimeType,
+                            width: server.width,
+                            height: server.height,
+                            name: server.name ?? att.name,
+                          };
+                        }
+                        return att;
+                      });
+                      return { ...msg, attachments: next };
+                    })
+                  );
+                }
+
                 seenTerminalEvent = true;
                 break;
               }
@@ -371,15 +466,36 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
     [addUserMessage, conversationId, options]
   );
 
+  const revokeMessageObjectURLs = useCallback((msgs: AIAskMessage[]) => {
+    for (const m of msgs) {
+      m.attachments?.forEach((a) => {
+        if (a.localPreviewUrl) URL.revokeObjectURL(a.localPreviewUrl);
+      });
+    }
+  }, []);
+
   const reset = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    setMessages([]);
+    setMessages((prev) => {
+      revokeMessageObjectURLs(prev);
+      return [];
+    });
     setConversationId(undefined);
     setIsStreaming(false);
     streamingMessageIdRef.current = null;
-  }, []);
+  }, [revokeMessageObjectURLs]);
+
+  // Revoke any remaining object URLs when the hook unmounts
+  useEffect(() => {
+    return () => {
+      setMessages((prev) => {
+        revokeMessageObjectURLs(prev);
+        return prev;
+      });
+    };
+  }, [revokeMessageObjectURLs]);
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
@@ -420,6 +536,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
           content: msg.content,
           type: msg.role === "user" ? "text" : "answer",
           sources: msg.sources?.map(normalizeBackendSource),
+          attachments: msg.attachments?.map(normalizeBackendAttachment),
         });
       }
 

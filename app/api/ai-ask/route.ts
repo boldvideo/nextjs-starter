@@ -48,6 +48,16 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
     case "message_complete": {
       // Use sources from event (SDK provides as citations), fall back to accumulated state
       const completeSources = event.citations || state.sources;
+      // BOLD-1463: optional user-message attachments (server-resolved URLs)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const userAttachments = (event as any).userAttachments as Array<{
+        id: string;
+        url?: string;
+        mimeType?: string;
+        width?: number;
+        height?: number;
+        name?: string;
+      }> | undefined;
       return JSON.stringify({
         type: "message_complete",
         responseType: event.responseType,
@@ -66,6 +76,14 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         conversationId: event.conversationId || state.conversationId,
         usage: event.usage,
         context: event.context,
+        user_attachments: userAttachments?.map((a) => ({
+          id: a.id,
+          url: a.url,
+          mime_type: a.mimeType,
+          width: a.width,
+          height: a.height,
+          name: a.name,
+        })),
       });
     }
 
@@ -82,6 +100,14 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         type: "progress",
         stage: event.stage,
         message: event.message,
+      });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    case "image_analysis" as any:
+      return JSON.stringify({
+        type: "image_analysis",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        message: (event as any).message,
       });
 
     default:
@@ -137,17 +163,42 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: AskRequestBody;
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ type: "error", code: "INVALID_JSON", message: "Invalid JSON body" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  const contentType = request.headers.get("content-type") ?? "";
+  let prompt: string | undefined;
+  let conversationId: string | undefined;
+  let collectionId: string | undefined;
+  let images: File[] = [];
 
-  const { prompt, conversationId, collectionId } = body;
+  if (contentType.startsWith("multipart/form-data")) {
+    try {
+      const form = await request.formData();
+      const promptValue = form.get("prompt");
+      prompt = typeof promptValue === "string" ? promptValue : undefined;
+      const cid = form.get("conversationId");
+      conversationId = typeof cid === "string" ? cid : undefined;
+      const colId = form.get("collectionId");
+      collectionId = typeof colId === "string" ? colId : undefined;
+      images = form.getAll("image").filter((v): v is File => v instanceof File);
+    } catch {
+      return new Response(
+        JSON.stringify({ type: "error", code: "INVALID_MULTIPART", message: "Invalid multipart body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  } else {
+    let body: AskRequestBody;
+    try {
+      body = await request.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ type: "error", code: "INVALID_JSON", message: "Invalid JSON body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    prompt = body.prompt;
+    conversationId = body.conversationId;
+    collectionId = body.collectionId;
+  }
 
   if (!prompt || typeof prompt !== "string") {
     return new Response(
@@ -162,7 +213,9 @@ export async function POST(request: Request) {
       stream: true,
       conversationId,
       collectionId,
-    });
+      // BOLD-1449: pass images per the published SDK shape (cast until SDK types catch up)
+      ...(images.length > 0 ? { images } : {}),
+    } as Parameters<typeof context.client.ai.ask>[0]);
 
     const responseStream = asyncIterableToStream(
       stream as AsyncIterable<AIEvent>,

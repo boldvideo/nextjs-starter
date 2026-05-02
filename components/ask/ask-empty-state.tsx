@@ -15,6 +15,12 @@ interface AskEmptyStateProps {
   suggestions: string[];
   placeholder: string;
   disclaimer?: string;
+  // Multimodal (Phase 2)
+  multimodalEnabled?: boolean;
+  images?: File[];
+  onImagesChange?: (images: File[]) => void;
+  maxImages?: number;
+  acceptedMediaTypes?: string[];
 }
 
 export function AskEmptyState({
@@ -29,6 +35,11 @@ export function AskEmptyState({
   suggestions,
   placeholder,
   disclaimer,
+  multimodalEnabled,
+  images,
+  onImagesChange,
+  maxImages,
+  acceptedMediaTypes,
 }: AskEmptyStateProps) {
   return (
     <div className="flex h-[calc(100vh-120px)] w-full items-center justify-center px-4 md:px-6">
@@ -63,6 +74,11 @@ export function AskEmptyState({
           suggestions={suggestions}
           showSuggestions={true}
           disclaimer={disclaimer}
+          multimodalEnabled={multimodalEnabled}
+          images={images}
+          onImagesChange={onImagesChange}
+          maxImages={maxImages}
+          acceptedMediaTypes={acceptedMediaTypes}
         />
       </div>
     </div>

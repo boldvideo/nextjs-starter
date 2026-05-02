@@ -46,6 +46,16 @@ function formatSSE(
     case "message_complete": {
       // Use sources from event (SDK provides as citations), fall back to accumulated state
       const completeSources = event.citations || state.sources;
+      // BOLD-1463: optional user-message attachments (server-resolved URLs)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const userAttachments = (event as any).userAttachments as Array<{
+        id: string;
+        url?: string;
+        mimeType?: string;
+        width?: number;
+        height?: number;
+        name?: string;
+      }> | undefined;
       return JSON.stringify({
         type: "message_complete",
         responseType: event.responseType,
@@ -64,6 +74,14 @@ function formatSSE(
         conversationId: event.conversationId || state.conversationId,
         usage: event.usage,
         context: event.context,
+        user_attachments: userAttachments?.map((a) => ({
+          id: a.id,
+          url: a.url,
+          mime_type: a.mimeType,
+          width: a.width,
+          height: a.height,
+          name: a.name,
+        })),
       });
     }
 
@@ -80,6 +98,14 @@ function formatSSE(
         type: "progress",
         stage: event.stage,
         message: event.message,
+      });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    case "image_analysis" as any:
+      return JSON.stringify({
+        type: "image_analysis",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        message: (event as any).message,
       });
 
     default:
@@ -140,17 +166,38 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: CoachRequestBody;
-  try {
-    body = await request.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ type: "error", content: "Invalid JSON body" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  const contentType = request.headers.get("content-type") ?? "";
+  let message: string | undefined;
+  let conversationId: string | undefined;
+  let images: File[] = [];
 
-  const { message, conversationId } = body;
+  if (contentType.startsWith("multipart/form-data")) {
+    try {
+      const form = await request.formData();
+      const messageValue = form.get("message");
+      message = typeof messageValue === "string" ? messageValue : undefined;
+      const cid = form.get("conversationId");
+      conversationId = typeof cid === "string" ? cid : undefined;
+      images = form.getAll("image").filter((v): v is File => v instanceof File);
+    } catch {
+      return new Response(
+        JSON.stringify({ type: "error", content: "Invalid multipart body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  } else {
+    let body: CoachRequestBody;
+    try {
+      body = await request.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ type: "error", content: "Invalid JSON body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    message = body.message;
+    conversationId = body.conversationId;
+  }
 
   if (!message || typeof message !== "string") {
     return new Response(
@@ -163,7 +210,9 @@ export async function POST(request: Request) {
     const stream = await context.client.ai.coach({
       prompt: message,
       conversationId,
-    });
+      // BOLD-1449: pass images per the published SDK shape (cast until SDK types catch up)
+      ...(images.length > 0 ? { images } : {}),
+    } as Parameters<typeof context.client.ai.coach>[0]);
 
     // Convert AsyncIterable to ReadableStream with pull-based streaming
     const responseStream = asyncIterableToStream(stream as AsyncIterable<AIEvent>, conversationId);

@@ -19,6 +19,11 @@ export interface PortalConfig {
     showInHeader: boolean;
     conversationStarters: string[];
     chatDisclaimer?: string;
+    multimodal: {
+      enabled: boolean;
+      maxImages: number;
+      acceptedMediaTypes: string[];
+    };
   };
   homepage: {
     layout: 'none' | 'library' | 'assistant';
@@ -101,7 +106,12 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
         greeting: 'Hello! How can I help you today?',
         showInHeader: false,
         conversationStarters: [],
-        chatDisclaimer: undefined
+        chatDisclaimer: undefined,
+        multimodal: {
+          enabled: false,
+          maxImages: 0,
+          acceptedMediaTypes: [],
+        }
       },
       homepage: {
         layout: 'library',
@@ -171,6 +181,27 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // Chat disclaimer (bold-js 1.15.1+)
   const chatDisclaimer = settings.chatDisclaimer;
 
+  // Multimodal capability (BOLD-1495). The SDK normalizes settings keys to
+  // camelCase, but the underlying API contract uses snake_case — accept either.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const multimodalRaw = (settings.account as any)?.multimodal;
+  const multimodalMaxImages =
+    typeof multimodalRaw?.maxImages === "number"
+      ? multimodalRaw.maxImages
+      : typeof multimodalRaw?.max_images === "number"
+        ? multimodalRaw.max_images
+        : 0;
+  const multimodalAcceptedMediaTypes = Array.isArray(multimodalRaw?.acceptedMediaTypes)
+    ? (multimodalRaw.acceptedMediaTypes as string[])
+    : Array.isArray(multimodalRaw?.accepted_media_types)
+      ? (multimodalRaw.accepted_media_types as string[])
+      : [];
+  const multimodal = {
+    enabled: multimodalRaw?.enabled === true,
+    maxImages: multimodalMaxImages,
+    acceptedMediaTypes: multimodalAcceptedMediaTypes,
+  };
+
   // Determine homepage layout
   const homepageLayout = (layoutOverride ?? settings.portal?.layout?.type ?? 'library') as 'none' | 'library' | 'assistant';
 
@@ -200,7 +231,8 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
       greeting: aiGreeting,
       showInHeader: showAiInHeader,
       conversationStarters: conversationStarters,
-      chatDisclaimer
+      chatDisclaimer,
+      multimodal
     },
     homepage: {
       layout: homepageLayout,

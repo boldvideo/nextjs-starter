@@ -22,6 +22,7 @@ import { AskLoadingState } from "./ask-loading-state";
 import { AskReadOnlyFooter } from "./ask-read-only-footer";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
+import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 
 type PageState =
   | { status: "idle" }
@@ -37,9 +38,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [images, setImages] = useState<File[]>([]);
 
   const settings = useSettings();
   const config = getPortalConfig(settings);
+  const multimodal = config.ai.multimodal;
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
   const greeting = config.ai.greeting || "How can I help you today?";
@@ -151,16 +154,25 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
 
 
+  // Drop in-flight image selections if the multimodal capability flips off mid-session
+  useEffect(() => {
+    if (!multimodal.enabled && images.length > 0) {
+      setImages([]);
+    }
+  }, [multimodal.enabled, images.length]);
+
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();
       const trimmedQuery = query.trim();
-      if (!trimmedQuery || isStreaming) return;
+      if ((!trimmedQuery && images.length === 0) || isStreaming) return;
 
       setQuery("");
-      await streamQuestion(trimmedQuery);
+      const submittedImages = images;
+      setImages([]);
+      await streamQuestion(trimmedQuery, submittedImages);
     },
-    [query, isStreaming, streamQuestion]
+    [query, images, isStreaming, streamQuestion]
   );
 
   const handleStop = useCallback(() => {
@@ -290,6 +302,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         suggestions={suggestions}
         placeholder="What's on your mind?"
         disclaimer={chatDisclaimer}
+        multimodalEnabled={multimodal.enabled}
+        images={images}
+        onImagesChange={setImages}
+        maxImages={multimodal.maxImages}
+        acceptedMediaTypes={multimodal.acceptedMediaTypes}
       />
     );
   }
@@ -343,7 +360,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   className="space-y-8"
                   {...(isCurrentlyStreaming ? { "data-streaming-message": true } : {})}
                 >
-                  {/* User's question as title */}
+                  {/* User's question as title, with optional attachment thumbnails */}
+                  {pair.userMessage.attachments && pair.userMessage.attachments.length > 0 && (
+                    <AttachmentThumbnails attachments={pair.userMessage.attachments} />
+                  )}
                   <h2 className="text-2xl font-semibold">{pair.userMessage.content}</h2>
 
                   {/* Loading state */}
@@ -423,6 +443,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 suggestions={[]}
                 showSuggestions={false}
                 disclaimer={chatDisclaimer}
+                multimodalEnabled={multimodal.enabled}
+                images={images}
+                onImagesChange={setImages}
+                maxImages={multimodal.maxImages}
+                acceptedMediaTypes={multimodal.acceptedMediaTypes}
               />
             </div>
           </div>
