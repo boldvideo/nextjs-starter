@@ -154,6 +154,13 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
 
 
+  // Drop in-flight image selections if the multimodal capability flips off mid-session
+  useEffect(() => {
+    if (!multimodal.enabled && images.length > 0) {
+      setImages([]);
+    }
+  }, [multimodal.enabled, images.length]);
+
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();

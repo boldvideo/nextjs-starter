@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
 
 export interface ChatAttachment {
@@ -50,11 +50,33 @@ interface BackendSource {
   cited?: boolean;
 }
 
+interface BackendAttachment {
+  id: string;
+  url?: string;
+  mime_type?: string;
+  mimeType?: string;
+  width?: number;
+  height?: number;
+  name?: string;
+}
+
+function normalizeBackendAttachment(raw: BackendAttachment): ChatAttachment {
+  return {
+    id: raw.id,
+    url: raw.url,
+    mimeType: raw.mime_type ?? raw.mimeType ?? "image/*",
+    width: raw.width,
+    height: raw.height,
+    name: raw.name,
+  };
+}
+
 interface ConversationHistoryMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   sources?: BackendSource[];
+  attachments?: BackendAttachment[];
   insertedAt: string;
 }
 
@@ -444,15 +466,36 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
     [addUserMessage, conversationId, options]
   );
 
+  const revokeMessageObjectURLs = useCallback((msgs: AIAskMessage[]) => {
+    for (const m of msgs) {
+      m.attachments?.forEach((a) => {
+        if (a.localPreviewUrl) URL.revokeObjectURL(a.localPreviewUrl);
+      });
+    }
+  }, []);
+
   const reset = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    setMessages([]);
+    setMessages((prev) => {
+      revokeMessageObjectURLs(prev);
+      return [];
+    });
     setConversationId(undefined);
     setIsStreaming(false);
     streamingMessageIdRef.current = null;
-  }, []);
+  }, [revokeMessageObjectURLs]);
+
+  // Revoke any remaining object URLs when the hook unmounts
+  useEffect(() => {
+    return () => {
+      setMessages((prev) => {
+        revokeMessageObjectURLs(prev);
+        return prev;
+      });
+    };
+  }, [revokeMessageObjectURLs]);
 
   const stop = useCallback(() => {
     if (abortControllerRef.current) {
@@ -493,6 +536,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
           content: msg.content,
           type: msg.role === "user" ? "text" : "answer",
           sources: msg.sources?.map(normalizeBackendSource),
+          attachments: msg.attachments?.map(normalizeBackendAttachment),
         });
       }
 
