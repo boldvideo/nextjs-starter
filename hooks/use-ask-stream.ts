@@ -6,6 +6,7 @@ import {
   SynthesizedResponse,
   AskCitation
 } from "@/lib/ask";
+import type { ChatAttachment } from "@/hooks/use-ai-ask-stream";
 import { createPlaceholderCitations } from "@/lib/citation-helpers";
 
 export interface ChatMessage {
@@ -17,7 +18,10 @@ export interface ChatMessage {
     clarificationResponse?: ClarificationResponse;
     synthesizedResponse?: SynthesizedResponse;
   };
+  attachments?: ChatAttachment[];
 }
+
+export type { ChatAttachment };
 
 interface MessageStartMessage {
   type: "message_start";
@@ -138,13 +142,14 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
 
-  const addUserMessage = useCallback((content: string) => {
+  const addUserMessage = useCallback((content: string, attachments?: ChatAttachment[]) => {
     const messageId = `user-${Date.now()}`;
     setMessages(prev => [...prev, {
       id: messageId,
       role: "user",
       content,
-      type: "text"
+      type: "text",
+      attachments,
     }]);
     return messageId;
   }, []);
@@ -204,7 +209,17 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
     abortControllerRef.current = new AbortController();
 
-    addUserMessage(query);
+    const optimisticAttachments: ChatAttachment[] | undefined =
+      images.length > 0
+        ? images.map((file, i) => ({
+            id: `local-${Date.now()}-${i}`,
+            localPreviewUrl: URL.createObjectURL(file),
+            mimeType: file.type,
+            name: file.name,
+          }))
+        : undefined;
+    const userMessageId = addUserMessage(query, optimisticAttachments);
+
     streamingMessageIdRef.current = null;
     addAssistantMessage("", "loading");
     setIsStreaming(true);
@@ -424,6 +439,42 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
                   options.onComplete?.(finalResponse);
                 }
+
+                // BOLD-1463: swap optimistic local preview URLs to server-resolved URLs
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const serverAttachments = (message as any).user_attachments as Array<{
+                  id: string;
+                  url?: string;
+                  mime_type?: string;
+                  width?: number;
+                  height?: number;
+                  name?: string;
+                }> | undefined;
+                if (serverAttachments && serverAttachments.length > 0 && optimisticAttachments) {
+                  setMessages((prev) =>
+                    prev.map((msg) => {
+                      if (msg.id !== userMessageId || !msg.attachments) return msg;
+                      const next = msg.attachments.map((att, i) => {
+                        const server = serverAttachments[i];
+                        if (server?.url && att.localPreviewUrl) {
+                          URL.revokeObjectURL(att.localPreviewUrl);
+                          return {
+                            ...att,
+                            url: server.url,
+                            localPreviewUrl: undefined,
+                            mimeType: server.mime_type ?? att.mimeType,
+                            width: server.width,
+                            height: server.height,
+                            name: server.name ?? att.name,
+                          };
+                        }
+                        return att;
+                      });
+                      return { ...msg, attachments: next };
+                    })
+                  );
+                }
+
                 break;
               }
 

@@ -3,12 +3,23 @@
 import { useState, useCallback, useRef } from "react";
 import { AskCitation } from "@/lib/ask";
 
+export interface ChatAttachment {
+  id: string;
+  url?: string;
+  localPreviewUrl?: string;
+  mimeType: string;
+  width?: number;
+  height?: number;
+  name?: string;
+}
+
 export interface AIAskMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   type: "text" | "answer" | "error" | "loading";
   sources?: AIAskSource[];
+  attachments?: ChatAttachment[];
 }
 
 export interface AIAskSource {
@@ -87,7 +98,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
 
-  const addUserMessage = useCallback((content: string) => {
+  const addUserMessage = useCallback((content: string, attachments?: ChatAttachment[]) => {
     const messageId = `user-${Date.now()}`;
     setMessages((prev) => [
       ...prev,
@@ -96,6 +107,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
         role: "user",
         content,
         type: "text",
+        attachments,
       },
     ]);
     return messageId;
@@ -111,7 +123,16 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       const messageId = `assistant-${Date.now()}`;
       streamingMessageIdRef.current = messageId;
 
-      addUserMessage(query);
+      const optimisticAttachments: ChatAttachment[] | undefined =
+        images.length > 0
+          ? images.map((file, i) => ({
+              id: `local-${Date.now()}-${i}`,
+              localPreviewUrl: URL.createObjectURL(file),
+              mimeType: file.type,
+              name: file.name,
+            }))
+          : undefined;
+      const userMessageId = addUserMessage(query, optimisticAttachments);
 
       setMessages((prev) => [
         ...prev,
@@ -283,6 +304,42 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                     options.onComplete?.(finalContent, accumulatedSources);
                   }
                 }
+
+                // BOLD-1463: swap optimistic local preview URLs to server-resolved URLs
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const serverAttachments = (event as any).user_attachments as Array<{
+                  id: string;
+                  url?: string;
+                  mime_type?: string;
+                  width?: number;
+                  height?: number;
+                  name?: string;
+                }> | undefined;
+                if (serverAttachments && serverAttachments.length > 0 && optimisticAttachments) {
+                  setMessages((prev) =>
+                    prev.map((msg) => {
+                      if (msg.id !== userMessageId || !msg.attachments) return msg;
+                      const next = msg.attachments.map((att, i) => {
+                        const server = serverAttachments[i];
+                        if (server?.url && att.localPreviewUrl) {
+                          URL.revokeObjectURL(att.localPreviewUrl);
+                          return {
+                            ...att,
+                            url: server.url,
+                            localPreviewUrl: undefined,
+                            mimeType: server.mime_type ?? att.mimeType,
+                            width: server.width,
+                            height: server.height,
+                            name: server.name ?? att.name,
+                          };
+                        }
+                        return att;
+                      });
+                      return { ...msg, attachments: next };
+                    })
+                  );
+                }
+
                 seenTerminalEvent = true;
                 break;
               }

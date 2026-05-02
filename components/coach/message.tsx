@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { ChatMessage } from "@/hooks/use-ask-stream";
 import { cn } from "@/lib/utils";
 import { User, AlertCircle } from "lucide-react";
+import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 
 const LOADING_MESSAGES = [
   "Thinking about that",
@@ -77,6 +78,11 @@ export function MessageBubble({
           <span className="text-xs text-muted-foreground ml-3">
             {aiName}
           </span>
+        )}
+
+        {/* Attachment thumbnails (user messages only) */}
+        {isUser && message.attachments && message.attachments.length > 0 && (
+          <AttachmentThumbnails attachments={message.attachments} />
         )}
 
         {/* Message bubble */}

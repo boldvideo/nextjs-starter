@@ -22,6 +22,7 @@ import { AskLoadingState } from "./ask-loading-state";
 import { AskReadOnlyFooter } from "./ask-read-only-footer";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
+import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 
 type PageState =
   | { status: "idle" }
@@ -352,7 +353,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   className="space-y-8"
                   {...(isCurrentlyStreaming ? { "data-streaming-message": true } : {})}
                 >
-                  {/* User's question as title */}
+                  {/* User's question as title, with optional attachment thumbnails */}
+                  {pair.userMessage.attachments && pair.userMessage.attachments.length > 0 && (
+                    <AttachmentThumbnails attachments={pair.userMessage.attachments} />
+                  )}
                   <h2 className="text-2xl font-semibold">{pair.userMessage.content}</h2>
 
                   {/* Loading state */}

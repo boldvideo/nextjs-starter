@@ -48,6 +48,16 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
     case "message_complete": {
       // Use sources from event (SDK provides as citations), fall back to accumulated state
       const completeSources = event.citations || state.sources;
+      // BOLD-1463: optional user-message attachments (server-resolved URLs)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const userAttachments = (event as any).userAttachments as Array<{
+        id: string;
+        url?: string;
+        mimeType?: string;
+        width?: number;
+        height?: number;
+        name?: string;
+      }> | undefined;
       return JSON.stringify({
         type: "message_complete",
         responseType: event.responseType,
@@ -66,6 +76,14 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         conversationId: event.conversationId || state.conversationId,
         usage: event.usage,
         context: event.context,
+        user_attachments: userAttachments?.map((a) => ({
+          id: a.id,
+          url: a.url,
+          mime_type: a.mimeType,
+          width: a.width,
+          height: a.height,
+          name: a.name,
+        })),
       });
     }
 
