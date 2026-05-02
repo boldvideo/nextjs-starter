@@ -181,15 +181,25 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // Chat disclaimer (bold-js 1.15.1+)
   const chatDisclaimer = settings.chatDisclaimer;
 
-  // Multimodal capability (snake_case from API, see BOLD-1495)
+  // Multimodal capability (BOLD-1495). The SDK normalizes settings keys to
+  // camelCase, but the underlying API contract uses snake_case — accept either.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const multimodalRaw = (settings.account as any)?.multimodal;
+  const multimodalMaxImages =
+    typeof multimodalRaw?.maxImages === "number"
+      ? multimodalRaw.maxImages
+      : typeof multimodalRaw?.max_images === "number"
+        ? multimodalRaw.max_images
+        : 0;
+  const multimodalAcceptedMediaTypes = Array.isArray(multimodalRaw?.acceptedMediaTypes)
+    ? (multimodalRaw.acceptedMediaTypes as string[])
+    : Array.isArray(multimodalRaw?.accepted_media_types)
+      ? (multimodalRaw.accepted_media_types as string[])
+      : [];
   const multimodal = {
     enabled: multimodalRaw?.enabled === true,
-    maxImages: typeof multimodalRaw?.max_images === "number" ? multimodalRaw.max_images : 0,
-    acceptedMediaTypes: Array.isArray(multimodalRaw?.accepted_media_types)
-      ? multimodalRaw.accepted_media_types as string[]
-      : [],
+    maxImages: multimodalMaxImages,
+    acceptedMediaTypes: multimodalAcceptedMediaTypes,
   };
 
   // Determine homepage layout
