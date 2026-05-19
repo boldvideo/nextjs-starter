@@ -1,5 +1,13 @@
 import { jwtVerify, type JWTPayload } from "jose";
-import type { NextRequest } from "next/server";
+
+/**
+ * Minimal request shape this module needs: just cookie access.
+ * Typed structurally so it accepts both `NextRequest` and next-auth's
+ * `NextAuthRequest` without coupling to a specific `next` package copy.
+ */
+type RequestWithCookies = {
+  cookies: { get(name: string): { value: string } | undefined };
+};
 
 const PORTAL_SESSION_COOKIE = "portal_session";
 
@@ -35,7 +43,9 @@ export async function verifyPortalSessionEdge(
   }
 }
 
-export function getPortalSessionFromRequest(req: NextRequest): string | null {
+export function getPortalSessionFromRequest(
+  req: RequestWithCookies
+): string | null {
   return req.cookies.get(PORTAL_SESSION_COOKIE)?.value ?? null;
 }
 

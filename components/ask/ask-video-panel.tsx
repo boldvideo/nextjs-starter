@@ -35,7 +35,6 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
   };
 
   const startSeconds = citation.startMs / 1000;
-  const endSeconds = citation.endMs / 1000;
 
   const video: MuxPlayerVideoLike = {
     id: citation.videoId,
@@ -79,13 +78,6 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
             startTime={startSeconds}
             autoPlay={true}
             className="w-full h-full"
-            onTimeUpdate={(e: Event) => {
-              const target = e.target as HTMLVideoElement | null;
-              if (!target) return;
-              if (endSeconds > startSeconds && target.currentTime >= endSeconds) {
-                target.pause();
-              }
-            }}
           />
         </div>
 

@@ -36,7 +36,6 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
   };
 
   const startSeconds = citation.startMs / 1000;
-  const endSeconds = citation.endMs / 1000;
 
   // Transform citation to minimal video object for player (colocated mapper)
   const video: MuxPlayerVideoLike = {
@@ -66,7 +65,7 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
               {citation.videoTitle}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {citation.speaker} • {formatTime(citation.startMs)} - {formatTime(citation.endMs)}
+              {citation.speaker} • {formatTime(citation.startMs)}
             </p>
           </div>
           <button
@@ -85,14 +84,6 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
             startTime={startSeconds}
             autoPlay={true}
             className="w-full h-full"
-            onTimeUpdate={(e: Event) => {
-              const target = e.target as HTMLVideoElement | null;
-              if (!target) return;
-              // Auto-pause at end time if defined and greater than start time
-              if (endSeconds > startSeconds && target.currentTime >= endSeconds) {
-                target.pause();
-              }
-            }}
           />
         </div>
 
