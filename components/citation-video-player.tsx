@@ -23,7 +23,6 @@ interface CitationVideoPlayerProps {
   playbackId: string; // Now required from the API
   videoTitle?: string;
   startTime: number; // in seconds
-  endTime?: number;
   label: string;
   speaker?: string;
   isExpanded: boolean;
@@ -35,7 +34,6 @@ export function CitationVideoPlayer({
   playbackId,
   videoTitle,
   startTime,
-  endTime,
   label,
   isExpanded,
   onToggle,
@@ -83,7 +81,7 @@ export function CitationVideoPlayer({
             <span className="font-medium">[{label}]</span>
             {videoTitle && <span className="text-muted-foreground">• {videoTitle}</span>}
             <span className="text-muted-foreground">
-              • {formatTime(startTime)}{endTime ? ` - ${formatTime(endTime)}` : ""}
+              • {formatTime(startTime)}
             </span>
           </div>
         </div>
@@ -95,7 +93,7 @@ export function CitationVideoPlayer({
             </>
           ) : (
             <>
-              <span className="text-xs text-muted-foreground">Watch clip</span>
+              <span className="text-xs text-muted-foreground">Watch</span>
               <ChevronDown className="h-4 w-4" />
             </>
           )}
@@ -117,16 +115,6 @@ export function CitationVideoPlayer({
               autoPlay={false} // We control this manually
               muted={false}
               style={{ width: "100%", height: "100%" }}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- MuxPlayer event types not exported
-              onTimeUpdate={(e: any) => {
-                // Auto-pause at end time if specified
-                if (endTime && e.target) {
-                  const currentTime = e.target.currentTime;
-                  if (currentTime >= endTime) {
-                    e.target.pause();
-                  }
-                }
-              }}
             />
             
             {/* Video Info Overlay */}
@@ -135,7 +123,7 @@ export function CitationVideoPlayer({
                 <p className="text-white text-sm font-medium mb-1">{videoTitle}</p>
               )}
               <p className="text-white/70 text-xs">
-                Segment: {formatTime(startTime)} - {endTime ? formatTime(endTime) : "end"}
+                Starts at {formatTime(startTime)}
               </p>
             </div>
           </div>

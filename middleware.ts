@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
 import { get } from "@vercel/edge-config";
@@ -130,7 +130,7 @@ function shouldSkipPortalAuth(pathname: string): boolean {
   return skipPaths.some((path) => pathname.startsWith(path));
 }
 
-export default auth(async (req: NextRequest) => {
+export default auth(async (req) => {
   const pathname = req.nextUrl.pathname;
 
   if (isHostedMode()) {
