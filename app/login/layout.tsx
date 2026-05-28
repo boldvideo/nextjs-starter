@@ -9,6 +9,7 @@ import {
 import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 import { SettingsProvider } from "@/components/providers/settings-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,7 @@ export default async function LoginLayout({
             {children}
           </SettingsProvider>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

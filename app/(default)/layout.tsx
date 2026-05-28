@@ -10,6 +10,7 @@ import { AppProviders } from "@/components/providers/app-providers";
 import { BoldProvider } from "@/components/providers/bold-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { Analytics } from "@/components/analytics";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import {
   getThemeFromSettings,
   getHeaderHeight,
@@ -212,6 +213,7 @@ export default async function RootLayout({
             </SettingsProvider>
           )}
         </BoldProvider>
+        <SpeedInsights />
       </body>
     </html>
   );

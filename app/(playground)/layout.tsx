@@ -1,6 +1,7 @@
 import "@/app/(default)/globals.css";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "AI Playground | Bold",
@@ -28,6 +29,7 @@ export default function PlaygroundLayout({
           </header>
           <main className="flex-1 p-6">{children}</main>
         </div>
+        <SpeedInsights />
       </body>
     </html>
   );

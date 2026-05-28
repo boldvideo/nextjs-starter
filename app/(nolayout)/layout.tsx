@@ -8,6 +8,7 @@ import {
   getCssOverrides,
   generateThemeCss,
 } from "@/lib/theme-css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +80,7 @@ export default async function RootLayout({
         ) : (
           children
         )}
+        <SpeedInsights />
       </body>
     </html>
   );
