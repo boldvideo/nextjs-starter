@@ -23,6 +23,7 @@ import ChatTab from "../mobile/chat-tab";
 import InfoTab from "../mobile/info-tab";
 import { buildVideoUrl } from "@/lib/video-path";
 import { MobileVideoMeta } from "./mobile-video-meta";
+import { Breadcrumb } from "@/components/providers/breadcrumb-provider";
 
 interface VideoDetailProps {
   video: ExtendedVideo;
@@ -86,6 +87,7 @@ export function VideoDetail({
 
   return (
     <AIAssistantProvider onTimeClick={handleTimeSelect}>
+      <Breadcrumb label={video.title} />
       <VideoDetailLayout
         hasPlaylist={!!playlist}
         className={className}

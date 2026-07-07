@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import type { Video } from "@boldvideo/bold-js";
 import { cn } from "@/lib/utils";
 import { buildVideoUrl } from "@/lib/video-path";
+import { useSettings } from "@/components/providers/settings-provider";
+import { getTenantId } from "@/lib/progress/tenant";
+import { getAllProgress, isIndexedDBDefined } from "@/lib/progress/store";
 
 // Tags arrive from the API as objects ({ id, name, slug }) even though the
 // SDK types them as string[]. Normalize either shape.
@@ -116,7 +119,14 @@ function TopicButton({
   );
 }
 
-function EpisodeCard({ video }: { video: Video }) {
+function EpisodeCard({
+  video,
+  progress,
+}: {
+  video: Video;
+  /** Furthest-watched fraction (0..1) from local playback progress. */
+  progress?: number;
+}) {
   const blurb = video.teaser || video.description || "";
   const tags = normalizeTags(video.tags).slice(0, 2);
 
@@ -141,6 +151,22 @@ function EpisodeCard({ video }: { video: Video }) {
             <span className="absolute right-2 bottom-2 font-mono text-[11px] bg-black/80 text-white px-1.5 py-0.5 rounded">
               {formatDuration(video.duration)}
             </span>
+          )}
+          {/* Local watch progress along the thumb's bottom edge */}
+          {progress != null && progress > 0.01 && (
+            <div
+              className="absolute inset-x-0 bottom-0 h-[3px] bg-white/20"
+              role="progressbar"
+              aria-valuenow={Math.round(progress * 100)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Watch progress"
+            >
+              <div
+                className="h-full bg-primary"
+                style={{ width: `${Math.min(100, progress * 100)}%` }}
+              />
+            </div>
           )}
         </div>
         <div className="flex flex-col gap-2 p-4 flex-1">
@@ -187,6 +213,33 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
   const [isFiltering, setIsFiltering] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(pageSize > 0);
+  const settings = useSettings();
+
+  // Locally stored watch progress (IndexedDB), videoId → fraction watched.
+  const [progressById, setProgressById] = useState<Map<string, number>>(
+    () => new Map()
+  );
+  useEffect(() => {
+    if (!isIndexedDBDefined()) return;
+    const tenantId = getTenantId(settings);
+    if (!tenantId) return;
+    let cancelled = false;
+    getAllProgress(tenantId)
+      .then((records) => {
+        if (cancelled) return;
+        const next = new Map<string, number>();
+        for (const r of records) {
+          if (r.duration > 0) {
+            next.set(r.videoId, Math.min(1, r.furthestPosition / r.duration));
+          }
+        }
+        setProgressById(next);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [settings]);
 
   // Prefer real tags carried by the loaded videos (with counts); fall back
   // to the mock list until tags are generated.
@@ -330,7 +383,11 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
           // regardless of how close the tenant's border/surface tokens are
           <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-px bg-foreground/10 border border-foreground/10 rounded-xl overflow-hidden">
             {videos.map((video) => (
-              <EpisodeCard key={video.id} video={video} />
+              <EpisodeCard
+                key={video.id}
+                video={video}
+                progress={progressById.get(video.id)}
+              />
             ))}
           </ul>
         ) : (

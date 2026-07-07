@@ -4,7 +4,8 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { FileText, Paperclip } from "lucide-react";
-import { formatRelative } from "date-fns";
+import { format } from "date-fns";
+import { formatDuration } from "@/util/format-duration";
 import { Transcript } from "@/components/transcript";
 import { VideoDescription } from "@/components/video-description";
 import type { ExtendedVideo } from "@/types/video-detail";
@@ -38,15 +39,21 @@ export function VideoMainContent({
       <div className="flex flex-col flex-1 min-h-0 mt-6 pb-24 lg:pb-8">
         {/* Title & Metadata - hidden on mobile since videoMeta shows it */}
         <div className="hidden lg:block mb-2">
-          <h1 className="text-2xl lg:text-3xl font-bold line-clamp-2 leading-tight">
+          <h1 className="font-[family-name:var(--font-heading)] text-2xl lg:text-3xl font-bold tracking-tight line-clamp-2 leading-tight">
             {video.title}
           </h1>
         </div>
-        <div className="hidden lg:flex items-center gap-4 text-base text-muted-foreground mb-6">
-          <span>
-            {video.publishedAt &&
-              formatRelative(new Date(video.publishedAt), new Date())}
-          </span>
+        <div className="hidden lg:flex items-center gap-3.5 font-mono text-xs text-muted-foreground mb-6">
+          {video.publishedAt && (
+            <span>{format(new Date(video.publishedAt), "MMM d, yyyy")}</span>
+          )}
+          {video.publishedAt && video.duration ? (
+            <span
+              aria-hidden="true"
+              className="w-[3px] h-[3px] rounded-full bg-muted-foreground/40"
+            />
+          ) : null}
+          {video.duration ? <span>{formatDuration(video.duration)}</span> : null}
         </div>
 
         {/* Main Pills Navigation */}

@@ -1,5 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { cn } from "@/lib/utils";
+import { PROSE_CLASS } from "@/lib/prose";
 
 interface VideoDescriptionProps {
   text: string;
@@ -25,7 +27,7 @@ export function VideoDescription({ text }: VideoDescriptionProps) {
   );
 
   return (
-    <div className="min-h-[100px] prose  dark:prose-invert">
+    <div className={cn("min-h-[100px]", PROSE_CLASS)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{

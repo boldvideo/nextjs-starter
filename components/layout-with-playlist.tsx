@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 import { Header } from "@/components/header";
 import { SearchCommandDialog } from "@/components/search-command-dialog";
 import { PlaylistProvider } from "@/components/providers/playlist-provider";
+import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
 import type { Session } from "next-auth";
 import type { Settings } from "@boldvideo/bold-js";
 
@@ -36,9 +37,11 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
 export function LayoutWithPlaylist({ children, settings, session, showHeader = true }: LayoutWithPlaylistProps) {
   return (
     <PlaylistProvider>
-      <LayoutContent settings={settings} session={session} showHeader={showHeader}>
-        {children}
-      </LayoutContent>
+      <BreadcrumbProvider>
+        <LayoutContent settings={settings} session={session} showHeader={showHeader}>
+          {children}
+        </LayoutContent>
+      </BreadcrumbProvider>
     </PlaylistProvider>
   );
 }

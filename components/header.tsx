@@ -12,6 +12,7 @@ import { Wordmark } from "@/components/wordmark";
 import { MobileSearchButton } from "@/components/mobile-search-button";
 import { MobileAskButton } from "@/components/mobile-ask-button";
 import { useSettings } from "@/components/providers/settings-provider";
+import { useBreadcrumb } from "@/components/providers/breadcrumb-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import type { Session } from "next-auth";
 
@@ -33,13 +34,17 @@ export function Header({
   const settings = useSettings();
   const config = getPortalConfig(settings);
   const pathname = usePathname();
+  const { label: pageCrumb } = useBreadcrumb();
 
-  // Subtle "Library / Ask Anton" breadcrumb on non-library pages.
-  const crumbLabel = pathname?.startsWith("/ask")
-    ? askLabel(config.ai.name)
-    : pathname === "/s"
-      ? "Search"
-      : null;
+  // Subtle "Library / …" breadcrumb on non-library pages. Pages can publish
+  // their own label (e.g. the video title) via <Breadcrumb />.
+  const crumbLabel =
+    pageCrumb ??
+    (pathname?.startsWith("/ask")
+      ? askLabel(config.ai.name)
+      : pathname === "/s"
+        ? "Search"
+        : null);
 
   // Logo scales with header height
   // Desktop: header height minus 24px for visual breathing room
@@ -106,7 +111,9 @@ export function Header({
                       Library
                     </Link>
                     <span className="text-muted-foreground/40">/</span>
-                    <span className="text-muted-foreground">{crumbLabel}</span>
+                    <span className="text-muted-foreground max-w-[320px] truncate">
+                      {crumbLabel}
+                    </span>
                   </div>
                 )}
 
