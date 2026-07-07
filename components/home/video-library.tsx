@@ -10,6 +10,7 @@ import { buildVideoUrl } from "@/lib/video-path";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getTenantId } from "@/lib/progress/tenant";
 import { getAllProgress, isIndexedDBDefined } from "@/lib/progress/store";
+import { PoweredByBold } from "@/components/powered-by-bold";
 
 // Tags arrive from the API as objects ({ id, name, slug }) even though the
 // SDK types them as string[]. Normalize either shape.
@@ -331,6 +332,9 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
             />
           ))}
         </div>
+        <div className="mt-8 pt-4 border-t border-border ml-1">
+          <PoweredByBold />
+        </div>
       </aside>
 
       {/* Main */}
@@ -415,6 +419,11 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
             </button>
           </div>
         )}
+
+        {/* Attribution (mobile — desktop shows it in the rail) */}
+        <div className="lg:hidden flex justify-center mt-10">
+          <PoweredByBold />
+        </div>
       </main>
     </div>
   );

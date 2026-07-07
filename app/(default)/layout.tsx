@@ -27,10 +27,11 @@ import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 // Force dynamic rendering — tenant depends on hostname in hosted mode
 export const dynamic = "force-dynamic";
 
-// Default metadata values - only used as fallback when settings unavailable
+// Default metadata values - used as fallback when settings don't provide them
 const defaultMetadata = {
-  title: "Video Portal",
-  description: "",
+  title: "AI That Works",
+  description:
+    "Weekly sessions on taking AI apps from demo to production — live coding, Q&A, and production-ready AI engineering with Dex Horthy and Vaibhav Gupta. New episodes Tuesdays.",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -77,11 +78,10 @@ export async function generateMetadata(): Promise<Metadata> {
     return url;
   };
   
+  // Tenant-uploaded social image wins; otherwise our own branded /og card.
   const ogImageUrl =
     fixUploadUrl(meta?.socialGraphImageUrl) ||
-    `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(title)}${
-      meta?.image ? `&img=${encodeURIComponent(fixUploadUrl(meta.image) || meta.image)}` : ""
-    }`;
+    `/og?t=${encodeURIComponent(String(title))}`;
 
   return {
     title: title,

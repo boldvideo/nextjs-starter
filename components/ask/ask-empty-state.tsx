@@ -3,6 +3,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { ChatInput } from "@/components/coach";
 import { PersonaAvatar } from "@/components/persona-avatar";
+import { PoweredByBold } from "@/components/powered-by-bold";
 import { askLabel } from "@/lib/utils";
 
 interface AskEmptyStateProps {
@@ -102,6 +103,10 @@ export function AskEmptyState({
             ))}
           </div>
         )}
+
+        <div className="flex justify-center mt-8">
+          <PoweredByBold variant="pitch" />
+        </div>
       </div>
     </div>
   );

@@ -25,6 +25,7 @@ import { AskReadOnlyFooter } from "./ask-read-only-footer";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
+import { PoweredByBold } from "@/components/powered-by-bold";
 
 type PageState =
   | { status: "idle" }
@@ -538,6 +539,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 maxImages={multimodal.maxImages}
                 acceptedMediaTypes={multimodal.acceptedMediaTypes}
               />
+              {/* The moment of wow is a cited answer — that's when this sells */}
+              <div className="flex justify-center mt-2">
+                <PoweredByBold variant="pitch" />
+              </div>
             </div>
           </div>
         )}
