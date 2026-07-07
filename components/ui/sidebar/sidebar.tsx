@@ -20,7 +20,7 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
     // Determine visibility and width
     const isVisible = mode === "toggle" ? isOpen : true;
     
-    const DEFAULT_RIGHT_WIDTH = 380;
+    const DEFAULT_RIGHT_WIDTH = 460;
     const MAX_RIGHT_WIDTH = 640;
 
     // Width configuration

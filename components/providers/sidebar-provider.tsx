@@ -58,7 +58,7 @@ export function SidebarProvider({
   // Default: Left open on desktop, closed on mobile. Right closed.
   const [state, setState] = React.useState<SidebarState>({
     left: { isOpen: defaultOpen, isCollapsed: false },
-    right: { isOpen: false, isCollapsed: false, width: 380 },
+    right: { isOpen: false, isCollapsed: false, width: 460 },
     isMobile: false, // Assume desktop first for SSR
   });
 
@@ -262,7 +262,7 @@ export function SidebarProvider({
     : "0px";
 
   const rightWidth = state.right.isOpen 
-    ? state.right.isCollapsed ? "56px" : `${state.right.width ?? 380}px`
+    ? state.right.isCollapsed ? "56px" : `${state.right.width ?? 460}px`
     : state.right.isCollapsed 
     ? "56px" 
     : "0px";

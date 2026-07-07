@@ -26,8 +26,14 @@ export function VideoDescription({ text }: VideoDescriptionProps) {
     (match, handle) => ` [/${handle}](https://twitter.com/${handle})`
   );
 
+  // YouTube-imported descriptions separate lines with single newlines, which
+  // markdown collapses into one paragraph. Turn them into hard breaks
+  // (trailing double space) so the original formatting survives.
+  const withHardBreaks = withSlashHandles.replace(/\n/g, "  \n");
+
   return (
-    <div className={cn("min-h-[100px]", PROSE_CLASS)}>
+    // 70ch keeps the measure in the readable 45–75 character range
+    <div className={cn("min-h-[100px]", PROSE_CLASS, "max-w-[70ch]")}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -41,7 +47,7 @@ export function VideoDescription({ text }: VideoDescriptionProps) {
           ),
         }}
       >
-        {withSlashHandles}
+        {withHardBreaks}
       </ReactMarkdown>
     </div>
   );
