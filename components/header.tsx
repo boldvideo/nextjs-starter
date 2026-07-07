@@ -2,6 +2,8 @@
 import { Suspense } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { askLabel } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
@@ -30,6 +32,14 @@ export function Header({
 }: HeaderProps) {
   const settings = useSettings();
   const config = getPortalConfig(settings);
+  const pathname = usePathname();
+
+  // Subtle "Library / Ask Anton" breadcrumb on non-library pages.
+  const crumbLabel = pathname?.startsWith("/ask")
+    ? askLabel(config.ai.name)
+    : pathname === "/s"
+      ? "Search"
+      : null;
 
   // Logo scales with header height
   // Desktop: header height minus 24px for visual breathing room
@@ -85,6 +95,20 @@ export function Header({
                     />
                   )}
                 </Link>
+
+                {/* Breadcrumb */}
+                {crumbLabel && (
+                  <div className="hidden lg:flex items-center gap-2 text-sm mr-6">
+                    <Link
+                      href="/"
+                      className="text-muted-foreground/70 hover:text-foreground transition-colors"
+                    >
+                      Library
+                    </Link>
+                    <span className="text-muted-foreground/40">/</span>
+                    <span className="text-muted-foreground">{crumbLabel}</span>
+                  </div>
+                )}
 
                 {/* Desktop Navigation Menu */}
                 <div className="hidden lg:flex space-x-1">

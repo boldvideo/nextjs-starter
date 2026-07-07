@@ -125,9 +125,9 @@ function EpisodeCard({ video }: { video: Video }) {
       <Link
         href={buildVideoUrl(video)}
         prefetch
-        className="flex flex-col w-full bg-surface hover:bg-muted transition-colors"
+        className="flex flex-col w-full bg-background hover:bg-muted transition-colors"
       >
-        <div className="relative aspect-video overflow-hidden border-b border-border/50 bg-black">
+        <div className="relative aspect-video overflow-hidden border-b border-foreground/10 bg-black">
           {video.thumbnail && (
             <Image
               src={video.thumbnail}
@@ -326,7 +326,9 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
         ) : videos.length > 0 ? (
-          <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-px bg-border/60 border border-border rounded-xl overflow-hidden">
+          // Hairline grid — lines keyed to foreground so they stay visible
+          // regardless of how close the tenant's border/surface tokens are
+          <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-px bg-foreground/10 border border-foreground/10 rounded-xl overflow-hidden">
             {videos.map((video) => (
               <EpisodeCard key={video.id} video={video} />
             ))}

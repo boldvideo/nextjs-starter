@@ -11,10 +11,11 @@ import {
 } from "@/hooks/use-ai-ask-stream";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
-import { askLabel, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { AskMessageCard } from "./ask-message-card";
 import { AskSourcesCarousel } from "./ask-sources-carousel";
+import { AskSourcesRail } from "./ask-sources-rail";
 
 import { AskVideoPanel } from "./ask-video-panel";
 import { AskEmptyState } from "./ask-empty-state";
@@ -96,6 +97,17 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     null
   );
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  // The rail (desktop) and the overlay (mobile) both embed a video player —
+  // gate on the breakpoint so only one is ever mounted.
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mq.matches);
+    const update = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const hasInitializedRef = useRef(false);
   const prevRouteConversationIdRef = useRef<string | undefined>(routeConversationId);
@@ -199,8 +211,14 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     setIsPanelOpen(true);
   }, []);
 
+  const handleSelectCitation = useCallback((citation: AskCitation | null) => {
+    setSelectedCitation(citation);
+    setIsPanelOpen(!!citation);
+  }, []);
+
   const handleClosePanel = useCallback(() => {
     setIsPanelOpen(false);
+    setSelectedCitation(null);
   }, []);
 
   // Handle clicking a suggestion in read-only mode
@@ -339,9 +357,16 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     return pairs;
   }, [messages]);
 
-  const placeholder = "Ask a follow up question";
+  const placeholder = "Ask a follow-up…";
 
   const hasMessages = messages.length > 0;
+
+  // "Ask" prefix is rendered separately in the thread head — strip it from
+  // the configured name (e.g. "Ask Anton" → "Anton").
+  const personaDisplayName = aiName.replace(/^ask\s+/i, "");
+
+  // The sources rail always reflects the latest answer.
+  const lastPair = qaPairs[qaPairs.length - 1];
 
   if (pageState.status === "loading") {
     return <AskLoadingState />;
@@ -373,44 +398,43 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   return (
     <div className="flex flex-1 min-h-0 w-full overflow-hidden">
-      <div
-        className={cn(
-          "flex flex-col flex-1 min-h-0 w-full transition-all duration-300",
-          isPanelOpen ? "mr-0 lg:mr-[500px] xl:mr-[600px]" : ""
-        )}
-      >
-        {/* Header */}
-        <div className="shrink-0 flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <PersonaAvatar name={aiName} avatar={aiAvatar} size={30} />
-            <h1 className="text-lg md:text-xl font-semibold font-[family-name:var(--font-heading)] tracking-tight">
-              {askLabel(aiName)}
-            </h1>
-          </div>
-          <button
-            onClick={handleReset}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer",
-              "text-muted-foreground hover:text-foreground hover:bg-accent transition-colors",
-              "text-sm"
-            )}
-            title="Start new chat"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">New Chat</span>
-          </button>
-        </div>
-
+      <div className="flex flex-col flex-1 min-h-0 min-w-0">
         {/* Scrollable content area */}
         <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto">
-          <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-12">
+          <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8">
+            {/* Thread head — lives inside the content column */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-2.5">
+                <PersonaAvatar name={personaDisplayName} avatar={aiAvatar} size={30} />
+                <span className="font-[family-name:var(--font-heading)] text-base tracking-tight">
+                  <span className="text-muted-foreground/70 font-normal mr-1.5">
+                    Ask
+                  </span>
+                  <span className="font-semibold">{personaDisplayName}</span>
+                </span>
+              </div>
+              <button
+                onClick={handleReset}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer",
+                  "text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
+                  "text-sm whitespace-nowrap"
+                )}
+                title="Start new chat"
+              >
+                <Plus className="h-[15px] w-[15px]" />
+                <span className="hidden sm:inline">New chat</span>
+              </button>
+            </div>
+
+            <div className="space-y-12">
             {qaPairs.map((pair, pairIndex) => {
               const isLastPair = pairIndex === qaPairs.length - 1;
               const isCurrentlyStreaming = isStreaming && isLastPair;
 
               return (
-                <div 
-                  key={pair.userMessage.id} 
+                <div
+                  key={pair.userMessage.id}
                   className="space-y-8"
                   {...(isCurrentlyStreaming ? { "data-streaming-message": true } : {})}
                 >
@@ -418,7 +442,14 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   {pair.userMessage.attachments && pair.userMessage.attachments.length > 0 && (
                     <AttachmentThumbnails attachments={pair.userMessage.attachments} />
                   )}
-                  <h2 className="text-2xl font-semibold">{pair.userMessage.content}</h2>
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 mt-[7px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70 border border-border rounded px-1.5 py-[3px]">
+                      You
+                    </span>
+                    <h2 className="font-[family-name:var(--font-heading)] font-semibold text-2xl md:text-3xl tracking-tight leading-[1.15]">
+                      {pair.userMessage.content}
+                    </h2>
+                  </div>
 
                   {/* Loading state */}
                   {pair.assistantMessage?.type === "loading" && (
@@ -445,16 +476,19 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                       onCitationClick={handleCitationClick}
                       isStreaming={isCurrentlyStreaming}
                       citationDisplayNumberById={pair.citationDisplayNumberById}
+                      selectedCitationId={selectedCitation?.id}
                     />
                   )}
 
-                  {/* Video sources carousel - below text */}
+                  {/* Video sources carousel — mobile only; desktop uses the rail */}
                   {pair.orderedCitations.length > 0 && !isCurrentlyStreaming && (
-                    <AskSourcesCarousel
-                      citations={pair.orderedCitations}
-                      onCitationClick={handleCitationClick}
-                      selectedCitationId={selectedCitation?.id}
-                    />
+                    <div className="lg:hidden">
+                      <AskSourcesCarousel
+                        citations={pair.orderedCitations}
+                        onCitationClick={handleCitationClick}
+                        selectedCitationId={selectedCitation?.id}
+                      />
+                    </div>
                   )}
 
                   {/* Divider between Q&A pairs (not after the last one) */}
@@ -464,6 +498,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
 
@@ -508,11 +543,25 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         )}
       </div>
 
-      <AskVideoPanel
-        citation={selectedCitation}
-        isOpen={isPanelOpen}
-        onClose={handleClosePanel}
-      />
+      {/* Sources rail (desktop) — expands into the video source panel */}
+      {isDesktop && (
+        <AskSourcesRail
+          citations={lastPair?.orderedCitations ?? []}
+          displayNumberById={lastPair?.citationDisplayNumberById}
+          selectedCitation={selectedCitation}
+          onSelect={handleSelectCitation}
+          isStreaming={isStreaming}
+        />
+      )}
+
+      {/* Mobile: video source overlay */}
+      {!isDesktop && (
+        <AskVideoPanel
+          citation={selectedCitation}
+          isOpen={isPanelOpen}
+          onClose={handleClosePanel}
+        />
+      )}
     </div>
   );
 }
