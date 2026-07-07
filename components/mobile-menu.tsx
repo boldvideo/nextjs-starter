@@ -9,6 +9,7 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 import { ThemeToggle } from "./theme-toggle";
+import { Wordmark } from "@/components/wordmark";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 
@@ -20,7 +21,7 @@ type MenuItem = {
 
 type Props = {
   menuItems: Array<MenuItem>;
-  logo: StaticImageData | string;
+  logo?: StaticImageData | string;
   logoDark?: StaticImageData | string;
 };
 
@@ -53,7 +54,9 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
                 className=""
                 onClick={() => setIsMobileMenu(false)}
               >
-                {logoDark ? (
+                {!logo ? (
+                  <Wordmark />
+                ) : logoDark ? (
                   <>
                     {/* Light Mode Logo */}
                     <Image

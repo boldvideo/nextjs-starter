@@ -24,18 +24,14 @@ async function getHomeData(): Promise<{
 
   const { client, settings } = context;
 
-  // Debug: log full settings payload
-  console.log("=== SETTINGS PAYLOAD ===");
-  console.log(JSON.stringify(settings, null, 2));
-  console.log("=== END SETTINGS PAYLOAD ===");
-
   // Get portal configuration
   const config = getPortalConfig(settings);
 
-  // Only fetch videos if we're showing the library layout
+  // Only fetch videos if we're showing the library layout. Page 1 of the
+  // paginated index endpoint, so the client-side "Load more" pages line up.
   let videos: Video[] | null = null;
   if (config.homepage.layout === 'library') {
-    const videosResponse = await client.videos.list(config.homepage.videosLimit);
+    const videosResponse = await client.videos.list({ page: 1 });
     videos = videosResponse?.data ?? null;
   }
 

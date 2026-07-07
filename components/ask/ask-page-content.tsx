@@ -3,14 +3,15 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { PersonaAvatar } from "@/components/persona-avatar";
 import {
   useAIAskStream,
   askSourceToCitation,
+  type AIAskSource,
 } from "@/hooks/use-ai-ask-stream";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
-import { cn } from "@/lib/utils";
+import { askLabel, cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { AskMessageCard } from "./ask-message-card";
 import { AskSourcesCarousel } from "./ask-sources-carousel";
@@ -30,6 +31,10 @@ type PageState =
   | { status: "ready" }
   | { status: "error"; message: string };
 
+// Shared empty map so pairs without citations keep a stable prop identity
+// across re-renders (memo hygiene for AskMessageCard's sections).
+const EMPTY_DISPLAY_MAP = new Map<string, number>();
+
 interface AskPageContentProps {
   conversationId?: string;
 }
@@ -45,14 +50,14 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const multimodal = config.ai.multimodal;
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
-  const greeting = config.ai.greeting || "How can I help you today?";
+  const greeting = config.ai.greeting || "What do you want to know?";
   const chatDisclaimer = config.ai.chatDisclaimer;
   
+  // Deterministic pick — shuffling with Math.random() here caused a
+  // server/client hydration mismatch.
   const suggestions = useMemo(() => {
     const starters = config.ai.conversationStarters || [];
-    if (starters.length <= 4) return starters;
-    const shuffled = [...starters].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 4);
+    return starters.slice(0, 4);
   }, [config.ai.conversationStarters]);
 
   const [pageState, setPageState] = useState<PageState>(
@@ -208,6 +213,25 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     [router]
   );
 
+  // Per-message caches keyed by assistant message id. Citation arrays and the
+  // display-number map keep a stable identity across text_delta re-renders so
+  // the memoized markdown sections in AskMessageCard don't re-parse the whole
+  // answer on every streamed chunk.
+  const citationsCacheRef = useRef(
+    new Map<string, { sources?: AIAskSource[]; citations: AskCitation[] }>()
+  );
+  const displayMapCacheRef = useRef(
+    new Map<
+      string,
+      {
+        citations: AskCitation[];
+        orderKey: string;
+        ordered: AskCitation[];
+        map: Map<string, number>;
+      }
+    >()
+  );
+
   // Group messages into Q&A pairs for display
   const qaPairs = useMemo(() => {
     const pairs: Array<{
@@ -223,13 +247,27 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       if (msg.role === "user") {
         const assistantMsg =
           messages[i + 1]?.role === "assistant" ? messages[i + 1] : null;
-        const citations =
-          assistantMsg?.sources?.map((s, idx) => askSourceToCitation(s, idx)) ||
-          [];
+
+        let citations: AskCitation[] = [];
+        if (assistantMsg) {
+          const cached = citationsCacheRef.current.get(assistantMsg.id);
+          if (cached && cached.sources === assistantMsg.sources) {
+            citations = cached.citations;
+          } else {
+            citations =
+              assistantMsg.sources?.map((s, idx) =>
+                askSourceToCitation(s, idx)
+              ) || [];
+            citationsCacheRef.current.set(assistantMsg.id, {
+              sources: assistantMsg.sources,
+              citations,
+            });
+          }
+        }
 
         // Compute citation ordering for this pair
         let orderedCitations = citations;
-        const displayMap = new Map<string, number>();
+        let displayMap = EMPTY_DISPLAY_MAP;
 
         if (assistantMsg?.content && citations.length > 0) {
           const matches = Array.from(
@@ -263,8 +301,29 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             }
           }
 
-          orderedCitations = ordered;
-          ordered.forEach((c, idx) => displayMap.set(c.id, idx + 1));
+          // Reuse the cached ordered array + display map when the order hasn't
+          // changed, so identities stay stable across streamed deltas.
+          const orderKey = ordered.map((c) => c.id).join(",");
+          const cachedOrder = displayMapCacheRef.current.get(assistantMsg.id);
+          if (
+            cachedOrder &&
+            cachedOrder.citations === citations &&
+            cachedOrder.orderKey === orderKey
+          ) {
+            orderedCitations = cachedOrder.ordered;
+            displayMap = cachedOrder.map;
+          } else {
+            const map = new Map<string, number>();
+            ordered.forEach((c, idx) => map.set(c.id, idx + 1));
+            orderedCitations = ordered;
+            displayMap = map;
+            displayMapCacheRef.current.set(assistantMsg.id, {
+              citations,
+              orderKey,
+              ordered,
+              map,
+            });
+          }
         }
 
         pairs.push({
@@ -302,6 +361,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         suggestions={suggestions}
         placeholder="What's on your mind?"
         disclaimer={chatDisclaimer}
+        onAsk={(q) => streamQuestion(q)}
         multimodalEnabled={multimodal.enabled}
         images={images}
         onImagesChange={setImages}
@@ -322,16 +382,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border/50">
           <div className="flex items-center gap-3">
-            {aiAvatar && (
-              <Image
-                src={aiAvatar}
-                alt={aiName}
-                width={36}
-                height={36}
-                className="rounded-full"
-              />
-            )}
-            <h1 className="text-lg md:text-xl font-semibold">{aiName}</h1>
+            <PersonaAvatar name={aiName} avatar={aiAvatar} size={30} />
+            <h1 className="text-lg md:text-xl font-semibold font-[family-name:var(--font-heading)] tracking-tight">
+              {askLabel(aiName)}
+            </h1>
           </div>
           <button
             onClick={handleReset}
@@ -370,7 +424,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   {pair.assistantMessage?.type === "loading" && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">{statusMessage || "Thinking..."}</span>
+                      <span className="text-sm">{statusMessage || "Reading across the series…"}</span>
                     </div>
                   )}
 

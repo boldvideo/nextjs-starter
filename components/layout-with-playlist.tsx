@@ -19,8 +19,10 @@ function LayoutContent({ children, settings, session, showHeader = true }: Layou
     <>
       {showHeader && (
         <Header
-          logo={settings?.logoUrl || "/bold-logo.svg"}
-          logoDark={settings?.logoDarkUrl}
+          // This fork always brands with the "AI That Works" wordmark — the
+          // tenant's configured logo is the BOLD logo, which we leave out.
+          logo={undefined}
+          logoDark={undefined}
           menuItems={settings?.menuItems || []}
           session={session}
         />

@@ -25,6 +25,9 @@
   /* Legacy tokens mapped to new system */
   --color-secondary-foreground: var(--muted-foreground);
   --color-secondary: var(--muted);
+  /* Amber citation signal + brand mono */
+  --color-signal: var(--signal);
+  --font-mono: var(--font-mono-brand, var(--font-jetbrains-mono)), ui-monospace, monospace;
   --color-card-foreground: var(--foreground);
   --color-card: var(--surface);
   --color-popover-foreground: var(--foreground);
@@ -44,36 +47,43 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --header-height: 73px;
-  /* Core 9 tokens - Bold brand defaults */
-  --background: oklch(0.98 0.02 95);
-  --foreground: oklch(0.22 0.04 175);
-  --muted: oklch(0.96 0.01 95);
-  --muted-foreground: oklch(0.45 0.03 175);
-  --border: oklch(0.90 0.02 95);
-  --ring: oklch(0.73 0.12 175);
-  --surface: oklch(0.99 0.01 95);
-  --accent: oklch(0.73 0.12 175);
-  --accent-foreground: oklch(0.22 0.04 175);
-  --primary: oklch(0.73 0.12 175);
+  --radius: 0.75rem;
+  --header-height: 57px;
+  /* Core 9 tokens - AI That Works design (light mode) */
+  --background: #ffffff;
+  --foreground: #0c0c0b;
+  --muted: #f5f5f3;
+  --muted-foreground: #52524f;
+  --border: #e5e5e2;
+  --ring: #0d9488;
+  --surface: #fafaf9;
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+  --primary: #0d9488;
+  /* Amber "signal" for citations and provenance */
+  --signal: #b45309;
+  --signal-soft: rgba(180, 83, 9, 0.1);
+  --signal-line: rgba(180, 83, 9, 0.32);
   /* Derived tokens */
   --input: var(--border);
   --destructive: oklch(0.577 0.245 27.325);
 }
 
 .dark {
-  /* Core 9 tokens - Bold brand defaults */
-  --background: oklch(0.18 0.02 175);
-  --foreground: oklch(0.96 0.01 95);
-  --muted: oklch(0.25 0.02 175);
-  --muted-foreground: oklch(0.65 0.03 175);
-  --border: oklch(0.30 0.02 175);
-  --ring: oklch(0.73 0.12 175);
-  --surface: oklch(0.22 0.02 175);
-  --accent: oklch(0.73 0.12 175);
-  --accent-foreground: oklch(0.18 0.02 175);
-  --primary: oklch(0.73 0.12 175);
+  /* Core 9 tokens - AI That Works design (dark mode, primary) */
+  --background: #0a0a09;
+  --foreground: #fafaf9;
+  --muted: #161614;
+  --muted-foreground: #a8a8a1;
+  --border: #1e1e1c;
+  --ring: #2dd4bf;
+  --surface: #0e0e0d;
+  --accent: #2dd4bf;
+  --accent-foreground: #04201c;
+  --primary: #2dd4bf;
+  --signal: #f0b429;
+  --signal-soft: rgba(240, 180, 41, 0.13);
+  --signal-line: rgba(240, 180, 41, 0.32);
   /* Derived tokens */
   --input: oklch(1 0 0 / 15%);
   --destructive: oklch(0.704 0.191 22.216);
@@ -87,6 +97,12 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     overscroll-behavior-y: none; /* Prevents rubber-banding/bounce on macOS */
+    /* Soft teal wash bleeding down from the top — part of the brand look */
+    background-image: radial-gradient(
+      120% 80% at 50% -20%,
+      rgba(45, 212, 191, 0.04),
+      transparent 60%
+    );
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
@@ -126,8 +142,28 @@
       background-position: 0% 50%;
     }
   }
-  
+
   .animate-shimmer-text {
     animation: shimmer-text 3s ease-in-out infinite;
+  }
+
+  @keyframes cursor-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Streaming caret that rides inline at the end of the last rendered block
+     (instead of blinking on its own line below the text). */
+  .chat-stream-cursor > :last-child::after {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 1.05em;
+    margin-left: 3px;
+    border-radius: 9999px;
+    vertical-align: -0.15em;
+    background-color: color-mix(in srgb, var(--color-primary) 75%, transparent);
+    animation: cursor-blink 1s steps(2) infinite;
   }
 }

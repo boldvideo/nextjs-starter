@@ -144,8 +144,10 @@ export default async function RootLayout({
   // Get fonts from settings (font_header and font_body fields in portal.theme or theme_config)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const themeAny = theme as any;
-  const fontHeaderVar = getFontVar(themeAny?.font_header);
-  const fontBodyVar = getFontVar(themeAny?.font_body);
+  // Fork defaults: Space Grotesk display / DM Sans body (per the AI That
+  // Works design); tenant-configured fonts still take precedence.
+  const fontHeaderVar = getFontVar(themeAny?.font_header || "Space Grotesk");
+  const fontBodyVar = getFontVar(themeAny?.font_body || "DM Sans");
 
   // Check if user should see content
   const showContent = !isAuthEnabled() || session;
@@ -160,6 +162,7 @@ export default async function RootLayout({
               :root {
                 --font-heading: ${fontHeaderVar};
                 --font-body: ${fontBodyVar};
+                --font-mono-brand: var(--font-jetbrains-mono), monospace;
               }
             `,
           }}

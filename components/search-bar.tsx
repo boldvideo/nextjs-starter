@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Command } from "lucide-react";
+import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearch } from "@/components/providers/search-provider";
 
@@ -23,25 +23,27 @@ export function SearchBar({
       type="button"
       onClick={() => setIsOpen(true)}
       className={cn(
-        "relative flex items-center gap-2 w-full text-sm border border-input rounded-lg bg-muted/30 hover:bg-muted/60 hover:border-accent transition-all duration-200 group cursor-text text-left",
-        isMobile ? "h-10 px-3" : "h-10 px-3",
+        "flex items-center gap-2.5 w-full h-[34px] pl-3 pr-2",
+        "text-sm text-muted-foreground text-left",
+        "rounded-lg border border-border bg-surface",
+        "hover:border-muted-foreground/40 transition-colors cursor-text",
+        !isMobile && "min-w-[240px]",
         className
       )}
     >
       {/* Icon */}
-      <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+      <Search className="h-[15px] w-[15px] shrink-0" />
 
       {/* Placeholder Text */}
-      <span className="flex-1 text-muted-foreground truncate">
-        {placeholder || "Search..."}
+      <span className="flex-1 truncate">
+        {placeholder || "Search or ask…"}
       </span>
 
       {/* Shortcut Hint (Desktop only) */}
       {!isMobile && (
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded border border-border/50">
-          <Command className="h-3 w-3" />
-          <span>K</span>
-        </div>
+        <span className="font-mono text-[11px] tracking-[0.04em] text-muted-foreground border border-border rounded-[4px] bg-muted px-1.5 py-0.5">
+          ⌘K
+        </span>
       )}
     </button>
   );

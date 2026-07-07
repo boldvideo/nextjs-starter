@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
 import { HeaderSearch } from "@/components/header-search";
+import { Wordmark } from "@/components/wordmark";
 import { MobileSearchButton } from "@/components/mobile-search-button";
 import { MobileAskButton } from "@/components/mobile-ask-button";
 import { useSettings } from "@/components/providers/settings-provider";
@@ -13,7 +14,7 @@ import { getPortalConfig } from "@/lib/portal-config";
 import type { Session } from "next-auth";
 
 interface HeaderProps {
-  logo: StaticImageData | string;
+  logo?: StaticImageData | string;
   logoDark?: string;
   menuItems: Array<{ url: string; label: string; blank?: boolean }>;
   session?: Session | null;
@@ -49,7 +50,9 @@ export function Header({
               {/* Logo */}
               <div className="flex items-center">
                 <Link href="/" className="mr-8 hidden lg:block">
-                  {logoDark ? (
+                  {!logo ? (
+                    <Wordmark />
+                  ) : logoDark ? (
                     <>
                       {/* Light Mode Logo */}
                       <Image
@@ -128,7 +131,9 @@ export function Header({
                   </Suspense>
 
                   <Link href="/">
-                    {logoDark ? (
+                    {!logo ? (
+                      <Wordmark className="text-lg" />
+                    ) : logoDark ? (
                       <>
                         {/* Light Mode Logo */}
                         <Image

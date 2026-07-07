@@ -1,15 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { askLabel, cn } from "@/lib/utils";
+import { PersonaAvatar } from "@/components/persona-avatar";
 
 interface AskAiButtonProps {
   personaName: string;
+  personaAvatar?: string;
   className?: string;
 }
 
-export function AskAiButton({ personaName, className }: AskAiButtonProps) {
+export function AskAiButton({
+  personaName,
+  personaAvatar,
+  className,
+}: AskAiButtonProps) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -21,16 +26,18 @@ export function AskAiButton({ personaName, className }: AskAiButtonProps) {
       type="button"
       onClick={handleClick}
       className={cn(
-        "relative flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md",
-        "text-foreground hover:bg-muted/50 transition-colors duration-200",
-        "cursor-pointer",
+        "flex items-center gap-2 h-[34px] pl-2.5 pr-3 rounded-lg",
+        "border border-border bg-muted",
+        "text-sm font-medium text-muted-foreground",
+        "hover:text-foreground hover:border-muted-foreground/40",
+        "transition-colors cursor-pointer",
         className
       )}
     >
-      <Sparkles className="h-4 w-4 text-primary" />
-      <span className="whitespace-nowrap bg-gradient-to-r from-foreground via-muted-foreground to-foreground bg-[length:200%_100%] bg-clip-text text-transparent animate-shimmer-text">
+      <PersonaAvatar name={personaName} avatar={personaAvatar} size={20} />
+      <span className="whitespace-nowrap">
         <span className="md:hidden">Ask</span>
-        <span className="hidden md:inline">{personaName}</span>
+        <span className="hidden md:inline">{askLabel(personaName)}</span>
       </span>
     </button>
   );
