@@ -93,7 +93,10 @@ export function VideoMainContent({
         <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar">
           {activeMainTab === "description" && (
             <div className="space-y-6 animate-in fade-in slide-in-from-left-1 duration-300 pb-8">
-              <VideoDescription text={video.description || ""} />
+              <VideoDescription
+                text={video.description || ""}
+                onTimeSelect={onTimeSelect}
+              />
               {video.cta && (
                 <div className="rounded-lg border border-border p-6 bg-muted">
                   <h2 className="text-lg font-bold mb-2">{video.cta.title}</h2>
