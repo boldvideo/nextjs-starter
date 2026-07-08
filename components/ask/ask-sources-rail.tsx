@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { X, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,55 @@ import {
   MuxPlayerVideoLike,
 } from "@/components/players/player-mux";
 import { getCanonicalVideoPath } from "@/lib/video-path";
+
+interface FramePreview {
+  citation: AskCitation;
+  top: number;
+  left: number;
+}
+
+/**
+ * The actual video frame at the cited second, floating beside the hovered
+ * moment. Mux serves exact-timestamp thumbnails, so this is free — and for
+ * an engineer skimming sources, seeing the frame beats reading the quote.
+ */
+function MomentFramePreview({ preview }: { preview: FramePreview }) {
+  const { citation } = preview;
+  if (!citation.playbackId) return null;
+  const seconds = Math.floor(citation.startMs / 1000);
+
+  return (
+    <div
+      className="fixed z-50 pointer-events-none pr-3"
+      style={{
+        top: preview.top,
+        left: preview.left,
+        transform: "translate(-100%, -50%)",
+      }}
+    >
+      <div
+        key={citation.id}
+        className={cn(
+          "relative w-[280px] aspect-video rounded-lg overflow-hidden",
+          "border border-border bg-black shadow-2xl",
+          "origin-right motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-[0.97] motion-safe:duration-150 motion-safe:ease-out"
+        )}
+      >
+        {/* Plain img: transient hover preview, Mux CDN handles resizing */}
+        <img
+          src={`https://image.mux.com/${citation.playbackId}/thumbnail.webp?time=${seconds}&width=560`}
+          alt=""
+          width={280}
+          height={158}
+          className="block w-full h-full object-cover"
+        />
+        <span className="absolute right-1.5 bottom-1.5 font-mono text-[10px] bg-black/80 text-white px-1 py-0.5 rounded">
+          {citation.timestampStart}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 interface AskSourcesRailProps {
   citations: AskCitation[];
@@ -34,6 +84,25 @@ export function AskSourcesRail({
   className,
 }: AskSourcesRailProps) {
   const episodeCount = new Set(citations.map((c) => c.videoId)).size;
+
+  const [preview, setPreview] = useState<FramePreview | null>(null);
+
+  const showPreview = useCallback(
+    (citation: AskCitation, el: HTMLElement) => {
+      // Hover-only affordance — on touch, mouseenter fires on tap and the
+      // preview would stick around.
+      if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+        return;
+      const rect = el.getBoundingClientRect();
+      setPreview({
+        citation,
+        top: rect.top + rect.height / 2,
+        left: rect.left,
+      });
+    },
+    []
+  );
+  const hidePreview = useCallback(() => setPreview(null), []);
 
   if (selectedCitation) {
     return (
@@ -69,6 +138,8 @@ export function AskSourcesRail({
         "px-5 py-8",
         className
       )}
+      // Preview position is viewport-fixed — drop it when the rail scrolls
+      onScroll={hidePreview}
     >
       <h4 className="font-[family-name:var(--font-heading)] font-semibold text-sm tracking-tight mb-1">
         Sources
@@ -78,10 +149,10 @@ export function AskSourcesRail({
           ? "retrieving…"
           : `${citations.length} ${citations.length === 1 ? "moment" : "moments"} · ${episodeCount} ${episodeCount === 1 ? "episode" : "episodes"}`}
       </p>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4" onMouseLeave={hidePreview}>
         {groups.map((g) => (
           <div key={g.videoId}>
-            <p className="text-[12.5px] font-medium text-muted-foreground leading-snug mb-1.5 line-clamp-2">
+            <p className="text-[12.5px] font-medium text-muted-foreground leading-snug mb-1.5 line-clamp-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
               {g.title}
             </p>
             <div className="flex flex-col gap-0.5">
@@ -92,9 +163,16 @@ export function AskSourcesRail({
                     key={c.id}
                     type="button"
                     onClick={() => onSelect(c)}
+                    onMouseEnter={(e) => showPreview(c, e.currentTarget)}
+                    onMouseLeave={hidePreview}
+                    onFocus={(e) => showPreview(c, e.currentTarget)}
+                    onBlur={hidePreview}
                     className={cn(
                       "flex items-center gap-2.5 px-2 py-1.5 -ml-2 rounded-md text-left w-full",
-                      "cursor-pointer hover:bg-muted transition-colors"
+                      "cursor-pointer hover:bg-muted",
+                      "transition-[background-color,transform] duration-150 ease-out",
+                      "active:scale-[0.98]",
+                      "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 motion-safe:duration-300"
                     )}
                   >
                     <span
@@ -119,6 +197,8 @@ export function AskSourcesRail({
           </div>
         ))}
       </div>
+
+      {preview && <MomentFramePreview preview={preview} />}
     </aside>
   );
 }
