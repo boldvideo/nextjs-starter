@@ -201,7 +201,7 @@ function EpisodeCard({
         playheadRef.current.style.left = `${frac * 100}%`;
       }
       if (badgeRef.current) {
-        badgeRef.current.textContent = formatDuration(Math.floor(seconds));
+        badgeRef.current.textContent = `▶ ${formatDuration(Math.floor(seconds))}`;
       }
       if (!sb || sb.tiles.length === 0) return;
 
@@ -287,6 +287,7 @@ function EpisodeCard({
     active: boolean;
     suppressClick: boolean;
   }>({ timer: null, startX: 0, startY: 0, active: false, suppressClick: false });
+  const dismissTimerRef = useRef<number | null>(null);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent<HTMLDivElement>) => {
@@ -294,6 +295,7 @@ function EpisodeCard({
       loadStoryboard(playbackId).then((sb) => setStoryboard(sb));
       const t = e.touches[0];
       const state = touchRef.current;
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
       state.startX = t.clientX;
       state.startY = t.clientY;
       state.suppressClick = false;
@@ -323,16 +325,33 @@ function EpisodeCard({
       state.timer = null;
     }
     if (state.active) {
+      // Release keeps the scrubbed frame + a tappable "▶ time" badge as the
+      // explicit commit step — no accidental deep links on lift-off.
       state.active = false;
       state.suppressClick = true;
-      setHovering(false);
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+      dismissTimerRef.current = window.setTimeout(
+        () => setHovering(false),
+        4000
+      );
+    }
+  }, []);
+
+  // Jump to the scrubbed moment — the badge is the commit affordance on
+  // both desktop (click while scrubbing) and touch (tap after release).
+  const handleScrubJump = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
       const sb = storyboardRef.current;
       const seconds = Math.floor(
         lastFracRef.current * (sb?.duration || video.duration || 0)
       );
       router.push(buildVideoUrl(video, { time: seconds }));
-    }
-  }, [router, video]);
+    },
+    [router, video]
+  );
 
   const handleClickCapture = useCallback((e: React.MouseEvent) => {
     // Swallow the ghost click that follows a scrub release
@@ -462,9 +481,14 @@ function EpisodeCard({
               // Remount on mode switch so imperative scrub text resets cleanly
               key={showScrubUi ? "scrub" : "idle"}
               ref={badgeRef}
+              role={showScrubUi ? "button" : undefined}
+              title={showScrubUi ? "Play from here" : undefined}
+              onClick={showScrubUi ? handleScrubJump : undefined}
               className={cn(
-                "absolute right-2 bottom-2 font-mono text-[11px] px-1.5 py-0.5 rounded",
-                showScrubUi ? "bg-black text-primary" : "bg-black/80 text-white"
+                "absolute right-2 bottom-2 font-mono text-[11px] rounded",
+                showScrubUi
+                  ? "px-2 py-1 bg-black text-primary cursor-pointer border border-primary/40 hover:bg-primary hover:text-primary-foreground transition-colors"
+                  : "px-1.5 py-0.5 bg-black/80 text-white"
               )}
             >
               {formatDuration(video.duration)}

@@ -97,7 +97,11 @@ export function VideoDetailLayout({
         className="video-detail__player-wrapper w-full flex-shrink-0 lg:pl-[var(--padding-left)] lg:pr-[var(--padding-right)] lg:pt-5 transition-[padding]"
       >
         <div className={cn("mx-auto w-full", className)}>
-          <div className="w-full bg-black aspect-video relative overflow-hidden shadow-lg z-20 lg:rounded-lg">
+          {/* Height-budgeted: on laptops a full-width 16:9 player leaves no
+              room for the content below, so the width is capped by what the
+              viewport height affords (~300px reserved for title/tabs/prose),
+              with a sane floor. */}
+          <div className="w-full mx-auto lg:max-w-[max(640px,calc((100dvh-380px)*1.7778))] bg-black aspect-video relative overflow-hidden shadow-lg z-20 lg:rounded-lg">
             {player}
           </div>
         </div>
