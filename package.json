@@ -22,6 +22,7 @@
     "@vercel/edge-config": "^1.4.3",
     "@vercel/og": "^0.8.5",
     "@vercel/speed-insights": "^2.0.0",
+    "@videojs/react": "^10.0.0-beta.25",
     "@vidstack/react": "^1.12.13",
     "babel-plugin-react-compiler": "^1.0.0",
     "date-fns": "^4.1.0",

@@ -38,7 +38,8 @@ export default function ChatTab({ video, settings, compact = true }: ChatTabProp
         avatar={aiConfig.avatar || "/default-avatar.png"}
         subdomain={""}
         userName={undefined}
-        greeting={aiConfig.greeting}
+        // Video-scoped ask: portal-wide greeting doesn't fit this context
+        greeting="I've watched this one closely. Ask me anything about it — I'll point you to the exact moment."
         isEmbedded={true}
         compact={compact}
         className="flex-1 h-full border-none shadow-none"

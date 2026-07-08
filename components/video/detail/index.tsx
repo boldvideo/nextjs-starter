@@ -136,7 +136,10 @@ export function VideoDetail({
             aiName={aiConfig.name}
             aiAvatar={aiConfig.avatar || "/default-avatar.png"}
             subdomain={""}
-            greeting={aiConfig.greeting}
+            // Video-scoped ask: the portal-wide greeting (markdown, "ask me
+            // anything") doesn't fit here — see BOLD ticket for a dedicated
+            // per-tenant field.
+            greeting="I've watched this one closely. Ask me anything about it — I'll point you to the exact moment."
             onChapterClick={handleTimeSelect}
             hasChapters={Boolean(video.chapters)}
             className="z-[35]"
