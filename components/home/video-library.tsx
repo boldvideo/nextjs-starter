@@ -120,6 +120,30 @@ function TopicButton({
   );
 }
 
+/**
+ * Mux storyboard metadata, fetched once per playback id on first hover.
+ * https://image.mux.com/{id}/storyboard.json
+ */
+interface Storyboard {
+  url: string;
+  tile_width: number;
+  tile_height: number;
+  duration: number;
+  tiles: { start: number; x: number; y: number }[];
+}
+const storyboardCache = new Map<string, Promise<Storyboard | null>>();
+
+function loadStoryboard(playbackId: string): Promise<Storyboard | null> {
+  let p = storyboardCache.get(playbackId);
+  if (!p) {
+    p = fetch(`https://image.mux.com/${playbackId}/storyboard.json`)
+      .then((r) => (r.ok ? (r.json() as Promise<Storyboard>) : null))
+      .catch(() => null);
+    storyboardCache.set(playbackId, p);
+  }
+  return p;
+}
+
 function EpisodeCard({
   video,
   progress,
@@ -131,14 +155,60 @@ function EpisodeCard({
   const blurb = video.teaser || video.description || "";
   const tags = normalizeTags(video.tags).slice(0, 2);
 
+  // Scrub-on-hover: sweeping the pointer across the thumbnail scrubs
+  // through the episode via the Mux storyboard (one image for all frames).
+  const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
+  const [frac, setFrac] = useState<number | null>(null);
+  const playbackId = (video as { playbackId?: string }).playbackId;
+
+  const handleEnter = useCallback(() => {
+    if (!playbackId) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+      return;
+    loadStoryboard(playbackId).then((sb) => setStoryboard(sb));
+  }, [playbackId]);
+
+  const handleMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setFrac(Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width)));
+  }, []);
+
+  const handleLeave = useCallback(() => setFrac(null), []);
+
+  // Resolve the storyboard tile for the hovered position
+  let tileStyle: React.CSSProperties | null = null;
+  let scrubSeconds: number | null = null;
+  if (storyboard && frac != null && storyboard.tiles.length > 0) {
+    scrubSeconds = frac * storyboard.duration;
+    const tiles = storyboard.tiles;
+    let tile = tiles[0];
+    for (const t of tiles) {
+      if (t.start <= scrubSeconds) tile = t;
+      else break;
+    }
+    const sheetW = Math.max(...tiles.map((t) => t.x)) + storyboard.tile_width;
+    const sheetH = Math.max(...tiles.map((t) => t.y)) + storyboard.tile_height;
+    tileStyle = {
+      backgroundImage: `url(${storyboard.url})`,
+      backgroundSize: `${(sheetW / storyboard.tile_width) * 100}% ${(sheetH / storyboard.tile_height) * 100}%`,
+      backgroundPosition: `${sheetW > storyboard.tile_width ? (tile.x / (sheetW - storyboard.tile_width)) * 100 : 0}% ${sheetH > storyboard.tile_height ? (tile.y / (sheetH - storyboard.tile_height)) * 100 : 0}%`,
+    };
+  }
+  const isScrubbing = tileStyle != null && scrubSeconds != null;
+
   return (
     <li className="flex">
       <Link
         href={buildVideoUrl(video)}
         prefetch
-        className="flex flex-col w-full bg-background hover:bg-muted transition-colors"
+        className="group flex flex-col w-full"
       >
-        <div className="relative aspect-video overflow-hidden border-b border-foreground/10 bg-black">
+        <div
+          className="relative aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-black"
+          onMouseEnter={handleEnter}
+          onMouseMove={handleMove}
+          onMouseLeave={handleLeave}
+        >
           {video.thumbnail && (
             <Image
               src={video.thumbnail}
@@ -148,13 +218,35 @@ function EpisodeCard({
               className="object-cover"
             />
           )}
+
+          {/* Storyboard frame while scrubbing */}
+          {isScrubbing && (
+            <div className="absolute inset-0" style={tileStyle!} />
+          )}
+
+          {/* Playhead while scrubbing */}
+          {isScrubbing && (
+            <div
+              className="absolute inset-y-0 w-px bg-white/70"
+              style={{ left: `${(frac ?? 0) * 100}%` }}
+            />
+          )}
+
           {video.duration > 0 && (
-            <span className="absolute right-2 bottom-2 font-mono text-[11px] bg-black/80 text-white px-1.5 py-0.5 rounded">
-              {formatDuration(video.duration)}
+            <span
+              className={cn(
+                "absolute right-2 bottom-2 font-mono text-[11px] px-1.5 py-0.5 rounded",
+                isScrubbing ? "bg-black text-primary" : "bg-black/80 text-white"
+              )}
+            >
+              {isScrubbing
+                ? formatDuration(Math.floor(scrubSeconds!))
+                : formatDuration(video.duration)}
             </span>
           )}
+
           {/* Local watch progress along the thumb's bottom edge */}
-          {progress != null && progress > 0.01 && (
+          {progress != null && progress > 0.01 && !isScrubbing && (
             <div
               className="absolute inset-x-0 bottom-0 h-[3px] bg-white/20"
               role="progressbar"
@@ -170,8 +262,8 @@ function EpisodeCard({
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-2 p-4 flex-1">
-          <h3 className="font-[family-name:var(--font-heading)] font-semibold text-lg leading-tight tracking-tight">
+        <div className="flex flex-col gap-1.5 pt-3 flex-1">
+          <h3 className="font-[family-name:var(--font-heading)] font-semibold text-lg leading-tight tracking-tight group-hover:text-primary transition-colors duration-150">
             {video.title}
           </h3>
           {blurb && (
@@ -179,17 +271,18 @@ function EpisodeCard({
               {blurb}
             </p>
           )}
-          <div className="flex items-center gap-2 mt-auto pt-1.5">
+          {/* Meta row: chips never wrap internally, date never breaks */}
+          <div className="flex items-center gap-2 mt-auto pt-2 min-w-0">
             {tags.map((tag) => (
               <span
                 key={tag.slug}
-                className="font-mono text-[10.5px] tracking-[0.03em] text-muted-foreground border border-border rounded px-1.5 py-0.5"
+                className="font-mono text-[10.5px] tracking-[0.03em] text-muted-foreground border border-border rounded px-1.5 py-0.5 whitespace-nowrap truncate min-w-0 max-w-[45%]"
               >
                 {tag.name}
               </span>
             ))}
             {video.publishedAt && (
-              <span className="ml-auto font-mono text-[11px] text-muted-foreground/70">
+              <span className="ml-auto shrink-0 whitespace-nowrap font-mono text-[11px] text-muted-foreground/70">
                 {formatDate(video.publishedAt)}
               </span>
             )}
@@ -383,9 +476,9 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
         ) : videos.length > 0 ? (
-          // Hairline grid — lines keyed to foreground so they stay visible
-          // regardless of how close the tenant's border/surface tokens are
-          <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-px bg-foreground/10 border border-foreground/10 rounded-xl overflow-hidden">
+          // Spacing-based grid: the rounded thumbnail is the only bounded
+          // surface; text hangs free below it
+          <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
             {videos.map((video) => (
               <EpisodeCard
                 key={video.id}
