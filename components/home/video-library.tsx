@@ -735,42 +735,44 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
             />
           ))}
         </div>
-        {/* The companies behind the show — people love seeing their logos */}
+        {/* The companies behind the show — logo tiles, ad-wall style */}
         <div className="mt-8 pt-4 border-t border-border ml-1">
-          <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-2.5">
+          <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-3">
             Brought to you by
           </p>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2.5 pr-1">
             <a
               href="https://humanlayer.dev"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="HumanLayer"
+              title="HumanLayer"
+              className="group/tile flex items-center justify-center h-16 rounded-lg border border-border bg-surface hover:border-primary/40 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
             >
-              {/* Plain img: third-party favicons via Google's resolver */}
+              {/* Plain img: GitHub org avatars, already CDN-sized */}
               <img
-                src="https://www.google.com/s2/favicons?domain=humanlayer.dev&sz=64"
-                alt=""
-                width={16}
-                height={16}
-                className="w-4 h-4 rounded-sm"
+                src="https://github.com/humanlayer.png?size=120"
+                alt="HumanLayer"
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-md"
               />
-              HumanLayer
             </a>
             <a
               href="https://boundaryml.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Boundary (BAML)"
+              title="Boundary (BAML)"
+              className="group/tile flex items-center justify-center h-16 rounded-lg border border-border bg-surface hover:border-primary/40 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
             >
               <img
-                src="https://www.google.com/s2/favicons?domain=boundaryml.com&sz=64"
-                alt=""
-                width={16}
-                height={16}
-                className="w-4 h-4 rounded-sm"
+                src="https://github.com/boundaryml.png?size=120"
+                alt="Boundary (BAML)"
+                width={40}
+                height={40}
+                className="w-10 h-10 rounded-md"
               />
-              Boundary <span className="text-muted-foreground/50">(BAML)</span>
             </a>
           </div>
         </div>

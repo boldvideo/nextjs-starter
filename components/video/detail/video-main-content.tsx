@@ -1,13 +1,21 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { FileText, Paperclip } from "lucide-react";
+import { FileText, Github, NotebookText, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { formatDuration } from "@/util/format-duration";
 import { VideoDescription } from "@/components/video-description";
+import { extractYouTubeId } from "@/components/players/player-youtube";
 import type { ExtendedVideo } from "@/types/video-detail";
 import { formatFileSize } from "@/util/format-file-size";
+
+interface EpisodeLinks {
+  showNotesUrl: string;
+  codeUrl: string | null;
+  episodeNumber: string | null;
+}
 
 interface VideoMainContentProps {
   video: ExtendedVideo;
@@ -22,6 +30,24 @@ interface VideoMainContentProps {
  */
 export function VideoMainContent({ video, onTimeSelect }: VideoMainContentProps) {
   const hasAttachments = video.attachments && video.attachments.length > 0;
+
+  // Official episode links (show notes + session source code) from the
+  // show's podcast index, matched exactly by YouTube id.
+  const [episode, setEpisode] = useState<EpisodeLinks | null>(null);
+  useEffect(() => {
+    const yt = extractYouTubeId(video);
+    if (!yt) return;
+    let cancelled = false;
+    fetch(`/api/show-notes?yt=${yt}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled && d?.episode) setEpisode(d.episode);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [video]);
 
   return (
     <div className="w-full mx-auto flex flex-col">
@@ -43,6 +69,39 @@ export function VideoMainContent({ video, onTimeSelect }: VideoMainContentProps)
             />
           ) : null}
           {video.duration ? <span>{formatDuration(video.duration)}</span> : null}
+          {episode?.episodeNumber && (
+            <>
+              <span
+                aria-hidden="true"
+                className="w-[3px] h-[3px] rounded-full bg-muted-foreground/40"
+              />
+              <span className="text-primary">EP {episode.episodeNumber}</span>
+            </>
+          )}
+          {episode && (
+            <span className="ml-auto flex items-center gap-2">
+              <a
+                href={episode.showNotesUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
+              >
+                <NotebookText className="h-3.5 w-3.5" />
+                Show notes
+              </a>
+              {episode.codeUrl && (
+                <a
+                  href={episode.codeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
+                >
+                  <Github className="h-3.5 w-3.5" />
+                  Session code
+                </a>
+              )}
+            </span>
+          )}
         </div>
 
         {/* Description flows like an article */}
