@@ -83,11 +83,18 @@ export function VideoDetailLayout({
     "--padding-right": rightSidebar
       ? "calc(var(--sidebar-right-width, 0px) + 20px)"
       : "20px",
+    // Shared column cap: a full-width 16:9 player would leave no room for
+    // content on laptops, so the column is capped by what the viewport
+    // height affords (~300px reserved below the player). Player AND text
+    // use the same cap so they stay aligned as one column.
+    "--video-col-max": "max(640px, calc((100dvh - 380px) * 1.7778))",
   } as React.CSSProperties;
 
   return (
     <section
-      className="video-detail flex flex-1 flex-col min-h-0 w-full"
+      // On desktop the whole column scrolls as one document (player included);
+      // sidebars are fixed and unaffected. Mobile keeps its panel scrolling.
+      className="video-detail flex flex-1 flex-col min-h-0 w-full lg:overflow-y-auto"
       data-active-tab={activeTab}
       data-has-playlist={hasPlaylist}
       style={sidebarPadding}
@@ -97,25 +104,23 @@ export function VideoDetailLayout({
         className="video-detail__player-wrapper w-full flex-shrink-0 lg:pl-[var(--padding-left)] lg:pr-[var(--padding-right)] lg:pt-5 transition-[padding]"
       >
         <div className={cn("mx-auto w-full", className)}>
-          {/* Height-budgeted: on laptops a full-width 16:9 player leaves no
-              room for the content below, so the width is capped by what the
-              viewport height affords (~300px reserved for title/tabs/prose),
-              with a sane floor. */}
-          <div className="w-full mx-auto lg:max-w-[max(640px,calc((100dvh-380px)*1.7778))] bg-black aspect-video relative overflow-hidden shadow-lg z-20 lg:rounded-lg">
+          <div className="w-full mx-auto lg:max-w-[var(--video-col-max)] bg-black aspect-video relative overflow-hidden shadow-lg z-20 lg:rounded-lg">
             {player}
           </div>
         </div>
       </div>
 
       {/* === DESKTOP LAYOUT (lg+) === */}
-      <div className="video-detail__desktop hidden lg:flex flex-1 flex-col min-h-0 relative">
+      <div className="video-detail__desktop hidden lg:flex flex-col relative">
         {leftSidebar}
 
         {/* Content wrapper with sidebar-aware padding */}
-        <div className="flex-1 min-w-0 w-full transition-all flex flex-col min-h-0 pl-[var(--padding-left)] pr-[var(--padding-right)] transition-[padding]">
-          <div className={cn("mx-auto w-full flex-1 flex flex-col min-h-0", className)}>
-            {/* Main Content */}
-            {infoPanel}
+        <div className="min-w-0 w-full transition-all flex flex-col pl-[var(--padding-left)] pr-[var(--padding-right)] transition-[padding]">
+          <div className={cn("mx-auto w-full flex flex-col", className)}>
+            {/* Same column cap as the player so text and video stay aligned */}
+            <div className="w-full mx-auto lg:max-w-[var(--video-col-max)]">
+              {infoPanel}
+            </div>
           </div>
         </div>
 

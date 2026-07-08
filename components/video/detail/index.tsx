@@ -142,6 +142,8 @@ export function VideoDetail({
             greeting="I've watched this one closely. Ask me anything about it and I'll point you to the exact moment."
             onChapterClick={handleTimeSelect}
             hasChapters={Boolean(video.chapters)}
+            transcriptUrl={video.transcript?.json?.url}
+            playerRef={playerRef}
             className="z-[35]"
           />
         }
