@@ -9,7 +9,7 @@ import type { PortalSettings, PortalConfig } from "@/lib/portal-config";
 // Fork default tagline shown under the library title when the tenant hasn't
 // configured a channel description.
 const DEFAULT_TAGLINE =
-  "A working seminar on building AI systems that ship — RAG, agents, evals.";
+  "Real AI systems, built live every Tuesday. Agents, evals, RAG, and what actually holds up in production.";
 
 interface LibraryHomepageProps {
   settings: PortalSettings | null;

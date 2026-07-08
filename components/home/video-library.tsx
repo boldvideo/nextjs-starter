@@ -19,6 +19,7 @@ import { useSettings } from "@/components/providers/settings-provider";
 import { getTenantId } from "@/lib/progress/tenant";
 import { getAllProgress, isIndexedDBDefined } from "@/lib/progress/store";
 import { PoweredByBold } from "@/components/powered-by-bold";
+import { NextSession } from "@/components/home/next-session";
 
 // Tags arrive from the API as objects ({ id, name, slug }) even though the
 // SDK types them as string[]. Normalize either shape.
@@ -734,7 +735,47 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
             />
           ))}
         </div>
+        {/* The companies behind the show — people love seeing their logos */}
         <div className="mt-8 pt-4 border-t border-border ml-1">
+          <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-2.5">
+            Brought to you by
+          </p>
+          <div className="flex flex-col gap-1.5">
+            <a
+              href="https://humanlayer.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {/* Plain img: third-party favicons via Google's resolver */}
+              <img
+                src="https://www.google.com/s2/favicons?domain=humanlayer.dev&sz=64"
+                alt=""
+                width={16}
+                height={16}
+                className="w-4 h-4 rounded-sm"
+              />
+              HumanLayer
+            </a>
+            <a
+              href="https://boundaryml.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <img
+                src="https://www.google.com/s2/favicons?domain=boundaryml.com&sz=64"
+                alt=""
+                width={16}
+                height={16}
+                className="w-4 h-4 rounded-sm"
+              />
+              Boundary <span className="text-muted-foreground/50">(BAML)</span>
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-6 ml-1">
           <PoweredByBold />
         </div>
       </aside>
@@ -820,13 +861,7 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
               </a>
             </div>
 
-            <span className="inline-flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
-              <span className="relative flex h-[7px] w-[7px]">
-                <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/60" />
-                <span className="relative inline-flex h-[7px] w-[7px] rounded-full bg-primary" />
-              </span>
-              Live on Zoom · Tuesdays 10am PT
-            </span>
+            <NextSession />
           </div>
         </div>
 
