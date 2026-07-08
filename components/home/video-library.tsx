@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
@@ -138,6 +138,21 @@ function loadStoryboard(playbackId: string): Promise<Storyboard | null> {
   if (!p) {
     p = fetch(`https://image.mux.com/${playbackId}/storyboard.json`)
       .then((r) => (r.ok ? (r.json() as Promise<Storyboard>) : null))
+      .then(async (sb) => {
+        if (!sb) return null;
+        // Download AND decode the sheet before reporting ready — otherwise
+        // the first scrub paints nothing until the background image lands.
+        await new Promise<void>((resolve) => {
+          const img = new window.Image();
+          img.onload = () => {
+            if (img.decode) img.decode().then(resolve, () => resolve());
+            else resolve();
+          };
+          img.onerror = () => resolve();
+          img.src = sb.url;
+        });
+        return sb;
+      })
       .catch(() => null);
     storyboardCache.set(playbackId, p);
   }
@@ -157,9 +172,42 @@ function EpisodeCard({
 
   // Scrub-on-hover: sweeping the pointer across the thumbnail scrubs
   // through the episode via the Mux storyboard (one image for all frames).
+  // React state only gates mount (loaded / hovering); per-mousemove updates
+  // write styles directly so scrubbing never re-renders the card.
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
-  const [frac, setFrac] = useState<number | null>(null);
+  const [hovering, setHovering] = useState(false);
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const playheadRef = useRef<HTMLDivElement | null>(null);
+  const badgeRef = useRef<HTMLSpanElement | null>(null);
   const playbackId = (video as { playbackId?: string }).playbackId;
+
+  const applyFrac = useCallback(
+    (sb: Storyboard, frac: number) => {
+      const seconds = frac * sb.duration;
+      const tiles = sb.tiles;
+      let tile = tiles[0];
+      for (const t of tiles) {
+        if (t.start <= seconds) tile = t;
+        else break;
+      }
+      const sheetW = Math.max(...tiles.map((t) => t.x)) + sb.tile_width;
+      const sheetH = Math.max(...tiles.map((t) => t.y)) + sb.tile_height;
+      if (frameRef.current) {
+        frameRef.current.style.backgroundPosition = `${
+          sheetW > sb.tile_width ? (tile.x / (sheetW - sb.tile_width)) * 100 : 0
+        }% ${
+          sheetH > sb.tile_height ? (tile.y / (sheetH - sb.tile_height)) * 100 : 0
+        }%`;
+      }
+      if (playheadRef.current) {
+        playheadRef.current.style.left = `${frac * 100}%`;
+      }
+      if (badgeRef.current) {
+        badgeRef.current.textContent = formatDuration(Math.floor(seconds));
+      }
+    },
+    []
+  );
 
   const handleEnter = useCallback(() => {
     if (!playbackId) return;
@@ -168,33 +216,42 @@ function EpisodeCard({
     loadStoryboard(playbackId).then((sb) => setStoryboard(sb));
   }, [playbackId]);
 
-  const handleMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setFrac(Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width)));
-  }, []);
-
-  const handleLeave = useCallback(() => setFrac(null), []);
-
-  // Resolve the storyboard tile for the hovered position
-  let tileStyle: React.CSSProperties | null = null;
-  let scrubSeconds: number | null = null;
-  if (storyboard && frac != null && storyboard.tiles.length > 0) {
-    scrubSeconds = frac * storyboard.duration;
-    const tiles = storyboard.tiles;
-    let tile = tiles[0];
-    for (const t of tiles) {
-      if (t.start <= scrubSeconds) tile = t;
-      else break;
+  const handleThumbEnter = useCallback(() => {
+    handleEnter();
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      setHovering(true);
     }
+  }, [handleEnter]);
+
+  const handleMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!storyboard || storyboard.tiles.length === 0) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const frac = Math.min(
+        1,
+        Math.max(0, (e.clientX - rect.left) / rect.width)
+      );
+      applyFrac(storyboard, frac);
+    },
+    [storyboard, applyFrac]
+  );
+
+  const handleLeave = useCallback(() => setHovering(false), []);
+
+  const isScrubbing =
+    hovering && storyboard != null && storyboard.tiles.length > 0;
+
+  // Static per-storyboard sheet geometry (position is set imperatively)
+  let sheetStyle: React.CSSProperties | undefined;
+  if (isScrubbing) {
+    const tiles = storyboard.tiles;
     const sheetW = Math.max(...tiles.map((t) => t.x)) + storyboard.tile_width;
     const sheetH = Math.max(...tiles.map((t) => t.y)) + storyboard.tile_height;
-    tileStyle = {
+    sheetStyle = {
       backgroundImage: `url(${storyboard.url})`,
       backgroundSize: `${(sheetW / storyboard.tile_width) * 100}% ${(sheetH / storyboard.tile_height) * 100}%`,
-      backgroundPosition: `${sheetW > storyboard.tile_width ? (tile.x / (sheetW - storyboard.tile_width)) * 100 : 0}% ${sheetH > storyboard.tile_height ? (tile.y / (sheetH - storyboard.tile_height)) * 100 : 0}%`,
     };
   }
-  const isScrubbing = tileStyle != null && scrubSeconds != null;
 
   return (
     <li className="flex">
@@ -202,10 +259,13 @@ function EpisodeCard({
         href={buildVideoUrl(video)}
         prefetch
         className="group flex flex-col w-full"
+        // Warm the storyboard as soon as the pointer touches the card —
+        // buys the sheet download time before the thumb is hovered
+        onMouseEnter={handleEnter}
       >
         <div
           className="relative aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-black"
-          onMouseEnter={handleEnter}
+          onMouseEnter={handleThumbEnter}
           onMouseMove={handleMove}
           onMouseLeave={handleLeave}
         >
@@ -219,29 +279,34 @@ function EpisodeCard({
             />
           )}
 
-          {/* Storyboard frame while scrubbing */}
+          {/* Storyboard frame while scrubbing (position set imperatively) */}
           {isScrubbing && (
-            <div className="absolute inset-0" style={tileStyle!} />
+            <div
+              ref={frameRef}
+              className="absolute inset-0 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-150"
+              style={sheetStyle}
+            />
           )}
 
           {/* Playhead while scrubbing */}
           {isScrubbing && (
             <div
+              ref={playheadRef}
               className="absolute inset-y-0 w-px bg-white/70"
-              style={{ left: `${(frac ?? 0) * 100}%` }}
             />
           )}
 
           {video.duration > 0 && (
             <span
+              // Remount on mode switch so imperative scrub text resets cleanly
+              key={isScrubbing ? "scrub" : "idle"}
+              ref={badgeRef}
               className={cn(
                 "absolute right-2 bottom-2 font-mono text-[11px] px-1.5 py-0.5 rounded",
                 isScrubbing ? "bg-black text-primary" : "bg-black/80 text-white"
               )}
             >
-              {isScrubbing
-                ? formatDuration(Math.floor(scrubSeconds!))
-                : formatDuration(video.duration)}
+              {formatDuration(video.duration)}
             </span>
           )}
 
@@ -359,6 +424,36 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
     }));
   }, [initialVideos]);
 
+  // Prewarm storyboards for the above-the-fold cards once the page is idle,
+  // so the very first hover scrubs instantly. Hover-capable pointers only,
+  // and skipped entirely for data-saver users.
+  useEffect(() => {
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+      return;
+    const connection = (
+      navigator as Navigator & { connection?: { saveData?: boolean } }
+    ).connection;
+    if (connection?.saveData) return;
+
+    const warm = () => {
+      for (const v of initialVideos.slice(0, 6)) {
+        const pid = (v as { playbackId?: string }).playbackId;
+        if (pid) loadStoryboard(pid);
+      }
+    };
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const id = w.requestIdleCallback
+      ? w.requestIdleCallback(warm, { timeout: 4000 })
+      : window.setTimeout(warm, 2500);
+    return () => {
+      if (w.cancelIdleCallback) w.cancelIdleCallback(id as number);
+      else clearTimeout(id as number);
+    };
+  }, [initialVideos]);
+
   const appendUnique = (existing: Video[], incoming: Video[]) => {
     const seen = new Set(existing.map((v) => v.id));
     return [...existing, ...incoming.filter((v) => !seen.has(v.id))];
@@ -441,22 +536,25 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
           )}
         </div>
 
-        {/* Topic chips (mobile) */}
-        <div className="lg:hidden flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 mb-5">
-          <TopicButton
-            label="All"
-            active={activeTopic === null}
-            onClick={() => selectTopic(null)}
-            compact
-          />
-          {topics.map((t) => (
+        {/* Topic chips (mobile) — snap scrolling with soft edge fades */}
+        <div className="lg:hidden flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 mb-5 snap-x [mask-image:linear-gradient(to_right,transparent,black_20px,black_calc(100%-20px),transparent)]">
+          <div className="snap-start shrink-0">
             <TopicButton
-              key={t.slug}
-              label={t.label}
-              active={activeTopic === t.slug}
-              onClick={() => selectTopic(t.slug)}
+              label="All"
+              active={activeTopic === null}
+              onClick={() => selectTopic(null)}
               compact
             />
+          </div>
+          {topics.map((t) => (
+            <div key={t.slug} className="snap-start shrink-0">
+              <TopicButton
+                label={t.label}
+                active={activeTopic === t.slug}
+                onClick={() => selectTopic(t.slug)}
+                compact
+              />
+            </div>
           ))}
         </div>
 

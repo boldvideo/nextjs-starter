@@ -156,6 +156,9 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning className={getAllFontVariables()}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Thumbnails, storyboards, and frame previews all come from Mux */}
+        <link rel="preconnect" href="https://image.mux.com" />
+        <link rel="dns-prefetch" href="https://image.mux.com" />
         <style
           dangerouslySetInnerHTML={{
             __html: `
