@@ -419,11 +419,14 @@ function EpisodeCard({
             />
           )}
 
-          {/* Storyboard frame while scrubbing (position set imperatively) */}
+          {/* Storyboard frame while scrubbing (position set imperatively).
+              No duration-* utility here: it sets transition-duration, and the
+              implicit transition-property:all would animate background-position
+              — the sheet visibly slides between tiles instead of cutting. */}
           {isScrubbing && (
             <div
               ref={frameRef}
-              className="absolute inset-0 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-150"
+              className="absolute inset-0 transition-none motion-safe:animate-in motion-safe:fade-in [animation-duration:150ms]"
               style={sheetStyle}
             />
           )}
