@@ -747,14 +747,14 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
               rel="noopener noreferrer"
               aria-label="HumanLayer"
               title="HumanLayer"
-              className="group/tile flex items-center justify-center h-16 rounded-lg border border-border bg-surface hover:border-primary/40 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
+              className="group/tile flex items-center justify-center h-20 rounded-lg border border-border bg-surface hover:border-primary/50 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
             >
               {/* Official wordmark ships as fill="currentColor" — masked so it
                   takes our foreground color on the dark surface */}
               <span
                 role="img"
                 aria-label="HumanLayer"
-                className="h-5 w-36 bg-foreground/85 group-hover/tile:bg-foreground transition-colors duration-150"
+                className="h-6 w-44 bg-foreground/85 group-hover/tile:bg-foreground transition-colors duration-150"
                 style={{
                   WebkitMaskImage: "url(/logos/humanlayer-full.svg)",
                   maskImage: "url(/logos/humanlayer-full.svg)",
@@ -775,16 +775,16 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
               rel="noopener noreferrer"
               aria-label="BAML by Boundary"
               title="BAML by Boundary"
-              className="group/tile flex items-center justify-center gap-2.5 h-16 rounded-lg border border-[#d9d3c4] bg-[#fbf7ed] hover:border-[#b9b19d] transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
+              className="group/tile flex items-center justify-center gap-3 h-20 rounded-lg border border-[#d9d3c4] bg-[#fbf7ed] hover:border-primary/50 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
             >
               <img
                 src="/logos/baml-sheep.png"
                 alt=""
-                width={32}
-                height={32}
-                className="w-8 h-8"
+                width={40}
+                height={40}
+                className="w-10 h-10"
               />
-              <span className="font-mono text-[15px] font-semibold tracking-[0.02em] text-[#141414]">
+              <span className="font-mono text-[17px] font-semibold tracking-[0.02em] text-[#141414]">
                 BAML
               </span>
             </a>
