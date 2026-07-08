@@ -207,6 +207,22 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     window.history.replaceState(null, "", "/ask");
   }, [reset]);
 
+  // Header "Ask …" pill starts a new chat even when this page is already
+  // mounted with an active conversation.
+  useEffect(() => {
+    const onNewChat = () => {
+      stop();
+      reset();
+      setQuery("");
+      setSelectedCitation(null);
+      setIsPanelOpen(false);
+      setPageState({ status: "idle" });
+      window.history.replaceState(null, "", "/ask");
+    };
+    window.addEventListener("bold:ask-new-chat", onNewChat);
+    return () => window.removeEventListener("bold:ask-new-chat", onNewChat);
+  }, [reset, stop]);
+
   const handleCitationClick = useCallback((citation: AskCitation) => {
     setSelectedCitation(citation);
     setIsPanelOpen(true);
@@ -309,8 +325,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           }
         }
 
-        // Compute citation ordering for this pair
-        let orderedCitations = citations;
+        // Compute citation ordering for this pair. While the answer streams,
+        // only text-referenced moments surface (append-only, stable numbers);
+        // leftovers from the retrieval set join at rest.
+        const stillStreaming = isStreaming && i >= messages.length - 2;
+        let orderedCitations = stillStreaming ? [] : citations;
         let displayMap = EMPTY_DISPLAY_MAP;
 
         if (assistantMsg?.content && citations.length > 0) {
@@ -341,10 +360,12 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           // Unreferenced leftovers only from the retrieval set — the
           // citation_map carries every candidate moment and would flood the
           // sources rail.
-          for (const citation of sourceCitations) {
-            if (!seenIds.has(citation.id)) {
-              seenIds.add(citation.id);
-              ordered.push(citation);
+          if (!stillStreaming) {
+            for (const citation of sourceCitations) {
+              if (!seenIds.has(citation.id)) {
+                seenIds.add(citation.id);
+                ordered.push(citation);
+              }
             }
           }
 
@@ -384,7 +405,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     }
 
     return pairs;
-  }, [messages]);
+  }, [messages, isStreaming]);
 
   const placeholder = "Ask a follow-up…";
 

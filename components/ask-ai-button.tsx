@@ -18,7 +18,11 @@ export function AskAiButton({
   const router = useRouter();
 
   const handleClick = () => {
-    router.push("/ask");
+    // Always start fresh: if the ask page is already mounted with a
+    // conversation, tell it to reset (URL updates via replaceState don't
+    // remount it).
+    window.dispatchEvent(new CustomEvent("bold:ask-new-chat"));
+    router.push("/ask", { scroll: false });
   };
 
   return (
