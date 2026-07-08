@@ -27,6 +27,10 @@ import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 // Force dynamic rendering — tenant depends on hostname in hosted mode
 export const dynamic = "force-dynamic";
 
+export const viewport = {
+  themeColor: "#0a0a09",
+};
+
 // Default metadata values - used as fallback when settings don't provide them
 const defaultMetadata = {
   title: "AI That Works",
@@ -103,6 +107,12 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: settings.faviconUrl || "/favicon.ico",
+      apple: "/icon-pwa?size=180",
+    },
+    appleWebApp: {
+      capable: true,
+      title: String(title),
+      statusBarStyle: "black-translucent" as const,
     },
   };
 }

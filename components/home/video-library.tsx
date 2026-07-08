@@ -1,7 +1,15 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import type { Video } from "@boldvideo/bold-js";
@@ -190,14 +198,21 @@ function EpisodeCard({
         if (t.start <= seconds) tile = t;
         else break;
       }
-      const sheetW = Math.max(...tiles.map((t) => t.x)) + sb.tile_width;
-      const sheetH = Math.max(...tiles.map((t) => t.y)) + sb.tile_height;
-      if (frameRef.current) {
-        frameRef.current.style.backgroundPosition = `${
-          sheetW > sb.tile_width ? (tile.x / (sheetW - sb.tile_width)) * 100 : 0
-        }% ${
-          sheetH > sb.tile_height ? (tile.y / (sheetH - sb.tile_height)) * 100 : 0
-        }%`;
+      const el = frameRef.current;
+      if (el) {
+        // Pixel-exact tile placement. Percentage background-position
+        // amplifies tile rounding error across the sheet (frames drift
+        // diagonally the deeper the tile). Scale to cover, anchor top-left:
+        // worst case is a 1–2px crop at the frame's right/bottom edge.
+        const rect = el.getBoundingClientRect();
+        const sheetW = Math.max(...tiles.map((t) => t.x)) + sb.tile_width;
+        const sheetH = Math.max(...tiles.map((t) => t.y)) + sb.tile_height;
+        const scale = Math.max(
+          rect.width / sb.tile_width,
+          rect.height / sb.tile_height
+        );
+        el.style.backgroundSize = `${sheetW * scale}px ${sheetH * scale}px`;
+        el.style.backgroundPosition = `${-tile.x * scale}px ${-tile.y * scale}px`;
       }
       if (playheadRef.current) {
         playheadRef.current.style.left = `${frac * 100}%`;
@@ -216,12 +231,22 @@ function EpisodeCard({
     loadStoryboard(playbackId).then((sb) => setStoryboard(sb));
   }, [playbackId]);
 
-  const handleThumbEnter = useCallback(() => {
-    handleEnter();
-    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      setHovering(true);
-    }
-  }, [handleEnter]);
+  const lastFracRef = useRef(0);
+
+  const handleThumbEnter = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      handleEnter();
+      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        lastFracRef.current = Math.min(
+          1,
+          Math.max(0, (e.clientX - rect.left) / rect.width)
+        );
+        setHovering(true);
+      }
+    },
+    [handleEnter]
+  );
 
   const handleMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -231,6 +256,7 @@ function EpisodeCard({
         1,
         Math.max(0, (e.clientX - rect.left) / rect.width)
       );
+      lastFracRef.current = frac;
       applyFrac(storyboard, frac);
     },
     [storyboard, applyFrac]
@@ -238,20 +264,125 @@ function EpisodeCard({
 
   const handleLeave = useCallback(() => setHovering(false), []);
 
+  // ── Touch: long-press (350ms) then drag horizontally to scrub; release
+  // opens the video at the scrubbed timestamp. A quick tap still navigates
+  // normally, and moving before the long-press fires means scrolling wins.
+  const router = useRouter();
+  const thumbRef = useRef<HTMLDivElement | null>(null);
+  const storyboardRef = useRef<Storyboard | null>(null);
+  useEffect(() => {
+    storyboardRef.current = storyboard;
+  }, [storyboard]);
+  const touchRef = useRef<{
+    timer: number | null;
+    startX: number;
+    startY: number;
+    active: boolean;
+    suppressClick: boolean;
+  }>({ timer: null, startX: 0, startY: 0, active: false, suppressClick: false });
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      if (!playbackId || e.touches.length !== 1) return;
+      loadStoryboard(playbackId).then((sb) => setStoryboard(sb));
+      const t = e.touches[0];
+      const state = touchRef.current;
+      state.startX = t.clientX;
+      state.startY = t.clientY;
+      state.suppressClick = false;
+      if (state.timer) clearTimeout(state.timer);
+      state.timer = window.setTimeout(() => {
+        state.timer = null;
+        state.active = true;
+        (navigator as Navigator & { vibrate?: (ms: number) => void }).vibrate?.(10);
+        const el = thumbRef.current;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          lastFracRef.current = Math.min(
+            1,
+            Math.max(0, (state.startX - rect.left) / rect.width)
+          );
+        }
+        setHovering(true);
+      }, 350);
+    },
+    [playbackId]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    const state = touchRef.current;
+    if (state.timer) {
+      clearTimeout(state.timer);
+      state.timer = null;
+    }
+    if (state.active) {
+      state.active = false;
+      state.suppressClick = true;
+      setHovering(false);
+      const sb = storyboardRef.current;
+      const seconds = Math.floor(
+        lastFracRef.current * (sb?.duration || video.duration || 0)
+      );
+      router.push(buildVideoUrl(video, { time: seconds }));
+    }
+  }, [router, video]);
+
+  const handleClickCapture = useCallback((e: React.MouseEvent) => {
+    // Swallow the ghost click that follows a scrub release
+    if (touchRef.current.suppressClick) {
+      e.preventDefault();
+      e.stopPropagation();
+      touchRef.current.suppressClick = false;
+    }
+  }, []);
+
+  // Native non-passive touchmove: React's synthetic handler can't
+  // preventDefault, and we must beat scrolling while scrubbing.
+  useEffect(() => {
+    const el = thumbRef.current;
+    if (!el) return;
+    const onTouchMove = (ev: TouchEvent) => {
+      const state = touchRef.current;
+      const t = ev.touches[0];
+      if (!t) return;
+      if (state.active) {
+        ev.preventDefault();
+        const rect = el.getBoundingClientRect();
+        const frac = Math.min(
+          1,
+          Math.max(0, (t.clientX - rect.left) / rect.width)
+        );
+        lastFracRef.current = frac;
+        const sb = storyboardRef.current;
+        if (sb && sb.tiles.length > 0) applyFrac(sb, frac);
+      } else if (
+        state.timer &&
+        (Math.abs(t.clientX - state.startX) > 10 ||
+          Math.abs(t.clientY - state.startY) > 10)
+      ) {
+        // Finger moved before the long-press fired — it's a scroll
+        clearTimeout(state.timer);
+        state.timer = null;
+      }
+    };
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => el.removeEventListener("touchmove", onTouchMove);
+  }, [applyFrac]);
+
   const isScrubbing =
     hovering && storyboard != null && storyboard.tiles.length > 0;
 
-  // Static per-storyboard sheet geometry (position is set imperatively)
-  let sheetStyle: React.CSSProperties | undefined;
-  if (isScrubbing) {
-    const tiles = storyboard.tiles;
-    const sheetW = Math.max(...tiles.map((t) => t.x)) + storyboard.tile_width;
-    const sheetH = Math.max(...tiles.map((t) => t.y)) + storyboard.tile_height;
-    sheetStyle = {
-      backgroundImage: `url(${storyboard.url})`,
-      backgroundSize: `${(sheetW / storyboard.tile_width) * 100}% ${(sheetH / storyboard.tile_height) * 100}%`,
-    };
-  }
+  // Position the frame before first paint when scrub mode mounts, so there
+  // is never a flash of the raw (unsized) sheet.
+  useLayoutEffect(() => {
+    if (isScrubbing && storyboard) applyFrac(storyboard, lastFracRef.current);
+  }, [isScrubbing, storyboard, applyFrac]);
+
+  // Sheet image is static per storyboard; size + position are written
+  // imperatively (pixel-exact) in applyFrac.
+  const sheetStyle: React.CSSProperties | undefined = isScrubbing
+    ? { backgroundImage: `url(${storyboard.url})` }
+    : undefined;
 
   return (
     <li className="flex">
@@ -262,12 +393,21 @@ function EpisodeCard({
         // Warm the storyboard as soon as the pointer touches the card —
         // buys the sheet download time before the thumb is hovered
         onMouseEnter={handleEnter}
+        onClickCapture={handleClickCapture}
       >
         <div
-          className="relative aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-black"
+          ref={thumbRef}
+          className="relative aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-black select-none [-webkit-touch-callout:none]"
           onMouseEnter={handleThumbEnter}
           onMouseMove={handleMove}
           onMouseLeave={handleLeave}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          onContextMenu={(e) => {
+            if (touchRef.current.active || touchRef.current.timer)
+              e.preventDefault();
+          }}
         >
           {video.thumbnail && (
             <Image
@@ -374,10 +514,14 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
   const [hasMore, setHasMore] = useState(pageSize > 0);
   const settings = useSettings();
 
-  // Locally stored watch progress (IndexedDB), videoId → fraction watched.
+  // Locally stored watch progress (IndexedDB), videoId → fraction watched,
+  // plus the in-flight (started, not finished) records for Continue watching.
   const [progressById, setProgressById] = useState<Map<string, number>>(
     () => new Map()
   );
+  const [resumeRecords, setResumeRecords] = useState<
+    { videoId: string; position: number; fraction: number; lastWatched: string }[]
+  >([]);
   useEffect(() => {
     if (!isIndexedDBDefined()) return;
     const tenantId = getTenantId(settings);
@@ -387,18 +531,43 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
       .then((records) => {
         if (cancelled) return;
         const next = new Map<string, number>();
+        const resume: typeof resumeRecords = [];
         for (const r of records) {
           if (r.duration > 0) {
-            next.set(r.videoId, Math.min(1, r.furthestPosition / r.duration));
+            const fraction = Math.min(1, r.furthestPosition / r.duration);
+            next.set(r.videoId, fraction);
+            if (!r.completed && fraction > 0.01 && r.position > 15) {
+              resume.push({
+                videoId: r.videoId,
+                position: Math.floor(r.position),
+                fraction,
+                lastWatched: r.lastWatched,
+              });
+            }
           }
         }
+        resume.sort((a, b) => b.lastWatched.localeCompare(a.lastWatched));
         setProgressById(next);
+        setResumeRecords(resume.slice(0, 8));
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
   }, [settings]);
+
+  // Continue watching needs video metadata — resolve against loaded videos.
+  const resumeItems = useMemo(
+    () =>
+      resumeRecords
+        .map((r) => ({
+          ...r,
+          video: initialVideos.find((v) => v.id === r.videoId),
+        }))
+        .filter((r): r is typeof r & { video: Video } => !!r.video)
+        .slice(0, 6),
+    [resumeRecords, initialVideos]
+  );
 
   // Prefer real tags carried by the loaded videos (with counts); fall back
   // to the mock list until tags are generated.
@@ -557,6 +726,53 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
             </div>
           ))}
         </div>
+
+        {/* Continue watching — local progress, most recent first */}
+        {activeTopic === null && resumeItems.length > 0 && (
+          <section className="mb-10">
+            <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-3">
+              Continue watching
+            </p>
+            <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 md:-mx-8 md:px-8 [mask-image:linear-gradient(to_right,transparent,black_20px,black_calc(100%-20px),transparent)]">
+              {resumeItems.map(({ video, position, fraction }) => (
+                <Link
+                  key={video.id}
+                  href={buildVideoUrl(video, { time: position })}
+                  className="group snap-start shrink-0 w-[220px]"
+                >
+                  <div className="relative aspect-video rounded-lg overflow-hidden border border-foreground/10 bg-black">
+                    {video.thumbnail && (
+                      <Image
+                        src={video.thumbnail}
+                        alt={video.title}
+                        fill
+                        sizes="220px"
+                        className="object-cover"
+                      />
+                    )}
+                    {video.duration > position && (
+                      <span className="absolute right-1.5 bottom-1.5 font-mono text-[10px] bg-black/80 text-white px-1 py-0.5 rounded">
+                        {formatDuration(video.duration - position)} left
+                      </span>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 h-[3px] bg-white/20">
+                      <div
+                        className="h-full bg-primary"
+                        style={{ width: `${Math.min(100, fraction * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm font-medium leading-snug line-clamp-1 group-hover:text-primary transition-colors duration-150">
+                    {video.title}
+                  </p>
+                  <p className="font-mono text-[11px] text-muted-foreground/70 mt-0.5">
+                    Resume at {formatDuration(position)}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-5 text-xs text-muted-foreground">
