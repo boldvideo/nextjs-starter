@@ -182,7 +182,10 @@ function EpisodeCard({
   // through the episode via the Mux storyboard (one image for all frames).
   // React state only gates mount (loaded / hovering); per-mousemove updates
   // write styles directly so scrubbing never re-renders the card.
-  const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
+  // storyboard: undefined = still loading, null = unavailable.
+  const [storyboard, setStoryboard] = useState<Storyboard | null | undefined>(
+    undefined
+  );
   const [hovering, setHovering] = useState(false);
   const frameRef = useRef<HTMLDivElement | null>(null);
   const playheadRef = useRef<HTMLDivElement | null>(null);
@@ -190,8 +193,18 @@ function EpisodeCard({
   const playbackId = (video as { playbackId?: string }).playbackId;
 
   const applyFrac = useCallback(
-    (sb: Storyboard, frac: number) => {
-      const seconds = frac * sb.duration;
+    (sb: Storyboard | null | undefined, frac: number) => {
+      // Playhead + timecode respond instantly (they only need the video
+      // duration); frames join once the sheet has loaded.
+      const seconds = frac * (sb?.duration ?? video.duration ?? 0);
+      if (playheadRef.current) {
+        playheadRef.current.style.left = `${frac * 100}%`;
+      }
+      if (badgeRef.current) {
+        badgeRef.current.textContent = formatDuration(Math.floor(seconds));
+      }
+      if (!sb || sb.tiles.length === 0) return;
+
       const tiles = sb.tiles;
       let tile = tiles[0];
       for (const t of tiles) {
@@ -214,14 +227,8 @@ function EpisodeCard({
         el.style.backgroundSize = `${sheetW * scale}px ${sheetH * scale}px`;
         el.style.backgroundPosition = `${-tile.x * scale}px ${-tile.y * scale}px`;
       }
-      if (playheadRef.current) {
-        playheadRef.current.style.left = `${frac * 100}%`;
-      }
-      if (badgeRef.current) {
-        badgeRef.current.textContent = formatDuration(Math.floor(seconds));
-      }
     },
-    []
+    [video.duration]
   );
 
   const handleEnter = useCallback(() => {
@@ -250,7 +257,7 @@ function EpisodeCard({
 
   const handleMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!storyboard || storyboard.tiles.length === 0) return;
+      if (storyboard === null) return; // no storyboard available for this video
       const rect = e.currentTarget.getBoundingClientRect();
       const frac = Math.min(
         1,
@@ -269,7 +276,7 @@ function EpisodeCard({
   // normally, and moving before the long-press fires means scrolling wins.
   const router = useRouter();
   const thumbRef = useRef<HTMLDivElement | null>(null);
-  const storyboardRef = useRef<Storyboard | null>(null);
+  const storyboardRef = useRef<Storyboard | null | undefined>(undefined);
   useEffect(() => {
     storyboardRef.current = storyboard;
   }, [storyboard]);
@@ -369,14 +376,17 @@ function EpisodeCard({
     return () => el.removeEventListener("touchmove", onTouchMove);
   }, [applyFrac]);
 
+  // Frames need the loaded sheet; playhead + timecode respond immediately.
   const isScrubbing =
     hovering && storyboard != null && storyboard.tiles.length > 0;
+  const isSheetLoading = hovering && !!playbackId && storyboard === undefined;
+  const showScrubUi = isScrubbing || isSheetLoading;
 
-  // Position the frame before first paint when scrub mode mounts, so there
-  // is never a flash of the raw (unsized) sheet.
+  // Position the frame (or at least playhead/timecode) before first paint
+  // when scrub mode mounts, so there is never a flash of the raw sheet.
   useLayoutEffect(() => {
-    if (isScrubbing && storyboard) applyFrac(storyboard, lastFracRef.current);
-  }, [isScrubbing, storyboard, applyFrac]);
+    if (showScrubUi) applyFrac(storyboard, lastFracRef.current);
+  }, [showScrubUi, storyboard, applyFrac]);
 
   // Sheet image is static per storyboard; size + position are written
   // imperatively (pixel-exact) in applyFrac.
@@ -431,22 +441,30 @@ function EpisodeCard({
             />
           )}
 
-          {/* Playhead while scrubbing */}
-          {isScrubbing && (
+          {/* Playhead — live as soon as the pointer scrubs */}
+          {showScrubUi && (
             <div
               ref={playheadRef}
               className="absolute inset-y-0 w-px bg-white/70"
             />
           )}
 
+          {/* Sheet still downloading: a quiet teal sweep along the bottom
+              edge (same edge as watch progress) says "frames incoming" */}
+          {isSheetLoading && (
+            <div className="absolute inset-x-0 bottom-0 h-[2px] overflow-hidden bg-white/10">
+              <div className="h-full w-1/3 bg-primary/70 motion-safe:animate-[scrub-loading_1.1s_ease-in-out_infinite] motion-reduce:w-full motion-reduce:bg-primary/30" />
+            </div>
+          )}
+
           {video.duration > 0 && (
             <span
               // Remount on mode switch so imperative scrub text resets cleanly
-              key={isScrubbing ? "scrub" : "idle"}
+              key={showScrubUi ? "scrub" : "idle"}
               ref={badgeRef}
               className={cn(
                 "absolute right-2 bottom-2 font-mono text-[11px] px-1.5 py-0.5 rounded",
-                isScrubbing ? "bg-black text-primary" : "bg-black/80 text-white"
+                showScrubUi ? "bg-black text-primary" : "bg-black/80 text-white"
               )}
             >
               {formatDuration(video.duration)}
@@ -454,7 +472,7 @@ function EpisodeCard({
           )}
 
           {/* Local watch progress along the thumb's bottom edge */}
-          {progress != null && progress > 0.01 && !isScrubbing && (
+          {progress != null && progress > 0.01 && !showScrubUi && (
             <div
               className="absolute inset-x-0 bottom-0 h-[3px] bg-white/20"
               role="progressbar"

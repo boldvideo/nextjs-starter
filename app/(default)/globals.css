@@ -153,6 +153,16 @@
     }
   }
 
+  /* Storyboard-sheet loading sweep along a thumbnail's bottom edge */
+  @keyframes scrub-loading {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+
   /* Streaming caret that rides inline at the end of the last rendered block
      (instead of blinking on its own line below the text). */
   .chat-stream-cursor > :last-child::after {
