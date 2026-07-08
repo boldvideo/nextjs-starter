@@ -20,7 +20,9 @@ const SUB_CLASS =
  * renders as markdown body.
  */
 function Greeting({ greeting }: { greeting: string }) {
-  const text = greeting.trim();
+  // The admin greeting field is single-line, so line breaks arrive as a
+  // typed literal "\n" — treat those as real newlines.
+  const text = greeting.replace(/\\n/g, "\n").trim();
   const isMultiline = text.includes("\n");
   const startsWithHeading = /^#{1,6}\s/.test(text);
 
