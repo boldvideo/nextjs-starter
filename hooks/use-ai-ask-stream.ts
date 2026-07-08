@@ -19,6 +19,12 @@ export interface AIAskMessage {
   content: string;
   type: "text" | "answer" | "error" | "loading";
   sources?: AIAskSource[];
+  /**
+   * citation_map entries (stable c_xxx ids → source metadata) streamed
+   * before the first text delta so inline refs resolve mid-stream. Kept
+   * separate from `sources`: only text-referenced entries surface in the UI.
+   */
+  citationSources?: AIAskSource[];
   attachments?: ChatAttachment[];
 }
 
@@ -259,6 +265,18 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                   prev.map((msg) =>
                     msg.id === messageId
                       ? { ...msg, sources: accumulatedSources }
+                      : msg
+                  )
+                );
+                break;
+
+              // Arrives before the first text_delta: stable c_xxx id → source
+              // metadata, so inline [c_xxx] refs resolve while streaming.
+              case "citation_map":
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === messageId
+                      ? { ...msg, citationSources: event.sources || [] }
                       : msg
                   )
                 );

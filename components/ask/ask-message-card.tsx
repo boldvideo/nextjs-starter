@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import ReactMarkdown, { Components, ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import { AskCitation } from "@/lib/ask";
+import { buildVideoUrl } from "@/lib/video-path";
 import { cn } from "@/lib/utils";
 import { remarkCitations } from "@/lib/remark-citations";
 import { PROSE_CLASS } from "@/lib/prose";
@@ -83,6 +85,33 @@ function hastText(node: ElementContent | Element | undefined): string {
     return node.children.map((c) => hastText(c as ElementContent)).join("");
   }
   return "";
+}
+
+/** Loose title comparison: lowercase, strip emoji/punctuation/numbers noise. */
+function normalizeTitle(s: string): string {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * Match an episode mention like `Episode 8 ("Human as Tools")` against the
+ * answer's sources so it can deep-link to the video.
+ */
+function findMentionedVideo(
+  text: string,
+  citations: AskCitation[]
+): AskCitation | null {
+  const quoted = text.match(/["“”']([^"“”']{4,})["“”']/)?.[1];
+  if (!quoted) return null;
+  const needle = normalizeTitle(quoted);
+  if (needle.length < 4) return null;
+  return (
+    citations.find((c) =>
+      normalizeTitle(c.videoTitle || "").includes(needle)
+    ) ?? null
+  );
 }
 
 function extractReactText(children: React.ReactNode): string {
@@ -277,6 +306,29 @@ const MarkdownSection = React.memo(function MarkdownSection({
 
     return {
       a: AnchorComponent,
+      // Episode mentions like **Episode 8 ("Human as Tools")** deep-link to
+      // the video when the quoted title matches one of the answer's sources.
+      strong: ({ children }) => {
+        const mentioned = findMentionedVideo(
+          extractReactText(children),
+          citations
+        );
+        if (mentioned) {
+          return (
+            <Link
+              href={buildVideoUrl({ id: mentioned.videoId })}
+              className={cn(
+                "font-semibold text-foreground no-underline",
+                "border-b border-primary/40 hover:border-primary",
+                "transition-colors"
+              )}
+            >
+              {children}
+            </Link>
+          );
+        }
+        return <strong>{children}</strong>;
+      },
       ul: (props) => <ul {...props} className="list-disc pl-5 space-y-2" />,
       // `start` passes through via props: a streamed list split at a block
       // boundary continues in a fresh <ol> that starts mid-count.

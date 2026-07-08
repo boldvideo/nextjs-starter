@@ -237,7 +237,15 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   // the memoized markdown sections in AskMessageCard don't re-parse the whole
   // answer on every streamed chunk.
   const citationsCacheRef = useRef(
-    new Map<string, { sources?: AIAskSource[]; citations: AskCitation[] }>()
+    new Map<
+      string,
+      {
+        sources?: AIAskSource[];
+        extras?: AIAskSource[];
+        sourceCitations: AskCitation[];
+        citations: AskCitation[];
+      }
+    >()
   );
   const displayMapCacheRef = useRef(
     new Map<
@@ -267,18 +275,35 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         const assistantMsg =
           messages[i + 1]?.role === "assistant" ? messages[i + 1] : null;
 
+        // Retrieved sources resolve positional [1]-style refs; citation_map
+        // entries (stable c_xxx ids) are appended so [c_xxx] refs resolve
+        // during streaming. Appending keeps numeric indices untouched.
+        let sourceCitations: AskCitation[] = [];
         let citations: AskCitation[] = [];
         if (assistantMsg) {
           const cached = citationsCacheRef.current.get(assistantMsg.id);
-          if (cached && cached.sources === assistantMsg.sources) {
-            citations = cached.citations;
+          if (
+            cached &&
+            cached.sources === assistantMsg.sources &&
+            cached.extras === assistantMsg.citationSources
+          ) {
+            ({ sourceCitations, citations } = cached);
           } else {
-            citations =
+            sourceCitations =
               assistantMsg.sources?.map((s, idx) =>
                 askSourceToCitation(s, idx)
               ) || [];
+            const seenIds = new Set(sourceCitations.map((c) => c.id));
+            const extraCitations = (assistantMsg.citationSources || [])
+              .filter((s) => s.id && !seenIds.has(s.id))
+              .map((s, idx) =>
+                askSourceToCitation(s, sourceCitations.length + idx)
+              );
+            citations = [...sourceCitations, ...extraCitations];
             citationsCacheRef.current.set(assistantMsg.id, {
               sources: assistantMsg.sources,
+              extras: assistantMsg.citationSources,
+              sourceCitations,
               citations,
             });
           }
@@ -313,7 +338,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             ordered.push(citation);
           }
 
-          for (const citation of citations) {
+          // Unreferenced leftovers only from the retrieval set — the
+          // citation_map carries every candidate moment and would flood the
+          // sources rail.
+          for (const citation of sourceCitations) {
             if (!seenIds.has(citation.id)) {
               seenIds.add(citation.id);
               ordered.push(citation);

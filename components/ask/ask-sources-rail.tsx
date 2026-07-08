@@ -47,6 +47,20 @@ export function AskSourcesRail({
     );
   }
 
+  // Group moments by episode, preserving first-appearance order — repeated
+  // titles per moment aren't scannable.
+  const groups: { videoId: string; title: string; items: AskCitation[] }[] = [];
+  const byVideo = new Map<string, (typeof groups)[number]>();
+  for (const c of citations) {
+    let g = byVideo.get(c.videoId);
+    if (!g) {
+      g = { videoId: c.videoId, title: c.videoTitle || "Untitled", items: [] };
+      byVideo.set(c.videoId, g);
+      groups.push(g);
+    }
+    g.items.push(c);
+  }
+
   return (
     <aside
       className={cn(
@@ -64,40 +78,46 @@ export function AskSourcesRail({
           ? "retrieving…"
           : `${citations.length} ${citations.length === 1 ? "moment" : "moments"} · ${episodeCount} ${episodeCount === 1 ? "episode" : "episodes"}`}
       </p>
-      <div className="flex flex-col gap-0.5">
-        {citations.map((c) => {
-          const num = displayNumberById?.get(c.id);
-          return (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => onSelect(c)}
-              className={cn(
-                "flex gap-2.5 p-2.5 rounded-lg text-left w-full",
-                "border border-transparent cursor-pointer",
-                "hover:bg-muted transition-colors"
-              )}
-            >
-              <span
-                className={cn(
-                  "shrink-0 w-[18px] h-[18px] mt-px grid place-items-center rounded",
-                  "font-mono text-[10.5px] font-semibold",
-                  "text-signal bg-[var(--signal-soft)] border border-[var(--signal-line)]"
-                )}
-              >
-                {num ?? "·"}
-              </span>
-              <span className="min-w-0">
-                <span className="block text-[12.5px] font-medium text-muted-foreground leading-snug truncate">
-                  {c.videoTitle}
-                </span>
-                <span className="block font-mono text-[11px] text-muted-foreground/60 mt-0.5">
-                  {c.timestampStart}
-                </span>
-              </span>
-            </button>
-          );
-        })}
+      <div className="flex flex-col gap-4">
+        {groups.map((g) => (
+          <div key={g.videoId}>
+            <p className="text-[12.5px] font-medium text-muted-foreground leading-snug mb-1.5 line-clamp-2">
+              {g.title}
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {g.items.map((c) => {
+                const num = displayNumberById?.get(c.id);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => onSelect(c)}
+                    className={cn(
+                      "flex items-center gap-2.5 px-2 py-1.5 -ml-2 rounded-md text-left w-full",
+                      "cursor-pointer hover:bg-muted transition-colors"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "shrink-0 w-[18px] h-[18px] grid place-items-center rounded",
+                        "font-mono text-[10.5px] font-semibold",
+                        "text-signal bg-[var(--signal-soft)] border border-[var(--signal-line)]"
+                      )}
+                    >
+                      {num ?? "·"}
+                    </span>
+                    <span className="font-mono text-[11px] text-muted-foreground/70">
+                      {c.timestampStart}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate text-[11.5px] text-muted-foreground/50">
+                      {c.text}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
     </aside>
   );
