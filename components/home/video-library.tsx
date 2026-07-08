@@ -11,7 +11,7 @@ import React, {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
+import { Github, Loader2, Youtube } from "lucide-react";
 import type { Video } from "@boldvideo/bold-js";
 import { cn } from "@/lib/utils";
 import { buildVideoUrl } from "@/lib/video-path";
@@ -741,13 +741,93 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
 
       {/* Main */}
       <main className="px-5 pt-6 pb-16 md:px-8 md:pt-8 min-w-0">
-        <div className="mb-6">
+        <div className="mb-8">
           <h1 className="font-[family-name:var(--font-heading)] font-bold text-3xl md:text-4xl tracking-tight leading-none">
             {title}
           </h1>
           {subtitle && (
             <p className="text-sm text-muted-foreground mt-2.5">{subtitle}</p>
           )}
+
+          {/* Hosts + canonical homes — this portal is a companion to the
+              show, so it credits the humans and links back out */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
+            <div className="flex items-center gap-2.5">
+              <div className="flex -space-x-2">
+                {/* Plain img: GitHub avatars, tiny and already CDN-optimized */}
+                <img
+                  src="https://github.com/dexhorthy.png?size=56"
+                  alt="Dex Horthy"
+                  width={28}
+                  height={28}
+                  className="w-7 h-7 rounded-full border-2 border-background bg-muted"
+                />
+                <img
+                  src="https://github.com/hellovai.png?size=56"
+                  alt="Vaibhav Gupta"
+                  width={28}
+                  height={28}
+                  className="w-7 h-7 rounded-full border-2 border-background bg-muted"
+                />
+              </div>
+              <span className="text-sm text-muted-foreground">
+                with{" "}
+                <a
+                  href="https://x.com/dexhorthy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  Dex Horthy
+                </a>{" "}
+                <span className="text-muted-foreground/60">(HumanLayer)</span>
+                {" & "}
+                <a
+                  href="https://x.com/vaibcode"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-foreground hover:text-primary transition-colors"
+                >
+                  Vaibhav Gupta
+                </a>{" "}
+                <span className="text-muted-foreground/60">(Boundary)</span>
+              </span>
+            </div>
+
+            <span
+              aria-hidden="true"
+              className="hidden sm:block w-px h-4 bg-border"
+            />
+
+            <div className="flex items-center gap-2">
+              <a
+                href="https://www.youtube.com/@boundaryml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
+              >
+                <Youtube className="h-3.5 w-3.5" />
+                YouTube
+              </a>
+              <a
+                href="https://github.com/ai-that-works/ai-that-works"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
+              >
+                <Github className="h-3.5 w-3.5" />
+                GitHub
+              </a>
+            </div>
+
+            <span className="inline-flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
+              <span className="relative flex h-[7px] w-[7px]">
+                <span className="motion-safe:animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/60" />
+                <span className="relative inline-flex h-[7px] w-[7px] rounded-full bg-primary" />
+              </span>
+              Live on Zoom · Tuesdays 10am PT
+            </span>
+          </div>
         </div>
 
         {/* Topic chips (mobile) — snap scrolling with soft edge fades */}
