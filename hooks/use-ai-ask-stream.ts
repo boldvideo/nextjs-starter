@@ -547,7 +547,18 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
         });
       }
 
-      for (const msg of data.messages) {
+      // The API has returned messages newest-first; the Q&A pairing needs
+      // chronological order (user question, then assistant answer).
+      const ordered = [...data.messages].sort((a, b) => {
+        const ta = a.insertedAt ? Date.parse(a.insertedAt) : 0;
+        const tb = b.insertedAt ? Date.parse(b.insertedAt) : 0;
+        if (ta !== tb) return ta - tb;
+        // Same timestamp: the user asks before the assistant answers
+        if (a.role !== b.role) return a.role === "user" ? -1 : 1;
+        return 0;
+      });
+
+      for (const msg of ordered) {
         loadedMessages.push({
           id: msg.id,
           role: msg.role,
