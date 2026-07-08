@@ -204,7 +204,16 @@ export default async function RootLayout({
         className="bg-background flex flex-col h-[100dvh] overflow-hidden lg:overflow-auto"
         suppressHydrationWarning
       >
-        <Analytics config={config.analytics} />
+        {/* Fork default: aithatworks Plausible site. Tenant analytics
+            settings take precedence once configured in superadmin. */}
+        <Analytics
+          config={
+            config.analytics ?? {
+              provider: "plausible",
+              id: "pa-E7GAywJ_EFfrEr3f768UL",
+            }
+          }
+        />
         <BoldProvider
           token={tenantToken}
           baseURL={process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1"}

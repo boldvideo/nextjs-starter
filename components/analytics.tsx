@@ -12,6 +12,24 @@ export function Analytics({ config }: AnalyticsProps) {
 
   switch (provider) {
     case "plausible":
+      // New tracker: per-site script id ("pa-…") from the install wizard.
+      // Feature toggles (outbound links etc.) are baked into the hosted
+      // script, so the id is all we need. The queue stub makes load order
+      // between the two tags irrelevant.
+      if (id.startsWith("pa-")) {
+        return (
+          <>
+            <Script
+              src={`https://plausible.io/js/${id}.js`}
+              strategy="afterInteractive"
+            />
+            <Script id="plausible-init" strategy="afterInteractive">
+              {`window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init();`}
+            </Script>
+          </>
+        );
+      }
+      // Legacy tracker: id is the site domain
       return (
         <Script
           src="https://plausible.io/js/script.js"
