@@ -749,30 +749,44 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
               title="HumanLayer"
               className="group/tile flex items-center justify-center h-16 rounded-lg border border-border bg-surface hover:border-primary/40 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
             >
-              {/* Plain img: GitHub org avatars, already CDN-sized */}
-              <img
-                src="https://github.com/humanlayer.png?size=120"
-                alt="HumanLayer"
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-md"
+              {/* Official wordmark ships as fill="currentColor" — masked so it
+                  takes our foreground color on the dark surface */}
+              <span
+                role="img"
+                aria-label="HumanLayer"
+                className="h-5 w-36 bg-foreground/85 group-hover/tile:bg-foreground transition-colors duration-150"
+                style={{
+                  WebkitMaskImage: "url(/logos/humanlayer-full.svg)",
+                  maskImage: "url(/logos/humanlayer-full.svg)",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskPosition: "center",
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                }}
               />
             </a>
+            {/* Brand-accurate card: boundaryml.com header on its cream
+                background — sheep left, mono BAML wordmark in ink */}
             <a
               href="https://boundaryml.com"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Boundary (BAML)"
-              title="Boundary (BAML)"
-              className="group/tile flex items-center justify-center h-16 rounded-lg border border-border bg-surface hover:border-primary/40 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
+              aria-label="BAML by Boundary"
+              title="BAML by Boundary"
+              className="group/tile flex items-center justify-center gap-2.5 h-16 rounded-lg border border-[#d9d3c4] bg-[#fbf7ed] hover:border-[#b9b19d] transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
             >
               <img
-                src="https://github.com/boundaryml.png?size=120"
-                alt="Boundary (BAML)"
-                width={40}
-                height={40}
-                className="w-10 h-10 rounded-md"
+                src="/logos/baml-sheep.png"
+                alt=""
+                width={32}
+                height={32}
+                className="w-8 h-8"
               />
+              <span className="font-mono text-[15px] font-semibold tracking-[0.02em] text-[#141414]">
+                BAML
+              </span>
             </a>
           </div>
         </div>
