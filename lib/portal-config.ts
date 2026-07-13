@@ -212,15 +212,15 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // Determine homepage layout
   const homepageLayout = (layoutOverride ?? settings.portal?.layout?.type ?? 'library') as 'none' | 'library' | 'assistant';
 
-  // Show the Ask pill in the header whenever the AI assistant is enabled
-  // (and AI isn't already the homepage). Deliberately NOT tied to the
-  // separate "AI search" feature — /ask runs on ai.enabled, and disabling
-  // AI search in admin shouldn't remove the portal's hero nav element.
-  const showAiInHeader = aiEnabled && homepageLayout !== 'assistant';
+  // Show the Ask pill in the header when AI is enabled AND the tenant's
+  // "Enable AI Search" feature is on (its admin copy promises the button
+  // hides when disabled) — and AI isn't already the homepage.
+  const showAiInHeader =
+    aiEnabled && aiSearchEnabled && homepageLayout !== 'assistant';
 
-  // The "search with AI" toggle inside the search dialog does depend on the
-  // AI search feature.
-  const showAiSearchToggle = showAiInHeader && aiSearchEnabled;
+  // The "search with AI" toggle inside the search dialog follows the same
+  // feature switch.
+  const showAiSearchToggle = showAiInHeader;
 
   // Smart header visibility:
   // 1. Use explicit showHeader setting from API (SDK 0.6.0+)
