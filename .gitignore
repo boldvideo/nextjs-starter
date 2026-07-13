@@ -43,3 +43,6 @@ CLAUDE.md
 hack
 thoughts
 .env*.local
+
+# Riptide artifacts (cloud-synced)
+.humanlayer/tasks/
