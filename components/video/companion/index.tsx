@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { MessageSquare, List } from "lucide-react";
+import { useState, useEffect, type RefObject } from "react";
+import { MessageSquare, List, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Sidebar,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import { ChaptersSidebar } from "./chapters-sidebar";
 import { AIAssistant } from "../chat";
+import { Transcript } from "@/components/transcript";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 
 interface VideoCompanionSidebarProps {
@@ -26,13 +27,16 @@ interface VideoCompanionSidebarProps {
   endpoint?: string;
   onChapterClick: (time: number) => void;
   hasChapters?: boolean;
+  /** WEBVTT/JSON transcript URL — adds a Transcript tab when present */
+  transcriptUrl?: string;
+  playerRef?: RefObject<HTMLVideoElement | null>;
 
   // Visual props
   className?: string;
 }
 
 const TAB_STORAGE_KEY = "bold-video-companion-tab";
-type CompanionTab = "chat" | "chapters";
+type CompanionTab = "chat" | "chapters" | "transcript";
 
 export function VideoCompanionSidebar({
   videoId,
@@ -47,6 +51,8 @@ export function VideoCompanionSidebar({
   onChapterClick,
   className,
   hasChapters = true,
+  transcriptUrl,
+  playerRef,
 }: VideoCompanionSidebarProps) {
   const { right, isMobile, setRightCollapsed, setRightOpen } =
     useSidebar();
@@ -67,7 +73,11 @@ export function VideoCompanionSidebar({
     if (typeof window === "undefined") return;
     try {
       const stored = localStorage.getItem(TAB_STORAGE_KEY);
-      if (stored === "chat" || stored === "chapters") {
+      if (
+        stored === "chat" ||
+        stored === "chapters" ||
+        stored === "transcript"
+      ) {
         setActiveTab(stored as CompanionTab);
       }
     } catch (e) {
@@ -90,6 +100,9 @@ export function VideoCompanionSidebar({
   const tabs = [
     { id: "chat" as const, label: "Chat", icon: MessageSquare },
     { id: "chapters" as const, label: "Chapters", icon: List },
+    ...(transcriptUrl
+      ? [{ id: "transcript" as const, label: "Transcript", icon: FileText }]
+      : []),
   ];
 
   return (
@@ -189,6 +202,16 @@ export function VideoCompanionSidebar({
                       No chapters available
                     </div>
                   )}
+                </div>
+              )}
+
+              {activeTab === "transcript" && transcriptUrl && playerRef && (
+                <div className="h-full min-h-0 overflow-y-auto px-3 py-4">
+                  <Transcript
+                    url={transcriptUrl}
+                    onCueClick={onChapterClick}
+                    playerRef={playerRef}
+                  />
                 </div>
               )}
             </>

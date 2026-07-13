@@ -23,6 +23,8 @@ import ChatTab from "../mobile/chat-tab";
 import InfoTab from "../mobile/info-tab";
 import { buildVideoUrl } from "@/lib/video-path";
 import { MobileVideoMeta } from "./mobile-video-meta";
+import { Breadcrumb } from "@/components/providers/breadcrumb-provider";
+import { getPortalConfig } from "@/lib/portal-config";
 
 interface VideoDetailProps {
   video: ExtendedVideo;
@@ -41,6 +43,9 @@ export function VideoDetail({
 }: VideoDetailProps): React.JSX.Element {
   const router = useRouter();
   const playerRef = useRef<HTMLVideoElement | null>(null);
+
+  // Single source of truth for AI name/avatar/greeting (account.ai settings)
+  const aiConfig = getPortalConfig(settings).ai;
 
   const { setHasPlaylist, isAutoplay } = usePlaylist();
 
@@ -86,6 +91,7 @@ export function VideoDetail({
 
   return (
     <AIAssistantProvider onTimeClick={handleTimeSelect}>
+      <Breadcrumb label={video.title} />
       <VideoDetailLayout
         hasPlaylist={!!playlist}
         className={className}
@@ -127,12 +133,14 @@ export function VideoDetail({
             videoId={video.id}
             playbackId={video.playbackId}
             chaptersWebVTT={video.chapters || ""}
-            aiName={settings?.aiName || "AI Assistant"}
-            aiAvatar={settings?.aiAvatar || "/default-avatar.png"}
+            aiName={aiConfig.name}
+            aiAvatar={aiConfig.avatar || "/default-avatar.png"}
             subdomain={""}
-            greeting={settings?.aiGreeting}
+            greeting={aiConfig.greeting}
             onChapterClick={handleTimeSelect}
             hasChapters={Boolean(video.chapters)}
+            transcriptUrl={video.transcript?.json?.url}
+            playerRef={playerRef}
             className="z-[35]"
           />
         }

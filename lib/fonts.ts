@@ -12,6 +12,9 @@ import {
   Roboto,
   Economica,
   Bricolage_Grotesque,
+  Space_Grotesk,
+  DM_Sans,
+  JetBrains_Mono,
 } from "next/font/google";
 
 // Pre-load all fonts at build time
@@ -97,6 +100,27 @@ const bricolageGrotesque = Bricolage_Grotesque({
   display: "swap",
 });
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
 // All font instances for className injection
 export const fontInstances = {
   inter,
@@ -112,6 +136,9 @@ export const fontInstances = {
   roboto,
   economica,
   bricolageGrotesque,
+  spaceGrotesk,
+  dmSans,
+  jetbrainsMono,
 };
 
 // Map font names (as they come from API) to CSS variables
@@ -130,6 +157,9 @@ const fontNameToVar: Record<string, string> = {
   "Roboto": "var(--font-roboto)",
   "Economica": "var(--font-economica)",
   "Bricolage Grotesque": "var(--font-bricolage-grotesque)",
+  "Space Grotesk": "var(--font-space-grotesk)",
+  "DM Sans": "var(--font-dm-sans)",
+  "JetBrains Mono": "var(--font-jetbrains-mono)",
 };
 
 // Default font (Inter)

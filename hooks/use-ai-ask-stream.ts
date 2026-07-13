@@ -19,6 +19,12 @@ export interface AIAskMessage {
   content: string;
   type: "text" | "answer" | "error" | "loading";
   sources?: AIAskSource[];
+  /**
+   * citation_map entries (stable c_xxx ids → source metadata) streamed
+   * before the first text delta so inline refs resolve mid-stream. Kept
+   * separate from `sources`: only text-referenced entries surface in the UI.
+   */
+  citationSources?: AIAskSource[];
   attachments?: ChatAttachment[];
 }
 
@@ -259,6 +265,18 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                   prev.map((msg) =>
                     msg.id === messageId
                       ? { ...msg, sources: accumulatedSources }
+                      : msg
+                  )
+                );
+                break;
+
+              // Arrives before the first text_delta: stable c_xxx id → source
+              // metadata, so inline [c_xxx] refs resolve while streaming.
+              case "citation_map":
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === messageId
+                      ? { ...msg, citationSources: event.sources || [] }
                       : msg
                   )
                 );
@@ -529,7 +547,18 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
         });
       }
 
-      for (const msg of data.messages) {
+      // The API has returned messages newest-first; the Q&A pairing needs
+      // chronological order (user question, then assistant answer).
+      const ordered = [...data.messages].sort((a, b) => {
+        const ta = a.insertedAt ? Date.parse(a.insertedAt) : 0;
+        const tb = b.insertedAt ? Date.parse(b.insertedAt) : 0;
+        if (ta !== tb) return ta - tb;
+        // Same timestamp: the user asks before the assistant answers
+        if (a.role !== b.role) return a.role === "user" ? -1 : 1;
+        return 0;
+      });
+
+      for (const msg of ordered) {
         loadedMessages.push({
           id: msg.id,
           role: msg.role,

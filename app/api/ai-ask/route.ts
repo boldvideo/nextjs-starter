@@ -110,6 +110,30 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         message: (event as any).message,
       });
 
+    // Bold emits this BEFORE the first text_delta: stable c_xxx id → source
+    // metadata, so inline [c_xxx] refs can resolve while streaming. Not in
+    // the SDK's typed union yet, but parseSSE passes it through.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    case "citation_map" as any: {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const map = (event as any).citationMap as Record<string, any> | undefined;
+      if (!map) return null;
+      return JSON.stringify({
+        type: "citation_map",
+        sources: Object.values(map).map((s) => ({
+          id: s.id,
+          video_id: s.videoId,
+          title: s.title,
+          timestamp: s.timestamp ?? s.timestampSeconds,
+          timestamp_end: s.timestampEnd ?? s.timestampEndSeconds,
+          text: s.text,
+          playback_id: s.playbackId ?? s.muxPlaybackId,
+          speaker: s.speakerName ?? undefined,
+          cited: s.cited,
+        })),
+      });
+    }
+
     default:
       return null;
   }

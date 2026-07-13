@@ -25,6 +25,8 @@
   /* Legacy tokens mapped to new system */
   --color-secondary-foreground: var(--muted-foreground);
   --color-secondary: var(--muted);
+  /* Amber citation signal (Ask sources) */
+  --color-signal: var(--signal);
   --color-card-foreground: var(--foreground);
   --color-card: var(--surface);
   --color-popover-foreground: var(--foreground);
@@ -57,6 +59,10 @@
   --accent: oklch(0.73 0.12 175);
   --accent-foreground: oklch(0.22 0.04 175);
   --primary: oklch(0.73 0.12 175);
+  /* Amber "signal" for citations and provenance */
+  --signal: #b45309;
+  --signal-soft: rgba(180, 83, 9, 0.1);
+  --signal-line: rgba(180, 83, 9, 0.32);
   /* Derived tokens */
   --input: var(--border);
   --destructive: oklch(0.577 0.245 27.325);
@@ -74,6 +80,9 @@
   --accent: oklch(0.73 0.12 175);
   --accent-foreground: oklch(0.18 0.02 175);
   --primary: oklch(0.73 0.12 175);
+  --signal: #f0b429;
+  --signal-soft: rgba(240, 180, 41, 0.13);
+  --signal-line: rgba(240, 180, 41, 0.32);
   /* Derived tokens */
   --input: oklch(1 0 0 / 15%);
   --destructive: oklch(0.704 0.191 22.216);
@@ -129,5 +138,35 @@
   
   .animate-shimmer-text {
     animation: shimmer-text 3s ease-in-out infinite;
+  }
+
+  @keyframes cursor-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Storyboard-sheet loading sweep along a thumbnail's bottom edge */
+  @keyframes scrub-loading {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+
+  /* Streaming caret that rides inline at the end of the last rendered block
+     (instead of blinking on its own line below the text). */
+  .chat-stream-cursor > :last-child::after {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 1.05em;
+    margin-left: 3px;
+    border-radius: 9999px;
+    vertical-align: -0.15em;
+    background-color: color-mix(in srgb, var(--color-primary) 75%, transparent);
+    animation: cursor-blink 1s steps(2) infinite;
   }
 }

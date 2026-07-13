@@ -20,7 +20,10 @@ export function HeaderSearch({ className }: HeaderSearchProps) {
   return (
     <div className="flex items-center gap-4">
       {config.ai.showInHeader && (
-        <AskAiButton personaName={config.ai.name} />
+        <AskAiButton
+          personaName={config.ai.name}
+          personaAvatar={config.ai.avatar}
+        />
       )}
       <SearchBar className={className} />
     </div>

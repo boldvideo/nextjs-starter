@@ -22,7 +22,13 @@ export async function generateMetadata({
   const { data } = await context.client.videos.get(id);
   const video = data as ExtendedVideo;
   const description = video.teaser || video.description || "";
-  
+
+  // Mux thumbnails are guaranteed JPEG (imported thumbs can be WebP behind a
+  // .jpg name, which some scrapers can't parse).
+  const ogThumb = video.playbackId
+    ? `https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=1200&fit_mode=preserve`
+    : video.thumbnail;
+
   return {
     title: video.title,
     description,
@@ -31,7 +37,7 @@ export async function generateMetadata({
       description,
       images: [
         {
-          url: video.thumbnail,
+          url: ogThumb,
           width: 1200,
           height: 630,
         },

@@ -2,6 +2,7 @@ import React from "react";
 import { VideoThumbnail } from "@/components/video-thumbnail";
 import { FeaturedPlaylist } from "@/components/featured-playlist";
 import { HeroSlot } from "@/components/home/hero-slot";
+import { ContinueWatching } from "@/components/home/continue-watching";
 import type { Video, Playlist } from "@boldvideo/bold-js";
 import type { PortalSettings, PortalConfig } from "@/lib/portal-config";
 
@@ -27,6 +28,8 @@ export function LibraryHomepage({
   return (
     <div className="p-5 md:p-10 max-w-screen-2xl mx-auto overflow-y-auto">
       <HeroSlot settings={settings} config={config} />
+      {/* Continue watching — local progress, renders nothing without records */}
+      {hasVideos && <ContinueWatching videos={videos} />}
       {/* Videos Section */}
       {hasVideos && (
         <section>
@@ -39,7 +42,7 @@ export function LibraryHomepage({
           >
             {videos.map((video) => (
               <li key={video.id}>
-                <VideoThumbnail video={video} prefetch={true} />
+                <VideoThumbnail video={video} prefetch={true} scrub />
               </li>
             ))}
           </ul>

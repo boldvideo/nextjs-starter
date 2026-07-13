@@ -8,8 +8,10 @@
  * import { Player } from "@/components/players"; // Default export
  */
 
-// Export player implementation
+// Export player implementations
 export { MuxPlayerComponent as MuxPlayer } from "./player-mux";
+export { YouTubePlayerComponent as YouTubePlayer } from "./player-youtube";
 
-// Default player export
-export { MuxPlayerComponent as Player } from "./player-mux";
+// Default player: Mux for native playback, a real YouTube embed when the
+// video's playback_mode is flipped to play from source.
+export { SmartPlayer as Player } from "./player-smart";

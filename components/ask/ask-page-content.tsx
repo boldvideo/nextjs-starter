@@ -3,10 +3,11 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { PersonaAvatar } from "@/components/persona-avatar";
 import {
   useAIAskStream,
   askSourceToCitation,
+  type AIAskSource,
 } from "@/hooks/use-ai-ask-stream";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { AskMessageCard } from "./ask-message-card";
 import { AskSourcesCarousel } from "./ask-sources-carousel";
+import { AskSourcesRail } from "./ask-sources-rail";
 
 import { AskVideoPanel } from "./ask-video-panel";
 import { AskEmptyState } from "./ask-empty-state";
@@ -23,12 +25,17 @@ import { AskReadOnlyFooter } from "./ask-read-only-footer";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
+import { PoweredByBold } from "@/components/powered-by-bold";
 
 type PageState =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "ready" }
   | { status: "error"; message: string };
+
+// Shared empty map so pairs without citations keep a stable prop identity
+// across re-renders (memo hygiene for AskMessageCard's sections).
+const EMPTY_DISPLAY_MAP = new Map<string, number>();
 
 interface AskPageContentProps {
   conversationId?: string;
@@ -45,14 +52,14 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const multimodal = config.ai.multimodal;
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
-  const greeting = config.ai.greeting || "How can I help you today?";
+  const greeting = config.ai.greeting || "What do you want to know?";
   const chatDisclaimer = config.ai.chatDisclaimer;
   
+  // Deterministic pick — shuffling with Math.random() here caused a
+  // server/client hydration mismatch.
   const suggestions = useMemo(() => {
     const starters = config.ai.conversationStarters || [];
-    if (starters.length <= 4) return starters;
-    const shuffled = [...starters].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 4);
+    return starters.slice(0, 4);
   }, [config.ai.conversationStarters]);
 
   const [pageState, setPageState] = useState<PageState>(
@@ -91,6 +98,17 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     null
   );
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  // The rail (desktop) and the overlay (mobile) both embed a video player —
+  // gate on the breakpoint so only one is ever mounted.
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mq.matches);
+    const update = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const hasInitializedRef = useRef(false);
   const prevRouteConversationIdRef = useRef<string | undefined>(routeConversationId);
@@ -189,13 +207,35 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     window.history.replaceState(null, "", "/ask");
   }, [reset]);
 
+  // Header "Ask …" pill starts a new chat even when this page is already
+  // mounted with an active conversation.
+  useEffect(() => {
+    const onNewChat = () => {
+      stop();
+      reset();
+      setQuery("");
+      setSelectedCitation(null);
+      setIsPanelOpen(false);
+      setPageState({ status: "idle" });
+      window.history.replaceState(null, "", "/ask");
+    };
+    window.addEventListener("bold:ask-new-chat", onNewChat);
+    return () => window.removeEventListener("bold:ask-new-chat", onNewChat);
+  }, [reset, stop]);
+
   const handleCitationClick = useCallback((citation: AskCitation) => {
     setSelectedCitation(citation);
     setIsPanelOpen(true);
   }, []);
 
+  const handleSelectCitation = useCallback((citation: AskCitation | null) => {
+    setSelectedCitation(citation);
+    setIsPanelOpen(!!citation);
+  }, []);
+
   const handleClosePanel = useCallback(() => {
     setIsPanelOpen(false);
+    setSelectedCitation(null);
   }, []);
 
   // Handle clicking a suggestion in read-only mode
@@ -206,6 +246,33 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       router.push(`/ask?q=${encodeURIComponent(suggestion)}`, { scroll: false });
     },
     [router]
+  );
+
+  // Per-message caches keyed by assistant message id. Citation arrays and the
+  // display-number map keep a stable identity across text_delta re-renders so
+  // the memoized markdown sections in AskMessageCard don't re-parse the whole
+  // answer on every streamed chunk.
+  const citationsCacheRef = useRef(
+    new Map<
+      string,
+      {
+        sources?: AIAskSource[];
+        extras?: AIAskSource[];
+        sourceCitations: AskCitation[];
+        citations: AskCitation[];
+      }
+    >()
+  );
+  const displayMapCacheRef = useRef(
+    new Map<
+      string,
+      {
+        citations: AskCitation[];
+        orderKey: string;
+        ordered: AskCitation[];
+        map: Map<string, number>;
+      }
+    >()
   );
 
   // Group messages into Q&A pairs for display
@@ -223,13 +290,47 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       if (msg.role === "user") {
         const assistantMsg =
           messages[i + 1]?.role === "assistant" ? messages[i + 1] : null;
-        const citations =
-          assistantMsg?.sources?.map((s, idx) => askSourceToCitation(s, idx)) ||
-          [];
 
-        // Compute citation ordering for this pair
-        let orderedCitations = citations;
-        const displayMap = new Map<string, number>();
+        // Retrieved sources resolve positional [1]-style refs; citation_map
+        // entries (stable c_xxx ids) are appended so [c_xxx] refs resolve
+        // during streaming. Appending keeps numeric indices untouched.
+        let sourceCitations: AskCitation[] = [];
+        let citations: AskCitation[] = [];
+        if (assistantMsg) {
+          const cached = citationsCacheRef.current.get(assistantMsg.id);
+          if (
+            cached &&
+            cached.sources === assistantMsg.sources &&
+            cached.extras === assistantMsg.citationSources
+          ) {
+            ({ sourceCitations, citations } = cached);
+          } else {
+            sourceCitations =
+              assistantMsg.sources?.map((s, idx) =>
+                askSourceToCitation(s, idx)
+              ) || [];
+            const seenIds = new Set(sourceCitations.map((c) => c.id));
+            const extraCitations = (assistantMsg.citationSources || [])
+              .filter((s) => s.id && !seenIds.has(s.id))
+              .map((s, idx) =>
+                askSourceToCitation(s, sourceCitations.length + idx)
+              );
+            citations = [...sourceCitations, ...extraCitations];
+            citationsCacheRef.current.set(assistantMsg.id, {
+              sources: assistantMsg.sources,
+              extras: assistantMsg.citationSources,
+              sourceCitations,
+              citations,
+            });
+          }
+        }
+
+        // Compute citation ordering for this pair. While the answer streams,
+        // only text-referenced moments surface (append-only, stable numbers);
+        // leftovers from the retrieval set join at rest.
+        const stillStreaming = isStreaming && i >= messages.length - 2;
+        let orderedCitations = stillStreaming ? [] : citations;
+        let displayMap = EMPTY_DISPLAY_MAP;
 
         if (assistantMsg?.content && citations.length > 0) {
           const matches = Array.from(
@@ -256,15 +357,41 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             ordered.push(citation);
           }
 
-          for (const citation of citations) {
-            if (!seenIds.has(citation.id)) {
-              seenIds.add(citation.id);
-              ordered.push(citation);
+          // Unreferenced leftovers only from the retrieval set — the
+          // citation_map carries every candidate moment and would flood the
+          // sources rail.
+          if (!stillStreaming) {
+            for (const citation of sourceCitations) {
+              if (!seenIds.has(citation.id)) {
+                seenIds.add(citation.id);
+                ordered.push(citation);
+              }
             }
           }
 
-          orderedCitations = ordered;
-          ordered.forEach((c, idx) => displayMap.set(c.id, idx + 1));
+          // Reuse the cached ordered array + display map when the order hasn't
+          // changed, so identities stay stable across streamed deltas.
+          const orderKey = ordered.map((c) => c.id).join(",");
+          const cachedOrder = displayMapCacheRef.current.get(assistantMsg.id);
+          if (
+            cachedOrder &&
+            cachedOrder.citations === citations &&
+            cachedOrder.orderKey === orderKey
+          ) {
+            orderedCitations = cachedOrder.ordered;
+            displayMap = cachedOrder.map;
+          } else {
+            const map = new Map<string, number>();
+            ordered.forEach((c, idx) => map.set(c.id, idx + 1));
+            orderedCitations = ordered;
+            displayMap = map;
+            displayMapCacheRef.current.set(assistantMsg.id, {
+              citations,
+              orderKey,
+              ordered,
+              map,
+            });
+          }
         }
 
         pairs.push({
@@ -278,11 +405,18 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     }
 
     return pairs;
-  }, [messages]);
+  }, [messages, isStreaming]);
 
-  const placeholder = "Ask a follow up question";
+  const placeholder = "Ask a follow-up…";
 
   const hasMessages = messages.length > 0;
+
+  // "Ask" prefix is rendered separately in the thread head — strip it from
+  // the configured name (e.g. "Ask Anton" → "Anton").
+  const personaDisplayName = aiName.replace(/^ask\s+/i, "");
+
+  // The sources rail always reflects the latest answer.
+  const lastPair = qaPairs[qaPairs.length - 1];
 
   if (pageState.status === "loading") {
     return <AskLoadingState />;
@@ -302,6 +436,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         suggestions={suggestions}
         placeholder="What's on your mind?"
         disclaimer={chatDisclaimer}
+        onAsk={(q) => streamQuestion(q)}
         multimodalEnabled={multimodal.enabled}
         images={images}
         onImagesChange={setImages}
@@ -313,50 +448,43 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   return (
     <div className="flex flex-1 min-h-0 w-full overflow-hidden">
-      <div
-        className={cn(
-          "flex flex-col flex-1 min-h-0 w-full transition-all duration-300",
-          isPanelOpen ? "mr-0 lg:mr-[500px] xl:mr-[600px]" : ""
-        )}
-      >
-        {/* Header */}
-        <div className="shrink-0 flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            {aiAvatar && (
-              <Image
-                src={aiAvatar}
-                alt={aiName}
-                width={36}
-                height={36}
-                className="rounded-full"
-              />
-            )}
-            <h1 className="text-lg md:text-xl font-semibold">{aiName}</h1>
-          </div>
-          <button
-            onClick={handleReset}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer",
-              "text-muted-foreground hover:text-foreground hover:bg-accent transition-colors",
-              "text-sm"
-            )}
-            title="Start new chat"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">New Chat</span>
-          </button>
-        </div>
-
+      <div className="flex flex-col flex-1 min-h-0 min-w-0">
         {/* Scrollable content area */}
         <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto">
-          <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-12">
+          <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8">
+            {/* Thread head — lives inside the content column */}
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-2.5">
+                <PersonaAvatar name={personaDisplayName} avatar={aiAvatar} size={30} />
+                <span className="font-[family-name:var(--font-heading)] text-base tracking-tight">
+                  <span className="text-muted-foreground/70 font-normal mr-1.5">
+                    Ask
+                  </span>
+                  <span className="font-semibold">{personaDisplayName}</span>
+                </span>
+              </div>
+              <button
+                onClick={handleReset}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer",
+                  "text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
+                  "text-sm whitespace-nowrap"
+                )}
+                title="Start new chat"
+              >
+                <Plus className="h-[15px] w-[15px]" />
+                <span className="hidden sm:inline">New chat</span>
+              </button>
+            </div>
+
+            <div className="space-y-12">
             {qaPairs.map((pair, pairIndex) => {
               const isLastPair = pairIndex === qaPairs.length - 1;
               const isCurrentlyStreaming = isStreaming && isLastPair;
 
               return (
-                <div 
-                  key={pair.userMessage.id} 
+                <div
+                  key={pair.userMessage.id}
                   className="space-y-8"
                   {...(isCurrentlyStreaming ? { "data-streaming-message": true } : {})}
                 >
@@ -364,13 +492,20 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   {pair.userMessage.attachments && pair.userMessage.attachments.length > 0 && (
                     <AttachmentThumbnails attachments={pair.userMessage.attachments} />
                   )}
-                  <h2 className="text-2xl font-semibold">{pair.userMessage.content}</h2>
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 mt-[7px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70 border border-border rounded px-1.5 py-[3px]">
+                      You
+                    </span>
+                    <h2 className="font-[family-name:var(--font-heading)] font-semibold text-2xl md:text-3xl tracking-tight leading-[1.15]">
+                      {pair.userMessage.content}
+                    </h2>
+                  </div>
 
                   {/* Loading state */}
                   {pair.assistantMessage?.type === "loading" && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">{statusMessage || "Thinking..."}</span>
+                      <span className="text-sm">{statusMessage || "Reading across the series…"}</span>
                     </div>
                   )}
 
@@ -391,16 +526,19 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                       onCitationClick={handleCitationClick}
                       isStreaming={isCurrentlyStreaming}
                       citationDisplayNumberById={pair.citationDisplayNumberById}
+                      selectedCitationId={selectedCitation?.id}
                     />
                   )}
 
-                  {/* Video sources carousel - below text */}
+                  {/* Video sources carousel — mobile only; desktop uses the rail */}
                   {pair.orderedCitations.length > 0 && !isCurrentlyStreaming && (
-                    <AskSourcesCarousel
-                      citations={pair.orderedCitations}
-                      onCitationClick={handleCitationClick}
-                      selectedCitationId={selectedCitation?.id}
-                    />
+                    <div className="lg:hidden">
+                      <AskSourcesCarousel
+                        citations={pair.orderedCitations}
+                        onCitationClick={handleCitationClick}
+                        selectedCitationId={selectedCitation?.id}
+                      />
+                    </div>
                   )}
 
                   {/* Divider between Q&A pairs (not after the last one) */}
@@ -410,6 +548,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 </div>
               );
             })}
+            </div>
           </div>
         </div>
 
@@ -449,16 +588,34 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 maxImages={multimodal.maxImages}
                 acceptedMediaTypes={multimodal.acceptedMediaTypes}
               />
+              {/* The moment of wow is a cited answer — that's when this sells */}
+              <div className="flex justify-center mt-2">
+                <PoweredByBold variant="pitch" />
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      <AskVideoPanel
-        citation={selectedCitation}
-        isOpen={isPanelOpen}
-        onClose={handleClosePanel}
-      />
+      {/* Sources rail (desktop) — expands into the video source panel */}
+      {isDesktop && (
+        <AskSourcesRail
+          citations={lastPair?.orderedCitations ?? []}
+          displayNumberById={lastPair?.citationDisplayNumberById}
+          selectedCitation={selectedCitation}
+          onSelect={handleSelectCitation}
+          isStreaming={isStreaming}
+        />
+      )}
+
+      {/* Mobile: video source overlay */}
+      {!isDesktop && (
+        <AskVideoPanel
+          citation={selectedCitation}
+          isOpen={isPanelOpen}
+          onClose={handleClosePanel}
+        />
+      )}
     </div>
   );
 }

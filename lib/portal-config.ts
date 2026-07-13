@@ -161,12 +161,19 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   const persona = (settings.account as any)?.persona;
   const personaEnabled = persona?.enabled === true;
 
-  // Override AI name/greeting from persona if enabled, with fallbacks
-  const legacyAiName = settings.account?.ai?.name ?? settings.aiName ?? 'AI Assistant';
-  const legacyAiGreeting = settings.account?.ai?.greeting ?? settings.aiGreeting ?? 'Hello! How can I help you today?';
-
-  const aiName = personaEnabled && persona.name ? persona.name : legacyAiName;
-  const aiGreeting = personaEnabled && persona.greeting ? persona.greeting : legacyAiGreeting;
+  // The AI settings (account.ai) are the source of truth for name/greeting —
+  // the persona block often carries stale duplicates, so it only fills gaps.
+  // (Its conversation starters are still used below.)
+  const aiName =
+    settings.account?.ai?.name ??
+    (personaEnabled ? persona?.name : undefined) ??
+    settings.aiName ??
+    'AI Assistant';
+  const aiGreeting =
+    settings.account?.ai?.greeting ??
+    (personaEnabled ? persona?.greeting : undefined) ??
+    settings.aiGreeting ??
+    'Hello! How can I help you today?';
 
   // Conversation starters: persona first, then assistant_config, then defaults
   const defaultStarters = [
@@ -205,13 +212,15 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // Determine homepage layout
   const homepageLayout = (layoutOverride ?? settings.portal?.layout?.type ?? 'library') as 'none' | 'library' | 'assistant';
 
-  // Smart derivation: Show AI toggle in header if:
-  // 1. AI is enabled
-  // 2. AI search is enabled
-  // 3. AI is NOT the primary homepage (to avoid duplication)
-  const showAiInHeader = aiEnabled &&
-                         aiSearchEnabled &&
-                         homepageLayout !== 'assistant';
+  // Show the Ask pill in the header whenever the AI assistant is enabled
+  // (and AI isn't already the homepage). Deliberately NOT tied to the
+  // separate "AI search" feature — /ask runs on ai.enabled, and disabling
+  // AI search in admin shouldn't remove the portal's hero nav element.
+  const showAiInHeader = aiEnabled && homepageLayout !== 'assistant';
+
+  // The "search with AI" toggle inside the search dialog does depend on the
+  // AI search feature.
+  const showAiSearchToggle = showAiInHeader && aiSearchEnabled;
 
   // Smart header visibility:
   // 1. Use explicit showHeader setting from API (SDK 0.6.0+)
@@ -252,7 +261,7 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     },
     navigation: {
       showSearch: settings.portal?.navigation?.showSearch ?? true,
-      showAiToggle: showAiInHeader,
+      showAiToggle: showAiSearchToggle,
       showHeader: showHeader
     },
     display: {

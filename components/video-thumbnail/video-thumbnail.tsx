@@ -4,6 +4,7 @@ import { formatRelative } from "date-fns/formatRelative";
 import { formatDuration } from "util/format-duration";
 import { ProgressBar } from "../progress-bar";
 import { CompletionIndicator } from "../completion-indicator";
+import { ScrubOverlay } from "./scrub-overlay";
 import type { Video } from "@boldvideo/bold-js";
 import { buildVideoUrl } from "@/lib/video-path";
 
@@ -15,6 +16,8 @@ interface VideoThumbnailProps {
     percentWatched: number;
     completed: boolean;
   } | null;
+  /** Enable storyboard scrub-on-hover (needs a Mux playback id). */
+  scrub?: boolean;
 }
 
 export function VideoThumbnail({
@@ -22,6 +25,7 @@ export function VideoThumbnail({
   prefetch = false,
   playlistId,
   progress,
+  scrub = false,
 }: VideoThumbnailProps) {
 
   return (
@@ -38,13 +42,24 @@ export function VideoThumbnail({
         {/* Progress bar overlay */}
         {progress && <ProgressBar percentWatched={progress.percentWatched} completed={progress.completed} />}
 
-        {/* Duration badge or completion indicator */}
+        {/* Duration badge or completion indicator; the scrub overlay owns the
+            duration badge when enabled (it morphs into the jump affordance) */}
         {progress?.completed ? (
           <CompletionIndicator completed={true} />
         ) : (
-          <span className="bg-black text-white absolute px-2 py-1 font-semibold text-sm bottom-3 right-3 rounded-md">
-            {formatDuration(video.duration)}
-          </span>
+          !scrub && (
+            <span className="bg-black text-white absolute px-2 py-1 font-semibold text-sm bottom-3 right-3 rounded-md">
+              {formatDuration(video.duration)}
+            </span>
+          )
+        )}
+
+        {scrub && (
+          <ScrubOverlay
+            video={video}
+            playlistId={playlistId}
+            showDuration={!progress?.completed}
+          />
         )}
       </div>
       <h3 className="mt-4 font-semibold text-lg tracking-tight leading-snug">

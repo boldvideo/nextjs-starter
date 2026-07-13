@@ -2,6 +2,8 @@
 import { Suspense } from "react";
 import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { askLabel } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
@@ -9,6 +11,7 @@ import { HeaderSearch } from "@/components/header-search";
 import { MobileSearchButton } from "@/components/mobile-search-button";
 import { MobileAskButton } from "@/components/mobile-ask-button";
 import { useSettings } from "@/components/providers/settings-provider";
+import { useBreadcrumb } from "@/components/providers/breadcrumb-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import type { Session } from "next-auth";
 
@@ -29,6 +32,18 @@ export function Header({
 }: HeaderProps) {
   const settings = useSettings();
   const config = getPortalConfig(settings);
+  const pathname = usePathname();
+  const { label: pageCrumb } = useBreadcrumb();
+
+  // Subtle "Library / …" breadcrumb on non-library pages. Pages can publish
+  // their own label (e.g. the video title) via <Breadcrumb />.
+  const crumbLabel =
+    pageCrumb ??
+    (pathname?.startsWith("/ask")
+      ? askLabel(config.ai.name)
+      : pathname === "/s"
+        ? "Search"
+        : null);
 
   // Logo scales with header height
   // Desktop: header height minus 24px for visual breathing room
@@ -82,6 +97,22 @@ export function Header({
                     />
                   )}
                 </Link>
+
+                {/* Breadcrumb */}
+                {crumbLabel && (
+                  <div className="hidden lg:flex items-center gap-2 text-sm mr-6">
+                    <Link
+                      href="/"
+                      className="text-muted-foreground/70 hover:text-foreground transition-colors"
+                    >
+                      Library
+                    </Link>
+                    <span className="text-muted-foreground/40">/</span>
+                    <span className="text-muted-foreground max-w-[320px] truncate">
+                      {crumbLabel}
+                    </span>
+                  </div>
+                )}
 
                 {/* Desktop Navigation Menu */}
                 <div className="hidden lg:flex space-x-1">
