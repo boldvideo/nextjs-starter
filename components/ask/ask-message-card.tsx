@@ -114,6 +114,25 @@ function findMentionedVideo(
   );
 }
 
+/**
+ * Italic mentions set the whole emphasized run as the candidate title
+ * (*The Self-Healing Agent Loop…*), no quotes involved. Length guard keeps
+ * ordinary emphasis (*really*) from turning into links.
+ */
+function findTitleMatch(
+  text: string,
+  citations: AskCitation[]
+): AskCitation | null {
+  const needle = normalizeTitle(text);
+  if (needle.length < 8) return null;
+  return (
+    citations.find((c) => {
+      const title = normalizeTitle(c.videoTitle || "");
+      return title.length > 0 && (title.includes(needle) || needle.includes(title));
+    }) ?? null
+  );
+}
+
 function extractReactText(children: React.ReactNode): string {
   return React.Children.toArray(children)
     .map((c) => {
@@ -328,6 +347,26 @@ const MarkdownSection = React.memo(function MarkdownSection({
           );
         }
         return <strong>{children}</strong>;
+      },
+      // Italicized episode titles (*The Self-Healing Agent Loop…*) deep-link
+      // to the video when the emphasized text matches a source's title.
+      em: ({ children }) => {
+        const mentioned = findTitleMatch(extractReactText(children), citations);
+        if (mentioned) {
+          return (
+            <Link
+              href={buildVideoUrl({ id: mentioned.videoId })}
+              className={cn(
+                "italic text-foreground no-underline",
+                "border-b border-primary/40 hover:border-primary",
+                "transition-colors"
+              )}
+            >
+              {children}
+            </Link>
+          );
+        }
+        return <em>{children}</em>;
       },
       ul: (props) => <ul {...props} className="list-disc pl-5 space-y-2" />,
       // `start` passes through via props: a streamed list split at a block
