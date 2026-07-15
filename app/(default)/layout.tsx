@@ -101,7 +101,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
     },
     icons: {
-      icon: settings.faviconUrl || "/favicon.ico",
+      // Boundary's own favicon (the lamb) — part of reading as their site
+      icon: "/boundary-favicon.ico",
       apple: "/icon-pwa?size=180",
     },
     appleWebApp: {

@@ -48,9 +48,12 @@
 
 :root {
   --radius: 0.75rem;
-  /* Portal nav row + the Boundary site bar riding on top of it */
+  /* Portal nav row + Boundary's announcement banner and site nav on top */
+  --site-banner-height: 41px;
   --site-bar-height: 56px;
-  --header-height: calc(57px + var(--site-bar-height));
+  --header-height: calc(
+    57px + var(--site-banner-height) + var(--site-bar-height)
+  );
   /* Core 9 tokens - Boundary light: boundaryml.com's cream/ink/purple,
      so the portal reads as native next to their site */
   --background: #fbf7ed;
@@ -102,15 +105,77 @@
 }
 .bnav-wrap {
   position: relative;
+}
+/* Announcement banner above the nav — theirs links the EAP launch */
+.sbanner {
+  position: relative;
+  min-height: var(--site-banner-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  background: #fbf8f1;
+  border-bottom: 1px solid #d9d3c4;
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  color: #1a1612;
+}
+.sbanner-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #1a1612;
+  text-decoration: none;
+}
+.sbanner-new {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #6d28d9;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.sbanner-text {
+  color: #5c5852;
+}
+.sbanner-text strong {
+  color: #1a1612;
+  font-weight: 600;
+}
+.sbanner-arrow {
+  color: #6d28d9;
+  font-weight: 500;
+  transition: transform 200ms;
+}
+.sbanner-cta:hover .sbanner-arrow {
+  transform: translateX(3px);
+}
+.sbanner-olddocs {
+  position: absolute;
+  right: 16px;
+  color: #5c5852;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 200ms;
+}
+.sbanner-olddocs:hover {
+  color: #6d28d9;
+}
+@media (max-width: 640px) {
+  .sbanner-olddocs {
+    display: none;
+  }
+}
+.bnav {
   height: var(--site-bar-height);
   background: rgba(251, 247, 237, 0.92);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid #d9d3c4;
-}
-.bnav {
-  max-width: 1600px;
-  margin: 0 auto;
-  height: 100%;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;

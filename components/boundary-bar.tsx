@@ -18,9 +18,24 @@ const NAV_LINKS = [
   { label: "agent tries baml", href: "https://boundaryml.com/atb" },
 ];
 
+// Their banner counts down to the BAML EAP launch ("46 days" on Jul 15 2026)
+const LAUNCH_UTC = Date.UTC(2026, 7, 30);
+
 export function BoundaryBar() {
   const [open, setOpen] = useState(false);
   const [stars, setStars] = useState<string | null>(null);
+  const [daysToLaunch, setDaysToLaunch] = useState<number | null>(null);
+
+  useEffect(() => {
+    // One-shot clock read after mount (impure during render, so it lives
+    // here); the timeout keeps the mount commit clean.
+    const t = setTimeout(() => {
+      setDaysToLaunch(
+        Math.max(0, Math.ceil((LAUNCH_UTC - Date.now()) / 86_400_000))
+      );
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
   // Live star count like theirs; the 4ch slot reserves space until it lands.
   useEffect(() => {
@@ -40,6 +55,31 @@ export function BoundaryBar() {
 
   return (
     <div className="bnav-wrap">
+      <div className="sbanner">
+        <a
+          className="sbanner-cta"
+          href="https://boundaryml.com/eap"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="sbanner-new">New</span>
+          <span className="sbanner-text">
+            {daysToLaunch != null ? `${daysToLaunch} days to launch` : "Launching soon"}
+            &nbsp; ·&nbsp; join a live onboarding, <strong>every Thursday</strong>
+          </span>
+          <span aria-hidden="true" className="sbanner-arrow">
+            →
+          </span>
+        </a>
+        <a
+          className="sbanner-olddocs"
+          href="https://docs.boundaryml.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Old Docs
+        </a>
+      </div>
       <nav className="bnav" aria-label="Boundary">
         <a
           className="bnav-brand"

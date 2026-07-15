@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { FileText, Github, NotebookText, Paperclip } from "lucide-react";
+import { FileText, Github, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { formatDuration } from "@/util/format-duration";
 import { VideoDescription } from "@/components/video-description";
@@ -78,28 +78,18 @@ export function VideoMainContent({ video, onTimeSelect }: VideoMainContentProps)
               <span className="text-primary">EP {episode.episodeNumber}</span>
             </>
           )}
-          {episode && (
+          {/* No "Show notes" link — this page IS the show notes now */}
+          {episode?.codeUrl && (
             <span className="ml-auto flex items-center gap-2">
               <a
-                href={episode.showNotesUrl}
+                href={episode.codeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
               >
-                <NotebookText className="h-3.5 w-3.5" />
-                Show notes
+                <Github className="h-3.5 w-3.5" />
+                Session code
               </a>
-              {episode.codeUrl && (
-                <a
-                  href={episode.codeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
-                >
-                  <Github className="h-3.5 w-3.5" />
-                  Session code
-                </a>
-              )}
             </span>
           )}
         </div>

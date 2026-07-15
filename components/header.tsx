@@ -60,7 +60,7 @@ export function Header({
   return (
     <>
       {isHome && (
-        <style>{`:root { --header-height: var(--site-bar-height); }`}</style>
+        <style>{`:root { --header-height: calc(var(--site-banner-height) + var(--site-bar-height)); }`}</style>
       )}
       <header
         className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border transition-all h-[var(--header-height)] flex flex-col ${
