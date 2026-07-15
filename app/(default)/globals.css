@@ -49,24 +49,25 @@
 :root {
   --radius: 0.75rem;
   --header-height: 57px;
-  /* Core 9 tokens - AI That Works design (light mode) */
-  --background: #ffffff;
-  --foreground: #0c0c0b;
-  --muted: #f5f5f3;
-  --muted-foreground: #52524f;
-  --border: #e5e5e2;
-  --ring: #0d9488;
-  --surface: #fafaf9;
-  --accent: #0d9488;
-  --accent-foreground: #ffffff;
-  --primary: #0d9488;
+  /* Core 9 tokens - Boundary light: boundaryml.com's cream/ink/purple,
+     so the portal reads as native next to their site */
+  --background: #fbf7ed;
+  --foreground: #141414;
+  --muted: #efe9da;
+  --muted-foreground: #57534e;
+  --border: #d8cfbd;
+  --ring: #7c3aed;
+  --surface: #fffdf6;
+  --accent: #7c3aed;
+  --accent-foreground: #f3efe5;
+  --primary: #7c3aed;
   /* Amber "signal" for citations and provenance */
   --signal: #b45309;
   --signal-soft: rgba(180, 83, 9, 0.1);
   --signal-line: rgba(180, 83, 9, 0.32);
   /* Derived tokens */
   --input: var(--border);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: #dc2626;
 }
 
 .dark {
@@ -97,7 +98,10 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     overscroll-behavior-y: none; /* Prevents rubber-banding/bounce on macOS */
-    /* Soft teal wash bleeding down from the top — part of the brand look */
+  }
+  /* Soft teal wash bleeding down from the top — dark brand look only;
+     the Boundary light theme is flat cream like their site */
+  .dark body {
     background-image: radial-gradient(
       120% 80% at 50% -20%,
       rgba(45, 212, 191, 0.04),

@@ -12,10 +12,8 @@ import { getPortalConfig } from "@/lib/portal-config";
 import { Analytics } from "@/components/analytics";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import {
-  getThemeFromSettings,
   getHeaderHeight,
   getCssOverrides,
-  generateThemeCss,
   generateHeaderHeightCss,
 } from "@/lib/theme-css";
 import { auth } from "@/auth";
@@ -143,7 +141,6 @@ export default async function RootLayout({
   const session = isAuthEnabled() ? await auth() : null;
 
   // Theme configuration (BOLD-925, BOLD-924)
-  const theme = getThemeFromSettings(settings);
   const cssOverrides = getCssOverrides(settings);
   const headerHeight = getHeaderHeight(settings);
 
@@ -151,13 +148,11 @@ export default async function RootLayout({
   const config = getPortalConfig(settings);
   const showHeader = config.navigation.showHeader;
 
-  // Get fonts from settings (font_header and font_body fields in portal.theme or theme_config)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const themeAny = theme as any;
-  // Fork defaults: Space Grotesk display / DM Sans body (per the AI That
-  // Works design); tenant-configured fonts still take precedence.
-  const fontHeaderVar = getFontVar(themeAny?.font_header || "Space Grotesk");
-  const fontBodyVar = getFontVar(themeAny?.font_body || "DM Sans");
+  // Fork is design-owned: the Boundary-style stack (Geist body/headings,
+  // Geist Mono accents, Instrument Serif brand italics) is fixed in code —
+  // tenant font settings are intentionally ignored here.
+  const fontHeaderVar = getFontVar("Geist");
+  const fontBodyVar = getFontVar("Geist");
 
   // Check if user should see content
   const showContent = !isAuthEnabled() || session;
@@ -175,16 +170,15 @@ export default async function RootLayout({
               :root {
                 --font-heading: ${fontHeaderVar};
                 --font-body: ${fontBodyVar};
-                --font-mono-brand: var(--font-jetbrains-mono), monospace;
+                --font-mono-brand: var(--font-geist-mono), monospace;
+                --font-serif-brand: var(--font-instrument-serif), Georgia, serif;
               }
             `,
           }}
         />
-        {theme && (
-          <style
-            dangerouslySetInnerHTML={{ __html: generateThemeCss(theme) }}
-          />
-        )}
+        {/* Tenant theme tokens are deliberately NOT injected in this fork —
+            the Boundary-derived palette in globals.css is the design source
+            of truth for both light and dark. */}
         {headerHeight && (
           <style
             dangerouslySetInnerHTML={{

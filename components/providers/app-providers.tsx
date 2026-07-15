@@ -29,8 +29,12 @@ export function AppProviders({
     <SessionProvider session={session}>
       <ThemeProvider
         attribute="class"
-        defaultTheme={themeConfig.forcedTheme || "dark"}
-        enableSystem={!themeConfig.forcedTheme}
+        // Boundary light is the canonical look; dark stays one toggle away.
+        // Fresh storage key so visitors from the forced-dark era see the new
+        // default once — their toggles persist from there.
+        defaultTheme={themeConfig.forcedTheme || "light"}
+        enableSystem={false}
+        storageKey="aitw-theme"
         {...(themeConfig.forcedTheme && { forcedTheme: themeConfig.forcedTheme })}
       >
         <SettingsProvider settings={settings}>

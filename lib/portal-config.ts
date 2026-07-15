@@ -227,10 +227,12 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // 2. Default to true (show header)
   const showHeader = settings.portal?.navigation?.showHeader ?? true;
 
-  // Theme configuration (bold-js 1.2.0: colorScheme consolidated into portal.theme)
-  const colorScheme = (settings.portal?.theme?.colorScheme ?? settings.portal?.colorScheme ?? 'toggle') as 'toggle' | 'light' | 'dark';
-  const forcedTheme = colorScheme === 'toggle' ? null : colorScheme;
-  const showToggle = colorScheme === 'toggle';
+  // Fork override: both themes are design-owned (Boundary light + AITW
+  // dark), so the toggle is always available regardless of the tenant's
+  // configured color scheme.
+  const colorScheme = 'toggle' as 'toggle' | 'light' | 'dark';
+  const forcedTheme = null;
+  const showToggle = true;
 
   return {
     ai: {

@@ -2,23 +2,25 @@ import { cn } from "@/lib/utils";
 
 /**
  * Text wordmark shown when the tenant has no logo configured.
- * This fork intentionally drops the BOLD logo fallback.
+ * Mirrors the show's lockup on boundaryml.com/podcast: lowercase
+ * "ai that works." with "works" in serif italic, tinted by the theme's
+ * primary (Boundary purple in light, teal in dark).
  */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 select-none whitespace-nowrap",
-        "font-[family-name:var(--font-heading)] font-bold text-primary",
-        "text-[22px] leading-none tracking-[0.06em]",
+        "inline-flex items-baseline select-none whitespace-nowrap",
+        "font-[family-name:var(--font-heading)] font-semibold text-foreground",
+        "text-[21px] leading-none tracking-[-0.03em]",
         className
       )}
     >
-      <span
-        aria-hidden="true"
-        className="w-[7px] h-[7px] rounded-[2px] bg-primary shadow-[0_0_12px_rgba(45,212,191,0.7)]"
-      />
-      AI That Works
+      ai&nbsp;that&nbsp;
+      <span className="font-[family-name:var(--font-serif-brand)] italic font-medium text-primary text-[1.06em]">
+        works
+      </span>
+      .
     </span>
   );
 }

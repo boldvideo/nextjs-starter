@@ -15,6 +15,9 @@ import {
   Space_Grotesk,
   DM_Sans,
   JetBrains_Mono,
+  Geist,
+  Geist_Mono,
+  Instrument_Serif,
 } from "next/font/google";
 
 // Pre-load all fonts at build time
@@ -121,6 +124,28 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const geist = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist",
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-geist-mono",
+  display: "swap",
+});
+
+// Display serif for italic brand accents ("ai that works.")
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
+  display: "swap",
+});
+
 // All font instances for className injection
 export const fontInstances = {
   inter,
@@ -139,6 +164,9 @@ export const fontInstances = {
   spaceGrotesk,
   dmSans,
   jetbrainsMono,
+  geist,
+  geistMono,
+  instrumentSerif,
 };
 
 // Map font names (as they come from API) to CSS variables
@@ -160,6 +188,9 @@ const fontNameToVar: Record<string, string> = {
   "Space Grotesk": "var(--font-space-grotesk)",
   "DM Sans": "var(--font-dm-sans)",
   "JetBrains Mono": "var(--font-jetbrains-mono)",
+  "Geist": "var(--font-geist)",
+  "Geist Mono": "var(--font-geist-mono)",
+  "Instrument Serif": "var(--font-instrument-serif)",
 };
 
 // Default font (Inter)
