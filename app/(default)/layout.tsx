@@ -11,11 +11,7 @@ import { BoldProvider } from "@/components/providers/bold-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { Analytics } from "@/components/analytics";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import {
-  getHeaderHeight,
-  getCssOverrides,
-  generateHeaderHeightCss,
-} from "@/lib/theme-css";
+import { getCssOverrides } from "@/lib/theme-css";
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
 import SignIn from "@/components/auth/sign-in";
@@ -26,7 +22,8 @@ import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 export const dynamic = "force-dynamic";
 
 export const viewport = {
-  themeColor: "#0a0a09",
+  // Matches the default (Boundary light) chrome
+  themeColor: "#fbf7ed",
 };
 
 // Default metadata values - used as fallback when settings don't provide them
@@ -142,7 +139,6 @@ export default async function RootLayout({
 
   // Theme configuration (BOLD-925, BOLD-924)
   const cssOverrides = getCssOverrides(settings);
-  const headerHeight = getHeaderHeight(settings);
 
   // Get portal configuration to determine if we should show header
   const config = getPortalConfig(settings);
@@ -176,16 +172,10 @@ export default async function RootLayout({
             `,
           }}
         />
-        {/* Tenant theme tokens are deliberately NOT injected in this fork —
-            the Boundary-derived palette in globals.css is the design source
-            of truth for both light and dark. */}
-        {headerHeight && (
-          <style
-            dangerouslySetInnerHTML={{
-              __html: generateHeaderHeightCss(headerHeight),
-            }}
-          />
-        )}
+        {/* Tenant theme tokens and header sizing are deliberately NOT
+            injected in this fork — globals.css is the design source of
+            truth for both light and dark (incl. the Boundary site bar
+            baked into --header-height). */}
         {cssOverrides && (
           <style
             dangerouslySetInnerHTML={{

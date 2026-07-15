@@ -1,6 +1,7 @@
 "use client";
 
 import React, {
+  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -20,6 +21,8 @@ import { getTenantId } from "@/lib/progress/tenant";
 import { getAllProgress, isIndexedDBDefined } from "@/lib/progress/store";
 import { PoweredByBold } from "@/components/powered-by-bold";
 import { NextSession } from "@/components/home/next-session";
+import { Wordmark } from "@/components/wordmark";
+import { HeaderSearch } from "@/components/header-search";
 
 // Tags arrive from the API as objects ({ id, name, slug }) even though the
 // SDK types them as string[]. Normalize either shape.
@@ -550,7 +553,9 @@ function EpisodeCard({
  * the first page's length doubles as the page-size guess: a page that comes
  * back shorter than it means we've reached the end.
  */
-export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryProps) {
+// `title` is accepted for API compatibility; the hero renders the fixed
+// brand lockup instead of the tenant channel name.
+export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
   const pageSize = initialVideos.length;
   const [videos, setVideos] = useState<Video[]>(initialVideos);
   const [page, setPage] = useState(1);
@@ -799,9 +804,18 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
       {/* Main */}
       <main className="px-5 pt-6 pb-16 md:px-8 md:pt-8 min-w-0">
         <div className="mb-8">
-          <h1 className="font-[family-name:var(--font-heading)] font-bold text-3xl md:text-4xl tracking-tight leading-none">
-            {title}
-          </h1>
+          {/* Hero mirrors the original boundaryml.com/podcast headline;
+              search + ask ride to its right on desktop */}
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+            <h1>
+              <Wordmark className="text-[clamp(2.5rem,5vw,4rem)] leading-[1.02]" />
+            </h1>
+            <div className="shrink-0 lg:pt-2">
+              <Suspense>
+                <HeaderSearch className="w-full max-w-xs" />
+              </Suspense>
+            </div>
+          </div>
           {subtitle && (
             <p className="text-sm text-muted-foreground mt-2.5">{subtitle}</p>
           )}
@@ -961,14 +975,19 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
           )}
         </div>
 
-        {isFiltering ? (
-          <div className="flex items-center justify-center py-16 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </div>
-        ) : videos.length > 0 ? (
+        {videos.length > 0 ? (
           // Spacing-based grid: the rounded thumbnail is the only bounded
-          // surface; text hangs free below it
-          <ul className="grid sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10">
+          // surface; text hangs free below it. While a topic filter loads,
+          // the previous grid stays mounted (dimmed) so the page keeps its
+          // height and the topic rail doesn't jump.
+          <ul
+            aria-busy={isFiltering}
+            className={cn(
+              "grid sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-10",
+              isFiltering &&
+                "opacity-40 pointer-events-none transition-opacity duration-150"
+            )}
+          >
             {videos.map((video) => (
               <EpisodeCard
                 key={video.id}
@@ -977,6 +996,10 @@ export function VideoLibrary({ initialVideos, title, subtitle }: VideoLibraryPro
               />
             ))}
           </ul>
+        ) : isFiltering ? (
+          <div className="flex items-center justify-center py-16 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
         ) : (
           <p className="py-16 text-center text-muted-foreground">
             No videos for this topic yet.

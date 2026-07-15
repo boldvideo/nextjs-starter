@@ -48,7 +48,9 @@
 
 :root {
   --radius: 0.75rem;
-  --header-height: 57px;
+  /* Portal nav row + the Boundary site bar riding on top of it */
+  --site-bar-height: 56px;
+  --header-height: calc(57px + var(--site-bar-height));
   /* Core 9 tokens - Boundary light: boundaryml.com's cream/ink/purple,
      so the portal reads as native next to their site */
   --background: #fbf7ed;
@@ -88,6 +90,227 @@
   /* Derived tokens */
   --input: oklch(1 0 0 / 15%);
   --destructive: oklch(0.704 0.191 22.216);
+}
+
+/* ── Boundary site bar — 1:1 recreation of boundaryml.com's nav.
+   Values are copied verbatim from their inline CSS; hex stays hardcoded
+   because the bar keeps their cream in both of our themes. */
+@media (min-width: 861px) {
+  :root {
+    --site-bar-height: 52px;
+  }
+}
+.bnav-wrap {
+  position: relative;
+  height: var(--site-bar-height);
+  background: rgba(251, 247, 237, 0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid #d9d3c4;
+}
+.bnav {
+  max-width: 1600px;
+  margin: 0 auto;
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+  padding: 0 24px;
+  font-family: var(--font-mono-brand);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: #1a1612;
+}
+.bnav-brand {
+  font-weight: 600;
+  padding: 0 16px 0 0;
+  color: #1a1612;
+}
+.bnav-links {
+  min-width: 0;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.bnav-link {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 14px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
+  text-transform: lowercase;
+  color: #5c5852;
+  background-color: transparent;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.bnav-link:hover {
+  background-color: #f0ece0;
+  color: #1a1612;
+}
+.bnav-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.bnav-social {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+}
+.bnav-social img {
+  opacity: 0.6;
+  transition: opacity 140ms ease, filter 140ms ease;
+}
+.bnav-social:hover img {
+  opacity: 1;
+  filter: invert(27%) sepia(80%) saturate(800%) hue-rotate(240deg)
+    brightness(90%);
+}
+.bnav-gh {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  color: #1a1612;
+  transition: color 140ms ease;
+}
+.bnav-gh img {
+  opacity: 0.6;
+  transition: opacity 140ms ease;
+}
+.bnav-gh:hover {
+  color: #6d28d9;
+}
+.bnav-gh:hover img {
+  opacity: 1;
+}
+.bnav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: 6px;
+  padding: 7px 15px;
+  border-radius: 9px;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  white-space: nowrap;
+  color: #fff;
+  background-color: #6d28d9;
+  border: 1px solid #6d28d9;
+  box-shadow: 0 1px 2px rgba(109, 40, 217, 0.25);
+  transition: background-color 140ms ease, border-color 140ms ease,
+    transform 140ms ease, box-shadow 140ms ease;
+}
+.bnav-cta:hover {
+  background-color: #5b21b6;
+  border-color: #5b21b6;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(109, 40, 217, 0.35);
+}
+.bnav-toggle {
+  display: none;
+}
+.bnav-panel {
+  display: none;
+}
+@media (max-width: 860px) {
+  .bnav {
+    grid-template-columns: 1fr auto;
+  }
+  .bnav-links {
+    display: none;
+  }
+  .bnav-actions {
+    display: none;
+  }
+  .bnav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 8px 9px;
+    border: 1px solid #d9d3c4;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .bnav-toggle-bar {
+    display: block;
+    height: 1.5px;
+    width: 100%;
+    background: #1a1612;
+    border-radius: 2px;
+    transition: transform 180ms ease, opacity 140ms ease;
+  }
+  .bnav-toggle-bar.is-open-1 {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+  .bnav-toggle-bar.is-open-2 {
+    opacity: 0;
+  }
+  .bnav-toggle-bar.is-open-3 {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+  /* Their panel expands the nav; ours drops below the fixed bar —
+     same animation, same look, without pushing the portal nav. */
+  .bnav-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    padding: 0 24px;
+    background: #fbf7ed;
+    border-bottom: 1px solid #d9d3c4;
+    font-family: var(--font-mono-brand);
+    letter-spacing: 0.02em;
+    transition: max-height 240ms ease, opacity 200ms ease;
+  }
+  .bnav-panel.is-open {
+    max-height: 70vh;
+    overflow-y: auto;
+    opacity: 1;
+    padding-top: 12px;
+    padding-bottom: 16px;
+  }
+  .bnav-mobile-link {
+    padding: 14px 6px;
+    border-top: 1px solid #e7e1d3;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    text-transform: lowercase;
+    color: #1a1612;
+  }
+  .bnav-mobile-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 6px 4px;
+    border-top: 1px solid #e7e1d3;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+  .bnav-cta--mobile {
+    justify-content: center;
+    margin: 8px 6px 4px;
+    padding: 13px 16px;
+    font-size: 15px;
+    border-radius: 10px;
+  }
 }
 
 @layer base {

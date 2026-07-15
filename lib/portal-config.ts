@@ -227,12 +227,12 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // 2. Default to true (show header)
   const showHeader = settings.portal?.navigation?.showHeader ?? true;
 
-  // Fork override: both themes are design-owned (Boundary light + AITW
-  // dark), so the toggle is always available regardless of the tenant's
-  // configured color scheme.
-  const colorScheme = 'toggle' as 'toggle' | 'light' | 'dark';
-  const forcedTheme = null;
-  const showToggle = true;
+  // Fork override: the Boundary light theme IS the portal's look — forced
+  // light, no toggle. (The AITW dark tokens remain in globals.css should
+  // this ever flip back.)
+  const colorScheme = 'light' as 'toggle' | 'light' | 'dark';
+  const forcedTheme = 'light' as 'light' | 'dark' | null;
+  const showToggle = false;
 
   return {
     ai: {

@@ -9,6 +9,7 @@ import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
 import { HeaderSearch } from "@/components/header-search";
 import { Wordmark } from "@/components/wordmark";
+import { BoundaryBar } from "@/components/boundary-bar";
 import { MobileSearchButton } from "@/components/mobile-search-button";
 import { MobileAskButton } from "@/components/mobile-ask-button";
 import { useSettings } from "@/components/providers/settings-provider";
@@ -52,14 +53,24 @@ export function Header({
   const desktopLogoClass = "h-[calc(var(--header-height)-24px)]";
   const mobileLogoClass = "h-8";
 
+  // The homepage hero carries the wordmark, search, and ask — the Boundary
+  // bar is the only fixed chrome there. Other pages keep the portal nav row.
+  const isHome = pathname === "/";
+
   return (
     <>
+      {isHome && (
+        <style>{`:root { --header-height: var(--site-bar-height); }`}</style>
+      )}
       <header
-        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5 border-b border-border transition-all h-[var(--header-height)] flex items-center ${
+        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border transition-all h-[var(--header-height)] flex flex-col ${
           className || ""
         }`}
       >
-        <div className="mx-auto w-full">
+        {/* Boundary's site nav rides on top — the portal is part of their world */}
+        <BoundaryBar />
+        {!isHome && (
+        <div className="mx-auto w-full px-5 flex-1 flex items-center">
           <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
               {/* Logo */}
@@ -218,6 +229,7 @@ export function Header({
             </div>
           </nav>
         </div>
+        )}
       </header>
     </>
   );

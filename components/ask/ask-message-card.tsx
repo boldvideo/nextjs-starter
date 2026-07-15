@@ -225,7 +225,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
           type="button"
           onClick={() => onCitationClick(citation)}
           className={cn(
-            "inline-block align-[0.38em] mx-px px-1 py-0.5 rounded",
+            "inline-block align-[0.38em] ml-[3px] mr-px px-1 py-0.5 rounded",
             "font-mono text-[10px] font-semibold leading-none",
             "border border-[var(--signal-line)]",
             "transition-colors cursor-pointer",
@@ -268,7 +268,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
       return (
         <span
           className={cn(
-            "inline-block align-[0.38em] mx-px px-1 py-0.5 rounded",
+            "inline-block align-[0.38em] ml-[3px] mr-px px-1 py-0.5 rounded",
             "font-mono text-[10px] font-semibold leading-none",
             "text-signal bg-[var(--signal-soft)]",
             "border border-[var(--signal-line)]"
