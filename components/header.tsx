@@ -71,7 +71,7 @@ export function Header({
         <BoundaryBar />
         {!isHome && (
         <div className="mx-auto w-full px-5 flex-1 flex items-center">
-          <nav className="flex flex-col lg:flex-row gap-4 lg:gap-0">
+          <nav className="w-full flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
               {/* Logo */}
               <div className="flex items-center">
