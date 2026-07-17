@@ -130,7 +130,6 @@ export function AskAnswerCard({
           alt={aiName}
           width={36}
           height={36}
-          className="rounded-full"
         />
       </div>
 

@@ -83,7 +83,7 @@ export function AskAnswerTab({
                   <div className="bg-muted rounded-2xl rounded-tr-sm px-4 py-2.5 max-w-[85%]">
                     <p className="text-sm">{message.content}</p>
                   </div>
-                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-muted flex items-center justify-center">
+                  <div className="flex-shrink-0 w-9 h-9 bg-muted flex items-center justify-center">
                     <User className="w-4 h-4 text-muted-foreground" />
                   </div>
                 </div>
@@ -100,10 +100,9 @@ export function AskAnswerTab({
                         alt={aiName}
                         width={36}
                         height={36}
-                        className="rounded-full"
                       />
                     ) : (
-                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <div className="w-9 h-9 bg-primary/10 flex items-center justify-center">
                         <Loader2 className="w-4 h-4 animate-spin text-primary" />
                       </div>
                     )}
@@ -119,7 +118,7 @@ export function AskAnswerTab({
             if (message.type === "error") {
               return (
                 <div key={message.id} className="flex gap-3">
-                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <div className="flex-shrink-0 w-9 h-9 bg-destructive/10 flex items-center justify-center">
                     <span className="text-destructive text-sm">!</span>
                   </div>
                   <div className="text-destructive text-sm py-2">
@@ -153,7 +152,7 @@ export function AskAnswerTab({
           <button
             onClick={scrollToBottom}
             className={cn(
-              "p-2 rounded-full",
+              "p-2",
               "bg-background/95 backdrop-blur border shadow-lg",
               "hover:bg-accent transition-all duration-200",
               "animate-in fade-in slide-in-from-bottom-2"

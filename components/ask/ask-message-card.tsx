@@ -258,7 +258,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
           <span
             className={cn(
               "inline-flex w-8 h-[1.25em] mx-0.5 align-middle",
-              "rounded-full bg-primary/15 animate-pulse"
+              "bg-primary/15 animate-pulse"
             )}
             aria-hidden="true"
           />
@@ -408,7 +408,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
             className={cn(
               "font-mono text-[0.86em] font-normal",
               "text-primary dark:text-[#5eead4] bg-muted",
-              "border border-border/50 rounded-[4px] px-[5px] py-px",
+              "border border-border/50 px-[5px] py-px",
               "before:content-none after:content-none"
             )}
           >

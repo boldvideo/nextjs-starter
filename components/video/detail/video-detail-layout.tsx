@@ -86,8 +86,10 @@ export function VideoDetailLayout({
     // Shared column cap: a full-width 16:9 player would leave no room for
     // content on laptops, so the column is capped by what the viewport
     // height affords (~300px reserved below the player). Player AND text
-    // use the same cap so they stay aligned as one column.
-    "--video-col-max": "max(640px, calc((100dvh - 380px) * 1.7778))",
+    // use the same cap so they stay aligned as one column. The outer 1280px
+    // bound keeps the column inside the HumanLayer page frame on big screens.
+    "--video-col-max":
+      "min(1280px, max(640px, calc((100dvh - 380px) * 1.7778)))",
   } as React.CSSProperties;
 
   return (

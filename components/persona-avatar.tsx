@@ -18,8 +18,7 @@ export function PersonaAvatar({
   size = 30,
   className,
 }: PersonaAvatarProps) {
-  const radius = Math.max(6, Math.round(size * 0.26));
-
+  // Square, like everything in the HumanLayer look
   if (avatar) {
     return (
       <Image
@@ -28,7 +27,7 @@ export function PersonaAvatar({
         width={size}
         height={size}
         className={cn("object-cover shrink-0", className)}
-        style={{ width: size, height: size, borderRadius: radius }}
+        style={{ width: size, height: size }}
       />
     );
   }
@@ -45,7 +44,6 @@ export function PersonaAvatar({
       style={{
         width: size,
         height: size,
-        borderRadius: radius,
         fontSize: Math.round(size * 0.44),
       }}
     >

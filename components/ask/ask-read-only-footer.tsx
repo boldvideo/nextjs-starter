@@ -59,7 +59,7 @@ export function AskReadOnlyFooter({
                     key={index}
                     onClick={() => onSuggestionClick(suggestion)}
                     className={cn(
-                      "text-sm px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer",
+                      "text-sm px-4 py-2 border transition-all duration-200 cursor-pointer",
                       "border-border/60 hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm",
                       "text-muted-foreground hover:text-foreground",
                       "flex-none whitespace-nowrap snap-start"

@@ -91,7 +91,7 @@ export function AskVideosTab({
                   <div className="flex-shrink-0">
                     <span
                       className={cn(
-                        "inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium",
+                        "inline-flex items-center justify-center w-6 h-6 text-xs font-medium",
                         citation.relevanceRank === 1
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground"

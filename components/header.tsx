@@ -70,7 +70,8 @@ export function Header({
         {/* HumanLayer's site nav rides on top — the portal is part of their world */}
         <HumanLayerBar />
         {!isHome && (
-        <div className="mx-auto w-full px-5 flex-1 flex items-center">
+        // Portal nav row sits in the same 1280px frame as their nav-container
+        <div className="mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8 flex-1 flex items-center">
           <nav className="w-full flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
               {/* Logo */}

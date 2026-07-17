@@ -41,7 +41,7 @@ export function AskTabs({ activeTab, onTabChange, citationCount }: AskTabsProps)
             {count !== null && count > 0 && (
               <span
                 className={cn(
-                  "ml-1 px-1.5 py-0.5 text-xs rounded-full",
+                  "ml-1 px-1.5 py-0.5 text-xs",
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "bg-muted text-muted-foreground"

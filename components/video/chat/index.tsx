@@ -400,7 +400,7 @@ export const AIAssistant = ({
                 alt={name}
                 width={24}
                 height={24}
-                className="rounded-full flex-shrink-0"
+                className="flex-shrink-0"
               />
               <p className="line-clamp-2">{greetingText}</p>
             </div>
@@ -413,7 +413,7 @@ export const AIAssistant = ({
                 alt={name}
                 width={40}
                 height={40}
-                className="rounded-full mr-2"
+                className="mr-2"
               />
               <strong>{name}</strong>
             </div>
@@ -517,7 +517,7 @@ export const AIAssistant = ({
                       </p>
                     )}
                     {message.selected_action ? (
-                      <div className="mt-2 px-3 py-1 text-sm bg-muted/50 rounded-full inline-block">
+                      <div className="mt-2 px-3 py-1 text-sm bg-muted/50 inline-block">
                         {message.selected_action}
                       </div>
                     ) : (
@@ -528,7 +528,7 @@ export const AIAssistant = ({
                             onClick={() =>
                               handleSubmit(action.value, action.label, true)
                             }
-                            className="px-3 py-1 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors cursor-pointer font-medium"
+                            className="px-3 py-1 text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer font-medium"
                             disabled={isPending}
                           >
                             {action.label}
@@ -575,7 +575,7 @@ export const AIAssistant = ({
               }}
               placeholder="Ask about this video..."
               className={cn(
-                "w-full rounded-full py-2 px-4 text-base sm:text-sm",
+                "w-full py-2 px-4 text-base sm:text-sm",
                 "focus:outline-none focus:ring-2 focus:ring-primary/50",
                 "bg-muted text-foreground placeholder:text-muted-foreground"
               )}
@@ -605,7 +605,7 @@ export const AIAssistant = ({
           )}
           <button
             className={cn(
-              "flex-shrink-0 rounded-full transition-colors",
+              "flex-shrink-0 transition-colors",
               compact ? "p-2" : "p-3 mb-1",
               inputValue.trim()
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -647,7 +647,7 @@ export const AIAssistant = ({
           "fixed bottom-6 right-6 z-50",
           "flex items-center justify-center",
           "bg-primary/90 text-background",
-          "rounded-full p-2 shadow-lg",
+          "p-2 shadow-lg",
           "hover:bg-primary transition-colors duration-200"
         )}
       >
@@ -656,7 +656,6 @@ export const AIAssistant = ({
           alt={`Ask ${name}`}
           width={60}
           height={60}
-          className="rounded-full"
         />
         <span className="ml-2 font-bold">Ask {name}</span>
       </button>

@@ -34,7 +34,7 @@ export function AskSourcesCarousel({
     <div className="w-full space-y-3">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+        <div className="w-8 h-8 bg-primary/10 flex items-center justify-center">
           <Video className="h-4 w-4 text-primary" />
         </div>
         <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
@@ -76,7 +76,7 @@ export function AskSourcesCarousel({
                 )}
 
                 {/* Citation number badge - top left */}
-                <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-background text-primary text-xs font-medium flex items-center justify-center">
+                <div className="absolute top-2 left-2 w-6 h-6 bg-background text-primary text-xs font-medium flex items-center justify-center">
                   {index + 1}
                 </div>
 
