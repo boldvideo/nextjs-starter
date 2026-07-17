@@ -10,7 +10,6 @@ import React, {
   useState,
 } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Github, Loader2, Youtube } from "lucide-react";
 import type { Video } from "@boldvideo/bold-js";
@@ -206,7 +205,7 @@ function EpisodeCard({
         playheadRef.current.style.left = `${frac * 100}%`;
       }
       if (badgeRef.current) {
-        badgeRef.current.textContent = `▶ ${formatDuration(Math.floor(seconds))}`;
+        badgeRef.current.textContent = formatDuration(Math.floor(seconds));
       }
       if (!sb || sb.tiles.length === 0) return;
 
@@ -276,10 +275,9 @@ function EpisodeCard({
 
   const handleLeave = useCallback(() => setHovering(false), []);
 
-  // ── Touch: long-press (350ms) then drag horizontally to scrub; release
-  // opens the video at the scrubbed timestamp. A quick tap still navigates
-  // normally, and moving before the long-press fires means scrolling wins.
-  const router = useRouter();
+  // ── Touch: long-press (350ms) then drag horizontally to scrub a preview;
+  // release dismisses it. A quick tap still navigates normally, and moving
+  // before the long-press fires means scrolling wins.
   const thumbRef = useRef<HTMLDivElement | null>(null);
   const storyboardRef = useRef<Storyboard | null | undefined>(undefined);
   useEffect(() => {
@@ -292,7 +290,6 @@ function EpisodeCard({
     active: boolean;
     suppressClick: boolean;
   }>({ timer: null, startX: 0, startY: 0, active: false, suppressClick: false });
-  const dismissTimerRef = useRef<number | null>(null);
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent<HTMLDivElement>) => {
@@ -300,7 +297,6 @@ function EpisodeCard({
       loadStoryboard(playbackId).then((sb) => setStoryboard(sb));
       const t = e.touches[0];
       const state = touchRef.current;
-      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
       state.startX = t.clientX;
       state.startY = t.clientY;
       state.suppressClick = false;
@@ -330,33 +326,13 @@ function EpisodeCard({
       state.timer = null;
     }
     if (state.active) {
-      // Release keeps the scrubbed frame + a tappable "▶ time" badge as the
-      // explicit commit step — no accidental deep links on lift-off.
+      // The scrub is a preview only — release dismisses it, and the ghost
+      // click on lift-off is swallowed so there are no accidental opens.
       state.active = false;
       state.suppressClick = true;
-      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-      dismissTimerRef.current = window.setTimeout(
-        () => setHovering(false),
-        4000
-      );
+      setHovering(false);
     }
   }, []);
-
-  // Jump to the scrubbed moment — the badge is the commit affordance on
-  // both desktop (click while scrubbing) and touch (tap after release).
-  const handleScrubJump = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-      const sb = storyboardRef.current;
-      const seconds = Math.floor(
-        lastFracRef.current * (sb?.duration || video.duration || 0)
-      );
-      router.push(buildVideoUrl(video, { time: seconds }));
-    },
-    [router, video]
-  );
 
   const handleClickCapture = useCallback((e: React.MouseEvent) => {
     // Swallow the ghost click that follows a scrub release
@@ -465,11 +441,12 @@ function EpisodeCard({
             />
           )}
 
-          {/* Playhead — live as soon as the pointer scrubs */}
+          {/* Playhead — live as soon as the pointer scrubs; fades in with
+              the frames so nothing pops */}
           {showScrubUi && (
             <div
               ref={playheadRef}
-              className="absolute inset-y-0 w-px bg-white/70"
+              className="absolute inset-y-0 w-px bg-white/70 motion-safe:animate-in motion-safe:fade-in [animation-duration:150ms]"
             />
           )}
 
@@ -483,18 +460,12 @@ function EpisodeCard({
 
           {video.duration > 0 && (
             <span
-              // Remount on mode switch so imperative scrub text resets cleanly
+              // Remount on mode switch so imperative scrub text resets
+              // cleanly; the chrome is identical in both modes, so the swap
+              // is invisible — only the timecode changes.
               key={showScrubUi ? "scrub" : "idle"}
               ref={badgeRef}
-              role={showScrubUi ? "button" : undefined}
-              title={showScrubUi ? "Play from here" : undefined}
-              onClick={showScrubUi ? handleScrubJump : undefined}
-              className={cn(
-                "absolute right-2 bottom-2 font-mono text-[11px] rounded",
-                showScrubUi
-                  ? "px-2 py-1 bg-black text-primary cursor-pointer border border-primary/40 hover:bg-primary hover:text-primary-foreground transition-colors"
-                  : "px-1.5 py-0.5 bg-black/80 text-white"
-              )}
+              className="absolute right-2 bottom-2 font-mono text-[11px] px-1.5 py-0.5 bg-black/80 text-white"
             >
               {formatDuration(video.duration)}
             </span>
