@@ -97,8 +97,9 @@ export function ChaptersSidebar({
       {/* Chapter List */}
       <div className="flex-1 overflow-y-auto no-scrollbar">
         {chapters.length === 0 ? (
+          // Parsing is synchronous — an empty list means there are none
           <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-            Loading chapters...
+            No chapters available
           </div>
         ) : (
           <ol className={cn("divide-y", compact ? "divide-zinc-800" : "divide-border")}>

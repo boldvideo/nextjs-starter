@@ -26,7 +26,7 @@ export function SearchBar({
         "flex items-center gap-2.5 w-full h-[34px] pl-3 pr-2",
         "text-sm text-muted-foreground text-left",
         "rounded-lg border border-border bg-surface",
-        "hover:border-muted-foreground/40 transition-colors cursor-text",
+        "hover:border-primary hover:text-foreground transition-colors cursor-text",
         !isMobile && "min-w-[240px]",
         className
       )}

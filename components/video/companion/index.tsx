@@ -99,11 +99,18 @@ export function VideoCompanionSidebar({
 
   const tabs = [
     { id: "chat" as const, label: "Chat", icon: MessageSquare },
-    { id: "chapters" as const, label: "Chapters", icon: List },
+    ...(hasChapters
+      ? [{ id: "chapters" as const, label: "Chapters", icon: List }]
+      : []),
     ...(transcriptUrl
       ? [{ id: "transcript" as const, label: "Transcript", icon: FileText }]
       : []),
   ];
+
+  // A stored selection may point at a tab this video doesn't offer
+  const effectiveTab: CompanionTab = tabs.some((t) => t.id === activeTab)
+    ? activeTab
+    : "chat";
 
   return (
     <>
@@ -117,7 +124,7 @@ export function VideoCompanionSidebar({
                   the active tab is a solid block, no icons, no underline */}
               <div className="flex items-center gap-1 py-2">
                 {tabs.map((tab) => {
-                  const isActive = activeTab === tab.id;
+                  const isActive = effectiveTab === tab.id;
                   return (
                     <button
                       key={tab.id}
@@ -126,7 +133,7 @@ export function VideoCompanionSidebar({
                         "px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer",
                         isActive
                           ? "bg-[var(--bg-tertiary)] text-foreground"
-                          : "text-muted-foreground hover:text-foreground"
+                          : "text-muted-foreground hover:text-primary"
                       )}
                     >
                       {tab.label}
@@ -148,7 +155,7 @@ export function VideoCompanionSidebar({
             <div className="flex flex-col gap-2 p-2 items-center mt-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
+                const isActive = effectiveTab === tab.id;
                 return (
                   <button
                     key={tab.id}
@@ -171,7 +178,7 @@ export function VideoCompanionSidebar({
             </div>
           ) : (
             <>
-              {activeTab === "chat" && (
+              {effectiveTab === "chat" && (
                 <div className="h-full flex flex-col min-h-0 pt-5">
                   <AIAssistant
                     videoId={videoId}
@@ -187,7 +194,7 @@ export function VideoCompanionSidebar({
                 </div>
               )}
 
-              {activeTab === "chapters" && (
+              {effectiveTab === "chapters" && (
                 <div className="h-full flex flex-col min-h-0">
                   {hasChapters ? (
                     <ChaptersSidebar
@@ -204,7 +211,7 @@ export function VideoCompanionSidebar({
                 </div>
               )}
 
-              {activeTab === "transcript" && transcriptUrl && playerRef && (
+              {effectiveTab === "transcript" && transcriptUrl && playerRef && (
                 <div className="h-full min-h-0 overflow-y-auto px-3 py-4">
                   <Transcript
                     url={transcriptUrl}

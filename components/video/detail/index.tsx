@@ -167,11 +167,13 @@ export function VideoDetail({
           />
         }
         chaptersPanel={
-          <ChaptersTab
-            chaptersWebVTT={video.chapters || ""}
-            playbackId={video.playbackId}
-            onChapterClick={handleTimeSelect}
-          />
+          video.chapters ? (
+            <ChaptersTab
+              chaptersWebVTT={video.chapters}
+              playbackId={video.playbackId}
+              onChapterClick={handleTimeSelect}
+            />
+          ) : undefined
         }
         chatPanel={<ChatTab video={video} settings={settings} />}
       />

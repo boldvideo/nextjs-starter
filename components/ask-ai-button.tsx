@@ -33,7 +33,7 @@ export function AskAiButton({
         "flex items-center gap-2 h-[34px] pl-2.5 pr-3 rounded-lg",
         "border border-border bg-muted",
         "text-sm font-medium text-muted-foreground",
-        "hover:text-foreground hover:border-muted-foreground/40",
+        "hover:text-primary hover:border-primary",
         "transition-colors cursor-pointer",
         className
       )}

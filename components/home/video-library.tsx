@@ -113,7 +113,7 @@ function TopicButton({
         compact ? "px-3 py-1.5" : "px-2.5 py-[7px] w-full",
         active
           ? "bg-primary/10 text-foreground border-primary/30"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+          : "text-muted-foreground hover:text-primary hover:bg-[var(--bg-tertiary)]"
       )}
     >
       <span>{label}</span>
@@ -843,7 +843,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
                 href="https://www.youtube.com/@boundaryml"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
+                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"
               >
                 <Youtube className="h-3.5 w-3.5" />
                 YouTube
@@ -852,7 +852,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
                 href="https://github.com/ai-that-works/ai-that-works"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
+                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"
               >
                 <Github className="h-3.5 w-3.5" />
                 GitHub

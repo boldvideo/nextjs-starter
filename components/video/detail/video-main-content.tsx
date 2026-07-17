@@ -85,7 +85,7 @@ export function VideoMainContent({ video, onTimeSelect }: VideoMainContentProps)
                 href={episode.codeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 border border-border rounded px-2 py-1 hover:text-foreground hover:border-muted-foreground/40 transition-colors"
+                className="inline-flex items-center gap-1.5 border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"
               >
                 <Github className="h-3.5 w-3.5" />
                 Session code

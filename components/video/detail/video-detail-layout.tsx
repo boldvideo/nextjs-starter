@@ -72,14 +72,28 @@ export function VideoDetailLayout({
       ? [{ id: "playlist" as const, label: "Playlist", icon: PlaySquare }]
       : []),
     { id: "info" as const, label: "Info", icon: Info },
-    { id: "chapters" as const, label: "Chapters", icon: List },
+    ...(chaptersPanel
+      ? [{ id: "chapters" as const, label: "Chapters", icon: List }]
+      : []),
     { id: "chat" as const, label: "Chat", icon: MessageSquare },
   ];
 
+  // A stored selection may point at a tab this video doesn't offer
+  // (e.g. "chapters" persisted from an episode that has them).
+  const effectiveTab: VideoTab =
+    (activeTab === "chapters" && !chaptersPanel) ||
+    (activeTab === "playlist" && !hasPlaylist)
+      ? "info"
+      : activeTab;
+
   const sidebarPadding = {
+    // Left edge locks to the HumanLayer 1280px page frame (same offset as
+    // .hl-nav-container at lg), so the video column starts exactly where
+    // the site nav content does; a playlist sidebar wins when it's wider.
+    "--frame-left": "max(20px, calc((100vw - 1280px) / 2 + 2rem))",
     "--padding-left": leftSidebar
-      ? "calc(var(--sidebar-left-width, 0px) + 20px)"
-      : "20px",
+      ? "max(calc(var(--sidebar-left-width, 0px) + 20px), var(--frame-left))"
+      : "var(--frame-left)",
     "--padding-right": rightSidebar
       ? "calc(var(--sidebar-right-width, 0px) + 20px)"
       : "20px",
@@ -97,7 +111,7 @@ export function VideoDetailLayout({
       // On desktop the whole column scrolls as one document (player included);
       // sidebars are fixed and unaffected. Mobile keeps its panel scrolling.
       className="video-detail flex flex-1 flex-col min-h-0 w-full lg:overflow-y-auto"
-      data-active-tab={activeTab}
+      data-active-tab={effectiveTab}
       data-has-playlist={hasPlaylist}
       style={sidebarPadding}
     >
@@ -105,8 +119,10 @@ export function VideoDetailLayout({
       <div
         className="video-detail__player-wrapper w-full flex-shrink-0 lg:pl-[var(--padding-left)] lg:pr-[var(--padding-right)] lg:pt-5 transition-[padding]"
       >
-        <div className={cn("mx-auto w-full", className)}>
-          <div className="w-full mx-auto lg:max-w-[var(--video-col-max)] bg-black aspect-video relative overflow-hidden shadow-lg z-20 lg:rounded-lg">
+        <div className={cn("mx-auto w-full lg:mx-0", className)}>
+          {/* Left-aligned to the page frame, not centered — the sidebar
+              owns the right side and the column reads as in-frame */}
+          <div className="w-full lg:max-w-[var(--video-col-max)] bg-black aspect-video relative overflow-hidden shadow-lg z-20">
             {player}
           </div>
         </div>
@@ -118,9 +134,9 @@ export function VideoDetailLayout({
 
         {/* Content wrapper with sidebar-aware padding */}
         <div className="min-w-0 w-full transition-all flex flex-col pl-[var(--padding-left)] pr-[var(--padding-right)] transition-[padding]">
-          <div className={cn("mx-auto w-full flex flex-col", className)}>
+          <div className={cn("mx-auto w-full lg:mx-0 flex flex-col", className)}>
             {/* Same column cap as the player so text and video stay aligned */}
-            <div className="w-full mx-auto lg:max-w-[var(--video-col-max)]">
+            <div className="w-full lg:max-w-[var(--video-col-max)]">
               {infoPanel}
             </div>
           </div>
@@ -182,7 +198,7 @@ export function VideoDetailLayout({
           <div className="flex items-center justify-around">
             {tabs.map((tab) => {
               const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+              const isActive = effectiveTab === tab.id;
 
               return (
                 <button

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { askLabel } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
 import { HeaderSearch } from "@/components/header-search";
 import { Wordmark } from "@/components/wordmark";
@@ -118,7 +117,7 @@ export function Header({
                   <div className="hidden lg:flex items-center gap-2 text-sm mr-6">
                     <Link
                       href="/"
-                      className="text-muted-foreground/70 hover:text-foreground transition-colors"
+                      className="text-muted-foreground/70 hover:text-primary transition-colors"
                     >
                       Library
                     </Link>
@@ -163,16 +162,9 @@ export function Header({
 
               {/* Mobile Header Controls */}
               <div className="flex items-center justify-between w-full lg:hidden">
-                {/* Left: Hamburger Menu and Logo */}
+                {/* Left: Logo only — the HumanLayer bar has its own menu and
+                    the video pages carry a bottom tab nav */}
                 <div className="flex items-center gap-4">
-                  <Suspense>
-                    <MobileMenu
-                      menuItems={menuItems}
-                      logo={logo}
-                      logoDark={logoDark}
-                    />
-                  </Suspense>
-
                   <Link href="/">
                     {!logo ? (
                       <Wordmark className="text-lg" />
