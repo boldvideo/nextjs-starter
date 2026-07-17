@@ -70,11 +70,6 @@ export function PlaylistVideoList({
                 <h3 className="text-base sm:text-lg font-semibold mb-1 group-hover:text-primary transition-colors line-clamp-2">
                   {video.title}
                 </h3>
-                {video.teaser && (
-                  <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
-                    {video.teaser}
-                  </p>
-                )}
               </div>
             </Link>
           </li>

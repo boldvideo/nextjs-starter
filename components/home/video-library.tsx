@@ -179,7 +179,6 @@ function EpisodeCard({
   /** Furthest-watched fraction (0..1) from local playback progress. */
   progress?: number;
 }) {
-  const blurb = video.teaser || video.description || "";
   const tags = normalizeTags(video.tags).slice(0, 2);
 
   // Scrub-on-hover: sweeping the pointer across the thumbnail scrubs
@@ -520,11 +519,7 @@ function EpisodeCard({
           <h3 className="font-[family-name:var(--font-heading)] font-semibold text-lg leading-tight tracking-tight group-hover:text-primary transition-colors duration-150">
             {video.title}
           </h3>
-          {blurb && (
-            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-              {blurb}
-            </p>
-          )}
+          {/* No teaser line — title, chips, and date carry the card */}
           {/* Meta row: chips never wrap internally, date never breaks */}
           <div className="flex items-center gap-2 mt-auto pt-2 min-w-0">
             {tags.map((tag) => (
