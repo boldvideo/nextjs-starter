@@ -19,7 +19,6 @@ import { useSettings } from "@/components/providers/settings-provider";
 import { getTenantId } from "@/lib/progress/tenant";
 import { getAllProgress, isIndexedDBDefined } from "@/lib/progress/store";
 import { PoweredByBold } from "@/components/powered-by-bold";
-import { NextSession } from "@/components/home/next-session";
 import { Wordmark } from "@/components/wordmark";
 import { HeaderSearch } from "@/components/header-search";
 
@@ -531,6 +530,11 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
   const [isFiltering, setIsFiltering] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(pageSize > 0);
+  // The backend returns no total count, so the next page is probed in the
+  // background: an empty probe hides "Load more", a full one makes the
+  // click instant.
+  const nextPageRef = useRef<Video[] | null>(null);
+  const videoIdsRef = useRef<Set<string>>(new Set());
   const settings = useSettings();
 
   // Locally stored watch progress (IndexedDB), videoId → fraction watched,
@@ -666,10 +670,41 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
     [initialVideos, pageSize]
   );
 
+  // Probe the page after the current one whenever the list advances. Runs
+  // after mount too, so a first page that already holds every episode
+  // never shows a dead "Load more".
+  useEffect(() => {
+    videoIdsRef.current = new Set(videos.map((v) => v.id));
+  }, [videos]);
+  useEffect(() => {
+    if (!hasMore || isFiltering) return;
+    let cancelled = false;
+    nextPageRef.current = null;
+    fetchVideos(page + 1, activeTopic)
+      .then((data) => {
+        if (cancelled) return;
+        const fresh = data.filter((v) => !videoIdsRef.current.has(v.id));
+        if (fresh.length === 0) setHasMore(false);
+        else nextPageRef.current = fresh;
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [page, activeTopic, hasMore, isFiltering]);
+
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
-    setIsLoadingMore(true);
     const nextPage = page + 1;
+    // Prefetched probe makes this instant; fall back to a live fetch if
+    // the probe hasn't landed yet.
+    if (nextPageRef.current) {
+      setVideos((prev) => appendUnique(prev, nextPageRef.current!));
+      nextPageRef.current = null;
+      setPage(nextPage);
+      return;
+    }
+    setIsLoadingMore(true);
     try {
       const data = await fetchVideos(nextPage, activeTopic);
       setVideos((prev) => appendUnique(prev, data));
@@ -858,8 +893,6 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
                 GitHub
               </a>
             </div>
-
-            <NextSession />
           </div>
         </div>
 
