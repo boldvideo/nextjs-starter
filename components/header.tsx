@@ -56,15 +56,25 @@ export function Header({
   // bar is the only fixed chrome there. Other pages keep the portal nav row.
   const isHome = pathname === "/";
 
+  // Watch pages on mobile scroll as one document (chrome included, like
+  // humanlayer.com itself) — the fixed header steps aside entirely there
+  // and the video layout renders the chrome in-flow instead.
+  const isWatch =
+    /^\/(v|e)\//.test(pathname ?? "") ||
+    /^\/pl\/[^/]+\/v\//.test(pathname ?? "");
+
   return (
     <>
       {isHome && (
         <style>{`:root { --header-height: calc(var(--site-banner-height) + var(--site-bar-height)); }`}</style>
       )}
+      {isWatch && (
+        <style>{`@media (max-width: 1023.98px) { :root { --header-height: 0px; } }`}</style>
+      )}
       <header
-        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border transition-all h-[var(--header-height)] flex flex-col ${
-          className || ""
-        }`}
+        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border transition-all h-[var(--header-height)] flex-col ${
+          isWatch ? "hidden lg:flex" : "flex"
+        } ${className || ""}`}
       >
         {/* HumanLayer's site nav rides on top — the portal is part of their world */}
         <HumanLayerBar />

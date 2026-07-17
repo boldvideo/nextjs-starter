@@ -395,6 +395,19 @@
   padding: 1rem 0;
   transition: background-color 0.3s;
 }
+/* In-flow chrome on mobile watch pages: like their site, the banner
+   scrolls away and the nav sticks to the top of the scroll. The wrappers
+   dissolve (display: contents) so the sticky nav's containing block is
+   the scroll section itself, not the short chrome stack. */
+@media (max-width: 1023.98px) {
+  .video-detail__chrome {
+    display: contents;
+  }
+  .video-detail__chrome .hl-nav-header {
+    position: sticky;
+    top: 0;
+  }
+}
 .hl-nav-container {
   max-width: 1280px;
   width: 100%;

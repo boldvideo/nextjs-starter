@@ -37,8 +37,8 @@ export default function InfoTab({
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      {/* Single scroll view - no sub-tabs on mobile */}
-      <div className="flex-1 overflow-y-auto p-4 pb-20 min-h-0">
+      {/* Flows with the page scroll — the panels container clears the nav */}
+      <div className="flex-1 p-4 min-h-0">
         <div className="space-y-6">
           {/* Description */}
           <VideoDescription

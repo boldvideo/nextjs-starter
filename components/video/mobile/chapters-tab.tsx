@@ -1,7 +1,6 @@
 "use client";
 
 import { ChaptersSidebar } from "../companion/chapters-sidebar";
-import { cn } from "@/lib/utils";
 
 interface ChaptersTabProps {
   chaptersWebVTT: string;
@@ -17,7 +16,7 @@ export default function ChaptersTab({
   compact = false,
 }: ChaptersTabProps) {
   return (
-    <div className={cn("h-full flex flex-col", !compact && "pb-[60px]")}>
+    <div className="h-full flex flex-col">
       <ChaptersSidebar
         chaptersWebVTT={chaptersWebVTT}
         playbackId={playbackId}

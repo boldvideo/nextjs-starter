@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useEffect, ReactNode } from "react";
+import Link from "next/link";
 import { Info, List, MessageSquare, PlaySquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAIAssistantContext } from "@/components/video/chat/context";
+import { HumanLayerBar } from "@/components/humanlayer-bar";
+import { Wordmark } from "@/components/wordmark";
+import { MobileAskButton } from "@/components/mobile-ask-button";
+import { MobileSearchButton } from "@/components/mobile-search-button";
 
 export type VideoTab = "playlist" | "info" | "chapters" | "chat";
 
@@ -108,13 +113,29 @@ export function VideoDetailLayout({
 
   return (
     <section
-      // On desktop the whole column scrolls as one document (player included);
-      // sidebars are fixed and unaffected. Mobile keeps its panel scrolling.
-      className="video-detail flex flex-1 flex-col min-h-0 w-full lg:overflow-y-auto"
+      // The whole column scrolls as one document (chrome and player
+      // included on mobile; player included on desktop). Only the chat tab
+      // locks the viewport, since its input stays pinned.
+      className="video-detail flex flex-1 flex-col min-h-0 w-full overflow-y-auto"
       data-active-tab={effectiveTab}
       data-has-playlist={hasPlaylist}
       style={sidebarPadding}
     >
+      {/* Mobile: the HumanLayer chrome + a slim portal row scroll with the
+          page, exactly like their own site — nothing is pinned up top */}
+      <div className="video-detail__chrome lg:hidden">
+        <HumanLayerBar measure={false} className="contents" />
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+          <Link href="/">
+            <Wordmark className="text-lg" />
+          </Link>
+          <div className="flex items-center gap-1">
+            <MobileAskButton />
+            <MobileSearchButton />
+          </div>
+        </div>
+      </div>
+
       {/* === PLAYER === Rendered once, CSS handles responsive positioning */}
       <div
         className="video-detail__player-wrapper w-full flex-shrink-0 lg:pl-[var(--padding-left)] lg:pr-[var(--padding-right)] lg:pt-5 transition-[padding]"
@@ -145,49 +166,38 @@ export function VideoDetailLayout({
         {rightSidebar}
       </div>
 
-      {/* === MOBILE LAYOUT (<lg) === */}
-      <div className="video-detail__mobile lg:hidden flex flex-col flex-1 min-h-0 bg-background">
+      {/* === MOBILE LAYOUT (<lg) === Content tabs flow with the document
+          scroll; the chat tab flips to an app shell via the CSS below. */}
+      <div className="video-detail__mobile lg:hidden flex flex-col bg-background">
         {/* Video Metadata Header */}
         <div className="video-detail__meta flex-shrink-0 px-4 py-2 border-b border-border bg-background">
           {videoMeta}
         </div>
 
-        {/* Tab Content Container - fills remaining space above bottom nav */}
-        <div className="video-detail__panels flex-1 min-h-0 relative pb-16">
+        {/* Tab Content Container — clears the fixed bottom nav */}
+        <div className="video-detail__panels pb-16">
           {/* Playlist Panel */}
           {playlistPanel && (
-            <div
-              className="video-detail__panel absolute inset-0 overflow-y-auto"
-              data-panel="playlist"
-            >
+            <div className="video-detail__panel" data-panel="playlist">
               {playlistPanel}
             </div>
           )}
 
           {/* Info Panel */}
-          <div
-            className="video-detail__panel absolute inset-0 overflow-hidden"
-            data-panel="info"
-          >
+          <div className="video-detail__panel" data-panel="info">
             {mobileInfoPanel || infoPanel}
           </div>
 
           {/* Chapters Panel */}
           {chaptersPanel && (
-            <div
-              className="video-detail__panel absolute inset-0 overflow-hidden"
-              data-panel="chapters"
-            >
+            <div className="video-detail__panel" data-panel="chapters">
               {chaptersPanel}
             </div>
           )}
 
           {/* Chat Panel */}
           {chatPanel && (
-            <div
-              className="video-detail__panel absolute inset-0 overflow-hidden"
-              data-panel="chat"
-            >
+            <div className="video-detail__panel" data-panel="chat">
               <div className="h-full flex flex-col">{chatPanel}</div>
             </div>
           )}
@@ -231,15 +241,39 @@ export function VideoDetailLayout({
 
       {/* === CSS for data-attribute-driven panel visibility === */}
       <style jsx>{`
-        /* Mobile: Hide all panels by default, show active one */
+        /* Mobile: content tabs flow with the document scroll (chrome and
+           player scroll away, like humanlayer.com). The chat tab flips the
+           section into an app shell: viewport locked, input pinned. */
         @media (max-width: 1023.98px) {
           .video-detail__panel {
             display: none;
           }
 
-          /* Hide video meta header when Chat tab is active - maximize chat space */
+          /* Chat is an app shell: lock the page, hide chrome + meta,
+             give the chat panel the remaining viewport */
+          .video-detail[data-active-tab="chat"] {
+            overflow: hidden;
+          }
+          .video-detail[data-active-tab="chat"] .video-detail__chrome,
           .video-detail[data-active-tab="chat"] .video-detail__meta {
             display: none;
+          }
+          .video-detail[data-active-tab="chat"] .video-detail__mobile {
+            flex: 1 1 0%;
+            min-height: 0;
+          }
+          .video-detail[data-active-tab="chat"] .video-detail__panels {
+            flex: 1 1 0%;
+            min-height: 0;
+            position: relative;
+            padding-bottom: 0;
+          }
+          .video-detail[data-active-tab="chat"]
+            .video-detail__panel[data-panel="chat"] {
+            display: block;
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
           }
 
           .video-detail[data-active-tab="playlist"]
@@ -254,11 +288,6 @@ export function VideoDetailLayout({
 
           .video-detail[data-active-tab="chapters"]
             .video-detail__panel[data-panel="chapters"] {
-            display: block;
-          }
-
-          .video-detail[data-active-tab="chat"]
-            .video-detail__panel[data-panel="chat"] {
             display: block;
           }
         }

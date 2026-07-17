@@ -32,7 +32,7 @@ export function MobileVideoMeta({
 
         <div
           id={contentId}
-          className="text-xs text-muted-foreground leading-snug mt-0.5"
+          className="font-mono text-[11px] text-muted-foreground leading-snug mt-0.5"
         >
           {publishedAt}
           {publishedAt && durationLabel && " • "}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, Paintbrush, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,7 +45,16 @@ const THEMES = [
 
 const THEME_STORAGE_KEY = "hl-theme";
 
-export function HumanLayerBar() {
+export function HumanLayerBar({
+  className,
+  measure = true,
+}: {
+  className?: string;
+  /** Write the measured chrome heights to the --site-* variables. Off for
+      in-flow copies (mobile watch pages) so they don't fight the fixed one. */
+  measure?: boolean;
+}) {
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [theme, setTheme] = useState("poimandres");
@@ -69,6 +79,7 @@ export function HumanLayerBar() {
   // real chrome (the banner wraps to two lines on narrow screens) instead
   // of trusting the CSS fallback values.
   useEffect(() => {
+    if (!measure) return;
     const root = document.documentElement;
     const apply = () => {
       root.style.setProperty(
@@ -84,8 +95,17 @@ export function HumanLayerBar() {
     const ro = new ResizeObserver(apply);
     if (bannerRef.current) ro.observe(bannerRef.current);
     if (barRef.current) ro.observe(barRef.current);
-    return () => ro.disconnect();
-  }, [bannerDismissed]);
+    // display:none toggles (watch pages hide the fixed header on mobile,
+    // breakpoint crossings flip it back) don't reliably fire
+    // ResizeObserver — re-measure on the signals that change visibility:
+    // route via deps, viewport via matchMedia.
+    const mq = window.matchMedia("(min-width: 1024px)");
+    mq.addEventListener("change", apply);
+    return () => {
+      ro.disconnect();
+      mq.removeEventListener("change", apply);
+    };
+  }, [bannerDismissed, measure, pathname]);
 
   const selectTheme = (id: string) => {
     setTheme(id);
@@ -102,7 +122,7 @@ export function HumanLayerBar() {
     THEMES.find((t) => t.id === theme)?.name ?? "Poimandres";
 
   return (
-    <div>
+    <div className={className}>
       {!bannerDismissed && (
         <div ref={bannerRef} className="relative w-full bg-accent text-background">
           <div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-10 py-2 text-center font-mono text-sm font-medium">
