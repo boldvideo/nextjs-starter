@@ -227,9 +227,9 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // 2. Default to true (show header)
   const showHeader = settings.portal?.navigation?.showHeader ?? true;
 
-  // Fork override: the Boundary light theme IS the portal's look — forced
-  // light, no toggle. (The AITW dark tokens remain in globals.css should
-  // this ever flip back.)
+  // Fork override: theming is HumanLayer's data-theme system (globals.css),
+  // so next-themes is pinned to light with no toggle — the site bar's
+  // paintbrush switcher owns the look.
   const colorScheme = 'light' as 'toggle' | 'light' | 'dark';
   const forcedTheme = 'light' as 'light' | 'dark' | null;
   const showToggle = false;

@@ -17,6 +17,7 @@ import {
   JetBrains_Mono,
   Geist,
   Geist_Mono,
+  IBM_Plex_Mono,
   Instrument_Serif,
 } from "next/font/google";
 
@@ -137,6 +138,14 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+// HumanLayer's typeface — humanlayer.com sets everything in IBM Plex Mono
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
+
 // Display serif for italic brand accents ("ai that works.")
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -166,6 +175,7 @@ export const fontInstances = {
   jetbrainsMono,
   geist,
   geistMono,
+  ibmPlexMono,
   instrumentSerif,
 };
 
@@ -190,6 +200,7 @@ const fontNameToVar: Record<string, string> = {
   "JetBrains Mono": "var(--font-jetbrains-mono)",
   "Geist": "var(--font-geist)",
   "Geist Mono": "var(--font-geist-mono)",
+  "IBM Plex Mono": "var(--font-ibm-plex-mono)",
   "Instrument Serif": "var(--font-instrument-serif)",
 };
 

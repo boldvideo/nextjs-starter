@@ -123,7 +123,7 @@ export function VideoMainContent({ video, onTimeSelect }: VideoMainContentProps)
               </ReactMarkdown>
               {video.cta.buttonText && video.cta.buttonUrl && (
                 <a
-                  className="mt-4 inline-flex bg-foreground text-background rounded-md px-4 py-2 items-center justify-center hover:opacity-90 transition-opacity"
+                  className="mt-4 inline-flex h-9 items-center justify-center gap-3 px-4 font-mono text-sm uppercase tracking-wider border border-primary bg-primary/10 text-primary hover:bg-primary hover:text-background transition-all"
                   href={video.cta.buttonUrl}
                   target="_blank"
                   rel="noopener noreferrer"

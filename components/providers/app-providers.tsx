@@ -29,9 +29,9 @@ export function AppProviders({
     <SessionProvider session={session}>
       <ThemeProvider
         attribute="class"
-        // Boundary light is the canonical look; dark stays one toggle away.
-        // Fresh storage key so visitors from the forced-dark era see the new
-        // default once — their toggles persist from there.
+        // next-themes stays pinned to "light" — actual theming happens via
+        // the HumanLayer data-theme attribute (paintbrush switcher in the
+        // site bar), not the light/dark class.
         defaultTheme={themeConfig.forcedTheme || "light"}
         enableSystem={false}
         storageKey="aitw-theme"

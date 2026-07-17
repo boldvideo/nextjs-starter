@@ -2,9 +2,8 @@ import { cn } from "@/lib/utils";
 
 /**
  * Text wordmark shown when the tenant has no logo configured.
- * Mirrors the show's lockup on boundaryml.com/podcast: lowercase
- * "ai that works." with "works" in serif italic, tinted by the theme's
- * primary (Boundary purple in light, teal in dark).
+ * The show's lockup: lowercase "ai that works." with "works" in serif
+ * italic, tinted by the active theme's accent.
  */
 export function Wordmark({ className }: { className?: string }) {
   return (
