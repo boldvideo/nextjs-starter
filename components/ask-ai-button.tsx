@@ -30,7 +30,7 @@ export function AskAiButton({
       type="button"
       onClick={handleClick}
       className={cn(
-        "flex items-center gap-2 h-[34px] pl-2.5 pr-3 rounded-lg",
+        "flex shrink-0 items-center gap-2 h-[34px] pl-2.5 pr-3 rounded-lg",
         "border border-border bg-muted",
         "text-sm font-medium text-muted-foreground",
         "hover:text-primary hover:border-primary",

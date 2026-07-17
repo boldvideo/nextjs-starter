@@ -39,9 +39,9 @@ export function SearchBar({
         {placeholder || "Search…"}
       </span>
 
-      {/* Shortcut Hint (Desktop only) */}
+      {/* Shortcut Hint — pointer-and-keyboard screens only */}
       {!isMobile && (
-        <span className="font-mono text-[11px] tracking-[0.04em] text-muted-foreground border border-border bg-muted px-1.5 py-0.5">
+        <span className="hidden md:inline-block font-mono text-[11px] tracking-[0.04em] text-muted-foreground border border-border bg-muted px-1.5 py-0.5">
           ⌘K
         </span>
       )}

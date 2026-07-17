@@ -826,8 +826,8 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
           {/* Hosts + canonical homes — this portal is a companion to the
               show, so it credits the humans and links back out */}
           <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex -space-x-2">
+            <div className="flex items-center gap-3">
+              <div className="flex shrink-0 -space-x-2">
                 {/* Plain img: GitHub avatars, tiny and already CDN-optimized */}
                 <img
                   src="https://github.com/dexhorthy.png?size=56"
@@ -844,7 +844,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
                   className="w-7 h-7 rounded-full border-2 border-background bg-muted"
                 />
               </div>
-              <span className="text-sm text-muted-foreground">
+              <span className="min-w-0 text-sm leading-relaxed text-muted-foreground">
                 with{" "}
                 <a
                   href="https://x.com/dexhorthy"
