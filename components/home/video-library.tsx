@@ -179,7 +179,9 @@ function EpisodeCard({
   /** Furthest-watched fraction (0..1) from local playback progress. */
   progress?: number;
 }) {
-  const tags = normalizeTags(video.tags).slice(0, 2);
+  // One chip per card: two long topics truncate mid-word and every card
+  // ends up ragged — a single full label keeps the meta rows harmonic.
+  const tags = normalizeTags(video.tags).slice(0, 1);
 
   // Scrub-on-hover: sweeping the pointer across the thumbnail scrubs
   // through the episode via the Mux storyboard (one image for all frames).
@@ -429,7 +431,7 @@ function EpisodeCard({
       >
         <div
           ref={thumbRef}
-          className="relative aspect-video overflow-hidden rounded-xl border border-foreground/10 bg-black select-none [-webkit-touch-callout:none]"
+          className="relative aspect-video overflow-hidden border border-border bg-black select-none [-webkit-touch-callout:none]"
           onMouseEnter={handleThumbEnter}
           onMouseMove={handleMove}
           onMouseLeave={handleLeave}
@@ -525,7 +527,7 @@ function EpisodeCard({
             {tags.map((tag) => (
               <span
                 key={tag.slug}
-                className="font-mono text-[10.5px] tracking-[0.03em] text-muted-foreground border border-border rounded px-1.5 py-0.5 whitespace-nowrap truncate min-w-0 max-w-[45%]"
+                className="font-mono text-[11px] tracking-[0.03em] text-muted-foreground border border-border px-1.5 py-0.5 whitespace-nowrap truncate min-w-0 max-w-[70%]"
               >
                 {tag.name}
               </span>
@@ -925,7 +927,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
                   href={buildVideoUrl(video, { time: position })}
                   className="group snap-start shrink-0 w-[220px]"
                 >
-                  <div className="relative aspect-video rounded-lg overflow-hidden border border-foreground/10 bg-black">
+                  <div className="relative aspect-video overflow-hidden border border-border bg-black">
                     {video.thumbnail && (
                       <Image
                         src={video.thumbnail}
@@ -936,7 +938,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
                       />
                     )}
                     {video.duration > position && (
-                      <span className="absolute right-1.5 bottom-1.5 font-mono text-[10px] bg-black/80 text-white px-1 py-0.5 rounded">
+                      <span className="absolute right-2 bottom-2 font-mono text-[11px] bg-black/80 text-white px-1.5 py-0.5">
                         {formatDuration(video.duration - position)} left
                       </span>
                     )}
