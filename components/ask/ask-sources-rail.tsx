@@ -133,7 +133,7 @@ export function AskSourcesRail({
   return (
     <aside
       className={cn(
-        "w-[300px] shrink-0 border-l border-border",
+        "w-[300px] shrink-0 border-l-2 border-dashed border-border",
         "flex flex-col min-h-0 overflow-y-auto",
         "px-5 py-8",
         className
@@ -141,12 +141,12 @@ export function AskSourcesRail({
       // Preview position is viewport-fixed — drop it when the rail scrolls
       onScroll={hidePreview}
     >
-      <h4 className="font-[family-name:var(--font-heading)] font-semibold text-sm tracking-tight mb-1">
-        Sources
+      <h4 className="font-scribble rotate-[-2deg] text-[22px] leading-none text-foreground/75 mb-1.5">
+        the receipts
       </h4>
       <p className="font-mono text-xs text-muted-foreground/70 mb-5">
         {isStreaming && citations.length === 0
-          ? "retrieving…"
+          ? "pulling receipts…"
           : `${citations.length} ${citations.length === 1 ? "moment" : "moments"} · ${episodeCount} ${episodeCount === 1 ? "episode" : "episodes"}`}
       </p>
       <div className="flex flex-col gap-4" onMouseLeave={hidePreview}>
@@ -169,7 +169,7 @@ export function AskSourcesRail({
                     onBlur={hidePreview}
                     className={cn(
                       "flex items-center gap-2.5 px-2 py-1.5 -ml-2 rounded-md text-left w-full",
-                      "cursor-pointer hover:bg-muted",
+                      "cursor-pointer hover:bg-[var(--signal-soft)]",
                       "transition-[background-color,transform] duration-150 ease-out",
                       "active:scale-[0.98]",
                       "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 motion-safe:duration-300"
@@ -238,8 +238,8 @@ function VideoSourcePanel({
     >
       {/* Head */}
       <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-border shrink-0">
-        <h3 className="font-[family-name:var(--font-heading)] font-semibold text-base">
-          Video source
+        <h3 className="font-scribble rotate-[-1.5deg] text-[22px] leading-none text-foreground/75">
+          the receipt
         </h3>
         <button
           type="button"
@@ -280,19 +280,20 @@ function VideoSourcePanel({
         <Link
           href={`${getCanonicalVideoPath(citation.videoId)}?t=${startSeconds}`}
           className={cn(
-            "flex items-center justify-center gap-2 w-full h-[42px] rounded-lg",
-            "border border-border bg-muted text-sm font-medium",
-            "hover:border-primary/40 transition-colors"
+            "flex items-center justify-center gap-2 w-full h-[42px] rounded-xl",
+            "bg-accent text-sm font-semibold text-accent-foreground",
+            "shadow-[0_2px_0_rgba(22,21,15,0.25)] transition-all",
+            "hover:-translate-y-px hover:shadow-[0_3px_0_rgba(22,21,15,0.25)] active:translate-y-0 active:shadow-none"
           )}
         >
           <ExternalLink className="h-[15px] w-[15px]" />
-          Open full video at {citation.timestampStart}
+          Watch the full video at {citation.timestampStart}
         </Link>
 
         {nearby.length > 1 && (
           <div className="mt-6 pt-4 border-t border-border">
-            <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-2">
-              Other moments in this episode
+            <p className="font-scribble rotate-[-1deg] text-lg text-foreground/75 mb-2">
+              more moments in this one ↓
             </p>
             {nearby.map((c) => {
               const isHit = c.id === citation.id;

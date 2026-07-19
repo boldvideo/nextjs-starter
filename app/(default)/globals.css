@@ -94,10 +94,11 @@
   --surface: var(--bg-secondary);
   --accent-foreground: var(--text-primary);
   --primary: var(--accent);
-  /* Citation/provenance signal: readable amber on paper */
-  --signal: var(--warning);
-  --signal-soft: color-mix(in srgb, var(--accent) 16%, transparent);
-  --signal-line: color-mix(in srgb, var(--warning) 40%, transparent);
+  /* Citation/provenance signal: ink on a gold-highlight tint — the pen is
+     black, the gold is the highlighter */
+  --signal: var(--text-primary);
+  --signal-soft: color-mix(in srgb, var(--accent) 22%, transparent);
+  --signal-line: color-mix(in srgb, var(--accent) 60%, transparent);
   --input: var(--border-color);
   --destructive: var(--error);
 }

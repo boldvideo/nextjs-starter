@@ -151,7 +151,7 @@ export function TakiHomepage({
             <h2 className="font-marker -rotate-1 text-[clamp(1.9rem,4vw,2.9rem)] leading-none">
               IT&rsquo;S ALL IN HERE.
             </h2>
-            <p className="font-scribble rotate-[-1.5deg] text-[clamp(1.25rem,2vw,1.45rem)] text-[var(--warning)]">
+            <p className="font-scribble rotate-[-1.5deg] text-[clamp(1.25rem,2vw,1.45rem)] text-foreground/75">
               every framework, every play, every rant →
             </p>
           </div>
@@ -206,7 +206,7 @@ export function TakiHomepage({
                 <div
                   className={`max-w-[340px] rounded-2xl border-2 border-foreground/80 bg-surface px-6 py-5 ${step.tilt} md:flex-1`}
                 >
-                  <div className="font-scribble text-lg text-[var(--warning)]">
+                  <div className="font-scribble text-lg text-foreground/75">
                     step {i + 1}.
                   </div>
                   <h3 className="font-marker mt-1 text-[21px] leading-tight">

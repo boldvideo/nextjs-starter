@@ -1,7 +1,6 @@
 "use client";
 
 import React, {
-  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -20,7 +19,6 @@ import { getTenantId } from "@/lib/progress/tenant";
 import { getAllProgress, isIndexedDBDefined } from "@/lib/progress/store";
 import { PoweredByBold } from "@/components/powered-by-bold";
 import { Wordmark } from "@/components/wordmark";
-import { HeaderSearch } from "@/components/header-search";
 
 // Tags arrive from the API as objects ({ id, name, slug }) even though the
 // SDK types them as string[]. Normalize either shape.
@@ -406,7 +404,7 @@ function EpisodeCard({
       >
         <div
           ref={thumbRef}
-          className="relative aspect-video overflow-hidden border border-border bg-black select-none [-webkit-touch-callout:none]"
+          className="relative aspect-video overflow-hidden rounded-xl border border-border bg-black select-none [-webkit-touch-callout:none]"
           onMouseEnter={handleThumbEnter}
           onMouseMove={handleMove}
           onMouseLeave={handleLeave}
@@ -464,7 +462,7 @@ function EpisodeCard({
               // is invisible — only the timecode changes.
               key={showScrubUi ? "scrub" : "idle"}
               ref={badgeRef}
-              className="absolute right-2 bottom-2 font-mono text-[11px] px-1.5 py-0.5 bg-black/80 text-white"
+              className="absolute right-2 bottom-2 rounded-md font-mono text-[11px] px-1.5 py-0.5 bg-black/80 text-white"
             >
               {formatDuration(video.duration)}
             </span>
@@ -497,7 +495,7 @@ function EpisodeCard({
             {tags.map((tag) => (
               <span
                 key={tag.slug}
-                className="font-mono text-[11px] tracking-[0.03em] text-muted-foreground border border-border px-1.5 py-0.5 whitespace-nowrap truncate min-w-0 max-w-[70%]"
+                className="rounded-full font-mono text-[11px] tracking-[0.03em] text-muted-foreground border border-border px-2 py-0.5 whitespace-nowrap truncate min-w-0 max-w-[70%]"
               >
                 {tag.name}
               </span>
@@ -723,7 +721,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
     <div className="lg:grid lg:grid-cols-[248px_1fr] max-w-[1280px] mx-auto">
       {/* Topic rail (desktop) */}
       <aside className="hidden lg:block border-r border-border pt-8 pr-5 pb-8 pl-6 sticky top-[var(--header-height)] self-start">
-        <p className="font-scribble mb-2 ml-1 rotate-[-2deg] text-xl text-[var(--warning)]">
+        <p className="font-scribble mb-2 ml-1 rotate-[-2deg] text-xl text-foreground/75">
           topics
         </p>
         <div className="flex flex-col gap-0.5">
@@ -753,23 +751,16 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
         <div className="mb-8">
           {/* Hero mirrors the original boundaryml.com/podcast headline;
               search + ask ride to its right on desktop */}
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-            <h1>
-              <Wordmark className="text-[clamp(2.5rem,5vw,4rem)] leading-[1.02]" />
-            </h1>
-            <div className="shrink-0 lg:pt-2">
-              <Suspense>
-                <HeaderSearch className="w-full max-w-xs" />
-              </Suspense>
-            </div>
-          </div>
+          <h1>
+            <Wordmark className="text-[clamp(2.5rem,5vw,4rem)] leading-[1.02]" />
+          </h1>
           {subtitle && (
             <p className="text-sm text-muted-foreground mt-2.5">{subtitle}</p>
           )}
 
           {/* Nudge into the core loop: any of these can be asked about */}
           <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-            <span className="font-scribble rotate-[-1deg] text-lg text-[var(--warning)]">
+            <span className="font-scribble rotate-[-1deg] text-lg text-foreground/75">
               don&rsquo;t scrub through 34 hours —
             </span>
             <Link
@@ -806,8 +797,8 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
         {/* Continue watching — local progress, most recent first */}
         {activeTopic === null && resumeItems.length > 0 && (
           <section className="mb-10">
-            <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-3">
-              Continue watching
+            <p className="font-scribble rotate-[-1deg] text-xl text-foreground/75 mb-2.5">
+              pick up where you left off —
             </p>
             <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 md:-mx-8 md:px-8 [mask-image:linear-gradient(to_right,transparent,black_20px,black_calc(100%-20px),transparent)]">
               {resumeItems.map(({ video, position, fraction }) => (
@@ -900,14 +891,15 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
               onClick={loadMore}
               disabled={isLoadingMore}
               className={cn(
-                "inline-flex items-center gap-2 px-6 py-2.5 rounded-full",
-                "text-sm font-medium border border-border",
-                "hover:bg-muted transition-colors cursor-pointer",
+                "font-marker inline-flex items-center gap-2 rounded-xl px-6 py-2.5 -rotate-1",
+                "text-[15px] border-2 border-foreground/80 bg-surface",
+                "shadow-[0_2px_0_rgba(22,21,15,0.35)] transition-all cursor-pointer",
+                "hover:rotate-1 hover:bg-accent hover:shadow-[0_3px_0_rgba(22,21,15,0.35)]",
                 "disabled:opacity-60 disabled:cursor-default"
               )}
             >
               {isLoadingMore && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isLoadingMore ? "Loading…" : "Load more"}
+              {isLoadingMore ? "LOADING…" : "MORE EPISODES"}
             </button>
           </div>
         )}

@@ -400,22 +400,31 @@ export const AIAssistant = ({
                 alt={name}
                 width={24}
                 height={24}
-                className="flex-shrink-0"
+                className="flex-shrink-0 rounded-full ring-1 ring-accent"
               />
               <p className="line-clamp-2">{greetingText}</p>
             </div>
           </div>
         ) : (
           <div className={cn("mb-4", isEmbedded ? "pt-4" : "px-4 pt-4")}>
-            <div className="flex items-center mb-2">
+            <div className="flex items-center gap-2.5 mb-2">
               <Image
                 src={avatar}
                 alt={name}
                 width={40}
                 height={40}
-                className="mr-2"
+                className="rounded-full ring-2 ring-accent"
               />
-              <strong>{name}</strong>
+              <div>
+                <strong className="block leading-tight">{name}</strong>
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span
+                    aria-hidden="true"
+                    className="h-[6px] w-[6px] rounded-full bg-[var(--success)]"
+                  />
+                  has watched this one · cites the exact moment
+                </span>
+              </div>
             </div>
             <div
               className={cn(
@@ -441,10 +450,10 @@ export const AIAssistant = ({
           >
             <div
               className={cn(
-                "rounded-lg p-3 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
+                "rounded-2xl p-3 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
                 message.role === "user"
-                  ? "bg-muted/50 text-foreground border border-border/50"
-                  : "bg-muted text-foreground",
+                  ? "rounded-br-md bg-[var(--signal-soft)] text-foreground border border-accent/30"
+                  : "rounded-bl-md bg-muted text-foreground border border-border/70",
                 message.role === "user" && !isEmbedded ? "mr-8" : "",
                 message.role !== "user" && !isEmbedded ? "ml-8" : "",
                 message.role !== "user" && isEmbedded && !compact ? "ml-4" : "",

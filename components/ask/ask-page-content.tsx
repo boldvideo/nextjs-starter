@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
 import { PersonaAvatar } from "@/components/persona-avatar";
+import { MarkerUnderline } from "@/components/home/taki-doodles";
 import {
   useAIAskStream,
   askSourceToCitation,
@@ -493,11 +494,17 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     <AttachmentThumbnails attachments={pair.userMessage.attachments} />
                   )}
                   <div className="flex items-start gap-3">
-                    <span className="font-scribble shrink-0 mt-[2px] rotate-[-4deg] text-lg leading-none text-[var(--warning)]">
+                    <span className="font-scribble shrink-0 mt-[2px] rotate-[-4deg] text-lg leading-none text-foreground/75">
                       you:
                     </span>
                     <h2 className="font-[family-name:var(--font-heading)] font-semibold text-2xl md:text-3xl tracking-tight leading-[1.15]">
-                      {pair.userMessage.content}
+                      <span className="relative inline">
+                        {pair.userMessage.content}
+                        <MarkerUnderline
+                          className="absolute -bottom-2 left-0 h-[9px] w-[min(100%,220px)] text-accent"
+                          delay={0.25}
+                        />
+                      </span>
                     </h2>
                   </div>
 

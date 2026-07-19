@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { AskCitation } from "@/lib/ask";
-import { Play, Video } from "lucide-react";
+import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AskSourcesCarouselProps {
@@ -33,12 +33,12 @@ export function AskSourcesCarousel({
   return (
     <div className="w-full space-y-3">
       {/* Header */}
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary/10 flex items-center justify-center">
-          <Video className="h-4 w-4 text-primary" />
-        </div>
-        <span className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          {citedSources.length} Video Source{citedSources.length !== 1 ? "s" : ""}
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="font-scribble rotate-[-2deg] text-[22px] leading-none text-foreground/75">
+          the receipts
+        </span>
+        <span className="font-mono text-xs text-muted-foreground/70">
+          {citedSources.length} moment{citedSources.length !== 1 ? "s" : ""}
         </span>
       </div>
 
@@ -56,9 +56,11 @@ export function AskSourcesCarousel({
               key={citation.id}
               onClick={() => onCitationClick(citation)}
               className={cn(
-                "flex-shrink-0 w-[200px] rounded-lg overflow-hidden text-left transition-all",
-                "bg-card border hover:border-primary/50",
-                isSelected ? "border-primary ring-2 ring-primary" : "border-border"
+                "flex-shrink-0 w-[200px] rounded-xl overflow-hidden text-left transition-all",
+                "bg-card border shadow-[0_1px_2px_rgba(22,21,15,0.05)]",
+                index % 2 === 0 ? "rotate-[-0.4deg]" : "rotate-[0.4deg]",
+                "hover:rotate-0 hover:border-accent",
+                isSelected ? "rotate-0 border-accent ring-2 ring-accent/50" : "border-border"
               )}
             >
               <div className="relative aspect-video bg-muted">
@@ -76,7 +78,7 @@ export function AskSourcesCarousel({
                 )}
 
                 {/* Citation number badge - top left */}
-                <div className="absolute top-2 left-2 w-6 h-6 bg-background text-primary text-xs font-medium flex items-center justify-center">
+                <div className="absolute top-2 left-2 grid h-6 w-6 place-items-center rounded-md border border-[var(--signal-line)] bg-background font-mono text-xs font-semibold text-signal">
                   {index + 1}
                 </div>
 

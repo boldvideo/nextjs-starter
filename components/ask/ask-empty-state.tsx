@@ -1,12 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChatInput } from "@/components/coach";
 import { PersonaAvatar } from "@/components/persona-avatar";
 import { PoweredByBold } from "@/components/powered-by-bold";
+import { MarkerUnderline } from "@/components/home/taki-doodles";
 import { askLabel } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const H1_CLASS =
   "font-[family-name:var(--font-heading)] font-bold text-4xl md:text-5xl tracking-tight leading-[1.08] mb-3";
@@ -53,7 +56,13 @@ function Greeting({ greeting }: { greeting: string }) {
         return (
           <>
             <h1 className={H1_CLASS}>
-              <InlineMarkdown text={head} />
+              <span className="relative inline-block">
+                <InlineMarkdown text={head} />
+                <MarkerUnderline
+                  className="absolute -bottom-1.5 left-[-1%] h-[0.16em] w-[102%] text-accent"
+                  delay={0.35}
+                />
+              </span>
             </h1>
             <p className={SUB_CLASS}>
               <InlineMarkdown text={rest} />
@@ -65,7 +74,13 @@ function Greeting({ greeting }: { greeting: string }) {
     return (
       <>
         <h1 className={H1_CLASS}>
-          <InlineMarkdown text={headline} />
+          <span className="relative inline-block">
+            <InlineMarkdown text={headline} />
+            <MarkerUnderline
+              className="absolute -bottom-1.5 left-[-1%] h-[0.16em] w-[102%] text-accent"
+              delay={0.35}
+            />
+          </span>
         </h1>
         <p className={SUB_CLASS}>
           Ask anything from the library and get a straight answer — with the
@@ -197,13 +212,41 @@ export function AskEmptyState({
   acceptedMediaTypes,
 }: AskEmptyStateProps) {
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto flex justify-center">
-      <div className="w-full max-w-[720px] px-5 md:px-6 pt-[clamp(40px,9vh,110px)] pb-16 my-auto">
-        {/* Persona identity */}
+    <div className="relative flex-1 min-h-0 overflow-y-auto flex justify-center">
+      {/* Whiteboard dot paper, same as home */}
+      <div aria-hidden="true" className="taki-dotgrid pointer-events-none absolute inset-0" />
+
+      {/* Taki leans into the empty room on big screens */}
+      <div className="pointer-events-none absolute bottom-0 right-[max(20px,calc(50%-660px))] hidden select-none xl:block">
+        <Image
+          src="/taki-cutout.webp"
+          alt=""
+          width={880}
+          height={1321}
+          className="h-[min(44vh,400px)] w-auto drop-shadow-[0_18px_36px_rgba(22,21,15,0.18)] [mask-composite:intersect] [mask-image:linear-gradient(to_top,transparent_0%,black_9%),linear-gradient(to_right,transparent_1.5%,black_15%),linear-gradient(to_left,transparent_0.5%,black_10%)]"
+        />
+      </div>
+
+      <div className="relative w-full max-w-[720px] px-5 md:px-6 pt-[clamp(40px,9vh,110px)] pb-16 my-auto">
+        {/* Persona identity — same character strip as the homepage chat */}
         <div className="flex items-center gap-3 mb-6">
-          <PersonaAvatar name={aiName} avatar={aiAvatar} size={46} />
-          <div className="font-[family-name:var(--font-heading)] font-semibold text-lg tracking-tight">
-            {askLabel(aiName)}
+          <PersonaAvatar
+            name={aiName}
+            avatar={aiAvatar}
+            size={46}
+            className="ring-2 ring-accent"
+          />
+          <div>
+            <div className="font-[family-name:var(--font-heading)] font-semibold text-lg leading-tight tracking-tight">
+              {askLabel(aiName)}
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span
+                aria-hidden="true"
+                className="h-[7px] w-[7px] rounded-full bg-[var(--success)]"
+              />
+              trained on the full library · answers with receipts
+            </div>
           </div>
         </div>
 
@@ -228,23 +271,33 @@ export function AskEmptyState({
           acceptedMediaTypes={acceptedMediaTypes}
         />
 
-        {/* Conversation starters — single line rows */}
+        {/* Conversation starters — loose slips of paper */}
         {suggestions.length > 0 && (
-          <div className="flex flex-col gap-px mt-5 bg-border/60 border border-border rounded-lg overflow-hidden">
-            {suggestions.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => (onAsk ? onAsk(s) : setQuery(s))}
-                className="group flex items-center gap-3 px-4 py-[13px] text-left bg-surface hover:bg-muted transition-colors cursor-pointer"
-              >
-                <span className="flex-1 min-w-0 truncate text-base text-muted-foreground group-hover:text-foreground transition-colors">
-                  {s}
-                </span>
-                <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/50 group-hover:text-primary transition-colors" />
-              </button>
-            ))}
-          </div>
+          <>
+            <p className="font-scribble mt-6 rotate-[-1.5deg] text-lg text-foreground/75">
+              or grab one of these —
+            </p>
+            <div className="mt-2 flex flex-col gap-2">
+              {suggestions.map((s, i) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => (onAsk ? onAsk(s) : setQuery(s))}
+                  className={cn(
+                    "group flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-left cursor-pointer",
+                    "shadow-[0_1px_2px_rgba(22,21,15,0.04)] transition-all",
+                    "hover:rotate-0 hover:border-accent hover:bg-[var(--signal-soft)]",
+                    i % 2 === 0 ? "rotate-[-0.35deg]" : "rotate-[0.35deg]"
+                  )}
+                >
+                  <span className="flex-1 min-w-0 truncate text-[15px] text-muted-foreground transition-colors group-hover:text-foreground">
+                    {s}
+                  </span>
+                  <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-foreground" />
+                </button>
+              ))}
+            </div>
+          </>
         )}
 
         <div className="flex justify-center mt-8">

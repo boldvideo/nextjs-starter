@@ -146,6 +146,85 @@ function extractReactText(children: React.ReactNode): string {
     .join("");
 }
 
+// Inside a real markdown link the mention renderers must not nest another
+// anchor (invalid HTML, hydration error) — the link renderer flags its
+// subtree with this context and mentions fall back to plain formatting.
+const InsideLinkContext = React.createContext(false);
+
+// The inverse case: the model writes **[title](url)** — a link inside the
+// bold mention. Wrapping that in a <Link> nests anchors too, so mentions
+// check their markdown AST subtree for anchors before linking.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function hastContainsAnchor(node: any): boolean {
+  if (!node?.children) return false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return node.children.some(
+    (c: any) => c?.tagName === "a" || hastContainsAnchor(c)
+  );
+}
+
+function MentionStrong({
+  citations,
+  node,
+  children,
+}: {
+  citations: AskCitation[];
+  node?: unknown;
+  children?: React.ReactNode;
+}) {
+  const insideLink = React.useContext(InsideLinkContext);
+  const mentioned =
+    insideLink || hastContainsAnchor(node)
+      ? null
+      : findMentionedVideo(extractReactText(children), citations);
+  if (mentioned) {
+    return (
+      <Link
+        href={buildVideoUrl({ id: mentioned.videoId })}
+        className={cn(
+          "font-semibold text-foreground no-underline",
+          "border-b border-primary/40 hover:border-primary",
+          "transition-colors"
+        )}
+      >
+        {children}
+      </Link>
+    );
+  }
+  return <strong>{children}</strong>;
+}
+
+function MentionEm({
+  citations,
+  node,
+  children,
+}: {
+  citations: AskCitation[];
+  node?: unknown;
+  children?: React.ReactNode;
+}) {
+  const insideLink = React.useContext(InsideLinkContext);
+  const mentioned =
+    insideLink || hastContainsAnchor(node)
+      ? null
+      : findTitleMatch(extractReactText(children), citations);
+  if (mentioned) {
+    return (
+      <Link
+        href={buildVideoUrl({ id: mentioned.videoId })}
+        className={cn(
+          "italic text-foreground no-underline",
+          "border-b border-primary/40 hover:border-primary",
+          "transition-colors"
+        )}
+      >
+        {children}
+      </Link>
+    );
+  }
+  return <em>{children}</em>;
+}
+
 /** Fenced code block with a language bar and copy button. */
 function CodeBlock({
   lang,
@@ -318,7 +397,12 @@ const MarkdownSection = React.memo(function MarkdownSection({
           rel="noopener noreferrer"
           className="text-primary hover:underline"
         >
-          {children}
+          {/* The strong/em renderers turn episode mentions into <Link>s —
+              inside an actual markdown link they must stay plain text, or
+              the nested anchors break hydration. */}
+          <InsideLinkContext.Provider value={true}>
+            {children}
+          </InsideLinkContext.Provider>
         </a>
       );
     };
@@ -327,47 +411,18 @@ const MarkdownSection = React.memo(function MarkdownSection({
       a: AnchorComponent,
       // Episode mentions like **Episode 8 ("Human as Tools")** deep-link to
       // the video when the quoted title matches one of the answer's sources.
-      strong: ({ children }) => {
-        const mentioned = findMentionedVideo(
-          extractReactText(children),
-          citations
-        );
-        if (mentioned) {
-          return (
-            <Link
-              href={buildVideoUrl({ id: mentioned.videoId })}
-              className={cn(
-                "font-semibold text-foreground no-underline",
-                "border-b border-primary/40 hover:border-primary",
-                "transition-colors"
-              )}
-            >
-              {children}
-            </Link>
-          );
-        }
-        return <strong>{children}</strong>;
-      },
+      strong: ({ node, children }) => (
+        <MentionStrong citations={citations} node={node}>
+          {children}
+        </MentionStrong>
+      ),
       // Italicized episode titles (*The Self-Healing Agent Loop…*) deep-link
       // to the video when the emphasized text matches a source's title.
-      em: ({ children }) => {
-        const mentioned = findTitleMatch(extractReactText(children), citations);
-        if (mentioned) {
-          return (
-            <Link
-              href={buildVideoUrl({ id: mentioned.videoId })}
-              className={cn(
-                "italic text-foreground no-underline",
-                "border-b border-primary/40 hover:border-primary",
-                "transition-colors"
-              )}
-            >
-              {children}
-            </Link>
-          );
-        }
-        return <em>{children}</em>;
-      },
+      em: ({ node, children }) => (
+        <MentionEm citations={citations} node={node}>
+          {children}
+        </MentionEm>
+      ),
       ul: (props) => <ul {...props} className="list-disc pl-5 space-y-2" />,
       // `start` passes through via props: a streamed list split at a block
       // boundary continues in a fresh <ol> that starts mid-count.
