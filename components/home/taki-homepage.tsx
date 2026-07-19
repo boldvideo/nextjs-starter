@@ -102,7 +102,7 @@ export function TakiHomepage({
                   overflow it symmetrically on large screens */}
               <div className="relative mx-auto text-center lg:left-1/2 lg:w-max lg:max-w-none lg:-translate-x-1/2 lg:whitespace-nowrap">
                 <p className="font-scribble rotate-[-2deg] text-[clamp(1.35rem,2.2vw,1.6rem)] text-muted-foreground">
-                  g&rsquo;day coach 👋
+                  hey coach 👋
                 </p>
                 <h1 className="font-marker mt-1 -rotate-1 text-[clamp(2.75rem,6.5vw,4.6rem)] leading-[0.98] text-foreground">
                   ASK ME{" "}
