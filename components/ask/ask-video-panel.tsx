@@ -63,7 +63,7 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-scribble rotate-[-1.5deg] text-[22px] leading-none text-foreground/75">
-            the receipt
+            the exact moment
           </h3>
           <button
             onClick={onClose}

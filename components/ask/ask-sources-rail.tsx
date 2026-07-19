@@ -237,7 +237,7 @@ function VideoSourcePanel({
       {/* Head */}
       <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-border shrink-0">
         <h3 className="font-scribble rotate-[-1.5deg] text-[22px] leading-none text-foreground/75">
-          the receipt
+          the exact moment
         </h3>
         <button
           type="button"
