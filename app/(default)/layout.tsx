@@ -18,8 +18,10 @@ import SignIn from "@/components/auth/sign-in";
 import type { ExtendedMetaData } from "@/types/bold-extensions";
 import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 
-// Force dynamic rendering — tenant depends on hostname in hosted mode
-export const dynamic = "force-dynamic";
+// Fork override: this build is single-tenant standalone (no hostname
+// resolution), so pages render static with ISR instead of per-request.
+// Every route refreshes at most every 60s; watch pages build on demand.
+export const revalidate = 60;
 
 export const viewport = {
   // Matches the Taki paper-white chrome
