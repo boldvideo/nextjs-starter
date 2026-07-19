@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Github, Loader2, Youtube } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { Video } from "@boldvideo/bold-js";
 import { cn } from "@/lib/utils";
 import { buildVideoUrl } from "@/lib/video-path";
@@ -723,8 +723,8 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
     <div className="lg:grid lg:grid-cols-[248px_1fr] max-w-[1280px] mx-auto">
       {/* Topic rail (desktop) */}
       <aside className="hidden lg:block border-r border-border pt-8 pr-5 pb-8 pl-6 sticky top-[var(--header-height)] self-start">
-        <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-3 ml-1">
-          Topics
+        <p className="font-scribble mb-2 ml-1 rotate-[-2deg] text-xl text-[var(--warning)]">
+          topics
         </p>
         <div className="flex flex-col gap-0.5">
           <TopicButton
@@ -743,63 +743,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
             />
           ))}
         </div>
-        {/* The companies behind the show — logo tiles, ad-wall style */}
-        <div className="mt-8 pt-4 border-t border-border ml-1">
-          <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-3">
-            Brought to you by
-          </p>
-          <div className="flex flex-col gap-2.5 pr-1">
-            <a
-              href="https://humanlayer.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="HumanLayer"
-              title="HumanLayer"
-              className="group/tile flex items-center justify-center h-20 rounded-lg border border-border bg-surface hover:border-primary/50 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
-            >
-              {/* Official wordmark ships as fill="currentColor" — masked so it
-                  takes our foreground color on the dark surface */}
-              <span
-                role="img"
-                aria-label="HumanLayer"
-                className="h-6 w-44 bg-foreground/85 group-hover/tile:bg-foreground transition-colors duration-150"
-                style={{
-                  WebkitMaskImage: "url(/logos/humanlayer-full.svg)",
-                  maskImage: "url(/logos/humanlayer-full.svg)",
-                  WebkitMaskRepeat: "no-repeat",
-                  maskRepeat: "no-repeat",
-                  WebkitMaskPosition: "center",
-                  maskPosition: "center",
-                  WebkitMaskSize: "contain",
-                  maskSize: "contain",
-                }}
-              />
-            </a>
-            {/* Brand-accurate card: boundaryml.com header on its cream
-                background — sheep left, mono BAML wordmark in ink */}
-            <a
-              href="https://boundaryml.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="BAML by Boundary"
-              title="BAML by Boundary"
-              className="group/tile flex items-center justify-center gap-3 h-20 rounded-lg border border-[#d9d3c4] bg-[#fbf7ed] hover:border-primary/50 transition-[border-color,transform] duration-150 ease-out active:scale-[0.98]"
-            >
-              <img
-                src="/logos/baml-sheep.png"
-                alt=""
-                width={40}
-                height={40}
-                className="w-10 h-10"
-              />
-              <span className="font-mono text-[17px] font-semibold tracking-[0.02em] text-[#141414]">
-                BAML
-              </span>
-            </a>
-          </div>
-        </div>
-
-        <div className="mt-6 ml-1">
+        <div className="mt-8 border-t border-border pt-4 ml-1">
           <PoweredByBold />
         </div>
       </aside>
@@ -823,76 +767,17 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
             <p className="text-sm text-muted-foreground mt-2.5">{subtitle}</p>
           )}
 
-          {/* Hosts + canonical homes — this portal is a companion to the
-              show, so it credits the humans and links back out */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
-            <div className="flex items-center gap-3">
-              <div className="flex shrink-0 -space-x-2">
-                {/* Plain img: GitHub avatars, tiny and already CDN-optimized */}
-                <img
-                  src="https://github.com/dexhorthy.png?size=56"
-                  alt="Dex Horthy"
-                  width={28}
-                  height={28}
-                  className="w-7 h-7 rounded-full border-2 border-background bg-muted"
-                />
-                <img
-                  src="https://github.com/hellovai.png?size=56"
-                  alt="Vaibhav Gupta"
-                  width={28}
-                  height={28}
-                  className="w-7 h-7 rounded-full border-2 border-background bg-muted"
-                />
-              </div>
-              <span className="min-w-0 text-sm leading-relaxed text-muted-foreground">
-                with{" "}
-                <a
-                  href="https://x.com/dexhorthy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-foreground hover:text-primary transition-colors"
-                >
-                  Dex Horthy
-                </a>{" "}
-                <span className="text-muted-foreground/60">(HumanLayer)</span>
-                {" & "}
-                <a
-                  href="https://x.com/vaibcode"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-foreground hover:text-primary transition-colors"
-                >
-                  Vaibhav Gupta
-                </a>{" "}
-                <span className="text-muted-foreground/60">(Boundary)</span>
-              </span>
-            </div>
-
-            <span
-              aria-hidden="true"
-              className="hidden sm:block w-px h-4 bg-border"
-            />
-
-            <div className="flex items-center gap-2">
-              <a
-                href="https://www.youtube.com/@boundaryml"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"
-              >
-                <Youtube className="h-3.5 w-3.5" />
-                YouTube
-              </a>
-              <a
-                href="https://github.com/ai-that-works/ai-that-works"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"
-              >
-                <Github className="h-3.5 w-3.5" />
-                GitHub
-              </a>
-            </div>
+          {/* Nudge into the core loop: any of these can be asked about */}
+          <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+            <span className="font-scribble rotate-[-1deg] text-lg text-[var(--warning)]">
+              don&rsquo;t scrub through 34 hours —
+            </span>
+            <Link
+              href="/ask"
+              className="text-sm font-semibold decoration-accent decoration-[2.5px] underline-offset-4 hover:underline"
+            >
+              just ask Taki AI →
+            </Link>
           </div>
         </div>
 

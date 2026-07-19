@@ -1,25 +1,27 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Text wordmark shown when the tenant has no logo configured.
- * The show's lockup: lowercase "ai that works." with "works" in serif
- * italic, tinted by the active theme's accent.
+ * The Taki AI lockup: "TAKI" in his marker hand, "AI" sitting on a gold
+ * highlighter swipe. Scales with font-size, so callers can size it with
+ * text classes.
  */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-baseline select-none whitespace-nowrap",
-        "font-[family-name:var(--font-heading)] font-semibold text-foreground",
-        "text-[21px] leading-none tracking-[-0.03em]",
+        "font-marker inline-flex items-baseline gap-[0.18em] select-none whitespace-nowrap",
+        "text-[22px] leading-none text-foreground -rotate-1",
         className
       )}
     >
-      ai&nbsp;that&nbsp;
-      <span className="font-[family-name:var(--font-serif-brand)] italic font-medium text-primary text-[1.06em]">
-        works
+      TAKI
+      <span className="relative inline-block">
+        <span
+          aria-hidden="true"
+          className="absolute -inset-x-[0.14em] inset-y-[-0.08em] -skew-x-6 rounded-[0.18em] bg-accent"
+        />
+        <span className="relative">AI</span>
       </span>
-      .
     </span>
   );
 }

@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "AI That Works",
-    short_name: "AI That Works",
+    name: "Taki AI",
+    short_name: "Taki AI",
     description:
-      "Weekly sessions on taking AI apps from demo to production — live coding, Q&A, and production-ready AI engineering.",
+      "Taki Moore's entire video library, one question away — answers in his voice, with the exact clip they came from.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0a0a09",
-    theme_color: "#0a0a09",
+    background_color: "#faf9f6",
+    theme_color: "#faf9f6",
     icons: [
       {
         src: "/icon-pwa?size=192",

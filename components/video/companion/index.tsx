@@ -120,8 +120,8 @@ export function VideoCompanionSidebar({
             <SidebarToggle side="right" mode="collapse" className="mt-2" />
           ) : (
             <div className="flex items-center w-full justify-between px-2">
-              {/* Tab Navigation — HumanLayer app style: uppercase mono,
-                  the active tab is a solid block, no icons, no underline */}
+              {/* Tab Navigation — Taki style: the active tab sits on a
+                  gold highlight */}
               <div className="flex items-center gap-1 py-2">
                 {tabs.map((tab) => {
                   const isActive = effectiveTab === tab.id;
@@ -130,10 +130,10 @@ export function VideoCompanionSidebar({
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={cn(
-                        "px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors cursor-pointer",
+                        "rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer",
                         isActive
-                          ? "bg-[var(--bg-tertiary)] text-foreground"
-                          : "text-muted-foreground hover:text-primary"
+                          ? "bg-accent text-accent-foreground"
+                          : "text-muted-foreground hover:text-foreground"
                       )}
                     >
                       {tab.label}

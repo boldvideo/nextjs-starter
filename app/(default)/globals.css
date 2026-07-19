@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --tw-prose-body: var(--foreground);
-  --tw-prose-links: var(--accent);
+  --tw-prose-links: var(--foreground);
   --font-sans: var(--font-body);
   --font-heading: var(--font-heading);
   --color-ring: var(--ring);
@@ -41,538 +41,85 @@
   --color-sidebar-primary: var(--accent);
   --color-sidebar-foreground: var(--foreground);
   --color-sidebar: var(--surface);
-  /* HumanLayer: hard corners everywhere — no rounding on any component */
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
-  --radius-4xl: 0px;
 }
 
-/* ── HumanLayer theme system — the full [data-theme] variable sets from
-   humanlayer.com, copied verbatim. Poimandres (their landing default) is
-   our default; the paintbrush switcher in the site nav sets data-theme. */
+/* ── Taki Moore theme — one light "whiteboard" look, design-owned in code.
+   Warm paper white, near-black ink, Million Dollar Coach gold (#FABF19).
+   The legacy --bg-… and --text-… names are kept from the previous skin so
+   components that reference them directly keep working; they now resolve
+   to Taki's palette. */
 :root {
-  --radius: 0px;
-  /* The video player's default skin rounds its surface — square it off */
-  --media-border-radius: 0px;
-  /* Portal nav row + HumanLayer's announcement banner and site nav on top */
-  --site-banner-height: 36px;
-  --site-bar-height: 101px;
-  --header-height: calc(
-    57px + var(--site-banner-height) + var(--site-bar-height)
-  );
+  color-scheme: light;
+  --radius: 0.75rem;
+  --media-border-radius: 12px;
 
-  /* Cross-theme fallback chain, exactly as humanlayer.com defines it */
+  /* Chrome heights: slim brand bar (measured by TakiBar) + 57px portal
+     nav row on subpages. The homepage and mobile watch pages override
+     --header-height like before. */
+  --site-banner-height: 0px;
+  --site-bar-height: 60px;
+  --header-height: calc(57px + var(--site-banner-height) + var(--site-bar-height));
+
+  /* Base palette */
+  --bg-primary: #faf9f6;
+  --bg-secondary: #fffefb;
+  --bg-tertiary: #f0eee7;
+  --bg-muted: #f2f1ec;
+  --text-primary: #16150f;
+  --text-secondary: #55524a;
+  --text-muted: #8a867b;
+  --border-color: #e6e3d9;
+  --accent: #fabf19;
+  --accent-alt: #e8ad00;
+  --accent-hover: #e8ad00;
+  --success: #2e7d32;
+  --warning: #b78300;
+  --error: #d93025;
+  --shadow: rgba(22, 21, 15, 0.1);
+  --code-bg: #ffffff;
+  --code-border: #e6e3d9;
+
+  /* Cross-theme fallback chain (kept for components that use them) */
   --fg-primary: var(--text-primary);
   --fg-muted: var(--text-muted);
-  --bg-muted: var(--bg-tertiary);
   --accent-alt: var(--accent-hover, var(--accent));
 
-  /* Portal tokens ride the HumanLayer variables so every theme restyles
-     the whole app. --accent IS their accent — shared name, shared meaning. */
+  /* Portal tokens */
   --background: var(--bg-primary);
   --foreground: var(--text-primary);
   --muted: var(--bg-muted);
   --muted-foreground: var(--text-secondary);
   --border: var(--border-color);
   --ring: var(--accent);
-  --surface: var(--code-bg);
-  --accent-foreground: var(--bg-primary);
+  --surface: var(--bg-secondary);
+  --accent-foreground: var(--text-primary);
   --primary: var(--accent);
-  /* Citation/provenance signal maps to each theme's warning color */
+  /* Citation/provenance signal: readable amber on paper */
   --signal: var(--warning);
-  --signal-soft: color-mix(in srgb, var(--warning) 13%, transparent);
-  --signal-line: color-mix(in srgb, var(--warning) 35%, transparent);
+  --signal-soft: color-mix(in srgb, var(--accent) 16%, transparent);
+  --signal-line: color-mix(in srgb, var(--warning) 40%, transparent);
   --input: var(--border-color);
   --destructive: var(--error);
 }
 
-:root:not([data-theme]),
-[data-theme="poimandres"] {
-  color-scheme: dark;
-  --bg-primary: #1b1e28;
-  --bg-secondary: #303340;
-  --bg-tertiary: #3a3d4a;
-  --bg-muted: #252836;
-  --text-primary: #a6accd;
-  --text-secondary: #8990b3;
-  --text-muted: #6b7394;
-  --border-color: #303340;
-  --accent: #add7ff;
-  --accent-alt: #89ddff;
-  --accent-hover: #5de4c7;
-  --success: #5de4c7;
-  --warning: #fffac2;
-  --error: #d0679d;
-  --shadow: #0006;
-  --code-bg: #252836;
-  --code-border: #303340;
-}
+/* ── Taki site chrome ─────────────────────────────────────────────── */
 
-[data-theme="lattice-light"] {
-  color-scheme: light;
-  --bg-primary: #fff;
-  --bg-secondary: #f5f5f5;
-  --bg-tertiary: #fafafa;
-  --bg-muted: #f0f0f0;
-  --text-primary: #333;
-  --text-secondary: #666;
-  --text-muted: #999;
-  --border-color: #e5e5e5;
-  --accent: #06c;
-  --accent-alt: #09c;
-  --accent-hover: #0052a3;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --shadow: #0000001a;
-  --code-bg: #f9f9f9;
-  --code-border: #e1e1e1;
-}
-
-[data-theme="lattice-dark"] {
-  color-scheme: dark;
-  --bg-primary: #181818;
-  --bg-secondary: #222;
-  --bg-tertiary: #2a2a2a;
-  --bg-muted: #1a1a1a;
-  --text-primary: #eee;
-  --text-secondary: #aaa;
-  --text-muted: #666;
-  --border-color: #333;
-  --accent: #fd5799;
-  --accent-alt: #89ddff;
-  --accent-hover: #ff6ca8;
-  --success: #5de4c7;
-  --warning: #fffac2;
-  --error: #d0679d;
-  --shadow: #00000080;
-  --code-bg: #1a1a1a;
-  --code-border: #2a2a2a;
-}
-
-[data-theme="solarized-dark"] {
-  color-scheme: dark;
-  --bg-primary: #002b36;
-  --bg-secondary: #073642;
-  --bg-tertiary: #004052;
-  --text-primary: #839496;
-  --text-secondary: #657b83;
-  --text-muted: #586e75;
-  --border-color: #073642;
-  --accent: #268bd2;
-  --accent-hover: #2aa198;
-  --success: #859900;
-  --warning: #b58900;
-  --error: #dc322f;
-  --shadow: #0006;
-  --code-bg: #073642;
-  --code-border: #004052;
-}
-
-[data-theme="solarized-light"] {
-  color-scheme: light;
-  --bg-primary: #fdf6e3;
-  --bg-secondary: #eee8d5;
-  --bg-tertiary: #e5dfc9;
-  --text-primary: #657b83;
-  --text-secondary: #586e75;
-  --text-muted: #93a1a1;
-  --border-color: #eee8d5;
-  --accent: #268bd2;
-  --accent-hover: #2aa198;
-  --success: #859900;
-  --warning: #b58900;
-  --error: #dc322f;
-  --shadow: #00000014;
-  --code-bg: #eee8d5;
-  --code-border: #e5dfc9;
-}
-
-[data-theme="catppuccin"] {
-  color-scheme: dark;
-  --bg-primary: #1e1e2e;
-  --bg-secondary: #313244;
-  --bg-tertiary: #45475a;
-  --text-primary: #cdd6f4;
-  --text-secondary: #bac2de;
-  --text-muted: #a6adc8;
-  --border-color: #313244;
-  --accent: #cba6f7;
-  --accent-hover: #f5c2e7;
-  --success: #a6e3a1;
-  --warning: #f9e2af;
-  --error: #f38ba8;
-  --shadow: #0006;
-  --code-bg: #313244;
-  --code-border: #45475a;
-}
-
-[data-theme="monokai"] {
-  color-scheme: dark;
-  --bg-primary: #272822;
-  --bg-secondary: #3e3d32;
-  --bg-tertiary: #49483e;
-  --text-primary: #f8f8f2;
-  --text-secondary: #cfcfc2;
-  --text-muted: #75715e;
-  --border-color: #3e3d32;
-  --accent: #66d9ef;
-  --accent-hover: #a6e22e;
-  --success: #a6e22e;
-  --warning: #e6db74;
-  --error: #f92672;
-  --shadow: #0006;
-  --code-bg: #3e3d32;
-  --code-border: #49483e;
-}
-
-[data-theme="gruvbox-dark"] {
-  color-scheme: dark;
-  --bg-primary: #282828;
-  --bg-secondary: #3c3836;
-  --bg-tertiary: #504945;
-  --text-primary: #d4be98;
-  --text-secondary: #d5c4a1;
-  --text-muted: #a89984;
-  --border-color: #3c3836;
-  --accent: #a9b665;
-  --accent-hover: #89b482;
-  --success: #b8bb26;
-  --warning: #fabd2f;
-  --error: #fb4934;
-  --shadow: #0006;
-  --code-bg: #3c3836;
-  --code-border: #504945;
-}
-
-[data-theme="gruvbox-light"] {
-  color-scheme: light;
-  --bg-primary: #fbf1c7;
-  --bg-secondary: #f2e5bc;
-  --bg-tertiary: #ebdbb2;
-  --text-primary: #654735;
-  --text-secondary: #7c6f64;
-  --text-muted: #928374;
-  --border-color: #d5c4a1;
-  --accent: #6c782e;
-  --accent-hover: #45707a;
-  --success: #79740e;
-  --warning: #b57614;
-  --error: #9d0006;
-  --shadow: #00000014;
-  --code-bg: #f2e5bc;
-  --code-border: #ebdbb2;
-}
-
-[data-theme="rose-pine"] {
-  color-scheme: dark;
-  --bg-primary: #191724;
-  --bg-secondary: #1f1d2e;
-  --bg-tertiary: #26233a;
-  --text-primary: #e0def4;
-  --text-secondary: #908caa;
-  --text-muted: #6e6a86;
-  --border-color: #26233a;
-  --accent: #c4a7e7;
-  --accent-hover: #ebbcba;
-  --success: #9ccfd8;
-  --warning: #f6c177;
-  --error: #eb6f92;
-  --shadow: #0006;
-  --code-bg: #1f1d2e;
-  --code-border: #26233a;
-}
-
-[data-theme="rose-pine-dawn"] {
-  color-scheme: light;
-  --bg-primary: #faf4ed;
-  --bg-secondary: #fffaf3;
-  --bg-tertiary: #f2e9e1;
-  --text-primary: #575279;
-  --text-secondary: #797593;
-  --text-muted: #9893a5;
-  --border-color: #dfdad9;
-  --accent: #907aa9;
-  --accent-hover: #d7827e;
-  --success: #56949f;
-  --warning: #ea9d34;
-  --error: #b4637a;
-  --shadow: #00000014;
-  --code-bg: #f2e9e1;
-  --code-border: #dfdad9;
-}
-
-[data-theme="rose-pine-moon"] {
-  color-scheme: dark;
-  --bg-primary: #232136;
-  --bg-secondary: #2a273f;
-  --bg-tertiary: #393552;
-  --text-primary: #e0def4;
-  --text-secondary: #908caa;
-  --text-muted: #6e6a86;
-  --border-color: #393552;
-  --accent: #c4a7e7;
-  --accent-hover: #ea9a97;
-  --success: #3e8fb0;
-  --warning: #f6c177;
-  --error: #eb6f92;
-  --shadow: #0006;
-  --code-bg: #2a273f;
-  --code-border: #393552;
-}
-
-[data-theme="cappuccino"] {
-  color-scheme: dark;
-  --bg-primary: #2f1b14;
-  --bg-secondary: #3e2720;
-  --bg-tertiary: #4a322a;
-  --text-primary: #d4b895;
-  --text-secondary: #c09d74;
-  --text-muted: #8b6f56;
-  --border-color: #4a322a;
-  --accent: #f4a261;
-  --accent-hover: #e76f51;
-  --success: #2a9d8f;
-  --warning: #f4a261;
-  --error: #e76f51;
-  --shadow: #0006;
-  --code-bg: #3e2720;
-  --code-border: #4a322a;
-}
-
-[data-theme="high-contrast"] {
-  color-scheme: dark;
-  --bg-primary: #000;
-  --bg-secondary: #0a0a0a;
-  --bg-tertiary: #1a1a1a;
-  --text-primary: #fff;
-  --text-secondary: #e0e0e0;
-  --text-muted: #a0a0a0;
-  --border-color: #333;
-  --accent: #0f0;
-  --accent-hover: #0c0;
-  --success: #0f0;
-  --warning: #ff0;
-  --error: red;
-  --shadow: #ffffff1a;
-  --code-bg: #0a0a0a;
-  --code-border: #1a1a1a;
-}
-
-[data-theme="launch"] {
-  color-scheme: light;
-  --bg-primary: #f6f6ef;
-  --bg-secondary: #fff;
-  --bg-tertiary: #e0e0d7;
-  --bg-muted: #eee8e0;
-  --text-primary: #000;
-  --text-secondary: #333;
-  --text-muted: #828282;
-  --border-color: #828282;
-  --accent: #f60;
-  --accent-alt: #5a9fd4;
-  --accent-hover: #cc5200;
-  --success: #458cc9;
-  --warning: #f60;
-  --error: #cc5200;
-  --shadow: #00000014;
-  --code-bg: #fff;
-  --code-border: #e0e0d7;
-}
-
-/* ── HumanLayer site chrome — 1:1 recreation of humanlayer.com's
-   announcement banner + nav. Rules copied verbatim from their stylesheet
-   (hl- prefixed); colors ride the same theme variables their site uses. */
-.hl-nav-header {
+.taki-nav-header {
   z-index: 100;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-color);
-  padding: 1rem 0;
-  transition: background-color 0.3s;
 }
-/* In-flow chrome on mobile watch pages: like their site, the banner
-   scrolls away and the nav sticks to the top of the scroll. The wrappers
-   dissolve (display: contents) so the sticky nav's containing block is
-   the scroll section itself, not the short chrome stack. */
+
+/* In-flow chrome on mobile watch pages: the nav sticks to the top of the
+   scroll. The wrappers dissolve (display: contents) so the sticky nav's
+   containing block is the scroll section itself. */
 @media (max-width: 1023.98px) {
   .video-detail__chrome {
     display: contents;
   }
-  .video-detail__chrome .hl-nav-header {
+  .video-detail__chrome .taki-nav-header {
     position: sticky;
     top: 0;
-  }
-}
-.hl-nav-container {
-  max-width: 1280px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-@media (min-width: 640px) {
-  .hl-nav-container {
-    padding: 0 1.5rem;
-  }
-}
-@media (min-width: 1024px) {
-  .hl-nav-container {
-    padding: 0 2rem;
-  }
-}
-.hl-nav-grid {
-  padding: 1rem 0;
-}
-.hl-nav-row {
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  display: flex;
-}
-.hl-logo {
-  color: var(--text-primary);
-  flex-shrink: 0;
-  align-items: center;
-  gap: 8px;
-  line-height: 1;
-  text-decoration: none;
-  transition: transform 0.2s, color 0.3s;
-  display: flex;
-}
-.hl-logo:hover {
-  transform: scale(1.05);
-}
-.hl-main-nav {
-  flex: 1 1 0%;
-  align-items: center;
-  display: flex;
-}
-.hl-main-nav ul {
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  list-style: none;
-  display: flex;
-  margin: 0;
-  padding: 0;
-}
-.hl-main-nav a {
-  color: var(--text-primary);
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.hl-main-nav a:hover {
-  color: var(--accent);
-}
-.hl-nav-separator {
-  color: var(--text-muted);
-}
-.hl-nav-actions {
-  align-items: center;
-  gap: 0.75rem;
-  margin-left: auto;
-  display: flex;
-}
-.hl-mobile-menu-button {
-  cursor: pointer;
-  color: var(--text-primary);
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  transition: color 0.2s;
-  display: none;
-}
-.hl-mobile-menu-button:hover {
-  color: var(--accent);
-}
-/* Theme switcher dropdown (paintbrush menu in the nav) */
-.hl-theme-menu {
-  position: absolute;
-  left: 50%;
-  top: calc(100% + 0.1rem);
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  max-height: 20rem;
-  min-width: 12rem;
-  overflow-y: auto;
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transform: translateX(-50%);
-  transform-origin: top;
-  animation: hl-dropdown-slide 140ms ease;
-}
-@keyframes hl-dropdown-slide {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) scaleY(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) scaleY(1);
-  }
-}
-/* Dotted section dividers, like their feature separators */
-.hl-divider {
-  border: 0;
-  border-top: 2px dotted var(--accent);
-}
-@media (max-width: 768px) {
-  .hl-nav-row {
-    flex-wrap: wrap;
-    position: relative;
-  }
-  .hl-mobile-menu-button {
-    justify-content: center;
-    align-items: center;
-    margin-left: auto;
-    display: flex;
-  }
-  .hl-main-nav {
-    background: var(--bg-primary);
-    z-index: 50;
-    padding: 1rem;
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    box-shadow: rgba(0, 0, 0, 0.1) 0 4px 6px;
-  }
-  .hl-main-nav.nav-open {
-    display: block;
-  }
-  .hl-main-nav ul {
-    flex-direction: column;
-    gap: 0;
-    align-items: stretch;
-  }
-  .hl-main-nav li {
-    border-bottom: 1px solid var(--border-color);
-  }
-  .hl-main-nav li:last-child {
-    border-bottom: none;
-  }
-  .hl-main-nav a {
-    padding: 0.75rem 0.5rem;
-    display: block;
-  }
-  .hl-nav-separator,
-  .hl-nav-actions {
-    display: none;
-  }
-  .hl-theme-menu {
-    left: 0;
-    transform: none;
-    animation: none;
   }
 }
 
@@ -583,9 +130,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
-    /* humanlayer.com's mono body: slightly tightened, roomy paragraphs */
-    letter-spacing: -0.01em;
-    line-height: 1.7;
+    line-height: 1.65;
     overscroll-behavior-y: none; /* Prevents rubber-banding/bounce on macOS */
   }
   h1, h2, h3, h4, h5, h6 {
@@ -594,23 +139,53 @@
   h1 {
     letter-spacing: -0.02em;
   }
-  /* Content links, styled like theirs: accent, offset underline, hover
-     lifts to the theme's primary text color */
+  /* Content links: ink text with a gold marker underline; hovering
+     sweeps the highlighter across. */
   .prose a {
-    color: var(--accent);
+    color: var(--foreground);
     text-decoration: underline;
-    text-underline-offset: 2px;
-    transition: color 0.2s;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    transition: background-color 0.15s ease;
   }
   .prose a:hover {
-    color: var(--fg-primary);
+    background-color: var(--signal-soft);
   }
   mark {
     @apply bg-accent text-accent-foreground font-medium px-1;
   }
+  ::selection {
+    background: var(--accent);
+    color: var(--text-primary);
+  }
 }
 
 @layer utilities {
+  /* Faint whiteboard dot-paper, fading out toward the edges */
+  .taki-dotgrid {
+    background-image: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--text-muted) 30%, transparent) 1.2px,
+      transparent 1.3px
+    );
+    background-size: 26px 26px;
+    mask-image: radial-gradient(
+      ellipse 80% 72% at 50% 40%,
+      black 45%,
+      transparent 100%
+    );
+  }
+
+  .font-marker {
+    font-family: var(--font-marker), "Permanent Marker", cursive;
+    font-weight: 400;
+  }
+  .font-scribble {
+    font-family: var(--font-scribble), "Caveat", cursive;
+    font-weight: 700;
+  }
+
   .no-scrollbar {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE 10+ */
@@ -618,7 +193,7 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none; /* Safari and Chrome */
   }
-  
+
   @keyframes pulse-once {
     0%, 100% {
       opacity: 1;
@@ -627,11 +202,11 @@
       opacity: 0.5;
     }
   }
-  
+
   .animate-pulse-once {
     animation: pulse-once 1s cubic-bezier(0.4, 0, 0.6, 1) 2;
   }
-  
+
   @keyframes shimmer-text {
     0% {
       background-position: 100% 50%;
@@ -673,5 +248,75 @@
     vertical-align: -0.15em;
     background-color: color-mix(in srgb, var(--color-primary) 75%, transparent);
     animation: cursor-blink 1s steps(2) infinite;
+  }
+
+  /* ── Taki homepage motion ─────────────────────────────────────── */
+
+  /* Chat messages pop in like a real conversation */
+  @keyframes taki-pop {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .animate-taki-pop {
+    animation: taki-pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  }
+
+  /* Typing indicator dots */
+  @keyframes taki-blink {
+    0%, 80%, 100% {
+      opacity: 0.25;
+      transform: translateY(0);
+    }
+    40% {
+      opacity: 1;
+      transform: translateY(-3px);
+    }
+  }
+  .animate-taki-blink {
+    animation: taki-blink 1.2s infinite;
+  }
+
+  /* Hand-drawn SVG strokes draw themselves in (pathLength=1 based) */
+  @keyframes taki-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .animate-taki-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: taki-draw 0.7s ease-out forwards;
+  }
+
+  /* Highlighter sweep behind a word */
+  @keyframes taki-highlight {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  .animate-taki-highlight {
+    transform-origin: left center;
+    animation: taki-highlight 0.45s cubic-bezier(0.6, 0, 0.3, 1) forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-taki-pop,
+    .animate-taki-blink,
+    .animate-taki-draw,
+    .animate-taki-highlight {
+      animation: none;
+      stroke-dashoffset: 0;
+      transform: none;
+      opacity: 1;
+    }
   }
 }

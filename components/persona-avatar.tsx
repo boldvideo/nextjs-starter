@@ -18,7 +18,6 @@ export function PersonaAvatar({
   size = 30,
   className,
 }: PersonaAvatarProps) {
-  // Square, like everything in the HumanLayer look
   if (avatar) {
     return (
       <Image
@@ -26,7 +25,7 @@ export function PersonaAvatar({
         alt={name}
         width={size}
         height={size}
-        className={cn("object-cover shrink-0", className)}
+        className={cn("rounded-full object-cover shrink-0", className)}
         style={{ width: size, height: size }}
       />
     );
@@ -36,7 +35,7 @@ export function PersonaAvatar({
     <span
       aria-hidden="true"
       className={cn(
-        "grid place-items-center shrink-0 select-none",
+        "grid place-items-center shrink-0 select-none rounded-full",
         "bg-primary text-primary-foreground",
         "font-[family-name:var(--font-heading)] font-semibold",
         className

@@ -6,17 +6,22 @@ const WIDTH = 1200;
 const HEIGHT = 630;
 
 const COLORS = {
-  bg: "#0a0a09",
-  surface: "#0e0e0d",
-  border: "#2a2a27",
-  fg: "#fafaf9",
-  muted: "#a8a8a1",
-  faint: "#737370",
-  teal: "#2dd4bf",
+  bg: "#faf9f6",
+  surface: "#fffefb",
+  border: "#e6e3d9",
+  ink: "#16150f",
+  muted: "#55524a",
+  faint: "#8a867b",
+  gold: "#fabf19",
 };
 
-const DEFAULT_TAGLINE = "Take your AI app from demo → production";
-const DEFAULT_META = "Live sessions Tuesdays · Dex Horthy & Vaibhav Gupta";
+const DEFAULT_TAGLINE = "Ask me anything. I've probably filmed it.";
+const DEFAULT_META = "Taki Moore's library, one question away — answers with receipts";
+
+/** True for the site-level card (no specific video/page title). */
+function isDefaultTitle(title: string): boolean {
+  return title.startsWith("Taki AI");
+}
 
 /**
  * Fetch a Google Font as TTF for ImageResponse (which can't use woff2).
@@ -74,27 +79,29 @@ async function loadImageDataUri(url: string): Promise<string | null> {
   }
 }
 
-function Wordmark() {
+function Wordmark({ marker }: { marker: boolean }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        transform: "rotate(-1.5deg)",
+        fontFamily: marker ? "Permanent Marker" : "sans-serif",
+      }}
+    >
+      <div style={{ fontSize: 34, color: COLORS.ink }}>TAKI</div>
       <div
         style={{
-          width: 14,
-          height: 14,
-          borderRadius: 4,
-          background: COLORS.teal,
-          boxShadow: `0 0 24px ${COLORS.teal}`,
-        }}
-      />
-      <div
-        style={{
-          fontSize: 30,
-          fontWeight: 700,
-          letterSpacing: "0.06em",
-          color: COLORS.teal,
+          fontSize: 34,
+          color: COLORS.ink,
+          background: COLORS.gold,
+          padding: "0 10px",
+          borderRadius: 8,
+          transform: "skewX(-4deg)",
         }}
       >
-        AI That Works
+        AI
       </div>
     </div>
   );
@@ -112,7 +119,9 @@ function PoweredByBold() {
       }}
     >
       Powered by
-      <span style={{ fontWeight: 700, letterSpacing: "0.08em", color: COLORS.muted }}>
+      <span
+        style={{ fontWeight: 700, letterSpacing: "0.08em", color: COLORS.muted }}
+      >
         BOLD
       </span>
     </div>
@@ -121,20 +130,26 @@ function PoweredByBold() {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get("t")?.slice(0, 120) || "AI That Works";
+  const title = searchParams.get("t")?.slice(0, 120) || "Taki AI";
   const img = searchParams.get("img");
   const sub = searchParams.get("sub")?.slice(0, 160) || DEFAULT_TAGLINE;
 
-  const fontText = `${title}${sub}${DEFAULT_META}AI That WorksPowered by BOLD`;
-  const [bold, medium, imgSrc] = await Promise.all([
-    loadGoogleFont("Space Grotesk", 700, fontText),
+  const fontText = `${title}${sub}${DEFAULT_META}TAKIAIPowered by BOLD`;
+  const [bold, medium, marker, imgSrc] = await Promise.all([
+    loadGoogleFont("Bricolage Grotesque", 700, fontText),
     loadGoogleFont("DM Sans", 500, fontText),
+    loadGoogleFont("Permanent Marker", 400, "TAKIAI"),
     img ? loadImageDataUri(img) : Promise.resolve(null),
   ]);
 
   const fonts = [
-    ...(bold ? [{ name: "Space Grotesk", data: bold, weight: 700 as const }] : []),
+    ...(bold
+      ? [{ name: "Bricolage Grotesque", data: bold, weight: 700 as const }]
+      : []),
     ...(medium ? [{ name: "DM Sans", data: medium, weight: 500 as const }] : []),
+    ...(marker
+      ? [{ name: "Permanent Marker", data: marker, weight: 400 as const }]
+      : []),
   ];
 
   const baseStyle = {
@@ -142,9 +157,9 @@ export async function GET(request: Request) {
     height: "100%",
     display: "flex" as const,
     backgroundColor: COLORS.bg,
-    backgroundImage: `radial-gradient(80% 60% at 30% -10%, rgba(45,212,191,0.10), transparent 60%)`,
-    fontFamily: bold ? "Space Grotesk" : "sans-serif",
-    color: COLORS.fg,
+    backgroundImage: `radial-gradient(75% 60% at 25% -10%, rgba(250,191,25,0.16), transparent 60%)`,
+    fontFamily: bold ? "Bricolage Grotesque" : "sans-serif",
+    color: COLORS.ink,
   };
 
   // Video card: text column + thumbnail
@@ -163,7 +178,7 @@ export async function GET(request: Request) {
               paddingBottom: 8,
             }}
           >
-            <Wordmark />
+            <Wordmark marker={!!marker} />
             <div
               style={{
                 display: "flex",
@@ -187,7 +202,7 @@ export async function GET(request: Request) {
               height: 315,
               objectFit: "cover",
               borderRadius: 16,
-              border: `1px solid ${COLORS.border}`,
+              border: `4px solid ${COLORS.ink}`,
             }}
           />
         </div>
@@ -207,19 +222,19 @@ export async function GET(request: Request) {
           padding: 72,
         }}
       >
-        <Wordmark />
+        <Wordmark marker={!!marker} />
         <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
           <div
             style={{
               display: "flex",
-              fontSize: title.length > 40 ? 56 : 76,
+              fontSize: title.length > 40 && !isDefaultTitle(title) ? 56 : 72,
               fontWeight: 700,
               lineHeight: 1.08,
               letterSpacing: "-0.03em",
-              maxWidth: 980,
+              maxWidth: 1000,
             }}
           >
-            {title === "AI That Works" ? sub : title}
+            {isDefaultTitle(title) ? sub : title}
           </div>
           <div
             style={{
@@ -229,7 +244,7 @@ export async function GET(request: Request) {
               color: COLORS.muted,
             }}
           >
-            {title === "AI That Works" ? DEFAULT_META : sub}
+            {isDefaultTitle(title) ? DEFAULT_META : sub}
           </div>
         </div>
         <div
@@ -247,7 +262,7 @@ export async function GET(request: Request) {
               fontFamily: medium ? "DM Sans" : "sans-serif",
             }}
           >
-            Live coding, Q&A, and production-ready AI engineering
+            Every framework, every play, every rant — with receipts
           </div>
           <PoweredByBold />
         </div>

@@ -67,9 +67,9 @@ export function VideoDescription({ text, onTimeSelect }: VideoDescriptionProps) 
                   onClick={() => onTimeSelect(seconds)}
                   className={cn(
                     "font-mono text-[0.88em] font-medium no-underline",
-                    "text-primary bg-primary/10 border border-primary/20 rounded",
+                    "text-[var(--warning)] bg-primary/10 border border-primary/25 rounded",
                     "px-1.5 py-px align-baseline",
-                    "hover:bg-primary/20 transition-colors cursor-pointer"
+                    "hover:bg-primary/25 transition-colors cursor-pointer"
                   )}
                   title="Jump to this moment"
                 >
@@ -83,7 +83,7 @@ export function VideoDescription({ text, onTimeSelect }: VideoDescriptionProps) 
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
+                className="font-medium text-foreground underline decoration-accent decoration-2 underline-offset-[3px] hover:bg-[var(--signal-soft)]"
               >
                 {children}
               </a>

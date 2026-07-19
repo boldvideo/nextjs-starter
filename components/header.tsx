@@ -1,14 +1,13 @@
 "use client";
 import { Suspense } from "react";
-import Image, { StaticImageData } from "next/image";
+import type { StaticImageData } from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { askLabel } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import UserMenu from "@/components/auth/user-menu";
 import { HeaderSearch } from "@/components/header-search";
-import { Wordmark } from "@/components/wordmark";
-import { HumanLayerBar } from "@/components/humanlayer-bar";
+import { TakiBar } from "@/components/taki-bar";
 import { MobileSearchButton } from "@/components/mobile-search-button";
 import { MobileAskButton } from "@/components/mobile-ask-button";
 import { useSettings } from "@/components/providers/settings-provider";
@@ -24,13 +23,7 @@ interface HeaderProps {
   className?: string;
 }
 
-export function Header({
-  logo,
-  logoDark,
-  menuItems,
-  session,
-  className,
-}: HeaderProps) {
+export function Header({ menuItems, session, className }: HeaderProps) {
   const settings = useSettings();
   const config = getPortalConfig(settings);
   const pathname = usePathname();
@@ -44,16 +37,12 @@ export function Header({
       ? askLabel(config.ai.name)
       : pathname === "/s"
         ? "Search"
-        : null);
+        : pathname === "/videos"
+          ? "All videos"
+          : null);
 
-  // Logo scales with header height
-  // Desktop: header height minus 24px for visual breathing room
-  // Mobile: fixed 32px (h-8)
-  const desktopLogoClass = "h-[calc(var(--header-height)-24px)]";
-  const mobileLogoClass = "h-8";
-
-  // The homepage hero carries the wordmark, search, and ask — the HumanLayer
-  // bar is the only fixed chrome there. Other pages keep the portal nav row.
+  // The homepage carries its own hero — the Taki bar is the only fixed
+  // chrome there. Other pages keep the portal nav row.
   const isHome = pathname === "/";
 
   // Watch pages on mobile scroll as one document (chrome included, like
@@ -76,52 +65,16 @@ export function Header({
           isWatch ? "hidden lg:flex" : "flex"
         } ${className || ""}`}
       >
-        {/* HumanLayer's site nav rides on top — the portal is part of their world */}
-        <HumanLayerBar />
+        {/* Taki brand bar rides on top of the portal chrome */}
+        <TakiBar />
         {!isHome && (
         // Portal nav row sits in the same 1280px frame as their nav-container
         <div className="mx-auto w-full max-w-[1280px] px-4 sm:px-6 lg:px-8 flex-1 flex items-center">
           <nav className="w-full flex flex-col lg:flex-row gap-4 lg:gap-0">
             <div className="flex items-center justify-between w-full">
-              {/* Logo */}
+              {/* Left: breadcrumb (the TakiBar above already carries the
+                  wordmark — repeating it here reads as a stutter) */}
               <div className="flex items-center">
-                <Link href="/" className="mr-8 hidden lg:block">
-                  {!logo ? (
-                    <Wordmark />
-                  ) : logoDark ? (
-                    <>
-                      {/* Light Mode Logo */}
-                      <Image
-                        src={logo}
-                        alt="Logo"
-                        className={`${desktopLogoClass} w-auto object-contain block dark:hidden`}
-                        height={40}
-                        width={160}
-                        priority
-                      />
-                      {/* Dark Mode Logo */}
-                      <Image
-                        src={logoDark}
-                        alt="Logo"
-                        className={`${desktopLogoClass} w-auto object-contain hidden dark:block`}
-                        height={40}
-                        width={160}
-                        priority
-                      />
-                    </>
-                  ) : (
-                    // Default Logo if no dark variant
-                    <Image
-                      src={logo}
-                      alt="Logo"
-                      className={`${desktopLogoClass} w-auto object-contain`}
-                      height={40}
-                      width={160}
-                      priority
-                    />
-                  )}
-                </Link>
-
                 {/* Breadcrumb */}
                 {crumbLabel && (
                   <div className="hidden lg:flex items-center gap-2 text-sm mr-6">
@@ -172,42 +125,14 @@ export function Header({
 
               {/* Mobile Header Controls */}
               <div className="flex items-center justify-between w-full lg:hidden">
-                {/* Left: Logo only — the HumanLayer bar has its own menu and
-                    the video pages carry a bottom tab nav */}
-                <div className="flex items-center gap-4">
-                  <Link href="/">
-                    {!logo ? (
-                      <Wordmark className="text-lg" />
-                    ) : logoDark ? (
-                      <>
-                        {/* Light Mode Logo */}
-                        <Image
-                          src={logo}
-                          alt="Logo"
-                          className={`${mobileLogoClass} w-auto object-contain block dark:hidden`}
-                          height={32}
-                          width={128}
-                        />
-                        {/* Dark Mode Logo */}
-                        <Image
-                          src={logoDark}
-                          alt="Logo"
-                          className={`${mobileLogoClass} w-auto object-contain hidden dark:block`}
-                          height={32}
-                          width={128}
-                        />
-                      </>
-                    ) : (
-                      // Default Logo if no dark variant
-                      <Image
-                        src={logo}
-                        alt="Logo"
-                        className={`${mobileLogoClass} w-auto object-contain`}
-                        height={32}
-                        width={128}
-                      />
-                    )}
-                  </Link>
+                {/* Left: where-am-I crumb — the TakiBar above carries the
+                    wordmark */}
+                <div className="flex min-w-0 items-center gap-4">
+                  {crumbLabel && (
+                    <span className="truncate text-sm text-muted-foreground">
+                      {crumbLabel}
+                    </span>
+                  )}
                 </div>
 
                 {/* Right: Ask + Search + User Menu */}

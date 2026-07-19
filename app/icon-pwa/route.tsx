@@ -3,7 +3,7 @@ import { ImageResponse } from "@vercel/og";
 export const runtime = "edge";
 
 /**
- * PWA / touch icon: the wordmark's glowing teal dot on the brand near-black.
+ * PWA / touch icon: marker-drawn "T" on the Taki gold.
  * ?size=192|512 (default 512), ?maskable=1 adds safe-zone padding.
  */
 export async function GET(request: Request) {
@@ -14,9 +14,8 @@ export async function GET(request: Request) {
   );
   const maskable = searchParams.has("maskable");
 
-  // Maskable icons need ~80% safe zone; shrink the mark accordingly.
-  const dot = Math.round(size * (maskable ? 0.3 : 0.4));
-  const radius = Math.round(dot * 0.28);
+  // Maskable icons need ~80% safe zone; shrink the glyph accordingly.
+  const glyph = Math.round(size * (maskable ? 0.52 : 0.72));
 
   return new ImageResponse(
     (
@@ -27,20 +26,23 @@ export async function GET(request: Request) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#0a0a09",
-          backgroundImage:
-            "radial-gradient(70% 70% at 50% 35%, rgba(45,212,191,0.12), transparent 65%)",
+          backgroundColor: "#fabf19",
         }}
       >
-        <div
-          style={{
-            width: dot,
-            height: dot,
-            borderRadius: radius,
-            background: "#2dd4bf",
-            boxShadow: `0 0 ${Math.round(dot * 0.9)}px rgba(45,212,191,0.55)`,
-          }}
-        />
+        <svg width={glyph} height={glyph} viewBox="0 0 64 64" fill="none">
+          <path
+            d="M14 20.5 C 24 17.8, 40 18.6, 50.5 19.8"
+            stroke="#16150f"
+            strokeWidth="8.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M32.8 21.5 C 32 31, 31.4 39, 32.4 49.5"
+            stroke="#16150f"
+            strokeWidth="8.5"
+            strokeLinecap="round"
+          />
+        </svg>
       </div>
     ),
     { width: size, height: size }

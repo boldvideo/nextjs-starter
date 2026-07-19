@@ -22,15 +22,15 @@ import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 export const dynamic = "force-dynamic";
 
 export const viewport = {
-  // Matches the default (HumanLayer Poimandres) chrome
-  themeColor: "#1b1e28",
+  // Matches the Taki paper-white chrome
+  themeColor: "#faf9f6",
 };
 
 // Default metadata values - used as fallback when settings don't provide them
 const defaultMetadata = {
-  title: "AI That Works",
+  title: "Taki AI — Ask Me Anything (I've Probably Filmed It)",
   description:
-    "Weekly sessions on taking AI apps from demo to production — live coding, Q&A, and production-ready AI engineering with Dex Horthy and Vaibhav Gupta. New episodes Tuesdays.",
+    "Taki Moore's entire video library, one question away. Ask about getting clients, filling paid workshops, selling without sales calls, or scaling your coaching business — and get the answer with the exact clip it came from.",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -101,14 +101,13 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
     },
     icons: {
-      // HumanLayer's own favicon — part of reading as their site
-      icon: "/humanlayer-favicon.ico",
+      icon: "/taki-icon.svg",
       apple: "/icon-pwa?size=180",
     },
     appleWebApp: {
       capable: true,
       title: String(title),
-      statusBarStyle: "black-translucent" as const,
+      statusBarStyle: "default" as const,
     },
   };
 }
@@ -145,11 +144,12 @@ export default async function RootLayout({
   const config = getPortalConfig(settings);
   const showHeader = config.navigation.showHeader;
 
-  // Fork is design-owned: the HumanLayer stack (IBM Plex Mono for
-  // everything, Instrument Serif for brand italics) is fixed in code —
-  // tenant font settings are intentionally ignored here.
-  const fontHeaderVar = getFontVar("IBM Plex Mono");
-  const fontBodyVar = getFontVar("IBM Plex Mono");
+  // Fork is design-owned: the Taki stack is fixed in code — Bricolage
+  // Grotesque headings, Inter body, Permanent Marker + Caveat for the
+  // hand-drawn brand moments. Tenant font settings are intentionally
+  // ignored here.
+  const fontHeaderVar = getFontVar("Bricolage Grotesque");
+  const fontBodyVar = getFontVar("DM Sans");
 
   // Check if user should see content
   const showContent = !isAuthEnabled() || session;
@@ -161,28 +161,22 @@ export default async function RootLayout({
         {/* Thumbnails, storyboards, and frame previews all come from Mux */}
         <link rel="preconnect" href="https://image.mux.com" />
         <link rel="dns-prefetch" href="https://image.mux.com" />
-        {/* Apply the stored HumanLayer theme before first paint (the
-            paintbrush switcher in the site nav persists to localStorage) */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("hl-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})()`,
-          }}
-        />
         <style
           dangerouslySetInnerHTML={{
             __html: `
               :root {
                 --font-heading: ${fontHeaderVar};
                 --font-body: ${fontBodyVar};
-                --font-mono-brand: var(--font-ibm-plex-mono), monospace;
-                --font-serif-brand: var(--font-instrument-serif), Georgia, serif;
+                --font-mono-brand: var(--font-jetbrains-mono), monospace;
+                --font-marker: ${getFontVar("Permanent Marker")};
+                --font-scribble: ${getFontVar("Caveat")};
               }
             `,
           }}
         />
         {/* Tenant theme tokens and header sizing are deliberately NOT
             injected in this fork — globals.css is the design source of
-            truth (the HumanLayer theme system incl. the site bar baked
+            truth (the Taki whiteboard theme, incl. the site bar baked
             into --header-height). */}
         {cssOverrides && (
           <style
@@ -196,16 +190,7 @@ export default async function RootLayout({
         className="bg-background flex flex-col h-[100dvh] overflow-hidden lg:overflow-auto"
         suppressHydrationWarning
       >
-        {/* Fork default: aithatworks Plausible site. Tenant analytics
-            settings take precedence once configured in superadmin. */}
-        <Analytics
-          config={
-            config.analytics ?? {
-              provider: "plausible",
-              id: "pa-E7GAywJ_EFfrEr3f768UL",
-            }
-          }
-        />
+        {config.analytics && <Analytics config={config.analytics} />}
         <BoldProvider
           token={tenantToken}
           baseURL={process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1"}

@@ -19,6 +19,8 @@ import {
   Geist_Mono,
   IBM_Plex_Mono,
   Instrument_Serif,
+  Permanent_Marker,
+  Caveat,
 } from "next/font/google";
 
 // Pre-load all fonts at build time
@@ -155,6 +157,22 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
+// Taki Moore brand marker — his whiteboard handwriting energy
+const permanentMarker = Permanent_Marker({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-permanent-marker",
+  display: "swap",
+});
+
+// Casual handwritten annotations (scribbles next to the marker headlines)
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-caveat",
+  display: "swap",
+});
+
 // All font instances for className injection
 export const fontInstances = {
   inter,
@@ -177,6 +195,8 @@ export const fontInstances = {
   geistMono,
   ibmPlexMono,
   instrumentSerif,
+  permanentMarker,
+  caveat,
 };
 
 // Map font names (as they come from API) to CSS variables
@@ -202,6 +222,8 @@ const fontNameToVar: Record<string, string> = {
   "Geist Mono": "var(--font-geist-mono)",
   "IBM Plex Mono": "var(--font-ibm-plex-mono)",
   "Instrument Serif": "var(--font-instrument-serif)",
+  "Permanent Marker": "var(--font-permanent-marker)",
+  "Caveat": "var(--font-caveat)",
 };
 
 // Default font (Inter)

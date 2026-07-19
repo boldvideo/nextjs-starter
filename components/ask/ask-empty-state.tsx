@@ -34,13 +34,41 @@ function Greeting({ greeting }: { greeting: string }) {
   const body = restLines.join("\n").trim();
 
   if (!isMultiline) {
+    // A long one-liner would render as a wall of display type. Split it at
+    // the first natural break (em dash or sentence end) — the opener
+    // becomes the headline, the rest reads as body copy.
+    if (text.length > 90) {
+      const dashIdx = text.indexOf("—");
+      const sentenceMatch = text.match(/^(.{10,90}?[.!?])\s/);
+      const splitIdx =
+        dashIdx > 10 && dashIdx < 90
+          ? dashIdx
+          : sentenceMatch
+            ? sentenceMatch[1].length
+            : -1;
+      if (splitIdx > 0) {
+        const head = text.slice(0, splitIdx).trim();
+        let rest = text.slice(splitIdx).replace(/^[—\s]+/, "").trim();
+        rest = rest.charAt(0).toUpperCase() + rest.slice(1);
+        return (
+          <>
+            <h1 className={H1_CLASS}>
+              <InlineMarkdown text={head} />
+            </h1>
+            <p className={SUB_CLASS}>
+              <InlineMarkdown text={rest} />
+            </p>
+          </>
+        );
+      }
+    }
     return (
       <>
         <h1 className={H1_CLASS}>
           <InlineMarkdown text={headline} />
         </h1>
         <p className={SUB_CLASS}>
-          Ask anything from the series and get a straight answer — with the
+          Ask anything from the library and get a straight answer — with the
           exact moments to watch for yourself.
         </p>
       </>

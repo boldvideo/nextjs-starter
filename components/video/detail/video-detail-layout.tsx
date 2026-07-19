@@ -5,8 +5,7 @@ import Link from "next/link";
 import { Info, List, MessageSquare, PlaySquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAIAssistantContext } from "@/components/video/chat/context";
-import { HumanLayerBar } from "@/components/humanlayer-bar";
-import { Wordmark } from "@/components/wordmark";
+import { TakiBar } from "@/components/taki-bar";
 import { MobileAskButton } from "@/components/mobile-ask-button";
 import { MobileSearchButton } from "@/components/mobile-search-button";
 
@@ -121,13 +120,16 @@ export function VideoDetailLayout({
       data-has-playlist={hasPlaylist}
       style={sidebarPadding}
     >
-      {/* Mobile: the HumanLayer chrome + a slim portal row scroll with the
-          page, exactly like their own site — nothing is pinned up top */}
+      {/* Mobile: the Taki chrome + a slim portal row scroll with the
+          page — nothing is pinned up top */}
       <div className="video-detail__chrome lg:hidden">
-        <HumanLayerBar measure={false} className="contents" />
+        <TakiBar measure={false} className="contents" />
         <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-          <Link href="/">
-            <Wordmark className="text-lg" />
+          <Link
+            href="/videos"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            ← All videos
           </Link>
           <div className="flex items-center gap-1">
             <MobileAskButton />
