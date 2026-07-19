@@ -169,11 +169,14 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     (personaEnabled ? persona?.name : undefined) ??
     settings.aiName ??
     'AI Assistant';
-  const aiGreeting =
-    settings.account?.ai?.greeting ??
-    (personaEnabled ? persona?.greeting : undefined) ??
-    settings.aiGreeting ??
-    'Hello! How can I help you today?';
+  // Fork override: the ask-page intro is design-owned copy in Taki's
+  // voice (line 1 renders as the headline, the rest as body).
+  const aiGreeting = [
+    "G'day 👋 I'm Taki AI.",
+    "Every video Taki's ever filmed is in my head. The pricing plays. The bit where he fired his entire sales team and made more money. Ask me what you'd normally save for a coaching call and you'll get the straight answer, plus the exact clip so you can watch him say it himself.",
+    '',
+    'What are we working on?',
+  ].join('\n');
 
   // Conversation starters: persona first, then assistant_config, then defaults
   const defaultStarters = [

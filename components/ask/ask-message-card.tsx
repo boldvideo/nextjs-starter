@@ -395,7 +395,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
           {...props}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary hover:underline"
+          className="font-medium text-foreground underline decoration-accent decoration-2 underline-offset-[3px] transition-colors hover:bg-[var(--signal-soft)]"
         >
           {/* The strong/em renderers turn episode mentions into <Link>s —
               inside an actual markdown link they must stay plain text, or

@@ -93,7 +93,13 @@ function Greeting({ greeting }: { greeting: string }) {
   return (
     <div className="mb-8">
       <h1 className={H1_CLASS}>
-        <InlineMarkdown text={headline} />
+        <span className="relative inline-block">
+          <InlineMarkdown text={headline} />
+          <MarkerUnderline
+            className="absolute -bottom-1.5 left-[-1%] h-[0.16em] w-[102%] text-accent"
+            delay={0.35}
+          />
+        </span>
       </h1>
       <GreetingBody body={body} />
     </div>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface PoweredByBoldProps {
@@ -24,9 +25,13 @@ export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldPro
         )}
       >
         Want this for your own videos?
-        <span className="font-mono font-semibold tracking-[0.08em] text-muted-foreground/80 group-hover:text-primary transition-colors">
-          BOLD
-        </span>
+        <Image
+          src="/bold-logo-black.svg"
+          alt="Bold Video"
+          width={975}
+          height={267}
+          className="h-[13px] w-auto opacity-70 transition-opacity group-hover:opacity-100"
+        />
         <span aria-hidden="true" className="group-hover:translate-x-0.5 transition-transform">
           →
         </span>
@@ -40,16 +45,20 @@ export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldPro
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "inline-flex items-center gap-1.5",
+        "group inline-flex items-center gap-2",
         "font-mono text-[11px] tracking-[0.02em]",
         "text-muted-foreground/60 hover:text-muted-foreground transition-colors",
         className
       )}
     >
       Powered by
-      <span className="font-semibold tracking-[0.08em] text-muted-foreground/80">
-        BOLD
-      </span>
+      <Image
+        src="/bold-logo-black.svg"
+        alt="Bold Video"
+        width={975}
+        height={267}
+        className="h-[15px] w-auto opacity-60 transition-opacity group-hover:opacity-90"
+      />
     </a>
   );
 }

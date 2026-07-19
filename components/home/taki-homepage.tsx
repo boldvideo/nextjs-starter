@@ -255,7 +255,7 @@ export function TakiHomepage({
               alt="Million Dollar Coach"
               width={286}
               height={71}
-              className="h-6 w-auto opacity-90"
+              className="h-9 w-auto"
             />
           ) : (
             <span />

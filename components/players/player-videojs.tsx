@@ -63,8 +63,19 @@ const VideoJsPlayerBase = forwardRef(function VideoJsPlayer(
       if (video.playbackSpeed && mediaRef.current) {
         mediaRef.current.playbackRate = video.playbackSpeed;
       }
+      // The autoplay attribute alone races source attach and gets ignored —
+      // kick playback explicitly once metadata (and the seek above) landed.
+      // If audible playback is blocked (no trusted gesture yet), fall back
+      // to muted so the moment still rolls.
+      if (autoPlay && mediaRef.current) {
+        const el = mediaRef.current;
+        el.play().catch(() => {
+          el.muted = true;
+          el.play().catch(() => {});
+        });
+      }
     },
-    [bold, video, startTime, currentTime]
+    [bold, video, startTime, currentTime, autoPlay]
   );
 
   return (

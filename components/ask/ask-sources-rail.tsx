@@ -5,10 +5,8 @@ import { X, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
-import {
-  MuxPlayerComponent,
-  MuxPlayerVideoLike,
-} from "@/components/players/player-mux";
+import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
+import { VideoJsPlayerComponent } from "@/components/players/player-videojs";
 import { getCanonicalVideoPath } from "@/lib/video-path";
 
 interface FramePreview {
@@ -187,7 +185,7 @@ export function AskSourcesRail({
                     <span className="font-mono text-[11px] text-muted-foreground/70">
                       {c.timestampStart}
                     </span>
-                    <span className="min-w-0 flex-1 truncate text-[11.5px] text-muted-foreground/50">
+                    <span className="min-w-0 flex-1 truncate text-[12px] text-muted-foreground/70">
                       {c.text}
                     </span>
                   </button>
@@ -253,26 +251,32 @@ function VideoSourcePanel({
 
       {/* Body */}
       <div className="flex-1 min-h-0 overflow-y-auto p-[18px]">
+        {/* Marker-framed player — the receipt starts talking right away */}
         <div
           key={`${citation.videoId}-${citation.startMs}`}
-          className="relative aspect-video rounded-lg overflow-hidden border border-border bg-black mb-4"
+          className="relative aspect-video rounded-xl overflow-hidden border-2 border-foreground/80 bg-black mb-4"
         >
-          <MuxPlayerComponent
+          <VideoJsPlayerComponent
             video={video}
             startTime={startSeconds}
-            autoPlay={false}
+            autoPlay
             className="w-full h-full"
           />
         </div>
 
-        <p className="font-[family-name:var(--font-heading)] font-semibold text-lg leading-snug mb-1">
+        <p className="font-[family-name:var(--font-heading)] font-semibold text-lg leading-snug mb-2">
           {citation.videoTitle}
         </p>
-        <p className="font-mono text-sm text-signal mb-3">
-          Transcript at {citation.timestampStart}
+        <p className="mb-3 flex items-center gap-2">
+          <span className="inline-flex items-center rounded-md border border-[var(--signal-line)] bg-[var(--signal-soft)] px-2 py-0.5 font-mono text-xs font-semibold">
+            {citation.timestampStart}
+          </span>
+          <span className="font-scribble rotate-[-1deg] text-[15px] text-muted-foreground">
+            he says it right here
+          </span>
         </p>
         {citation.text && (
-          <blockquote className="border-l-2 border-signal pl-3.5 py-1 text-base leading-relaxed text-muted-foreground italic mb-5">
+          <blockquote className="mb-5 rounded-r-lg border-l-[3px] border-accent bg-[var(--signal-soft)] py-2 pl-3.5 pr-3 text-[15px] italic leading-relaxed text-foreground/80">
             &ldquo;{citation.text}&rdquo;
           </blockquote>
         )}

@@ -5,7 +5,8 @@ import { X, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
-import { MuxPlayerComponent, MuxPlayerVideoLike } from "@/components/players/player-mux";
+import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
+import { VideoJsPlayerComponent } from "@/components/players/player-videojs";
 import { getCanonicalVideoPath } from "@/lib/video-path";
 
 interface AskVideoPanelProps {
@@ -61,7 +62,9 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold">Video Source</h3>
+          <h3 className="font-scribble rotate-[-1.5deg] text-[22px] leading-none text-foreground/75">
+            the receipt
+          </h3>
           <button
             onClick={onClose}
             className="p-2 hover:bg-accent rounded-lg transition-colors cursor-pointer"
@@ -73,7 +76,7 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
 
         {/* Video Player */}
         <div className="aspect-video bg-black flex-shrink-0">
-          <MuxPlayerComponent
+          <VideoJsPlayerComponent
             video={video}
             startTime={startSeconds}
             autoPlay={true}
