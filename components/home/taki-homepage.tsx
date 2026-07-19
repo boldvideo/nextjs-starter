@@ -10,6 +10,7 @@ import { PoweredByBold } from "@/components/powered-by-bold";
 export interface LibraryStats {
   count: number;
   hours: number;
+  minutes: number;
 }
 
 interface TakiHomepageProps {
@@ -40,23 +41,27 @@ function buildChips(starters: string[]): TakiChatChip[] {
     : starters.slice(0, 3).map((q) => ({ label: q, question: q }));
 }
 
-const HOW_STEPS = [
-  {
-    title: "YOU ASK",
-    body: "Type it like you'd say it on a coaching call. Messy is fine. Messy is normal.",
-    tilt: "-rotate-1",
-  },
-  {
-    title: "IT FINDS THE MOMENT",
-    body: "It searches every minute of every video for the times Taki has answered this before.",
-    tilt: "rotate-[0.8deg]",
-  },
-  {
-    title: "ANSWER + RECEIPTS",
-    body: "You get the play in Taki's voice — with the exact clips, timestamped, so you can watch the real thing.",
-    tilt: "-rotate-[0.6deg]",
-  },
-];
+function buildHowSteps(stats: LibraryStats | null) {
+  return [
+    {
+      title: "YOU ASK",
+      body: "Type it like you'd say it on a coaching call. Messy is fine. Messy is normal.",
+      tilt: "-rotate-1",
+    },
+    {
+      title: "IT FINDS THE MOMENT",
+      body: stats
+        ? `It searches all ${stats.minutes.toLocaleString("en-US")} minutes of the library for the times Taki has answered this before.`
+        : "It searches every minute of every video for the times Taki has answered this before.",
+      tilt: "rotate-[0.8deg]",
+    },
+    {
+      title: "ANSWER + RECEIPTS",
+      body: "You get the play in Taki's voice — with the exact clips, timestamped, so you can watch the real thing.",
+      tilt: "-rotate-[0.6deg]",
+    },
+  ];
+}
 
 export function TakiHomepage({
   settings,
@@ -67,6 +72,7 @@ export function TakiHomepage({
   const latest = (videos ?? []).slice(0, 4);
   const chips = buildChips(config.ai.conversationStarters);
   const count = stats?.count ?? null;
+  const howSteps = buildHowSteps(stats);
 
   return (
     <div className="h-full overflow-y-auto overscroll-contain">
@@ -152,7 +158,7 @@ export function TakiHomepage({
               IT&rsquo;S ALL IN HERE.
             </h2>
             <p className="font-scribble rotate-[-1.5deg] text-[clamp(1.25rem,2vw,1.45rem)] text-foreground/75">
-              every framework, every play, every rant →
+              triage calls, offer diamonds, dead funnels →
             </p>
           </div>
 
@@ -195,7 +201,7 @@ export function TakiHomepage({
           </div>
 
           <div className="flex flex-col items-stretch justify-center gap-4 md:flex-row md:items-center md:gap-2">
-            {HOW_STEPS.map((step, i) => (
+            {howSteps.map((step, i) => (
               <div key={step.title} className="contents">
                 {i > 0 && (
                   <StepArrow

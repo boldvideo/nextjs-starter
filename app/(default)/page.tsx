@@ -26,7 +26,11 @@ async function getLibraryStats(): Promise<LibraryStats | null> {
     const list: Array<{ duration?: number }> = json?.data ?? [];
     if (list.length === 0) return null;
     const seconds = list.reduce((s, v) => s + (Number(v.duration) || 0), 0);
-    return { count: list.length, hours: Math.round(seconds / 3600) };
+    return {
+      count: list.length,
+      hours: Math.round(seconds / 3600),
+      minutes: Math.round(seconds / 60),
+    };
   } catch {
     return null;
   }
