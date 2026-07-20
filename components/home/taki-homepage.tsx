@@ -104,7 +104,7 @@ export function TakiHomepage({
                 <p className="font-scribble rotate-[-2deg] text-[clamp(1.35rem,2.2vw,1.6rem)] text-muted-foreground">
                   hey coach 👋
                 </p>
-                <h1 className="font-marker mt-1 -rotate-1 text-[clamp(2.75rem,6.5vw,4.6rem)] leading-[0.98] text-foreground">
+                <h1 className="font-marker mt-2 -rotate-1 text-[clamp(2.75rem,6.5vw,4.6rem)] leading-[0.98] text-foreground sm:mt-3">
                   ASK ME{" "}
                   <span className="relative inline-block">
                     ANYTHING.
@@ -115,7 +115,7 @@ export function TakiHomepage({
                   </span>
                 </h1>
                 {stats && (
-                  <p className="mt-3 font-mono text-[11px] text-muted-foreground/80 sm:mt-4 sm:text-[13px]">
+                  <p className="mt-4 font-mono text-[11px] text-muted-foreground/80 sm:mt-6 sm:text-[13px]">
                     {stats.count} videos · {stats.hours} hours of brandwidth ·
                     1 slightly opinionated coach
                   </p>
@@ -123,7 +123,7 @@ export function TakiHomepage({
               </div>
 
               {/* Chat stage. On mobile Taki peeks over the card. */}
-              <div className="relative mt-[118px] lg:mt-9">
+              <div className="relative mt-[126px] lg:mt-14">
                 <div className="pointer-events-none absolute -top-[112px] right-2 select-none lg:hidden">
                   <Image
                     src="/taki-cutout.webp"
