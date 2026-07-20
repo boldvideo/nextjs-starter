@@ -42,7 +42,7 @@ export function TakiChat({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const messages = [
-    "G'day Rockstar — Taki here. Well… the AI version. Slightly less jetlag.",
+    "G'day Rockstar — Taki here. Well… the AI version. Slightly less caffeinated.",
     videoCount
       ? `I've watched all ${videoCount} of my videos so you don't have to. What are we working on?`
       : "I've watched every video in here so you don't have to. What are we working on?",

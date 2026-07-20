@@ -77,7 +77,7 @@ export function TakiHomepage({
   return (
     <div className="h-full overflow-y-auto overscroll-contain">
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="relative flex min-h-[calc(100dvh-var(--header-height)-1px)] flex-col overflow-hidden border-b border-border">
+      <section className="relative flex min-h-[min(calc(100dvh-var(--header-height)-1px),820px)] flex-col overflow-hidden border-b border-border">
         {/* Whiteboard dot paper */}
         <div aria-hidden="true" className="taki-dotgrid absolute inset-0" />
 
@@ -251,18 +251,37 @@ export function TakiHomepage({
               no funnel. promise.
             </p>
           </div>
+          <p className="font-scribble mt-12 rotate-[-1deg] text-lg text-muted-foreground">
+            p.s. — ok, one link. The human version runs{" "}
+            <a
+              href="https://milliondollarcoach.com/blackbelt/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground underline decoration-accent decoration-[3px] underline-offset-4 hover:opacity-80"
+            >
+              Black Belt
+            </a>{" "}
+            →
+          </p>
         </section>
 
         {/* ── Footer ───────────────────────────────────────────── */}
         <footer className="flex flex-col items-center justify-between gap-5 border-t border-border pb-12 pt-8 sm:flex-row">
           {settings?.logoUrl ? (
-            <Image
-              src={settings.logoUrl}
-              alt="Million Dollar Coach"
-              width={286}
-              height={71}
-              className="h-9 w-auto"
-            />
+            <a
+              href="https://milliondollarcoach.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-opacity hover:opacity-80"
+            >
+              <Image
+                src={settings.logoUrl}
+                alt="Million Dollar Coach"
+                width={286}
+                height={71}
+                className="h-9 w-auto"
+              />
+            </a>
           ) : (
             <span />
           )}
