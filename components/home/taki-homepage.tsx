@@ -84,7 +84,7 @@ export function TakiHomepage({
         {/* Taki stands on the hero's bottom edge, beside the chat.
             The radial mask dissolves the photo's hard crops (the clipped
             elbow, the waist) into the page. */}
-        <div className="pointer-events-none absolute bottom-0 left-[calc(50%+96px)] hidden select-none lg:block">
+        <div className="pointer-events-none absolute bottom-0 left-[calc(50%+96px)] hidden translate-y-[16px] select-none lg:block">
           <Image
             src="/taki-cutout.webp"
             alt="Taki Moore, marker in hand"
@@ -95,7 +95,7 @@ export function TakiHomepage({
           />
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-[1120px] flex-1 flex-col items-center justify-center px-4 pb-8 pt-4 sm:px-6 sm:pt-8 lg:px-8 lg:pb-14">
+        <div className="relative mx-auto flex w-full max-w-[1120px] flex-1 flex-col items-center justify-center px-4 pb-8 pt-10 sm:px-6 sm:pt-16 lg:px-8 lg:pb-14">
           <div className="w-full lg:max-w-[960px]">
             <div className="relative w-full lg:max-w-[620px]">
               {/* Headline — centered on the chat column, allowed to
@@ -115,7 +115,7 @@ export function TakiHomepage({
                   </span>
                 </h1>
                 {stats && (
-                  <p className="mt-4 font-mono text-[11px] text-muted-foreground/80 sm:mt-6 sm:text-[13px]">
+                  <p className="mt-6 font-mono text-[11px] text-muted-foreground/80 sm:mt-8 sm:text-[13px]">
                     {stats.count} videos · {stats.hours} hours of brandwidth ·
                     1 slightly opinionated coach
                   </p>
