@@ -77,7 +77,7 @@ export function TakiHomepage({
   return (
     <div className="h-full overflow-y-auto overscroll-contain">
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="relative flex min-h-[min(calc(100dvh-var(--header-height)-1px),820px)] flex-col overflow-hidden border-b border-border">
+      <section className="relative flex min-h-[min(calc(100dvh-var(--header-height)-1px),920px)] flex-col overflow-hidden border-b border-border">
         {/* Whiteboard dot paper */}
         <div aria-hidden="true" className="taki-dotgrid absolute inset-0" />
 
