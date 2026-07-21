@@ -29,12 +29,11 @@ export function AppProviders({
     <SessionProvider session={session}>
       <ThemeProvider
         attribute="class"
-        // next-themes stays pinned to "light" — actual theming happens via
-        // the HumanLayer data-theme attribute (paintbrush switcher in the
-        // site bar), not the light/dark class.
-        defaultTheme={themeConfig.forcedTheme || "light"}
+        // startups.com lands you in dark mode and remembers your toggle
+        // choice — mirror that exactly.
+        defaultTheme={themeConfig.forcedTheme || "dark"}
         enableSystem={false}
-        storageKey="aitw-theme"
+        storageKey="srl-theme"
         {...(themeConfig.forcedTheme && { forcedTheme: themeConfig.forcedTheme })}
       >
         <SettingsProvider settings={settings}>

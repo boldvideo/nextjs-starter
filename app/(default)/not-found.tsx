@@ -1,40 +1,33 @@
 import Link from "next/link";
-import { MarkerUnderline } from "@/components/home/taki-doodles";
+import { ChevronRight } from "lucide-react";
 
 export default function NotFound() {
   return (
     <div className="relative flex h-full min-h-[60vh] items-center justify-center overflow-hidden px-6 py-16">
-      <div aria-hidden="true" className="taki-dotgrid absolute inset-0" />
-      <div className="relative max-w-md text-center">
-        <p className="font-scribble rotate-[-2deg] text-xl text-muted-foreground">
-          404 — checked the whole library
-        </p>
-        <h1 className="font-marker mt-1 -rotate-1 text-[clamp(2.2rem,6vw,3.2rem)] leading-[1.02]">
-          NEVER FILMED{" "}
-          <span className="relative inline-block">
-            THAT ONE.
-            <MarkerUnderline
-              className="absolute -bottom-1.5 left-[-2%] h-[0.2em] w-[104%] text-accent"
-              delay={0.3}
-            />
-          </span>
+      <div className="relative max-w-lg text-center">
+        <span className="srl-badge">404 · Request Not Found</span>
+        <h1 className="mt-5 font-heading text-[clamp(2rem,5vw,3rem)] font-extrabold leading-[1.12] tracking-tight">
+          This page didn&rsquo;t
+          <br />
+          <span className="srl-gradient-text">make the show.</span>
         </h1>
         <p className="mt-5 text-[15px] leading-relaxed text-muted-foreground">
-          This page doesn&rsquo;t exist. The good news: 100+ videos do, and
-          Taki AI has watched all of them.
+          The link&rsquo;s off — but every episode of Startup Requests Live is
+          still here, and the answer desk has watched all of them.
         </p>
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-4">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/"
-            className="font-marker -rotate-1 rounded-xl bg-accent px-6 py-3 text-[16px] text-accent-foreground shadow-[0_3px_0_rgba(22,21,15,0.3)] transition-transform hover:rotate-1 hover:scale-[1.04]"
+            href="/ask"
+            className="flex h-11 items-center gap-1.5 rounded-[6px] bg-accent px-5 font-heading text-[15px] font-semibold text-[#09090b] transition-colors hover:bg-[var(--accent-hover)]"
           >
-            ASK TAKI INSTEAD
+            Make a Request
+            <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
           </Link>
           <Link
             href="/videos"
-            className="text-sm font-semibold decoration-accent decoration-[2.5px] underline-offset-4 hover:underline"
+            className="flex h-11 items-center rounded-[5.25px] border border-border-strong px-4 text-sm font-medium transition-colors hover:bg-muted"
           >
-            Browse the library →
+            Browse episodes
           </Link>
         </div>
       </div>

@@ -20,13 +20,17 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-surface: var(--surface);
+  --color-frame: var(--frame);
+  --color-purple: var(--purple);
+  --color-purple-foreground: var(--purple-foreground);
+  --color-border-strong: var(--border-strong);
   /* Map primary to accent (accent is the new primary) */
   --color-primary-foreground: var(--accent-foreground);
   --color-primary: var(--accent);
   /* Legacy tokens mapped to new system */
   --color-secondary-foreground: var(--muted-foreground);
   --color-secondary: var(--muted);
-  /* Amber citation signal + brand mono */
+  /* Citation signal + brand mono */
   --color-signal: var(--signal);
   --font-mono: var(--font-mono-brand, var(--font-jetbrains-mono)), ui-monospace, monospace;
   --color-card-foreground: var(--foreground);
@@ -43,41 +47,67 @@
   --color-sidebar: var(--surface);
 }
 
-/* ── Taki Moore theme — one light "whiteboard" look, design-owned in code.
-   Warm paper white, near-black ink, Million Dollar Coach gold (#FABF19).
-   The legacy --bg-… and --text-… names are kept from the previous skin so
-   components that reference them directly keep working; they now resolve
-   to Taki's palette. */
+/* ── Startups.com theme — design-owned in code, measured off the live
+   site (startups.com/requests, /videos). Two modes, both theirs:
+
+   light: warm cream frame (orange-100), near-white panel (orange-50),
+          burnt-sienna ink accents, orange-700 hairlines.
+   dark:  ink-navy frame (#13121C), deep panel (#1B1A28), purple-slate
+          surfaces (#54538A), lavender-white type.
+
+   Shared: #FB923C CTA orange (near-black label), #4A47A3 series purple,
+   the #D97258→#9858A3 headline gradient, Poppins with 800/900 display
+   weights. The whole app sits inside a rounded, hairline-bordered panel
+   on the frame color — their signature "app in a card" chrome. */
 :root {
   color-scheme: light;
-  --radius: 0.75rem;
+  --radius: 0.5rem;
   --media-border-radius: 12px;
 
-  /* Chrome heights: slim brand bar (measured by TakiBar) + 57px portal
-     nav row on subpages. The homepage and mobile watch pages override
-     --header-height like before. */
+  /* Chrome: one fixed 68px nav (measured by SrlBar) + the panel gutter
+     below/around it. --header-height is everything between the viewport
+     top and usable content, so full-height pages subtract it. */
   --site-banner-height: 0px;
-  --site-bar-height: 60px;
-  --header-height: calc(57px + var(--site-banner-height) + var(--site-bar-height));
+  --site-bar-height: 68px;
+  --panel-gutter: 8px;
+  --header-height: calc(
+    var(--site-banner-height) + var(--site-bar-height) + var(--panel-gutter) +
+      2px
+  );
 
-  /* Base palette */
-  --bg-primary: #faf9f6;
-  --bg-secondary: #fffefb;
-  --bg-tertiary: #f0eee7;
-  --bg-muted: #f2f1ec;
-  --text-primary: #16150f;
-  --text-secondary: #55524a;
-  --text-muted: #8a867b;
-  --border-color: #e6e3d9;
-  --accent: #fabf19;
-  --accent-alt: #e8ad00;
-  --accent-hover: #e8ad00;
-  --success: #2e7d32;
-  --warning: #b78300;
-  --error: #d93025;
-  --shadow: rgba(22, 21, 15, 0.1);
+  /* Base palette — light "cream" mode */
+  --frame: #ffedd5;
+  --bg-primary: #fff7ed;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f9e8d2;
+  --bg-muted: #ffedd5;
+  --text-primary: #09090b;
+  --text-secondary: #6c2710;
+  --text-muted: rgba(108, 39, 16, 0.62);
+  --border-color: rgba(194, 65, 12, 0.14);
+  --border-strong: rgba(194, 65, 12, 0.5);
+  --accent: #fb923c;
+  --accent-hover: #f97316;
+  --accent-active: #f97316;
+  --purple: #4a47a3;
+  --purple-foreground: #ffffff;
+  --success: #16a34a;
+  --warning: #b45309;
+  --error: #d92d20;
+  --shadow: rgba(67, 20, 7, 0.1);
   --code-bg: #ffffff;
-  --code-border: #e6e3d9;
+  --code-border: rgba(194, 65, 12, 0.14);
+
+  /* Headline gradient + wizard stage (the chat's inner panel) */
+  --grad-from: #d97258;
+  --grad-to: #9858a3;
+  --stage: #eceae6;
+  --stage-panel: #ffffff;
+  --stage-panel-foreground: #09090b;
+  --stage-bubble: #f2ede6;
+  --stage-input: #ffffff;
+  --goal-card-bg: rgba(255, 247, 237, 0.6);
+  --goal-card-bg-hover: rgba(255, 237, 213, 0.85);
 
   /* Cross-theme fallback chain (kept for components that use them) */
   --fg-primary: var(--text-primary);
@@ -92,23 +122,77 @@
   --border: var(--border-color);
   --ring: var(--accent);
   --surface: var(--bg-secondary);
-  --accent-foreground: var(--text-primary);
+  --accent-foreground: #09090b;
   --primary: var(--accent);
-  /* Citation/provenance signal: ink on a gold-highlight tint — the pen is
-     black, the gold is the highlighter */
+  /* Citation/provenance signal: ink on an orange-highlight tint */
   --signal: var(--text-primary);
-  --signal-soft: color-mix(in srgb, var(--accent) 22%, transparent);
+  --signal-soft: color-mix(in srgb, var(--accent) 20%, transparent);
   --signal-line: color-mix(in srgb, var(--accent) 60%, transparent);
-  --input: var(--border-color);
+  --input: var(--border-strong);
   --destructive: var(--error);
 }
 
-/* ── Taki site chrome ─────────────────────────────────────────────── */
+.dark {
+  color-scheme: dark;
 
-.taki-nav-header {
+  /* Base palette — dark "ink navy" mode */
+  --frame: #13121c;
+  --bg-primary: #1b1a28;
+  --bg-secondary: #232132;
+  --bg-tertiary: rgba(84, 83, 138, 0.35);
+  --bg-muted: rgba(84, 83, 138, 0.24);
+  --text-primary: #fafafa;
+  --text-secondary: rgba(243, 232, 255, 0.78);
+  --text-muted: rgba(243, 232, 255, 0.55);
+  --border-color: rgba(84, 83, 138, 0.28);
+  --border-strong: #54538a;
+  --accent: #fb923c;
+  --accent-hover: #fdba74;
+  --accent-active: #fb923c;
+  --purple: #4a47a3;
+  --purple-foreground: #ffffff;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --error: #f97066;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --code-bg: #232132;
+  --code-border: rgba(84, 83, 138, 0.28);
+
+  --grad-from: #d97258;
+  --grad-to: #9858a3;
+  --stage: transparent;
+  --stage-panel: #565683;
+  --stage-panel-foreground: #ffffff;
+  --stage-bubble: rgba(19, 18, 28, 0.32);
+  --stage-input: rgba(19, 18, 28, 0.45);
+  --goal-card-bg: rgba(84, 83, 138, 0.5);
+  --goal-card-bg-hover: rgba(84, 83, 138, 0.72);
+
+  --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --panel-gutter: 12px;
+  }
+}
+
+/* ── Startups.com site chrome ─────────────────────────────────────── */
+
+.srl-nav-header {
   z-index: 100;
-  background: var(--bg-primary);
-  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--frame) 70%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Their nav link signature: tiny, black-weight, tracked-out Poppins */
+.srl-nav-link {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
 }
 
 /* In-flow chrome on mobile watch pages: the nav sticks to the top of the
@@ -118,7 +202,7 @@
   .video-detail__chrome {
     display: contents;
   }
-  .video-detail__chrome .taki-nav-header {
+  .video-detail__chrome .srl-nav-header {
     position: sticky;
     top: 0;
   }
@@ -128,20 +212,25 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    background-color: var(--frame);
+  }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--frame);
+    color: var(--foreground);
     font-family: var(--font-body);
     line-height: 1.65;
     overscroll-behavior-y: none; /* Prevents rubber-banding/bounce on macOS */
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    font-weight: 800;
   }
   h1 {
     letter-spacing: -0.02em;
   }
-  /* Content links: ink text with a gold marker underline; hovering
-     sweeps the highlighter across. */
+  /* Content links: ink text with an orange underline; hovering
+     sweeps a soft highlight across. */
   .prose a {
     color: var(--foreground);
     text-decoration: underline;
@@ -153,38 +242,75 @@
   .prose a:hover {
     background-color: var(--signal-soft);
   }
+  /* Long-form reading (descriptions, transcripts) sets in Lato, like
+     the startups.com article body */
+  .prose {
+    font-family: var(--font-prose, var(--font-body));
+  }
   mark {
     @apply bg-accent text-accent-foreground font-medium px-1;
   }
   ::selection {
     background: var(--accent);
-    color: var(--text-primary);
+    color: #09090b;
   }
 }
 
 @layer utilities {
-  /* Faint whiteboard dot-paper, fading out toward the edges */
-  .taki-dotgrid {
-    background-image: radial-gradient(
-      circle,
-      color-mix(in srgb, var(--text-muted) 30%, transparent) 1.2px,
-      transparent 1.3px
+  /* The two-line hero's second line — their exact 90° gradient */
+  .srl-gradient-text {
+    background-image: linear-gradient(
+      90deg,
+      var(--grad-from) 0%,
+      var(--grad-to) 100%
     );
-    background-size: 26px 26px;
-    mask-image: radial-gradient(
-      ellipse 80% 72% at 50% 40%,
-      black 45%,
-      transparent 100%
-    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
 
-  .font-marker {
-    font-family: var(--font-marker), "Permanent Marker", cursive;
-    font-weight: 400;
-  }
-  .font-scribble {
-    font-family: var(--font-scribble), "Caveat", cursive;
+  /* Small-caps section label ("CREATE A REQUEST", "TOTAL RAISED") */
+  .srl-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 12px;
     font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* Goal-picker cards, straight off the requests wizard */
+  .srl-goal-card {
+    background: var(--goal-card-bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 5.25px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .srl-goal-card:hover {
+    background: var(--goal-card-bg-hover);
+  }
+  .srl-goal-card[data-selected="true"] {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+    background: var(--goal-card-bg-hover);
+  }
+
+  /* "Featured" chip — amber tint, 3px corners */
+  .srl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 3px;
+    background: #fed7aa;
+    color: #6c2710;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 6px;
+  }
+  .dark .srl-badge {
+    background: rgba(254, 215, 170, 0.18);
+    color: #fed7aa;
   }
 
   .no-scrollbar {
@@ -193,6 +319,25 @@
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none; /* Safari and Chrome */
+  }
+
+  /* Panel scroll: slim themed thumb riding inside the rounded frame,
+     like the inset scrollbar on startups.com */
+  .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 10px;
+  }
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 8px;
+    border: 3px solid transparent;
+    background-clip: content-box;
   }
 
   @keyframes pulse-once {
@@ -251,10 +396,10 @@
     animation: cursor-blink 1s steps(2) infinite;
   }
 
-  /* ── Taki homepage motion ─────────────────────────────────────── */
+  /* ── Homepage motion ──────────────────────────────────────────── */
 
   /* Chat messages pop in like a real conversation */
-  @keyframes taki-pop {
+  @keyframes srl-pop {
     from {
       opacity: 0;
       transform: translateY(10px) scale(0.97);
@@ -264,12 +409,12 @@
       transform: none;
     }
   }
-  .animate-taki-pop {
-    animation: taki-pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  .animate-srl-pop {
+    animation: srl-pop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
   }
 
   /* Typing indicator dots */
-  @keyframes taki-blink {
+  @keyframes srl-blink {
     0%, 80%, 100% {
       opacity: 0.25;
       transform: translateY(0);
@@ -279,43 +424,30 @@
       transform: translateY(-3px);
     }
   }
-  .animate-taki-blink {
-    animation: taki-blink 1.2s infinite;
+  .animate-srl-blink {
+    animation: srl-blink 1.2s infinite;
   }
 
-  /* Hand-drawn SVG strokes draw themselves in (pathLength=1 based) */
-  @keyframes taki-draw {
-    to {
-      stroke-dashoffset: 0;
+  /* The "ON AIR" live dot */
+  @keyframes srl-live {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--error) 45%, transparent);
+    }
+    50% {
+      opacity: 0.75;
+      box-shadow: 0 0 0 5px transparent;
     }
   }
-  .animate-taki-draw {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: taki-draw 0.7s ease-out forwards;
-  }
-
-  /* Highlighter sweep behind a word */
-  @keyframes taki-highlight {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
-    }
-  }
-  .animate-taki-highlight {
-    transform-origin: left center;
-    animation: taki-highlight 0.45s cubic-bezier(0.6, 0, 0.3, 1) forwards;
+  .animate-srl-live {
+    animation: srl-live 2.2s ease-in-out infinite;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .animate-taki-pop,
-    .animate-taki-blink,
-    .animate-taki-draw,
-    .animate-taki-highlight {
+    .animate-srl-pop,
+    .animate-srl-blink,
+    .animate-srl-live {
       animation: none;
-      stroke-dashoffset: 0;
       transform: none;
       opacity: 1;
     }

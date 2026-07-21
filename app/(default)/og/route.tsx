@@ -6,21 +6,25 @@ const WIDTH = 1200;
 const HEIGHT = 630;
 
 const COLORS = {
-  bg: "#faf9f6",
-  surface: "#fffefb",
-  border: "#e6e3d9",
-  ink: "#16150f",
-  muted: "#55524a",
-  faint: "#8a867b",
-  gold: "#fabf19",
+  frame: "#13121c",
+  panel: "#1b1a28",
+  border: "rgba(84, 83, 138, 0.45)",
+  ink: "#fafafa",
+  muted: "rgba(243, 232, 255, 0.72)",
+  faint: "rgba(243, 232, 255, 0.5)",
+  orange: "#fb923c",
+  logoRed: "#d14423",
+  gradFrom: "#d97258",
+  gradTo: "#9858a3",
 };
 
-const DEFAULT_TAGLINE = "Ask me anything. I've probably filmed it.";
-const DEFAULT_META = "Taki Moore's library, one question away — answers with receipts";
+const DEFAULT_TAGLINE = "Make your request. We've probably answered it live.";
+const DEFAULT_META =
+  "Every episode of Startup Requests Live, one question away";
 
 /** True for the site-level card (no specific video/page title). */
 function isDefaultTitle(title: string): boolean {
-  return title.startsWith("Taki AI");
+  return title.startsWith("SRL");
 }
 
 /**
@@ -79,29 +83,34 @@ async function loadImageDataUri(url: string): Promise<string | null> {
   }
 }
 
-function Wordmark({ marker }: { marker: boolean }) {
+/** The red startups.com logo box + the SRL tag. */
+function Wordmark() {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        transform: "rotate(-1.5deg)",
-        fontFamily: marker ? "Permanent Marker" : "sans-serif",
-      }}
-    >
-      <div style={{ fontSize: 34, color: COLORS.ink }}>TAKI</div>
+    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
       <div
         style={{
-          fontSize: 34,
-          color: COLORS.ink,
-          background: COLORS.gold,
-          padding: "0 10px",
+          display: "flex",
+          alignItems: "center",
+          background: COLORS.logoRed,
+          color: "#ffffff",
+          fontSize: 26,
+          fontWeight: 700,
+          padding: "10px 18px",
           borderRadius: 8,
-          transform: "skewX(-4deg)",
         }}
       >
-        AI
+        startups.com
+      </div>
+      <div
+        style={{
+          display: "flex",
+          fontSize: 24,
+          fontWeight: 700,
+          letterSpacing: "0.14em",
+          color: COLORS.muted,
+        }}
+      >
+        SRL
       </div>
     </div>
   );
@@ -130,25 +139,23 @@ function PoweredByBold() {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const title = searchParams.get("t")?.slice(0, 120) || "Taki AI";
+  const title = searchParams.get("t")?.slice(0, 120) || "SRL";
   const img = searchParams.get("img");
   const sub = searchParams.get("sub")?.slice(0, 160) || DEFAULT_TAGLINE;
 
-  const fontText = `${title}${sub}${DEFAULT_META}TAKIAIPowered by BOLD`;
-  const [bold, medium, marker, imgSrc] = await Promise.all([
-    loadGoogleFont("Bricolage Grotesque", 700, fontText),
-    loadGoogleFont("DM Sans", 500, fontText),
-    loadGoogleFont("Permanent Marker", 400, "TAKIAI"),
+  const fontText = `${title}${sub}${DEFAULT_META}${DEFAULT_TAGLINE}startups.comSRLPowered by BOLD`;
+  const [extrabold, medium, imgSrc] = await Promise.all([
+    loadGoogleFont("Poppins", 800, fontText),
+    loadGoogleFont("Poppins", 500, fontText),
     img ? loadImageDataUri(img) : Promise.resolve(null),
   ]);
 
   const fonts = [
-    ...(bold
-      ? [{ name: "Bricolage Grotesque", data: bold, weight: 700 as const }]
+    ...(extrabold
+      ? [{ name: "Poppins", data: extrabold, weight: 800 as const }]
       : []),
-    ...(medium ? [{ name: "DM Sans", data: medium, weight: 500 as const }] : []),
-    ...(marker
-      ? [{ name: "Permanent Marker", data: marker, weight: 400 as const }]
+    ...(medium
+      ? [{ name: "Poppins Medium", data: medium, weight: 500 as const }]
       : []),
   ];
 
@@ -156,115 +163,154 @@ export async function GET(request: Request) {
     width: "100%",
     height: "100%",
     display: "flex" as const,
-    backgroundColor: COLORS.bg,
-    backgroundImage: `radial-gradient(75% 60% at 25% -10%, rgba(250,191,25,0.16), transparent 60%)`,
-    fontFamily: bold ? "Bricolage Grotesque" : "sans-serif",
+    backgroundColor: COLORS.frame,
+    padding: 20,
+    fontFamily: extrabold ? "Poppins" : "sans-serif",
     color: COLORS.ink,
+  };
+
+  const panelStyle = {
+    display: "flex" as const,
+    flex: 1,
+    backgroundColor: COLORS.panel,
+    backgroundImage: `radial-gradient(70% 60% at 80% -10%, rgba(152,88,163,0.22), transparent 60%), radial-gradient(60% 50% at 10% 110%, rgba(217,114,88,0.14), transparent 60%)`,
+    border: `2px solid ${COLORS.border}`,
+    borderRadius: 18,
   };
 
   // Video card: text column + thumbnail
   if (imgSrc) {
     return new ImageResponse(
       (
-        <div style={{ ...baseStyle, alignItems: "center", padding: 64, gap: 56 }}>
+        <div style={baseStyle}>
           <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              height: "100%",
-              flex: 1,
-              paddingTop: 8,
-              paddingBottom: 8,
-            }}
+            style={{ ...panelStyle, alignItems: "center", padding: 52, gap: 48 }}
           >
-            <Wordmark marker={!!marker} />
             <div
               style={{
                 display: "flex",
-                fontSize: title.length > 60 ? 44 : 54,
-                fontWeight: 700,
-                lineHeight: 1.12,
-                letterSpacing: "-0.02em",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                height: "100%",
+                flex: 1,
+                paddingTop: 6,
+                paddingBottom: 6,
               }}
             >
-              {title}
+              <Wordmark />
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: title.length > 60 ? 40 : 50,
+                  fontWeight: 800,
+                  lineHeight: 1.14,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {title}
+              </div>
+              <PoweredByBold />
             </div>
-            <PoweredByBold />
+            <img
+              src={imgSrc}
+              alt=""
+              width={520}
+              height={292}
+              style={{
+                width: 520,
+                height: 292,
+                objectFit: "cover",
+                borderRadius: 14,
+                border: `2px solid ${COLORS.border}`,
+              }}
+            />
           </div>
-          <img
-            src={imgSrc}
-            alt=""
-            width={560}
-            height={315}
-            style={{
-              width: 560,
-              height: 315,
-              objectFit: "cover",
-              borderRadius: 16,
-              border: `4px solid ${COLORS.ink}`,
-            }}
-          />
         </div>
       ),
       { width: WIDTH, height: HEIGHT, fonts }
     );
   }
 
-  // Default site card: wordmark + big tagline
+  // Default site card: wordmark + the two-line gradient headline
   return new ImageResponse(
     (
-      <div
-        style={{
-          ...baseStyle,
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: 72,
-        }}
-      >
-        <Wordmark marker={!!marker} />
-        <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-          <div
-            style={{
-              display: "flex",
-              fontSize: title.length > 40 && !isDefaultTitle(title) ? 56 : 72,
-              fontWeight: 700,
-              lineHeight: 1.08,
-              letterSpacing: "-0.03em",
-              maxWidth: 1000,
-            }}
-          >
-            {isDefaultTitle(title) ? sub : title}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              fontSize: 26,
-              fontFamily: medium ? "DM Sans" : "sans-serif",
-              color: COLORS.muted,
-            }}
-          >
-            {isDefaultTitle(title) ? DEFAULT_META : sub}
-          </div>
-        </div>
+      <div style={baseStyle}>
         <div
           style={{
-            display: "flex",
+            ...panelStyle,
+            flexDirection: "column",
             justifyContent: "space-between",
-            alignItems: "center",
+            padding: 60,
           }}
         >
+          <Wordmark />
+          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+            {isDefaultTitle(title) ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  fontSize: 64,
+                  fontWeight: 800,
+                  lineHeight: 1.12,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                <span>Make your request.</span>
+                <span
+                  style={{
+                    backgroundImage: `linear-gradient(90deg, ${COLORS.gradFrom}, ${COLORS.gradTo})`,
+                    backgroundClip: "text",
+                    color: "transparent",
+                  }}
+                >
+                  We&apos;ve probably answered it live.
+                </span>
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: title.length > 40 ? 52 : 64,
+                  fontWeight: 800,
+                  lineHeight: 1.1,
+                  letterSpacing: "-0.02em",
+                  maxWidth: 1000,
+                }}
+              >
+                {title}
+              </div>
+            )}
+            <div
+              style={{
+                display: "flex",
+                fontSize: 25,
+                fontFamily: medium ? "Poppins Medium" : "sans-serif",
+                color: COLORS.muted,
+              }}
+            >
+              {isDefaultTitle(title) ? DEFAULT_META : sub}
+            </div>
+          </div>
           <div
             style={{
               display: "flex",
-              fontSize: 22,
-              color: COLORS.faint,
-              fontFamily: medium ? "DM Sans" : "sans-serif",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            Every framework, every play, every rant — with receipts
+            <div
+              style={{
+                display: "flex",
+                fontSize: 21,
+                color: COLORS.faint,
+                fontFamily: medium ? "Poppins Medium" : "sans-serif",
+              }}
+            >
+              Startup Requests Live · with Ed, Wil &amp; Ryan
+            </div>
+            <PoweredByBold />
           </div>
-          <PoweredByBold />
         </div>
       </div>
     ),

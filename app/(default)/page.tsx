@@ -3,7 +3,7 @@ import type { Video } from "@boldvideo/bold-js";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { getPortalConfig, PortalSettings } from "@/lib/portal-config";
 import { LibraryHomepage } from "@/components/home/library-homepage";
-import { TakiHomepage, LibraryStats } from "@/components/home/taki-homepage";
+import { SrlHomepage, LibraryStats } from "@/components/home/srl-homepage";
 import { EmptyHomepage } from "@/components/home/empty-homepage";
 
 // How often this page should revalidate (in seconds)
@@ -90,7 +90,7 @@ export default async function Home(): Promise<React.JSX.Element> {
   switch (config.homepage.layout) {
     case 'assistant':
       return (
-        <TakiHomepage
+        <SrlHomepage
           settings={settings}
           config={config}
           videos={videos}

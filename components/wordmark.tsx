@@ -1,27 +1,20 @@
 import { cn } from "@/lib/utils";
 
 /**
- * The Taki AI lockup: "TAKI" in his marker hand, "AI" sitting on a gold
- * highlighter swipe. Scales with font-size, so callers can size it with
- * text classes.
+ * The SRL lockup: chunky 900-weight caps with an orange full stop —
+ * the show's initials in the startups.com type voice. Scales with
+ * font-size, so callers size it with text classes.
  */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "font-marker inline-flex items-baseline gap-[0.18em] select-none whitespace-nowrap",
-        "text-[22px] leading-none text-foreground -rotate-1",
+        "font-heading inline-flex select-none items-baseline whitespace-nowrap",
+        "text-[22px] font-black leading-none tracking-tight text-foreground",
         className
       )}
     >
-      TAKI
-      <span className="relative inline-block">
-        <span
-          aria-hidden="true"
-          className="absolute -inset-x-[0.14em] inset-y-[-0.08em] -skew-x-6 rounded-[0.18em] bg-accent"
-        />
-        <span className="relative">AI</span>
-      </span>
+      SRL<span className="text-accent">.</span>
     </span>
   );
 }

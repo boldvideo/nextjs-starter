@@ -3,8 +3,9 @@ import { ImageResponse } from "@vercel/og";
 export const runtime = "edge";
 
 /**
- * PWA / touch icon: marker-drawn "T" on the Taki gold.
- * ?size=192|512 (default 512), ?maskable=1 adds safe-zone padding.
+ * PWA / touch icon: white "S" on the startups.com red, matching their
+ * app icon. ?size=192|512 (default 512), ?maskable=1 adds safe-zone
+ * padding.
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
   const maskable = searchParams.has("maskable");
 
   // Maskable icons need ~80% safe zone; shrink the glyph accordingly.
-  const glyph = Math.round(size * (maskable ? 0.52 : 0.72));
+  const glyph = Math.round(size * (maskable ? 0.5 : 0.68));
 
   return new ImageResponse(
     (
@@ -26,23 +27,22 @@ export async function GET(request: Request) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#fabf19",
+          backgroundColor: "#d14423",
         }}
       >
-        <svg width={glyph} height={glyph} viewBox="0 0 64 64" fill="none">
-          <path
-            d="M14 20.5 C 24 17.8, 40 18.6, 50.5 19.8"
-            stroke="#16150f"
-            strokeWidth="8.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M32.8 21.5 C 32 31, 31.4 39, 32.4 49.5"
-            stroke="#16150f"
-            strokeWidth="8.5"
-            strokeLinecap="round"
-          />
-        </svg>
+        <div
+          style={{
+            display: "flex",
+            fontSize: glyph,
+            fontWeight: 800,
+            fontFamily: "Arial, Helvetica, sans-serif",
+            color: "#ffffff",
+            lineHeight: 1,
+            transform: `translateY(${Math.round(size * -0.03)}px)`,
+          }}
+        >
+          S
+        </div>
       </div>
     ),
     { width: size, height: size }

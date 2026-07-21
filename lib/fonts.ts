@@ -21,6 +21,8 @@ import {
   Instrument_Serif,
   Permanent_Marker,
   Caveat,
+  Poppins,
+  Lato,
 } from "next/font/google";
 
 // Pre-load all fonts at build time
@@ -173,6 +175,23 @@ const caveat = Caveat({
   display: "swap",
 });
 
+// Startups.com's typeface — everything on startups.com sets in Poppins,
+// including the 800 display headlines and the 900 tracked-out nav caps
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
+// Startups.com's long-form body face (articles, descriptions)
+const lato = Lato({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-lato",
+  display: "swap",
+});
+
 // All font instances for className injection
 export const fontInstances = {
   inter,
@@ -197,6 +216,8 @@ export const fontInstances = {
   instrumentSerif,
   permanentMarker,
   caveat,
+  poppins,
+  lato,
 };
 
 // Map font names (as they come from API) to CSS variables
@@ -224,6 +245,8 @@ const fontNameToVar: Record<string, string> = {
   "Instrument Serif": "var(--font-instrument-serif)",
   "Permanent Marker": "var(--font-permanent-marker)",
   "Caveat": "var(--font-caveat)",
+  "Poppins": "var(--font-poppins)",
+  "Lato": "var(--font-lato)",
 };
 
 // Default font (Inter)

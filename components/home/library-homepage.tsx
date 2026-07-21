@@ -9,7 +9,7 @@ import type { PortalSettings, PortalConfig } from "@/lib/portal-config";
 // Fork default tagline shown under the library title when the tenant hasn't
 // configured a channel description.
 const DEFAULT_TAGLINE =
-  "Every framework, every play, every rant — searchable, watchable, askable.";
+  "Startup Requests Live — real founders, real answers, every week.";
 
 interface LibraryHomepageProps {
   settings: PortalSettings | null;
@@ -34,7 +34,7 @@ export function LibraryHomepage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const meta = settings as any;
   const title =
-    meta?.metaData?.channelName || meta?.account?.name || "AI That Works";
+    meta?.metaData?.channelName || meta?.account?.name || "Startups.com";
   const subtitle =
     meta?.metaData?.channelDescription ||
     meta?.metaData?.description ||

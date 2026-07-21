@@ -32,7 +32,7 @@ export function AskReadOnlyFooter({ onStartNew }: AskReadOnlyFooterProps) {
             className="shrink-0 ring-2 ring-accent"
           />
           <p className="min-w-0 flex-1 truncate">
-            <span className="font-scribble text-[17px] text-foreground/75">
+            <span className="text-[14px] text-muted-foreground">
               this convo&rsquo;s wrapped —
             </span>{" "}
             <span className="hidden text-sm text-muted-foreground sm:inline">
@@ -41,7 +41,7 @@ export function AskReadOnlyFooter({ onStartNew }: AskReadOnlyFooterProps) {
           </p>
           <button
             onClick={onStartNew}
-            className="font-marker shrink-0 cursor-pointer rounded-xl bg-accent px-4 py-2 text-[14px] text-accent-foreground shadow-[0_2px_0_rgba(22,21,15,0.25)] transition-all hover:-translate-y-px hover:shadow-[0_3px_0_rgba(22,21,15,0.25)] active:translate-y-0 active:shadow-none"
+            className="font-heading font-semibold shrink-0 cursor-pointer rounded-[6px] bg-accent px-4 py-2 text-[14px] text-[#09090b] transition-colors hover:bg-[var(--accent-hover)]"
           >
             ASK YOURS
           </button>

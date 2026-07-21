@@ -42,13 +42,13 @@ function normalizeTags(tags: unknown): Array<{ name: string; slug: string }> {
 // this constant can be deleted. Filtering is already wired to the real
 // `tag` param on /api/videos, so a mocked topic with no tagged videos will
 // show the empty state rather than break.
-const MOCK_TOPICS: string[] = [
-  "Agents",
-  "RAG",
-  "Evals",
-  "Prompting",
-  "Tool calls",
-  "Code gen",
+const MOCK_TOPICS = [
+  "Pitch Decks",
+  "Fundraising",
+  "Investors",
+  "Go-To-Market",
+  "Product",
+  "Founder Life",
 ];
 
 interface VideoLibraryProps {
@@ -721,7 +721,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
     <div className="lg:grid lg:grid-cols-[248px_1fr] max-w-[1280px] mx-auto">
       {/* Topic rail (desktop) */}
       <aside className="hidden lg:block border-r border-border pt-8 pr-5 pb-8 pl-6 sticky top-[var(--header-height)] self-start">
-        <p className="font-scribble mb-2 ml-1 rotate-[-2deg] text-xl text-foreground/75">
+        <p className="srl-eyebrow mb-2 ml-1 text-muted-foreground">
           topics
         </p>
         <div className="flex flex-col gap-0.5">
@@ -760,7 +760,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
 
           {/* Nudge into the core loop: any of these can be asked about */}
           <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-            <span className="font-scribble rotate-[-1deg] text-lg text-foreground/75">
+            <span className="text-[14px] text-muted-foreground">
               don&rsquo;t scrub through 34 hours —
             </span>
             <Link
@@ -797,7 +797,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
         {/* Continue watching — local progress, most recent first */}
         {activeTopic === null && resumeItems.length > 0 && (
           <section className="mb-10">
-            <p className="font-scribble rotate-[-1deg] text-xl text-foreground/75 mb-2.5">
+            <p className="srl-eyebrow text-muted-foreground mb-2.5">
               pick up where you left off —
             </p>
             <div className="flex gap-4 overflow-x-auto no-scrollbar snap-x -mx-5 px-5 md:-mx-8 md:px-8 [mask-image:linear-gradient(to_right,transparent,black_20px,black_calc(100%-20px),transparent)]">
@@ -891,7 +891,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
               onClick={loadMore}
               disabled={isLoadingMore}
               className={cn(
-                "font-marker inline-flex items-center gap-2 rounded-xl px-6 py-2.5 -rotate-1",
+                "font-heading font-semibold inline-flex items-center gap-2 rounded-[6px] px-6 py-2.5",
                 "text-[15px] border-2 border-foreground/80 bg-surface",
                 "shadow-[0_2px_0_rgba(22,21,15,0.35)] transition-all cursor-pointer",
                 "hover:rotate-1 hover:bg-accent hover:shadow-[0_3px_0_rgba(22,21,15,0.35)]",

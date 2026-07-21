@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { MarkerUnderline } from "@/components/home/taki-doodles";
+import { RotateCcw } from "lucide-react";
 
 export default function ErrorBoundary({
   error,
@@ -15,37 +15,30 @@ export default function ErrorBoundary({
 
   return (
     <div className="relative flex h-full min-h-[60vh] items-center justify-center overflow-hidden px-6 py-16">
-      <div aria-hidden="true" className="taki-dotgrid absolute inset-0" />
-      <div className="relative max-w-md text-center">
-        <p className="font-scribble rotate-[-2deg] text-xl text-muted-foreground">
-          well, that&rsquo;s not the play
-        </p>
-        <h2 className="font-marker mt-1 -rotate-1 text-[clamp(2.2rem,6vw,3.2rem)] leading-[1.02]">
-          SOMETHING{" "}
-          <span className="relative inline-block">
-            BROKE.
-            <MarkerUnderline
-              className="absolute -bottom-1.5 left-[-2%] h-[0.2em] w-[104%] text-accent"
-              delay={0.3}
-            />
-          </span>
+      <div className="relative max-w-lg text-center">
+        <span className="srl-badge">Technical Difficulties</span>
+        <h2 className="mt-5 font-heading text-[clamp(2rem,5vw,3rem)] font-extrabold leading-[1.12] tracking-tight">
+          We lost the feed
+          <br />
+          <span className="srl-gradient-text">for a second there.</span>
         </h2>
         <p className="mt-5 text-[15px] leading-relaxed text-muted-foreground">
-          Not you — us. Run it back, and if it keeps happening, the library
-          still works.
+          Not you — us. Run it back, and if it keeps happening the episode
+          library still works.
         </p>
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-4">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <button
             onClick={reset}
-            className="font-marker -rotate-1 cursor-pointer rounded-xl bg-accent px-6 py-3 text-[16px] text-accent-foreground shadow-[0_3px_0_rgba(22,21,15,0.3)] transition-transform hover:rotate-1 hover:scale-[1.04]"
+            className="flex h-11 cursor-pointer items-center gap-2 rounded-[6px] bg-accent px-5 font-heading text-[15px] font-semibold text-[#09090b] transition-colors hover:bg-[var(--accent-hover)]"
           >
-            RUN IT BACK
+            <RotateCcw className="h-4 w-4" strokeWidth={2.5} />
+            Run It Back
           </button>
           <Link
             href="/videos"
-            className="text-sm font-semibold decoration-accent decoration-[2.5px] underline-offset-4 hover:underline"
+            className="flex h-11 items-center rounded-[5.25px] border border-border-strong px-4 text-sm font-medium transition-colors hover:bg-muted"
           >
-            Browse the library →
+            Browse episodes
           </Link>
         </div>
       </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Info, List, MessageSquare, PlaySquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAIAssistantContext } from "@/components/video/chat/context";
-import { TakiBar } from "@/components/taki-bar";
+import { SrlBar } from "@/components/srl-bar";
 import { MobileAskButton } from "@/components/mobile-ask-button";
 import { MobileSearchButton } from "@/components/mobile-search-button";
 
@@ -123,7 +123,7 @@ export function VideoDetailLayout({
       {/* Mobile: the Taki chrome + a slim portal row scroll with the
           page — nothing is pinned up top */}
       <div className="video-detail__chrome lg:hidden">
-        <TakiBar measure={false} className="contents" />
+        <SrlBar measure={false} className="contents" />
         <div className="flex items-center justify-between px-4 py-2 border-b border-border">
           <Link
             href="/videos"

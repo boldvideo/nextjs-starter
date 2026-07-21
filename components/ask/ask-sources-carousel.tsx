@@ -34,7 +34,7 @@ export function AskSourcesCarousel({
     <div className="w-full space-y-3">
       {/* Header */}
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="font-scribble rotate-[-2deg] text-[22px] leading-none text-foreground/75">
+        <span className="srl-eyebrow text-muted-foreground">
           the receipts
         </span>
         <span className="font-mono text-xs text-muted-foreground/70">

@@ -169,24 +169,26 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     (personaEnabled ? persona?.name : undefined) ??
     settings.aiName ??
     'AI Assistant';
-  // Fork override: the ask-page intro is design-owned copy in Taki's
+  // Fork override: the ask-page intro is design-owned copy in the show's
   // voice (line 1 renders as the headline, the rest as body).
   const aiGreeting = [
-    "G'day Rockstar 👋 I'm Taki AI.",
-    "Every video Taki's ever filmed is in my head. The pricing plays. The bit where he fired his entire sales team and made more money. Ask me what you'd normally save for a coaching call and you'll get the straight answer, plus the exact clip so you can watch him say it himself.",
+    "You're on. Make your request.",
+    "Every episode of Startup Requests Live is in here — the pitch deck teardowns, the fundraising math, the brutally honest go-to-market advice. Ask what you'd submit to the show and get the answer now, with the exact moments where Ed, Wil & Ryan covered it.",
     '',
-    'What are we working on?',
+    "What are you working on?",
   ].join('\n');
 
   // Conversation starters: persona first, then assistant_config, then defaults
   const defaultStarters = [
-    'How can I improve my product?',
-    'What are best practices for scaling?',
-    'How do I manage my team better?'
+    'What kills most pitch decks in the first 30 seconds?',
+    'How much should I raise for my pre-seed round?',
+    'Do investors actually care about my competition slide?'
   ];
   const conversationStarters = personaEnabled && persona.conversationStarters?.length > 0
     ? persona.conversationStarters
-    : settings.portal?.layout?.assistantConfig?.suggestions ?? defaultStarters;
+    : (settings.portal?.layout?.assistantConfig?.suggestions?.length
+        ? settings.portal.layout.assistantConfig.suggestions
+        : defaultStarters);
 
   // Chat disclaimer (bold-js 1.15.1+)
   const chatDisclaimer = settings.chatDisclaimer;
@@ -225,17 +227,17 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // AI search feature.
   const showAiSearchToggle = showAiInHeader && aiSearchEnabled;
 
-  // Smart header visibility:
-  // 1. Use explicit showHeader setting from API (SDK 0.6.0+)
-  // 2. Default to true (show header)
-  const showHeader = settings.portal?.navigation?.showHeader ?? true;
+  // Fork override: startups.com has exactly one nav bar (the fixed 68px
+  // SrlBar mounted by the layout), so the portal's secondary header row
+  // stays off regardless of tenant settings.
+  const showHeader = false;
 
-  // Fork override: theming is HumanLayer's data-theme system (globals.css),
-  // so next-themes is pinned to light with no toggle — the site bar's
-  // paintbrush switcher owns the look.
-  const colorScheme = 'light' as 'toggle' | 'light' | 'dark';
-  const forcedTheme = 'light' as 'light' | 'dark' | null;
-  const showToggle = false;
+  // Fork override: startups.com runs both modes with a nav toggle
+  // (moon/sun next to the logo, dark by default) — same here. The two
+  // palettes live in globals.css.
+  const colorScheme = 'toggle' as 'toggle' | 'light' | 'dark';
+  const forcedTheme = null as 'light' | 'dark' | null;
+  const showToggle = true;
 
   return {
     ai: {

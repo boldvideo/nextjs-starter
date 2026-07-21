@@ -139,7 +139,7 @@ export function AskSourcesRail({
       // Preview position is viewport-fixed — drop it when the rail scrolls
       onScroll={hidePreview}
     >
-      <h4 className="font-scribble rotate-[-2deg] text-[22px] leading-none text-foreground/75 mb-1.5">
+      <h4 className="srl-eyebrow text-muted-foreground mb-1.5">
         the receipts
       </h4>
       <p className="font-mono text-xs text-muted-foreground/70 mb-5">
@@ -236,7 +236,7 @@ function VideoSourcePanel({
     >
       {/* Head */}
       <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-border shrink-0">
-        <h3 className="font-scribble rotate-[-1.5deg] text-[22px] leading-none text-foreground/75">
+        <h3 className="srl-eyebrow text-muted-foreground">
           the exact moment
         </h3>
         <button
@@ -271,7 +271,7 @@ function VideoSourcePanel({
           <span className="inline-flex items-center rounded-md border border-[var(--signal-line)] bg-[var(--signal-soft)] px-2 py-0.5 font-mono text-xs font-semibold">
             {citation.timestampStart}
           </span>
-          <span className="font-scribble rotate-[-1deg] text-[15px] text-muted-foreground">
+          <span className="text-[13px] font-medium text-muted-foreground">
             he says it right here
           </span>
         </p>
@@ -296,7 +296,7 @@ function VideoSourcePanel({
 
         {nearby.length > 1 && (
           <div className="mt-6 pt-4 border-t border-border">
-            <p className="font-scribble rotate-[-1deg] text-lg text-foreground/75 mb-2">
+            <p className="srl-eyebrow text-muted-foreground mb-2">
               more moments in this one ↓
             </p>
             {nearby.map((c) => {

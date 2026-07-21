@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Taki AI",
-    short_name: "Taki AI",
+    name: "SRL — Startup Requests Live",
+    short_name: "SRL",
     description:
-      "Taki Moore's entire video library, one question away — answers in his voice, with the exact clip they came from.",
+      "Every episode of Startup Requests Live, one question away — answers with the exact moments Ed, Wil & Ryan covered it on the show.",
     start_url: "/",
     display: "standalone",
-    background_color: "#faf9f6",
-    theme_color: "#faf9f6",
+    background_color: "#13121c",
+    theme_color: "#13121c",
     icons: [
       {
         src: "/icon-pwa?size=192",

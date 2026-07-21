@@ -15,7 +15,7 @@ export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldPro
   if (variant === "pitch") {
     return (
       <a
-        href="https://www.boldvideo.com/taki"
+        href="https://www.boldvideo.com"
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
@@ -30,7 +30,7 @@ export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldPro
           alt="Bold Video"
           width={975}
           height={267}
-          className="h-[13px] w-auto opacity-70 transition-opacity group-hover:opacity-100"
+          className="h-[13px] w-auto opacity-70 transition-opacity group-hover:opacity-100 dark:invert"
         />
         <span aria-hidden="true" className="group-hover:translate-x-0.5 transition-transform">
           →
@@ -41,7 +41,7 @@ export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldPro
 
   return (
     <a
-      href="https://www.boldvideo.com/taki"
+      href="https://www.boldvideo.com"
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
@@ -57,7 +57,7 @@ export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldPro
         alt="Bold Video"
         width={975}
         height={267}
-        className="h-[15px] w-auto opacity-60 transition-opacity group-hover:opacity-90"
+        className="h-[15px] w-auto opacity-60 transition-opacity group-hover:opacity-90 dark:invert"
       />
     </a>
   );

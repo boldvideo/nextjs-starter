@@ -24,15 +24,18 @@ import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 export const revalidate = 60;
 
 export const viewport = {
-  // Matches the Taki paper-white chrome
-  themeColor: "#faf9f6",
+  // Matches the startups.com frame chrome in both color modes
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffedd5" },
+    { media: "(prefers-color-scheme: dark)", color: "#13121c" },
+  ],
 };
 
 // Default metadata values - used as fallback when settings don't provide them
 const defaultMetadata = {
-  title: "Taki AI — Ask Me Anything (I've Probably Filmed It)",
+  title: "SRL — Startup Requests Live, On Demand | Startups.com",
   description:
-    "Taki Moore's entire video library, one question away. Ask about getting clients, filling paid workshops, selling without sales calls, or scaling your coaching business — and get the answer with the exact clip it came from.",
+    "Every episode of Startup Requests Live, one question away. Ask about your pitch deck, your raise, your go-to-market — and get the answer with the exact moments Ed, Wil & Ryan covered it on the show.",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -103,7 +106,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
     },
     icons: {
-      icon: "/taki-icon.svg",
+      icon: "/srl-icon.svg",
       apple: "/icon-pwa?size=180",
     },
     appleWebApp: {
@@ -146,12 +149,13 @@ export default async function RootLayout({
   const config = getPortalConfig(settings);
   const showHeader = config.navigation.showHeader;
 
-  // Fork is design-owned: the Taki stack is fixed in code — Bricolage
-  // Grotesque headings, Inter body, Permanent Marker + Caveat for the
-  // hand-drawn brand moments. Tenant font settings are intentionally
-  // ignored here.
-  const fontHeaderVar = getFontVar("Bricolage Grotesque");
-  const fontBodyVar = getFontVar("DM Sans");
+  // Fork is design-owned: the startups.com stack is fixed in code —
+  // Poppins for everything interface (their 800 display / 900 nav-caps
+  // weights included), Lato for long-form prose. Tenant font settings
+  // are intentionally ignored here.
+  const fontHeaderVar = getFontVar("Poppins");
+  const fontBodyVar = getFontVar("Poppins");
+  const fontProseVar = getFontVar("Lato");
 
   // Check if user should see content
   const showContent = !isAuthEnabled() || session;
@@ -169,17 +173,16 @@ export default async function RootLayout({
               :root {
                 --font-heading: ${fontHeaderVar};
                 --font-body: ${fontBodyVar};
+                --font-prose: ${fontProseVar};
                 --font-mono-brand: var(--font-jetbrains-mono), monospace;
-                --font-marker: ${getFontVar("Permanent Marker")};
-                --font-scribble: ${getFontVar("Caveat")};
               }
             `,
           }}
         />
         {/* Tenant theme tokens and header sizing are deliberately NOT
             injected in this fork — globals.css is the design source of
-            truth (the Taki whiteboard theme, incl. the site bar baked
-            into --header-height). */}
+            truth (the startups.com dual theme, incl. the nav + panel
+            chrome baked into --header-height). */}
         {cssOverrides && (
           <style
             dangerouslySetInnerHTML={{
@@ -189,7 +192,7 @@ export default async function RootLayout({
         )}
       </head>
       <body
-        className="bg-background flex flex-col h-[100dvh] overflow-hidden lg:overflow-auto"
+        className="bg-frame flex flex-col h-[100dvh] overflow-hidden"
         suppressHydrationWarning
       >
         {config.analytics && <Analytics config={config.analytics} />}
