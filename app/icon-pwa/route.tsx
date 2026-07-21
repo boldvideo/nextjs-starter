@@ -3,9 +3,9 @@ import { ImageResponse } from "@vercel/og";
 export const runtime = "edge";
 
 /**
- * PWA / touch icon: white "S" on the startups.com red, matching their
- * app icon. ?size=192|512 (default 512), ?maskable=1 adds safe-zone
- * padding.
+ * PWA / touch icon: white "S" on the startups.com icon orange (#F37429 —
+ * their favicon/touch-icon color, lighter than the #D14423 wordmark box).
+ * ?size=192|512 (default 512), ?maskable=1 adds safe-zone padding.
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#d14423",
+          backgroundColor: "#f37429",
         }}
       >
         <div
