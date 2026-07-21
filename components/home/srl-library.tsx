@@ -97,6 +97,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
                 playbackId={
                   (featured as Video & { playbackId?: string }).playbackId
                 }
+                videoId={featured.id}
                 priority
                 sizes="(max-width: 1024px) 92vw, 480px"
                 className="shadow-[0_20px_44px_-20px_var(--shadow)]"

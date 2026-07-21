@@ -33,6 +33,7 @@ export function SrlVideoCard({
           title={video.title}
           duration={video.duration}
           playbackId={(video as Video & { playbackId?: string }).playbackId}
+          videoId={video.id}
           priority={priority}
           className="transition-shadow duration-300 group-hover:shadow-[0_16px_32px_-14px_var(--shadow)]"
         />

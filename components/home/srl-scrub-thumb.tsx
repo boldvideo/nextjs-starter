@@ -10,6 +10,7 @@ import {
 import Image from "next/image";
 import { formatDuration } from "util/format-duration";
 import { cn } from "@/lib/utils";
+import { useProgress } from "@/components/providers/progress-provider";
 
 /**
  * Mux storyboard metadata, fetched once per playback id on first hover.
@@ -55,6 +56,8 @@ interface SrlScrubThumbProps {
   title?: string;
   duration?: number;
   playbackId?: string;
+  /** Enables the local watch-progress bar along the bottom edge. */
+  videoId?: string;
   priority?: boolean;
   sizes?: string;
   className?: string;
@@ -72,10 +75,23 @@ export function SrlScrubThumb({
   title = "",
   duration = 0,
   playbackId,
+  videoId,
   priority = false,
   sizes = "(max-width: 768px) 78vw, (max-width: 1024px) 46vw, 300px",
   className,
 }: SrlScrubThumbProps) {
+  // Local watch progress (IndexedDB via ProgressProvider, synced across
+  // tabs). Furthest-watched fraction 0..1; completed shows a full bar.
+  const { progressMap } = useProgress();
+  const record = videoId ? progressMap.get(videoId) : undefined;
+  const progress = record
+    ? record.completed
+      ? 1
+      : record.duration > 0
+        ? Math.min(1, record.furthestPosition / record.duration)
+        : 0
+    : 0;
+
   // storyboard: undefined = still loading, null = unavailable.
   const [storyboard, setStoryboard] = useState<Storyboard | null | undefined>(
     undefined
@@ -355,6 +371,24 @@ export function SrlScrubThumb({
         >
           {formatDuration(duration)}
         </span>
+      )}
+
+      {/* Local watch progress along the thumb's bottom edge (steps aside
+          while the scrub playhead owns that edge) */}
+      {progress > 0.01 && !showScrubUi && (
+        <div
+          className="absolute inset-x-0 bottom-0 h-[3px] bg-white/20"
+          role="progressbar"
+          aria-valuenow={Math.round(progress * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Watch progress"
+        >
+          <div
+            className="h-full bg-accent"
+            style={{ width: `${Math.min(100, progress * 100)}%` }}
+          />
+        </div>
       )}
     </div>
   );
