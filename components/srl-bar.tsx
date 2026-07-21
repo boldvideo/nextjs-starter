@@ -169,7 +169,7 @@ export function SrlBar({
               rel="noopener noreferrer"
               className="hidden items-center rounded-[5.25px] border border-border-strong px-3.5 text-sm font-medium leading-none text-foreground transition-colors hover:bg-muted sm:flex sm:h-10"
             >
-              Startups.com
+              Back to startups.com
             </a>
           </div>
         </div>

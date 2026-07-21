@@ -22,6 +22,7 @@ interface SrlHomepageProps {
 
 export function SrlHomepage({
   settings,
+  config,
   videos,
   stats,
 }: SrlHomepageProps) {
@@ -52,7 +53,12 @@ export function SrlHomepage({
             )}
           </p>
 
-          <SrlAnswerDesk className="mx-auto mt-12 max-w-[680px]" />
+          <SrlAnswerDesk
+            aiName={config.ai.name}
+            aiAvatar={config.ai.avatar}
+            starters={config.ai.conversationStarters}
+            className="mx-auto mt-12 max-w-[680px]"
+          />
 
           <p className="mt-6 text-[13px] text-muted-foreground/80">
             Answers cite the exact episode moments — one click jumps you to the

@@ -6,6 +6,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Pick n random items (Fisher–Yates partial shuffle, input untouched).
+ */
+export function pickRandom<T>(items: T[], n: number): T[] {
+  const a = [...items];
+  const count = Math.min(n, a.length);
+  for (let i = 0; i < count; i++) {
+    const j = i + Math.floor(Math.random() * (a.length - i));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, count);
+}
+
+/**
  * "Ask Anton" label that doesn't double the verb when the configured AI name
  * already starts with "Ask".
  */

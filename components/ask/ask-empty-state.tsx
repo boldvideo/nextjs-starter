@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChatInput } from "@/components/coach";
+import { PersonaAvatar } from "@/components/persona-avatar";
 import { PoweredByBold } from "@/components/powered-by-bold";
-import { cn } from "@/lib/utils";
+import { cn, pickRandom } from "@/lib/utils";
 
 const H1_CLASS =
   "font-[family-name:var(--font-heading)] font-bold text-4xl md:text-5xl leading-[1.2] mb-3";
@@ -188,6 +190,8 @@ export function AskEmptyState({
   onSubmit,
   onStop,
   isStreaming,
+  aiName,
+  aiAvatar,
   greeting,
   suggestions,
   placeholder,
@@ -199,30 +203,21 @@ export function AskEmptyState({
   maxImages,
   acceptedMediaTypes,
 }: AskEmptyStateProps) {
+  // Drawn client-side after mount: fresh 3 per visit, deterministic SSR.
+  const [picked, setPicked] = useState<string[]>([]);
+  useEffect(() => {
+    setPicked(pickRandom(suggestions, 3));
+  }, [suggestions]);
+
   return (
     <div className="relative flex-1 min-h-0 overflow-y-auto flex justify-center">
       <div className="relative w-full max-w-[720px] px-5 md:px-6 pt-[clamp(40px,9vh,110px)] pb-16 my-auto">
-        {/* Desk identity — same host strip as the homepage desk */}
+        {/* Desk identity — the same configured voice that signs answers */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex -space-x-2">
-            {[
-              { initials: "EK", name: "Ed Kang", color: "#c65a3f" },
-              { initials: "WS", name: "Wil Schroter", color: "#4a47a3" },
-              { initials: "RR", name: "Ryan Rutan", color: "#2e8f7b" },
-            ].map((host) => (
-              <span
-                key={host.initials}
-                title={host.name}
-                className="flex h-9 w-9 items-center justify-center rounded-full font-[family-name:var(--font-heading)] text-[11px] font-bold text-white ring-2 ring-background"
-                style={{ backgroundColor: host.color }}
-              >
-                {host.initials}
-              </span>
-            ))}
-          </div>
+          <PersonaAvatar name={aiName} avatar={aiAvatar} size={42} />
           <div>
             <div className="font-[family-name:var(--font-heading)] font-bold text-lg leading-tight tracking-tight">
-              The SRL Answer Desk
+              {aiName}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span
@@ -261,8 +256,8 @@ export function AskEmptyState({
             <p className="srl-eyebrow mt-7 text-muted-foreground">
               Or start with one of these
             </p>
-            <div className="mt-2 flex flex-col gap-2">
-              {suggestions.map((s) => (
+            <div className="mt-2 flex min-h-[154px] flex-col gap-2">
+              {picked.map((s) => (
                 <button
                   key={s}
                   type="button"

@@ -1,33 +1,52 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, pickRandom } from "@/lib/utils";
+import { PersonaAvatar } from "@/components/persona-avatar";
 
-const HOSTS = [
-  { initials: "EK", name: "Ed Kang", color: "#c65a3f" },
-  { initials: "WS", name: "Wil Schroter", color: "#4a47a3" },
-  { initials: "RR", name: "Ryan Rutan", color: "#2e8f7b" },
-];
-
-const STARTERS = [
+const FALLBACK_STARTERS = [
   "What kills most pitch decks in the first 30 seconds?",
   "How much should I actually raise for my pre-seed round?",
   "How do I get meetings with investors without warm intros?",
 ];
 
+interface SrlAnswerDeskProps {
+  /** AI identity from the tenant settings — one voice everywhere. */
+  aiName: string;
+  aiAvatar?: string;
+  /** Full conversation-starter pool (settings endpoint); 3 are drawn
+      at random on every page load. */
+  starters?: string[];
+  className?: string;
+}
+
 /**
- * The homepage centerpiece, kept deliberately quiet: who you're asking
- * (the three hosts), one big input, and three real questions from the
- * show as starters. No scripted theatre — the first answer is the show.
- * Submitting hands off to /ask for the streamed answer.
+ * The homepage centerpiece, kept deliberately quiet: who's answering
+ * (the tenant's configured AI identity), one big input, and three
+ * randomly drawn real questions from the show as starters. The real
+ * streamed answer happens on /ask.
  */
-export function SrlAnswerDesk({ className }: { className?: string }) {
+export function SrlAnswerDesk({
+  aiName,
+  aiAvatar,
+  starters,
+  className,
+}: SrlAnswerDeskProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [leaving, setLeaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Drawn client-side after mount: fresh set per page load, and the
+  // server markup stays deterministic (no hydration mismatch).
+  const [picked, setPicked] = useState<string[]>([]);
+  useEffect(() => {
+    const pool = starters?.length ? starters : FALLBACK_STARTERS;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- random draw must happen client-side only
+    setPicked(pickRandom(pool, 3));
+  }, [starters]);
 
   const ask = (question: string) => {
     const q = question.trim();
@@ -48,23 +67,12 @@ export function SrlAnswerDesk({ className }: { className?: string }) {
         className
       )}
     >
-      {/* Who's answering */}
+      {/* Who's answering — the same identity that signs the answers */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-5">
-        <div className="flex -space-x-2">
-          {HOSTS.map((host) => (
-            <span
-              key={host.initials}
-              title={host.name}
-              className="flex h-8 w-8 items-center justify-center rounded-full font-heading text-[11px] font-bold text-white ring-2 ring-surface"
-              style={{ backgroundColor: host.color }}
-            >
-              {host.initials}
-            </span>
-          ))}
-        </div>
+        <PersonaAvatar name={aiName} avatar={aiAvatar} size={36} />
         <div className="min-w-0">
           <div className="font-heading text-[15px] font-bold leading-tight">
-            The SRL Answer Desk
+            {aiName}
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span
@@ -92,7 +100,7 @@ export function SrlAnswerDesk({ className }: { className?: string }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Ask about your pitch deck, your raise, your startup…"
-            aria-label="Ask the SRL answer desk a question"
+            aria-label={`Ask ${aiName} a question`}
             autoComplete="off"
             className="h-[52px] min-w-0 flex-1 rounded-[6px] border border-border-strong bg-background px-4 text-[15px] outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-accent focus:ring-2 focus:ring-accent/30"
           />
@@ -106,17 +114,19 @@ export function SrlAnswerDesk({ className }: { className?: string }) {
           </button>
         </form>
 
-        {/* Real questions from the show, as starters */}
+        {/* Real questions from the show, drawn fresh each visit */}
         <p className="srl-eyebrow mt-7 text-muted-foreground">
           Popular requests
         </p>
-        <div className="mt-3 flex flex-col gap-2.5">
-          {STARTERS.map((question) => (
+        <div className="mt-3 flex min-h-[178px] flex-col gap-2.5">
+          {picked.map((question, i) => (
             <button
               key={question}
               type="button"
+              title={question}
               onClick={() => ask(question)}
-              className="group flex cursor-pointer items-center justify-between gap-3 rounded-[6px] border border-border px-4 py-3.5 text-left text-[15px] text-muted-foreground transition-colors hover:border-accent hover:bg-[var(--signal-soft)] hover:text-foreground"
+              style={{ animationDelay: `${i * 0.07}s` }}
+              className="animate-srl-pop group flex cursor-pointer items-center justify-between gap-3 rounded-[6px] border border-border px-4 py-3.5 text-left text-[15px] text-muted-foreground transition-colors hover:border-accent hover:bg-[var(--signal-soft)] hover:text-foreground"
             >
               <span className="min-w-0 flex-1 truncate">{question}</span>
               <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-foreground" />
