@@ -10,7 +10,7 @@ export function Wordmark({ className }: { className?: string }) {
     <span
       className={cn(
         "font-heading inline-flex select-none items-baseline whitespace-nowrap",
-        "text-[22px] font-black leading-none tracking-tight text-foreground",
+        "text-[22px] font-bold leading-none tracking-tight text-foreground",
         className
       )}
     >

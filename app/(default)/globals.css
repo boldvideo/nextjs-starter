@@ -101,11 +101,6 @@
   /* Headline gradient + wizard stage (the chat's inner panel) */
   --grad-from: #d97258;
   --grad-to: #9858a3;
-  --stage-panel: #ece9e4;
-  --stage-panel-foreground: #09090b;
-  --stage-bubble: #ffffff;
-  --stage-chip-bg: #ffffff;
-  --stage-chip-border: var(--border-strong);
   --sub: #52525b;
 
   /* Cross-theme fallback chain (kept for components that use them) */
@@ -159,11 +154,6 @@
 
   --grad-from: #d97258;
   --grad-to: #9858a3;
-  --stage-panel: #565683;
-  --stage-panel-foreground: #ffffff;
-  --stage-bubble: rgba(19, 18, 28, 0.32);
-  --stage-chip-bg: rgba(19, 18, 28, 0.25);
-  --stage-chip-border: rgba(255, 255, 255, 0.3);
   --sub: #a1a1aa;
 
   --shadow-color: rgba(0, 0, 0, 0.5);
@@ -188,7 +178,7 @@
 .srl-nav-link {
   font-family: var(--font-heading);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }
@@ -222,7 +212,7 @@
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.05em;
   }
   /* Content links: ink text with an orange underline; hovering

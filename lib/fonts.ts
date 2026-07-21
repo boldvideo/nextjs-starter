@@ -175,11 +175,14 @@ const caveat = Caveat({
   display: "swap",
 });
 
-// Startups.com's typeface — everything on startups.com sets in Poppins,
-// including the 800 display headlines and the 900 tracked-out nav caps
+// Startups.com's typeface — everything on startups.com sets in Poppins
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  // Their site loads exactly these four faces. Its CSS asks for 800/900
+  // in places, but with no such files the browser renders 700 — that
+  // lighter-than-declared look IS the startups.com type voice, so we
+  // load the same set and declare 700 directly.
+  weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
   display: "swap",
 });

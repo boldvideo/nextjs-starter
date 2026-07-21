@@ -13,7 +13,8 @@ import { useSearch } from "@/components/providers/search-provider";
 /**
  * The startups.com site bar — one fixed 68px nav, measured off the live
  * site: translucent frame color under a 20px blur, the red logo box with
- * the color-mode toggle beside it, tracked-out 900-weight caps links with
+ * the color-mode toggle beside it, tracked-out caps links (declared 900
+ * on their site but rendered 700 — only four Poppins faces load) with
  * a 3px orange underline on the active item, and a quiet outlined link
  * back to startups.com on the right.
  *
@@ -57,10 +58,11 @@ export function SrlBar({
 
   const logoSrc = settings?.logoUrl || "/startups-wordmark.svg";
 
+  // No "Ask" item: the homepage desk IS the ask surface — /ask exists
+  // as the conversation page you land on, not as a nav destination.
   const navItems = [
     { label: "Home", href: "/" },
     { label: "Episodes", href: "/videos" },
-    { label: "Ask", href: "/ask" },
   ];
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : (pathname ?? "").startsWith(href);
@@ -99,7 +101,7 @@ export function SrlBar({
             )}
           </button>
 
-          {/* Center nav — 12px/900, 1.5px tracking, active gets the 3px
+          {/* Center nav — 12px/700, 1.5px tracking, active gets the 3px
               orange underline pulled down to the bar's bottom edge */}
           <nav className="absolute left-1/2 hidden h-full -translate-x-1/2 items-center gap-8 md:flex">
             {navItems.map((item) => (
@@ -130,7 +132,7 @@ export function SrlBar({
 
           <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
             {/* On small screens the center nav collapses into the right
-                cluster so Episodes/Ask stay one tap away */}
+                cluster so Episodes stays one tap away */}
             <nav className="flex items-center gap-4 pr-1 md:hidden">
               {navItems
                 .filter((item) => item.href !== "/")

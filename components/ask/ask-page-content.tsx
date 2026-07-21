@@ -496,7 +496,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     <span className="srl-eyebrow shrink-0 mt-[7px] text-muted-foreground">
                       Request
                     </span>
-                    <h2 className="font-[family-name:var(--font-heading)] font-extrabold text-2xl md:text-3xl tracking-tight leading-[1.15]">
+                    <h2 className="font-[family-name:var(--font-heading)] font-bold text-2xl md:text-3xl tracking-tight leading-[1.15]">
                       {pair.userMessage.content}
                     </h2>
                   </div>

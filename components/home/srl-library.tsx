@@ -21,6 +21,11 @@ const HOSTS = [
 export function SrlLibrary({ videos }: { videos: Video[] | null }) {
   const list = videos ?? [];
   const featured = list[0] ?? null;
+  const featuredDate = featured?.publishedAt ? new Date(featured.publishedAt) : null;
+  const featuredAgo =
+    featuredDate && !isNaN(featuredDate.getTime())
+      ? formatDistanceToNowStrict(featuredDate, { addSuffix: true })
+      : null;
 
   return (
     <div className="h-full overflow-y-auto overscroll-contain">
@@ -35,7 +40,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
           </span>
           {list.length > 0 && (
             <span className="ml-auto text-[12px] text-muted-foreground/80">
-              {list.length} full {list.length === 1 ? "show" : "shows"}
+              {list.length} {list.length === 1 ? "episode" : "episodes"}
             </span>
           )}
         </div>
@@ -46,8 +51,8 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
         <section className="border-b border-border">
           <div className="mx-auto grid w-full max-w-[1180px] items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_minmax(0,480px)] lg:gap-12 lg:py-16 lg:pl-8 lg:pr-8">
             <div>
-              <span className="srl-badge">Latest Request</span>
-              <h1 className="mt-4 font-heading text-[clamp(1.6rem,3.2vw,2.4rem)] font-extrabold leading-[1.25]">
+              <span className="srl-badge">Latest Episode</span>
+              <h1 className="mt-4 font-heading text-[clamp(1.6rem,3.2vw,2.4rem)] font-bold leading-[1.25]">
                 {featured.title}
               </h1>
               <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -67,10 +72,8 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
                   Ed, Wil &amp; Ryan
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  {formatDuration(featured.duration)} ·{" "}
-                  {formatDistanceToNowStrict(new Date(featured.publishedAt), {
-                    addSuffix: true,
-                  })}
+                  {formatDuration(featured.duration)}
+                  {featuredAgo ? ` · ${featuredAgo}` : ""}
                 </span>
               </div>
               <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -119,7 +122,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
       <section>
         <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-12 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-extrabold leading-[1.25]">
+            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-bold leading-[1.25]">
               Every Request, Every Show
             </h2>
             <p className="srl-sub mx-auto mt-3 max-w-[680px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
@@ -141,7 +144,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
           )}
 
           <div className="mt-14 rounded-lg border border-border bg-surface px-6 py-8 text-center">
-            <h3 className="font-heading text-xl font-extrabold">
+            <h3 className="font-heading text-xl font-bold">
               Don&rsquo;t feel like browsing?
             </h3>
             <p className="mx-auto mt-2 max-w-[480px] text-[15px] text-muted-foreground">

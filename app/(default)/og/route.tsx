@@ -145,14 +145,14 @@ export async function GET(request: Request) {
 
   const fontText = `${title}${sub}${DEFAULT_META}${DEFAULT_TAGLINE}startups.comSRLPowered by BOLD`;
   const [extrabold, medium, imgSrc] = await Promise.all([
-    loadGoogleFont("Poppins", 800, fontText),
+    loadGoogleFont("Poppins", 700, fontText),
     loadGoogleFont("Poppins", 500, fontText),
     img ? loadImageDataUri(img) : Promise.resolve(null),
   ]);
 
   const fonts = [
     ...(extrabold
-      ? [{ name: "Poppins", data: extrabold, weight: 800 as const }]
+      ? [{ name: "Poppins", data: extrabold, weight: 700 as const }]
       : []),
     ...(medium
       ? [{ name: "Poppins Medium", data: medium, weight: 500 as const }]
@@ -202,7 +202,7 @@ export async function GET(request: Request) {
                 style={{
                   display: "flex",
                   fontSize: title.length > 60 ? 40 : 50,
-                  fontWeight: 800,
+                  fontWeight: 700,
                   lineHeight: 1.14,
                   letterSpacing: "-0.02em",
                 }}
@@ -251,7 +251,7 @@ export async function GET(request: Request) {
                   display: "flex",
                   flexDirection: "column",
                   fontSize: 64,
-                  fontWeight: 800,
+                  fontWeight: 700,
                   lineHeight: 1.12,
                   letterSpacing: "-0.02em",
                 }}
@@ -272,7 +272,7 @@ export async function GET(request: Request) {
                 style={{
                   display: "flex",
                   fontSize: title.length > 40 ? 52 : 64,
-                  fontWeight: 800,
+                  fontWeight: 700,
                   lineHeight: 1.1,
                   letterSpacing: "-0.02em",
                   maxWidth: 1000,

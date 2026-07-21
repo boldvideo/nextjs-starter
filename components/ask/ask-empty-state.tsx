@@ -8,7 +8,7 @@ import { PoweredByBold } from "@/components/powered-by-bold";
 import { cn } from "@/lib/utils";
 
 const H1_CLASS =
-  "font-[family-name:var(--font-heading)] font-extrabold text-4xl md:text-5xl leading-[1.2] mb-3";
+  "font-[family-name:var(--font-heading)] font-bold text-4xl md:text-5xl leading-[1.2] mb-3";
 const SUB_CLASS =
   "text-lg text-muted-foreground leading-relaxed max-w-[52ch] mb-8";
 

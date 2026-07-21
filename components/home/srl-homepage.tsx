@@ -41,7 +41,6 @@ export function SrlHomepage({
   stats,
 }: SrlHomepageProps) {
   const latest = (videos ?? []).slice(0, 4);
-  const count = stats?.count ?? null;
 
   return (
     <div className="h-full overflow-y-auto overscroll-contain">
@@ -57,7 +56,7 @@ export function SrlHomepage({
             Startup Requests Live · On Demand
           </span>
 
-          <h1 className="mx-auto mt-6 font-heading text-[clamp(2.1rem,4.6vw,3rem)] font-extrabold leading-[1.25]">
+          <h1 className="mx-auto mt-6 font-heading text-[clamp(2.1rem,4.6vw,3rem)] font-bold leading-[1.25]">
             Ask us anything.
             <br />
             <span className="srl-gradient-text">
@@ -69,16 +68,13 @@ export function SrlHomepage({
             The show where real founders get real answers — now searchable.
             {stats && (
               <span className="block">
-                {stats.count} full shows · {stats.hours}+ hours with Ed, Wil
+                {stats.count} episodes · {stats.hours}+ hours with Ed, Wil
                 &amp; Ryan.
               </span>
             )}
           </p>
 
-          <SrlAnswerDesk
-            videoCount={count}
-            className="mx-auto mt-10 max-w-[680px]"
-          />
+          <SrlAnswerDesk className="mx-auto mt-10 max-w-[680px]" />
 
           <p className="mt-5 text-[13px] text-muted-foreground/80">
             Answers cite the exact episode moments — one click jumps you to the
@@ -91,7 +87,7 @@ export function SrlHomepage({
       <section className="border-b border-border">
         <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-14 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-extrabold leading-[1.25]">
+            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-bold leading-[1.25]">
               Latest Startup Requests
             </h2>
             <p className="srl-sub mx-auto mt-3 max-w-[680px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
@@ -126,7 +122,7 @@ export function SrlHomepage({
       <section className="border-b border-border">
         <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-14 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-extrabold leading-[1.25]">
+            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-bold leading-[1.25]">
               How It Works
             </h2>
             <p className="srl-sub mx-auto mt-3 max-w-[640px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
@@ -147,7 +143,7 @@ export function SrlHomepage({
                   <span className="flex h-11 w-11 items-center justify-center rounded-full border border-border-strong bg-muted font-heading text-[15px] font-bold text-[var(--accent-active)]">
                     {i + 1}
                   </span>
-                  <h3 className="mt-4 font-heading text-[17px] font-extrabold">
+                  <h3 className="mt-4 font-heading text-[17px] font-bold">
                     {step.title}
                   </h3>
                   <p className="mt-2 max-w-[300px] text-[15px] leading-relaxed text-muted-foreground">
