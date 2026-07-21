@@ -20,21 +20,6 @@ interface SrlHomepageProps {
   stats: LibraryStats | null;
 }
 
-const HOW_STEPS = [
-  {
-    title: "Ask anything",
-    body: "Type it like you'd ask the guys live — pitch deck, raise, go-to-market, anything.",
-  },
-  {
-    title: "We find the moments",
-    body: "The desk has watched every episode. It pulls the exact clips where the guys tackled it.",
-  },
-  {
-    title: "Watch the real thing",
-    body: "Every answer comes with receipts — one click drops you into the episode, right at the moment.",
-  },
-];
-
 export function SrlHomepage({
   settings,
   videos,
@@ -46,15 +31,8 @@ export function SrlHomepage({
     <div className="h-full overflow-y-auto overscroll-contain">
       {/* ── Hero: their two-line headline formula + the request desk ── */}
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-12 text-center sm:px-6 sm:pt-16 lg:px-8">
-          <span className="srl-badge">
-            <span
-              aria-hidden="true"
-              className="animate-srl-live h-[7px] w-[7px] rounded-full"
-              style={{ backgroundColor: "var(--error)" }}
-            />
-            Startup Requests Live · On Demand
-          </span>
+        <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-16 text-center sm:px-6 sm:pt-24 lg:px-8">
+          <span className="srl-badge">Startup Requests Live · On Demand</span>
 
           <h1 className="mx-auto mt-6 font-heading text-[clamp(2.1rem,4.6vw,3rem)] font-bold leading-[1.25]">
             Ask us anything.
@@ -64,8 +42,8 @@ export function SrlHomepage({
             </span>
           </h1>
 
-          <p className="mx-auto mt-5 max-w-[640px] text-[17px] leading-relaxed text-muted-foreground sm:text-lg">
-            The show where real founders get real answers — now searchable.
+          <p className="mx-auto mt-6 max-w-[640px] text-[17px] leading-relaxed text-muted-foreground sm:text-lg">
+            The show where real founders get real answers.
             {stats && (
               <span className="block">
                 {stats.count} episodes · {stats.hours}+ hours with Ed, Wil
@@ -74,9 +52,9 @@ export function SrlHomepage({
             )}
           </p>
 
-          <SrlAnswerDesk className="mx-auto mt-10 max-w-[680px]" />
+          <SrlAnswerDesk className="mx-auto mt-12 max-w-[680px]" />
 
-          <p className="mt-5 text-[13px] text-muted-foreground/80">
+          <p className="mt-6 text-[13px] text-muted-foreground/80">
             Answers cite the exact episode moments — one click jumps you to the
             clip.
           </p>
@@ -85,7 +63,7 @@ export function SrlHomepage({
 
       {/* ── Latest episodes — their "Latest Startup Requests" band ──── */}
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 lg:px-8">
           <div className="text-center">
             <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-bold leading-[1.25]">
               Latest Startup Requests
@@ -95,7 +73,7 @@ export function SrlHomepage({
             </p>
           </div>
 
-          <div className="no-scrollbar -mx-4 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 lg:grid-cols-4 lg:gap-5">
+          <div className="no-scrollbar -mx-4 mt-12 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-12 md:overflow-visible md:px-0 lg:grid-cols-4">
             {latest.map((video, i) => (
               <div
                 key={video.id}
@@ -106,7 +84,7 @@ export function SrlHomepage({
             ))}
           </div>
 
-          <div className="mt-10 flex justify-center">
+          <div className="mt-14 flex justify-center">
             <Link
               href="/videos"
               className="flex h-11 items-center gap-1.5 rounded-[6px] bg-purple px-5 font-heading text-[15px] font-medium text-purple-foreground transition-opacity hover:opacity-90"
@@ -118,47 +96,9 @@ export function SrlHomepage({
         </div>
       </section>
 
-      {/* ── How it works ────────────────────────────────────────────── */}
-      <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-14 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-bold leading-[1.25]">
-              How It Works
-            </h2>
-            <p className="srl-sub mx-auto mt-3 max-w-[640px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
-              You type what you need. The show answers.
-            </p>
-          </div>
-
-          <div className="mt-12 flex flex-col items-stretch gap-6 md:flex-row md:items-start md:gap-0">
-            {HOW_STEPS.map((step, i) => (
-              <div key={step.title} className="contents">
-                {i > 0 && (
-                  <div
-                    aria-hidden="true"
-                    className="mt-[22px] hidden h-0 flex-1 border-t-2 border-dashed border-border-strong/60 md:block md:max-w-[72px]"
-                  />
-                )}
-                <div className="flex flex-1 flex-col items-center px-2 text-center">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-border-strong bg-muted font-heading text-[15px] font-bold text-[var(--accent-active)]">
-                    {i + 1}
-                  </span>
-                  <h3 className="mt-4 font-heading text-[17px] font-bold">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 max-w-[300px] text-[15px] leading-relaxed text-muted-foreground">
-                    {step.body}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── Footer ──────────────────────────────────────────────────── */}
       <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-[1180px] flex-col items-center justify-between gap-5 px-4 pb-10 pt-8 sm:flex-row sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-[1180px] flex-col items-center justify-between gap-6 px-4 pb-12 pt-10 sm:flex-row sm:px-6 lg:px-8">
           <a
             href="https://www.startups.com"
             target="_blank"

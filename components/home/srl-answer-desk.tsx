@@ -49,7 +49,7 @@ export function SrlAnswerDesk({ className }: { className?: string }) {
       )}
     >
       {/* Who's answering */}
-      <div className="flex items-center gap-3 border-b border-border px-4 py-3 sm:px-5">
+      <div className="flex items-center gap-3 border-b border-border px-4 py-3.5 sm:px-5">
         <div className="flex -space-x-2">
           {HOSTS.map((host) => (
             <span
@@ -77,7 +77,7 @@ export function SrlAnswerDesk({ className }: { className?: string }) {
         </div>
       </div>
 
-      <div className="p-4 sm:p-5">
+      <div className="p-4 sm:p-6">
         {/* The one action */}
         <form
           className="flex gap-2"
@@ -107,16 +107,16 @@ export function SrlAnswerDesk({ className }: { className?: string }) {
         </form>
 
         {/* Real questions from the show, as starters */}
-        <p className="srl-eyebrow mt-6 text-muted-foreground">
+        <p className="srl-eyebrow mt-7 text-muted-foreground">
           Popular requests
         </p>
-        <div className="mt-2.5 flex flex-col gap-2">
+        <div className="mt-3 flex flex-col gap-2.5">
           {STARTERS.map((question) => (
             <button
               key={question}
               type="button"
               onClick={() => ask(question)}
-              className="group flex cursor-pointer items-center justify-between gap-3 rounded-[6px] border border-border px-4 py-3 text-left text-[15px] text-muted-foreground transition-colors hover:border-accent hover:bg-[var(--signal-soft)] hover:text-foreground"
+              className="group flex cursor-pointer items-center justify-between gap-3 rounded-[6px] border border-border px-4 py-3.5 text-left text-[15px] text-muted-foreground transition-colors hover:border-accent hover:bg-[var(--signal-soft)] hover:text-foreground"
             >
               <span className="min-w-0 flex-1 truncate">{question}</span>
               <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-foreground" />

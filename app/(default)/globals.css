@@ -404,25 +404,10 @@
     animation: srl-blink 1.2s infinite;
   }
 
-  /* The "ON AIR" live dot */
-  @keyframes srl-live {
-    0%, 100% {
-      opacity: 1;
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--error) 45%, transparent);
-    }
-    50% {
-      opacity: 0.75;
-      box-shadow: 0 0 0 5px transparent;
-    }
-  }
-  .animate-srl-live {
-    animation: srl-live 2.2s ease-in-out infinite;
-  }
 
   @media (prefers-reduced-motion: reduce) {
     .animate-srl-pop,
-    .animate-srl-blink,
-    .animate-srl-live {
+    .animate-srl-blink {
       animation: none;
       transform: none;
       opacity: 1;

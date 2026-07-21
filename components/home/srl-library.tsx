@@ -49,7 +49,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
       {/* Featured: the latest request */}
       {featured && (
         <section className="border-b border-border">
-          <div className="mx-auto grid w-full max-w-[1180px] items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_minmax(0,480px)] lg:gap-12 lg:py-16 lg:pl-8 lg:pr-8">
+          <div className="mx-auto grid w-full max-w-[1180px] items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_minmax(0,480px)] lg:gap-14 lg:py-20 lg:pl-8 lg:pr-8">
             <div>
               <span className="srl-badge">Latest Episode</span>
               <h1 className="mt-4 font-heading text-[clamp(1.6rem,3.2vw,2.4rem)] font-bold leading-[1.25]">
@@ -120,7 +120,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
 
       {/* The grid */}
       <section>
-        <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-12 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-16 sm:px-6 sm:pb-24 lg:px-8">
           <div className="text-center">
             <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-bold leading-[1.25]">
               Every Request, Every Show
@@ -131,7 +131,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
           </div>
 
           {list.length > 0 ? (
-            <div className="mt-10 grid grid-cols-1 gap-x-5 gap-y-9 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
               {list.map((video, i) => (
                 <SrlVideoCard key={video.id} video={video} priority={i < 3} />
               ))}
@@ -143,7 +143,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
             </p>
           )}
 
-          <div className="mt-14 rounded-lg border border-border bg-surface px-6 py-8 text-center">
+          <div className="mt-20 rounded-lg border border-border bg-surface px-6 py-10 text-center">
             <h3 className="font-heading text-xl font-bold">
               Don&rsquo;t feel like browsing?
             </h3>
