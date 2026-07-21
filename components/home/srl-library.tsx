@@ -1,11 +1,11 @@
 import Link from "next/link";
-import Image from "next/image";
-import { Clapperboard, Play, MessageCircleQuestion } from "lucide-react";
+import { Clapperboard, Play } from "lucide-react";
 import { formatDistanceToNowStrict } from "date-fns";
 import type { Video } from "@boldvideo/bold-js";
 import { formatDuration } from "util/format-duration";
 import { buildVideoUrl } from "@/lib/video-path";
 import { SrlVideoCard } from "@/components/home/srl-video-card";
+import { SrlScrubThumb } from "@/components/home/srl-scrub-thumb";
 
 const HOSTS = [
   { initials: "EK", name: "Ed Kang", color: "#c65a3f" },
@@ -84,35 +84,23 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
                   <Play className="h-4 w-4 fill-current" strokeWidth={0} />
                   Watch the Show
                 </Link>
-                <Link
-                  href={`/ask?q=${encodeURIComponent(
-                    `What did the guys cover in "${featured.title}"?`
-                  )}`}
-                  className="flex h-11 items-center gap-2 rounded-[5.25px] border border-border-strong px-4 text-sm font-medium transition-colors hover:bg-muted"
-                >
-                  <MessageCircleQuestion
-                    className="h-4 w-4"
-                    strokeWidth={1.75}
-                  />
-                  Ask about this one
-                </Link>
               </div>
             </div>
             <Link
               href={buildVideoUrl(featured)}
-              className="group relative block aspect-video overflow-hidden rounded-xl border border-border bg-muted shadow-[0_20px_44px_-20px_var(--shadow)]"
+              className="group block"
             >
-              <Image
-                src={featured.thumbnail}
-                alt=""
-                fill
+              <SrlScrubThumb
+                thumbnail={featured.thumbnail}
+                title={featured.title}
+                duration={featured.duration}
+                playbackId={
+                  (featured as Video & { playbackId?: string }).playbackId
+                }
                 priority
                 sizes="(max-width: 1024px) 92vw, 480px"
-                className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+                className="shadow-[0_20px_44px_-20px_var(--shadow)]"
               />
-              <span className="absolute bottom-3 right-3 rounded-[5px] bg-black/85 px-1.5 py-0.5 font-heading text-xs font-semibold text-white">
-                {formatDuration(featured.duration)}
-              </span>
             </Link>
           </div>
         </section>
@@ -122,10 +110,10 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
       <section>
         <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-16 sm:px-6 sm:pb-24 lg:px-8">
           <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-bold leading-[1.25]">
+            <h2 className="font-heading text-[clamp(1.75rem,3vw,2.25rem)] font-bold leading-[1.22]">
               Every Request, Every Show
             </h2>
-            <p className="srl-sub mx-auto mt-3 max-w-[680px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
+            <p className="mx-auto mt-4 max-w-[560px] text-lg leading-relaxed text-muted-foreground sm:text-xl">
               Real founders on the mic, getting the answers everyone needs.
             </p>
           </div>

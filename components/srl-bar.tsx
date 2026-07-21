@@ -58,10 +58,10 @@ export function SrlBar({
 
   const logoSrc = settings?.logoUrl || "/startups-wordmark.svg";
 
-  // No "Ask" item: the homepage desk IS the ask surface — /ask exists
-  // as the conversation page you land on, not as a nav destination.
+  // The homepage IS the ask surface, so the nav names it that. /ask
+  // stays the conversation page you land on, not a nav destination.
   const navItems = [
-    { label: "Home", href: "/" },
+    { label: "Ask", href: "/" },
     { label: "Episodes", href: "/videos" },
   ];
   const isActive = (href: string) =>

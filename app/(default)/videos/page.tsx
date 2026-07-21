@@ -27,6 +27,7 @@ async function getAllEpisodes(): Promise<Video[] | null> {
         ({
           ...v,
           publishedAt: v.published_at ?? v.publishedAt,
+          playbackId: v.playback_id ?? v.playbackId,
         }) as unknown as Video
     );
     // Newest first, regardless of index order

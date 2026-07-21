@@ -101,7 +101,6 @@
   /* Headline gradient + wizard stage (the chat's inner panel) */
   --grad-from: #d97258;
   --grad-to: #9858a3;
-  --sub: #52525b;
 
   /* Cross-theme fallback chain (kept for components that use them) */
   --fg-primary: var(--text-primary);
@@ -154,7 +153,6 @@
 
   --grad-from: #d97258;
   --grad-to: #9858a3;
-  --sub: #a1a1aa;
 
   --shadow-color: rgba(0, 0, 0, 0.5);
 }
@@ -263,12 +261,6 @@
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-  }
-
-  /* Marketing-band subtitle: their 30px/600 zinc gray */
-  .srl-sub {
-    color: var(--sub);
-    font-weight: 600;
   }
 
   /* "Featured" chip — amber tint, 3px corners */

@@ -31,7 +31,7 @@ export function SrlHomepage({
     <div className="h-full overflow-y-auto overscroll-contain">
       {/* ── Hero: their two-line headline formula + the request desk ── */}
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-16 text-center sm:px-6 sm:pt-24 lg:px-8">
+        <div className="mx-auto w-full max-w-[1180px] px-4 pb-24 pt-16 text-center sm:px-6 sm:pb-32 sm:pt-24 lg:px-8">
           <span className="srl-badge">Startup Requests Live · On Demand</span>
 
           <h1 className="mx-auto mt-6 font-heading text-[clamp(2.1rem,4.6vw,3rem)] font-bold leading-[1.25]">
@@ -63,12 +63,12 @@ export function SrlHomepage({
 
       {/* ── Latest episodes — their "Latest Startup Requests" band ──── */}
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 lg:px-8">
+        <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-24 lg:px-8">
           <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-bold leading-[1.25]">
+            <h2 className="font-heading text-[clamp(1.75rem,3vw,2.25rem)] font-bold leading-[1.22]">
               Latest Startup Requests
             </h2>
-            <p className="srl-sub mx-auto mt-3 max-w-[680px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
+            <p className="mx-auto mt-4 max-w-[560px] text-lg leading-relaxed text-muted-foreground sm:text-xl">
               Fresh from the show — real founders, real teardowns, no theory.
             </p>
           </div>
