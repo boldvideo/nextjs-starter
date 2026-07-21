@@ -115,6 +115,39 @@ function findMentionedVideo(
 }
 
 /**
+ * The persona closes each answer naming which episode(s) to watch as
+ * plain quoted text ("Title"). Promote such a span to a bold mention
+ * when it matches a cited video's title — the mention pipeline
+ * (MentionStrong) then renders it as a watch-page link. The same
+ * matcher decides bolding and linking, so nothing bolds that won't link.
+ */
+function boldQuotedTitleMentions(
+  content: string,
+  citations: AskCitation[]
+): string {
+  if (citations.length === 0 || !/["“]/.test(content)) return content;
+  return content.replace(
+    /["“][^"”\n]{8,160}["”]/g,
+    (match, offset: number) => {
+      const before = content.slice(Math.max(0, offset - 2), offset);
+      const after = content.slice(
+        offset + match.length,
+        offset + match.length + 2
+      );
+      // already emphasized, or part of a markdown link — leave it alone
+      if (
+        /[*_[]$/.test(before) ||
+        /^[*_]/.test(after) ||
+        after.startsWith("](")
+      ) {
+        return match;
+      }
+      return findMentionedVideo(match, citations) ? `**${match}**` : match;
+    }
+  );
+}
+
+/**
  * Italic mentions set the whole emphasized run as the candidate title
  * (*The Self-Healing Agent Loop…*), no quotes involved. Length guard keeps
  * ordinary emphasis (*really*) from turning into links.
@@ -516,8 +549,12 @@ export function AskMessageCard({
   // a partial "[…" token, so the space collapses in the same frame the ref
   // appears.
   const displayContent = React.useMemo(
-    () => revealed.replace(/[ \t]+(\[(?:\d+|c_[^\]]+)\])/g, "$1"),
-    [revealed]
+    () =>
+      boldQuotedTitleMentions(
+        revealed.replace(/[ \t]+(\[(?:\d+|c_[^\]]+)\])/g, "$1"),
+        citations
+      ),
+    [revealed, citations]
   );
 
   // While streaming, completed blocks render via a memoized section; only the
