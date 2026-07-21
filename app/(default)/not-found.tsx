@@ -6,7 +6,7 @@ export default function NotFound() {
     <div className="relative flex h-full min-h-[60vh] items-center justify-center overflow-hidden px-6 py-16">
       <div className="relative max-w-lg text-center">
         <span className="srl-badge">404 · Request Not Found</span>
-        <h1 className="mt-5 font-heading text-[clamp(2rem,5vw,3rem)] font-extrabold leading-[1.12] tracking-tight">
+        <h1 className="mt-5 font-heading text-[clamp(2rem,5vw,3rem)] font-extrabold leading-[1.2]">
           This page didn&rsquo;t
           <br />
           <span className="srl-gradient-text">make the show.</span>
@@ -20,7 +20,7 @@ export default function NotFound() {
             href="/ask"
             className="flex h-11 items-center gap-1.5 rounded-[6px] bg-accent px-5 font-heading text-[15px] font-semibold text-[#09090b] transition-colors hover:bg-[var(--accent-hover)]"
           >
-            Make a Request
+            Ask the Answer Desk
             <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
           </Link>
           <Link

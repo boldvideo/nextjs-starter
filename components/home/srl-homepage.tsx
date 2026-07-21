@@ -3,7 +3,7 @@ import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import type { Video } from "@boldvideo/bold-js";
 import { PortalSettings, PortalConfig } from "@/lib/portal-config";
-import { SrlRequestDesk } from "@/components/home/srl-request-desk";
+import { SrlAnswerDesk } from "@/components/home/srl-answer-desk";
 import { SrlVideoCard } from "@/components/home/srl-video-card";
 import { PoweredByBold } from "@/components/powered-by-bold";
 
@@ -22,8 +22,8 @@ interface SrlHomepageProps {
 
 const HOW_STEPS = [
   {
-    title: "Make a request",
-    body: "Type it like you'd submit it to the show — pitch deck, raise, go-to-market, anything.",
+    title: "Ask anything",
+    body: "Type it like you'd ask the guys live — pitch deck, raise, go-to-market, anything.",
   },
   {
     title: "We find the moments",
@@ -57,8 +57,8 @@ export function SrlHomepage({
             Startup Requests Live · On Demand
           </span>
 
-          <h1 className="mx-auto mt-6 font-heading text-[clamp(2.1rem,5.2vw,3.4rem)] font-extrabold leading-[1.12] tracking-tight">
-            Make your request.
+          <h1 className="mx-auto mt-6 font-heading text-[clamp(2.1rem,4.6vw,3rem)] font-extrabold leading-[1.25]">
+            Ask us anything.
             <br />
             <span className="srl-gradient-text">
               We&rsquo;ve probably answered it live.
@@ -75,9 +75,9 @@ export function SrlHomepage({
             )}
           </p>
 
-          <SrlRequestDesk
+          <SrlAnswerDesk
             videoCount={count}
-            className="mx-auto mt-10 max-w-[960px]"
+            className="mx-auto mt-10 max-w-[680px]"
           />
 
           <p className="mt-5 text-[13px] text-muted-foreground/80">
@@ -91,10 +91,10 @@ export function SrlHomepage({
       <section className="border-b border-border">
         <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-14 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.7rem,3.4vw,2.25rem)] font-extrabold leading-tight">
+            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-extrabold leading-[1.25]">
               Latest Startup Requests
             </h2>
-            <p className="mx-auto mt-3 max-w-[560px] text-lg text-muted-foreground sm:text-xl">
+            <p className="srl-sub mx-auto mt-3 max-w-[680px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
               Fresh from the show — real founders, real teardowns, no theory.
             </p>
           </div>
@@ -126,10 +126,10 @@ export function SrlHomepage({
       <section className="border-b border-border">
         <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-14 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.7rem,3.4vw,2.25rem)] font-extrabold leading-tight">
+            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-extrabold leading-[1.25]">
               How It Works
             </h2>
-            <p className="mx-auto mt-3 max-w-[520px] text-lg text-muted-foreground sm:text-xl">
+            <p className="srl-sub mx-auto mt-3 max-w-[640px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
               You type what you need. The show answers.
             </p>
           </div>
@@ -156,33 +156,6 @@ export function SrlHomepage({
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Funnel back into the show ───────────────────────────────── */}
-      <section>
-        <div className="mx-auto w-full max-w-[1180px] px-4 pb-20 pt-16 text-center sm:px-6 lg:px-8">
-          <h2 className="mx-auto font-heading text-[clamp(1.9rem,4.2vw,2.8rem)] font-extrabold leading-[1.15] tracking-tight">
-            Want the guys to take on your startup?
-            <br />
-            <span className="srl-gradient-text">
-              Submit a request. Go on the show.
-            </span>
-          </h2>
-          <div className="mt-9 flex flex-col items-center gap-4">
-            <a
-              href="https://www.startups.com/requests"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-12 items-center gap-1.5 rounded-[6px] bg-accent px-6 font-heading text-[16px] font-semibold text-[#09090b] transition-colors hover:bg-[var(--accent-hover)]"
-            >
-              Submit a Request
-              <ChevronRight className="h-[18px] w-[18px]" strokeWidth={2.5} />
-            </a>
-            <p className="text-[13px] text-muted-foreground/80">
-              Free · real requests get answered live on SRL
-            </p>
           </div>
         </div>
       </section>

@@ -172,7 +172,7 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   // Fork override: the ask-page intro is design-owned copy in the show's
   // voice (line 1 renders as the headline, the rest as body).
   const aiGreeting = [
-    "You're on. Make your request.",
+    "You're on. Ask us anything.",
     "Every episode of Startup Requests Live is in here — the pitch deck teardowns, the fundraising math, the brutally honest go-to-market advice. Ask what you'd submit to the show and get the answer now, with the exact moments where Ed, Wil & Ryan covered it.",
     '',
     "What are you working on?",

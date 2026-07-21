@@ -47,7 +47,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
           <div className="mx-auto grid w-full max-w-[1180px] items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_minmax(0,480px)] lg:gap-12 lg:py-16 lg:pl-8 lg:pr-8">
             <div>
               <span className="srl-badge">Latest Request</span>
-              <h1 className="mt-4 font-heading text-[clamp(1.6rem,3.2vw,2.4rem)] font-extrabold leading-[1.18] tracking-tight">
+              <h1 className="mt-4 font-heading text-[clamp(1.6rem,3.2vw,2.4rem)] font-extrabold leading-[1.25]">
                 {featured.title}
               </h1>
               <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -119,10 +119,10 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
       <section>
         <div className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-12 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="font-heading text-[clamp(1.6rem,3vw,2.1rem)] font-extrabold leading-tight">
+            <h2 className="font-heading text-[clamp(1.9rem,4vw,3rem)] font-extrabold leading-[1.25]">
               Every Request, Every Show
             </h2>
-            <p className="mx-auto mt-3 max-w-[560px] text-lg text-muted-foreground">
+            <p className="srl-sub mx-auto mt-3 max-w-[680px] text-[clamp(1.2rem,2.3vw,1.875rem)] leading-[1.5]">
               Real founders on the mic, getting the answers everyone needs.
             </p>
           </div>
@@ -152,7 +152,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
               href="/ask"
               className="mx-auto mt-5 flex h-11 w-fit items-center gap-1.5 rounded-[6px] bg-accent px-5 font-heading text-[15px] font-semibold text-[#09090b] transition-colors hover:bg-[var(--accent-hover)]"
             >
-              Make a Request
+              Ask the Answer Desk
             </Link>
           </div>
         </div>

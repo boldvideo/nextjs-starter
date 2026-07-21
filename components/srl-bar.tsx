@@ -14,8 +14,8 @@ import { useSearch } from "@/components/providers/search-provider";
  * The startups.com site bar — one fixed 68px nav, measured off the live
  * site: translucent frame color under a 20px blur, the red logo box with
  * the color-mode toggle beside it, tracked-out 900-weight caps links with
- * a 3px orange underline on the active item, and an outlined CTA on the
- * right that funnels viewers into startups.com/requests.
+ * a 3px orange underline on the active item, and a quiet outlined link
+ * back to startups.com on the right.
  *
  * Keeps the measurement contract the panel chrome relies on: the bar
  * writes its real height to --site-bar-height.
@@ -165,17 +165,9 @@ export function SrlBar({
               href="https://www.startups.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="srl-nav-link hidden text-foreground/90 transition-colors hover:text-foreground lg:block"
-            >
-              Startups.com
-            </a>
-            <a
-              href="https://www.startups.com/requests"
-              target="_blank"
-              rel="noopener noreferrer"
               className="hidden items-center rounded-[5.25px] border border-border-strong px-3.5 text-sm font-medium leading-none text-foreground transition-colors hover:bg-muted sm:flex sm:h-10"
             >
-              Submit a Request
+              Startups.com
             </a>
           </div>
         </div>

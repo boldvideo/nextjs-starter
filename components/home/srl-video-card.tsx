@@ -36,7 +36,7 @@ export function SrlVideoCard({
             {formatDuration(video.duration)}
           </span>
         </div>
-        <h3 className="mt-3 line-clamp-2 font-heading text-[16px] font-extrabold leading-snug transition-colors group-hover:text-[var(--accent-active)]">
+        <h3 className="mt-3 line-clamp-2 font-heading text-[17px] font-extrabold leading-[1.45] transition-colors group-hover:text-[var(--accent-active)] lg:text-[18px]">
           {video.title}
         </h3>
         <p className="mt-1 text-[13px] font-medium text-muted-foreground">

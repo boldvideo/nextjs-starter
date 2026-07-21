@@ -17,7 +17,7 @@ export default function ErrorBoundary({
     <div className="relative flex h-full min-h-[60vh] items-center justify-center overflow-hidden px-6 py-16">
       <div className="relative max-w-lg text-center">
         <span className="srl-badge">Technical Difficulties</span>
-        <h2 className="mt-5 font-heading text-[clamp(2rem,5vw,3rem)] font-extrabold leading-[1.12] tracking-tight">
+        <h2 className="mt-5 font-heading text-[clamp(2rem,5vw,3rem)] font-extrabold leading-[1.2]">
           We lost the feed
           <br />
           <span className="srl-gradient-text">for a second there.</span>

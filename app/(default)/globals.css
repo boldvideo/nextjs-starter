@@ -101,13 +101,12 @@
   /* Headline gradient + wizard stage (the chat's inner panel) */
   --grad-from: #d97258;
   --grad-to: #9858a3;
-  --stage: #eceae6;
-  --stage-panel: #ffffff;
+  --stage-panel: #ece9e4;
   --stage-panel-foreground: #09090b;
-  --stage-bubble: #f2ede6;
-  --stage-input: #ffffff;
-  --goal-card-bg: rgba(255, 247, 237, 0.6);
-  --goal-card-bg-hover: rgba(255, 237, 213, 0.85);
+  --stage-bubble: #ffffff;
+  --stage-chip-bg: #ffffff;
+  --stage-chip-border: var(--border-strong);
+  --sub: #52525b;
 
   /* Cross-theme fallback chain (kept for components that use them) */
   --fg-primary: var(--text-primary);
@@ -160,13 +159,12 @@
 
   --grad-from: #d97258;
   --grad-to: #9858a3;
-  --stage: transparent;
   --stage-panel: #565683;
   --stage-panel-foreground: #ffffff;
   --stage-bubble: rgba(19, 18, 28, 0.32);
-  --stage-input: rgba(19, 18, 28, 0.45);
-  --goal-card-bg: rgba(84, 83, 138, 0.5);
-  --goal-card-bg-hover: rgba(84, 83, 138, 0.72);
+  --stage-chip-bg: rgba(19, 18, 28, 0.25);
+  --stage-chip-border: rgba(255, 255, 255, 0.3);
+  --sub: #a1a1aa;
 
   --shadow-color: rgba(0, 0, 0, 0.5);
 }
@@ -219,15 +217,13 @@
     background-color: var(--frame);
     color: var(--foreground);
     font-family: var(--font-body);
-    line-height: 1.65;
+    line-height: 1.5;
     overscroll-behavior-y: none; /* Prevents rubber-banding/bounce on macOS */
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 800;
-  }
-  h1 {
-    letter-spacing: -0.02em;
+    letter-spacing: -0.05em;
   }
   /* Content links: ink text with an orange underline; hovering
      sweeps a soft highlight across. */
@@ -279,20 +275,10 @@
     text-transform: uppercase;
   }
 
-  /* Goal-picker cards, straight off the requests wizard */
-  .srl-goal-card {
-    background: var(--goal-card-bg);
-    border: 1px solid var(--border-strong);
-    border-radius: 5.25px;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
-  }
-  .srl-goal-card:hover {
-    background: var(--goal-card-bg-hover);
-  }
-  .srl-goal-card[data-selected="true"] {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
-    background: var(--goal-card-bg-hover);
+  /* Marketing-band subtitle: their 30px/600 zinc gray */
+  .srl-sub {
+    color: var(--sub);
+    font-weight: 600;
   }
 
   /* "Featured" chip — amber tint, 3px corners */
