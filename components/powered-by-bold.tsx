@@ -15,7 +15,7 @@ export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldPro
   if (variant === "pitch") {
     return (
       <a
-        href="https://www.boldvideo.com/taki"
+        href="https://www.boldvideo.com"
         target="_blank"
         rel="noopener noreferrer"
         className={cn(
@@ -41,7 +41,7 @@ export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldPro
 
   return (
     <a
-      href="https://www.boldvideo.com/taki"
+      href="https://www.boldvideo.com"
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
