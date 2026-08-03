@@ -66,7 +66,7 @@ export function Header({
   return (
     <>
       {isHome && (
-        <style>{`:root { --header-height: calc(var(--site-banner-height) + var(--site-bar-height)); }`}</style>
+        <style>{`:root { --header-height: var(--site-bar-height); }`}</style>
       )}
       {isWatch && (
         <style>{`@media (max-width: 1023.98px) { :root { --header-height: 0px; } }`}</style>

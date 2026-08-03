@@ -875,7 +875,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
 
             <div className="flex items-center gap-2">
               <a
-                href="https://www.youtube.com/@boundaryml"
+                href="https://www.youtube.com/playlist?list=PLi60mUelRAbFqfgymVfZttlkIyt0XHZjt"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"

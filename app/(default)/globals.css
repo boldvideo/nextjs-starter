@@ -59,12 +59,9 @@
   --radius: 0px;
   /* The video player's default skin rounds its surface — square it off */
   --media-border-radius: 0px;
-  /* Portal nav row + HumanLayer's announcement banner and site nav on top */
-  --site-banner-height: 36px;
+  /* Portal nav row + HumanLayer's site nav on top */
   --site-bar-height: 101px;
-  --header-height: calc(
-    57px + var(--site-banner-height) + var(--site-bar-height)
-  );
+  --header-height: calc(57px + var(--site-bar-height));
 
   /* Cross-theme fallback chain, exactly as humanlayer.com defines it */
   --fg-primary: var(--text-primary);

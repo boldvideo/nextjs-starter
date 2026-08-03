@@ -2,16 +2,15 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Paintbrush, X } from "lucide-react";
+import { Menu, Paintbrush } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
  * HumanLayer's site chrome, recreated 1:1 from humanlayer.com — the
- * dismissable announcement banner, the nav (logo, pipe-separated links,
- * theme switcher, LOG IN / SIGN UP), and their full 15-theme system.
- * Mounted above the portal nav so the library reads as part of their
- * site. Layout rules live in globals.css under the `hl-` namespace,
- * copied from their stylesheet.
+ * nav (logo, pipe-separated links, theme switcher, LOG IN / SIGN UP)
+ * and their full 15-theme system. Mounted above the portal nav so the
+ * library reads as part of their site. Layout rules live in globals.css
+ * under the `hl-` namespace, copied from their stylesheet.
  */
 const NAV_LINKS = [
   { label: "Learn", href: "https://www.humanlayer.com/#learn-more" },
@@ -58,8 +57,6 @@ export function HumanLayerBar({
   const [menuOpen, setMenuOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [theme, setTheme] = useState("poimandres");
-  const [bannerDismissed, setBannerDismissed] = useState(false);
-  const bannerRef = useRef<HTMLDivElement | null>(null);
   const barRef = useRef<HTMLDivElement | null>(null);
 
   // Sync with the pre-paint script in the layout head (which applies the
@@ -75,17 +72,12 @@ export function HumanLayerBar({
     return () => clearTimeout(t);
   }, []);
 
-  // The fixed header frame sizes itself off these variables; measure the
-  // real chrome (the banner wraps to two lines on narrow screens) instead
-  // of trusting the CSS fallback values.
+  // The fixed header frame sizes itself off this variable; measure the
+  // real chrome instead of trusting the CSS fallback value.
   useEffect(() => {
     if (!measure) return;
     const root = document.documentElement;
     const apply = () => {
-      root.style.setProperty(
-        "--site-banner-height",
-        `${bannerRef.current?.offsetHeight ?? 0}px`
-      );
       root.style.setProperty(
         "--site-bar-height",
         `${barRef.current?.offsetHeight ?? 0}px`
@@ -93,7 +85,6 @@ export function HumanLayerBar({
     };
     apply();
     const ro = new ResizeObserver(apply);
-    if (bannerRef.current) ro.observe(bannerRef.current);
     if (barRef.current) ro.observe(barRef.current);
     // display:none toggles (watch pages hide the fixed header on mobile,
     // breakpoint crossings flip it back) don't reliably fire
@@ -105,7 +96,7 @@ export function HumanLayerBar({
       ro.disconnect();
       mq.removeEventListener("change", apply);
     };
-  }, [bannerDismissed, measure, pathname]);
+  }, [measure, pathname]);
 
   const selectTheme = (id: string) => {
     setTheme(id);
@@ -116,31 +107,11 @@ export function HumanLayerBar({
     } catch {}
   };
 
-  const dismissBanner = () => setBannerDismissed(true);
-
   const currentTheme =
     THEMES.find((t) => t.id === theme)?.name ?? "Poimandres";
 
   return (
     <div className={className}>
-      {!bannerDismissed && (
-        <div ref={bannerRef} className="relative w-full bg-accent text-background">
-          <div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-10 py-2 text-center font-mono text-sm font-medium">
-            <span>
-              Announcing general availability for HumanLayer and HumanLayer
-              Cloud
-            </span>
-          </div>
-          <button
-            type="button"
-            aria-label="Dismiss banner"
-            onClick={dismissBanner}
-            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer px-2 text-lg leading-none opacity-80 hover:opacity-100"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      )}
       <div ref={barRef} className="hl-nav-header">
         <div className="hl-nav-container">
           <div className="hl-nav-grid">
