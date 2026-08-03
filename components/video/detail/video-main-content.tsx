@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { FileText, Github, Paperclip } from "lucide-react";
+import { FileText, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 import { formatDuration } from "@/util/format-duration";
+import { GithubIcon } from "@/components/brand-icons";
 import { VideoDescription } from "@/components/video-description";
 import { extractYouTubeId } from "@/components/players/player-youtube";
 import type { ExtendedVideo } from "@/types/video-detail";
@@ -87,7 +88,7 @@ export function VideoMainContent({ video, onTimeSelect }: VideoMainContentProps)
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"
               >
-                <Github className="h-3.5 w-3.5" />
+                <GithubIcon className="h-3.5 w-3.5" />
                 Session code
               </a>
             </span>

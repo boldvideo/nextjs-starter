@@ -11,7 +11,9 @@ import React, {
 } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Github, Loader2, Youtube } from "lucide-react";
+import { Loader2 } from "lucide-react";
+
+import { GithubIcon, YoutubeIcon } from "@/components/brand-icons";
 import type { Video } from "@boldvideo/bold-js";
 import { cn } from "@/lib/utils";
 import { buildVideoUrl } from "@/lib/video-path";
@@ -880,7 +882,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"
               >
-                <Youtube className="h-3.5 w-3.5" />
+                <YoutubeIcon className="h-3.5 w-3.5" />
                 YouTube
               </a>
               <a
@@ -889,7 +891,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground border border-border rounded px-2 py-1 hover:text-primary hover:border-primary transition-colors"
               >
-                <Github className="h-3.5 w-3.5" />
+                <GithubIcon className="h-3.5 w-3.5" />
                 GitHub
               </a>
             </div>
