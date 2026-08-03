@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Paintbrush } from "lucide-react";
+import { Download, Menu, Paintbrush } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -12,14 +12,19 @@ import { cn } from "@/lib/utils";
  * library reads as part of their site. Layout rules live in globals.css
  * under the `hl-` namespace, copied from their stylesheet.
  */
+// Same items and order as humanlayer.dev, absolute where their site uses
+// relative paths. Podcast is us — it stays on this site. Only Discord and
+// Jobs open a new tab there; everything else navigates in place so the
+// round trip between their site and this one reads as one site.
 const NAV_LINKS = [
-  { label: "Learn", href: "https://www.humanlayer.com/#learn-more" },
+  { label: "Learn", href: "https://www.humanlayer.dev/#learn-more" },
   { label: "Docs", href: "https://docs.humanlayer.com" },
-  { label: "Pricing", href: "https://www.humanlayer.com/#pricing" },
-  { label: "FAQ", href: "https://www.humanlayer.com/#faq" },
-  { label: "Discord", href: "https://www.humanlayer.com/discord" },
-  { label: "Jobs", href: "https://www.humanlayer.com/jobs" },
-  { label: "Blog", href: "https://www.humanlayer.com/blog" },
+  { label: "Pricing", href: "https://www.humanlayer.dev/#pricing" },
+  { label: "FAQ", href: "https://www.humanlayer.dev/#faq" },
+  { label: "Discord", href: "https://www.humanlayer.dev/discord", external: true },
+  { label: "Jobs", href: "https://www.humanlayer.dev/jobs", external: true },
+  { label: "Blog", href: "https://www.humanlayer.dev/blog" },
+  { label: "Podcast", href: "/" },
 ];
 
 // Their theme registry, in their dropdown order. The ids match the
@@ -34,9 +39,9 @@ const THEMES = [
   { id: "monokai", name: "Monokai" },
   { id: "gruvbox-dark", name: "Gruvbox Dark" },
   { id: "gruvbox-light", name: "Gruvbox Light" },
-  { id: "rose-pine", name: "Rose Pine" },
-  { id: "rose-pine-dawn", name: "Rose Pine Dawn" },
-  { id: "rose-pine-moon", name: "Rose Pine Moon" },
+  { id: "rose-pine", name: "Rosé Pine" },
+  { id: "rose-pine-dawn", name: "Rosé Pine Dawn" },
+  { id: "rose-pine-moon", name: "Rosé Pine Moon" },
   { id: "cappuccino", name: "Cappuccino" },
   { id: "high-contrast", name: "High Contrast" },
   { id: "launch", name: "Launch" },
@@ -117,11 +122,9 @@ export function HumanLayerBar({
           <div className="hl-nav-grid">
             <div className="hl-nav-row">
               <a
-                aria-label="Go to humanlayer.com"
+                aria-label="Go to homepage"
                 className="hl-logo"
-                href="https://www.humanlayer.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="https://www.humanlayer.dev"
               >
                 <div
                   aria-label="HumanLayer"
@@ -156,8 +159,9 @@ export function HumanLayerBar({
                       <li>
                         <a
                           href={link.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          {...(link.external
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
                           onClick={() => setMenuOpen(false)}
                         >
                           {link.label}
@@ -218,19 +222,16 @@ export function HumanLayerBar({
               <div className="hl-nav-actions">
                 <a
                   href="https://cloud.humanlayer.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="group inline-flex h-9 items-center gap-3 px-4 font-mono text-sm uppercase tracking-wider border transition-all border-border text-foreground hover:border-primary hover:text-primary"
                 >
                   Log in
                 </a>
                 <a
-                  href="https://cloud.humanlayer.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex h-9 items-center gap-3 px-4 font-mono text-sm uppercase tracking-wider border transition-all border-primary bg-primary/10 text-primary hover:bg-primary hover:text-background"
+                  href="https://update.humanlayer.com/download/darwin-arm64"
+                  className="group inline-flex h-9 items-center gap-3 px-4 font-mono text-sm uppercase tracking-wider border transition-all border-primary text-primary hover:bg-primary hover:text-background"
                 >
-                  Sign Up
+                  Download
+                  <Download className="h-4 w-4" aria-hidden="true" />
                 </a>
               </div>
             </div>
