@@ -48,9 +48,8 @@ const THEMES = [
 ];
 
 // Same key humanlayer.dev uses (next-themes is scoped to "aitw-theme",
-// so no collision). "hl-theme" is the pre-2026-08 key, migrated on read.
+// so no collision).
 const THEME_STORAGE_KEY = "theme";
-const LEGACY_THEME_STORAGE_KEY = "hl-theme";
 
 export function HumanLayerBar({
   className,
@@ -73,13 +72,7 @@ export function HumanLayerBar({
   useEffect(() => {
     const t = setTimeout(() => {
       try {
-        let stored = localStorage.getItem(THEME_STORAGE_KEY);
-        const legacy = localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
-        if (!stored && legacy) {
-          localStorage.setItem(THEME_STORAGE_KEY, legacy);
-          stored = legacy;
-        }
-        if (legacy) localStorage.removeItem(LEGACY_THEME_STORAGE_KEY);
+        const stored = localStorage.getItem(THEME_STORAGE_KEY);
         if (stored && THEMES.some((th) => th.id === stored)) setTheme(stored);
       } catch {}
     }, 0);

@@ -165,7 +165,7 @@ export default async function RootLayout({
             paintbrush switcher in the site nav persists to localStorage) */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("theme")||localStorage.getItem("hl-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})()`,
+            __html: `(function(){try{var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})()`,
           }}
         />
         <style
