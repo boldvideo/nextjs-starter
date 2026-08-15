@@ -93,9 +93,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "en-US",
       type: "website",
     },
-    icons: {
-      icon: settings.faviconUrl || "/favicon.ico",
-    },
+    // Explicit favicon wins; otherwise /favicon derives one from the header
+    // logo (normalized to square PNG); static Bold icon as last resort.
+    icons: fixUploadUrl(settings.faviconUrl)
+      ? { icon: fixUploadUrl(settings.faviconUrl) }
+      : settings.logoUrl
+        ? { icon: "/favicon", apple: "/favicon?size=180" }
+        : { icon: "/favicon.ico" },
   };
 }
 
