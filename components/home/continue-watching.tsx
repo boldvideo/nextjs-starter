@@ -93,7 +93,7 @@ export function ContinueWatching({ videos }: ContinueWatchingProps) {
                 />
               )}
               {video.duration > position && (
-                <span className="absolute right-1.5 bottom-1.5 font-mono text-[10px] bg-black/80 text-white px-1 py-0.5 rounded">
+                <span className="absolute right-1.5 bottom-1.5 text-[10px] font-medium tabular-nums bg-black/80 text-white px-1 py-0.5 rounded">
                   {formatDuration(video.duration - position)} left
                 </span>
               )}
@@ -107,7 +107,7 @@ export function ContinueWatching({ videos }: ContinueWatchingProps) {
             <p className="mt-2 text-sm font-medium leading-snug line-clamp-1 group-hover:text-primary transition-colors duration-150">
               {video.title}
             </p>
-            <p className="font-mono text-[11px] text-muted-foreground/70 mt-0.5">
+            <p className="text-[11px] tabular-nums text-muted-foreground/70 mt-0.5">
               Resume at {formatDuration(position)}
             </p>
           </Link>

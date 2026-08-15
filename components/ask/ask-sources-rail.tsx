@@ -52,7 +52,7 @@ function MomentFramePreview({ preview }: { preview: FramePreview }) {
           height={158}
           className="block w-full h-full object-cover"
         />
-        <span className="absolute right-1.5 bottom-1.5 font-mono text-[10px] bg-black/80 text-white px-1 py-0.5 rounded">
+        <span className="absolute right-1.5 bottom-1.5 text-[10px] font-medium tabular-nums bg-black/80 text-white px-1 py-0.5 rounded">
           {citation.timestampStart}
         </span>
       </div>
@@ -144,7 +144,7 @@ export function AskSourcesRail({
       <h4 className="font-[family-name:var(--font-heading)] font-semibold text-sm tracking-tight mb-1">
         Sources
       </h4>
-      <p className="font-mono text-xs text-muted-foreground/70 mb-5">
+      <p className="text-xs text-muted-foreground/70 mb-5">
         {isStreaming && citations.length === 0
           ? "retrieving…"
           : `${citations.length} ${citations.length === 1 ? "moment" : "moments"} · ${episodeCount} ${episodeCount === 1 ? "video" : "videos"}`}
@@ -178,13 +178,13 @@ export function AskSourcesRail({
                     <span
                       className={cn(
                         "shrink-0 w-[18px] h-[18px] grid place-items-center rounded",
-                        "font-mono text-[10.5px] font-semibold",
+                        "text-[10.5px] font-semibold tabular-nums",
                         "text-signal bg-[var(--signal-soft)] border border-[var(--signal-line)]"
                       )}
                     >
                       {num ?? "·"}
                     </span>
-                    <span className="font-mono text-[11px] text-muted-foreground/70">
+                    <span className="text-[11px] tabular-nums text-muted-foreground/70">
                       {c.timestampStart}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-[11.5px] text-muted-foreground/50">
@@ -268,7 +268,7 @@ function VideoSourcePanel({
         <p className="font-[family-name:var(--font-heading)] font-semibold text-lg leading-snug mb-1">
           {citation.videoTitle}
         </p>
-        <p className="font-mono text-sm text-signal mb-3">
+        <p className="text-sm font-medium tabular-nums text-signal mb-3">
           Transcript at {citation.timestampStart}
         </p>
         {citation.text && (
@@ -305,8 +305,8 @@ function VideoSourcePanel({
                 >
                   <span
                     className={cn(
-                      "font-mono shrink-0",
-                      isHit ? "text-signal" : "text-muted-foreground/60"
+                      "shrink-0 tabular-nums",
+                      isHit ? "text-signal font-medium" : "text-muted-foreground/60"
                     )}
                   >
                     {c.timestampStart}

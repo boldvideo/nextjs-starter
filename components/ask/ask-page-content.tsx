@@ -493,7 +493,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     <AttachmentThumbnails attachments={pair.userMessage.attachments} />
                   )}
                   <div className="flex items-start gap-3">
-                    <span className="shrink-0 mt-[7px] font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70 border border-border rounded px-1.5 py-[3px]">
+                    <span className="shrink-0 mt-[7px] text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70 border border-border rounded px-1.5 py-[3px]">
                       You
                     </span>
                     <h2 className="font-[family-name:var(--font-heading)] font-semibold text-2xl md:text-3xl tracking-tight leading-[1.15]">

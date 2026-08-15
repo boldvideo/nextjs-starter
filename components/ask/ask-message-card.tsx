@@ -199,15 +199,15 @@ const MarkdownSection = React.memo(function MarkdownSection({
       const hasValidTimestamp = citation.startMs > 0;
       const isActive = citation.id === selectedCitationId;
 
-      // Compact superscript-style marker in the amber "signal" color —
-      // the source details live in the rail/panel, not the prose.
+      // Compact superscript-style marker in the accent-driven "signal"
+      // color — the source details live in the rail/panel, not the prose.
       return (
         <button
           type="button"
           onClick={() => onCitationClick(citation)}
           className={cn(
             "inline-block align-[0.38em] mx-px px-1 py-0.5 rounded",
-            "font-mono text-[10px] font-semibold leading-none",
+            "text-[10px] font-semibold leading-none tabular-nums",
             "border border-[var(--signal-line)]",
             "transition-colors cursor-pointer",
             isActive
@@ -250,7 +250,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
         <span
           className={cn(
             "inline-block align-[0.38em] mx-px px-1 py-0.5 rounded",
-            "font-mono text-[10px] font-semibold leading-none",
+            "text-[10px] font-semibold leading-none tabular-nums",
             "text-signal bg-[var(--signal-soft)]",
             "border border-[var(--signal-line)]"
           )}
@@ -368,7 +368,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
             {...props}
             className={cn(
               "font-mono text-[0.86em] font-normal",
-              "text-primary dark:text-[#5eead4] bg-muted",
+              "text-primary bg-muted",
               "border border-border/50 rounded-[4px] px-[5px] py-px",
               "before:content-none after:content-none"
             )}

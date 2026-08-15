@@ -32,7 +32,7 @@ export function VideoMainContent({ video, onTimeSelect }: VideoMainContentProps)
             {video.title}
           </h1>
         </div>
-        <div className="hidden lg:flex items-center gap-3.5 font-mono text-xs text-muted-foreground mb-8">
+        <div className="hidden lg:flex items-center gap-3.5 text-xs text-muted-foreground mb-8">
           {video.publishedAt && (
             <span>{format(new Date(video.publishedAt), "MMM d, yyyy")}</span>
           )}
