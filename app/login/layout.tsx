@@ -29,8 +29,8 @@ export default async function LoginLayout({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const themeAny = theme as any;
-  const fontHeaderVar = getFontVar(themeAny?.font_header);
-  const fontBodyVar = getFontVar(themeAny?.font_body);
+  const fontHeaderVar = getFontVar(themeAny?.fontHeader || themeAny?.font_header);
+  const fontBodyVar = getFontVar(themeAny?.fontBody || themeAny?.font_body);
 
   return (
     <html lang="en" suppressHydrationWarning className={getAllFontVariables()}>

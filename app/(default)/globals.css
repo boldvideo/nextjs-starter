@@ -25,7 +25,7 @@
   /* Legacy tokens mapped to new system */
   --color-secondary-foreground: var(--muted-foreground);
   --color-secondary: var(--muted);
-  /* Amber citation signal (Ask sources) */
+  /* Citation signal (Ask sources) — follows the tenant accent */
   --color-signal: var(--signal);
   --color-card-foreground: var(--foreground);
   --color-card: var(--surface);
@@ -59,10 +59,11 @@
   --accent: oklch(0.73 0.12 175);
   --accent-foreground: oklch(0.22 0.04 175);
   --primary: oklch(0.73 0.12 175);
-  /* Amber "signal" for citations and provenance */
-  --signal: #b45309;
-  --signal-soft: rgba(180, 83, 9, 0.1);
-  --signal-line: rgba(180, 83, 9, 0.32);
+  /* Citation "signal" derives from the tenant accent so provenance UI
+     follows the portal theme (resolves per light/dark automatically) */
+  --signal: var(--accent);
+  --signal-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --signal-line: color-mix(in srgb, var(--accent) 32%, transparent);
   /* Derived tokens */
   --input: var(--border);
   --destructive: oklch(0.577 0.245 27.325);
@@ -80,9 +81,6 @@
   --accent: oklch(0.73 0.12 175);
   --accent-foreground: oklch(0.18 0.02 175);
   --primary: oklch(0.73 0.12 175);
-  --signal: #f0b429;
-  --signal-soft: rgba(240, 180, 41, 0.13);
-  --signal-line: rgba(240, 180, 41, 0.32);
   /* Derived tokens */
   --input: oklch(1 0 0 / 15%);
   --destructive: oklch(0.704 0.191 22.216);

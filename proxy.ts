@@ -125,6 +125,8 @@ function shouldSkipPortalAuth(pathname: string): boolean {
     "/api/auth",
     "/_next",
     "/favicon.ico",
+    // Social crawlers must reach the OG card even on password-protected portals
+    "/og",
   ];
 
   return skipPaths.some((path) => pathname.startsWith(path));

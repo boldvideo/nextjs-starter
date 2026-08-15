@@ -15,6 +15,7 @@ import {
   Space_Grotesk,
   DM_Sans,
   JetBrains_Mono,
+  Poppins,
 } from "next/font/google";
 
 // Pre-load all fonts at build time
@@ -121,6 +122,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
+  display: "swap",
+});
+
 // All font instances for className injection
 export const fontInstances = {
   inter,
@@ -139,6 +147,7 @@ export const fontInstances = {
   spaceGrotesk,
   dmSans,
   jetbrainsMono,
+  poppins,
 };
 
 // Map font names (as they come from API) to CSS variables
@@ -160,6 +169,7 @@ const fontNameToVar: Record<string, string> = {
   "Space Grotesk": "var(--font-space-grotesk)",
   "DM Sans": "var(--font-dm-sans)",
   "JetBrains Mono": "var(--font-jetbrains-mono)",
+  "Poppins": "var(--font-poppins)",
 };
 
 // Default font (Inter)

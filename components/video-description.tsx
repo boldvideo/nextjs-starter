@@ -66,7 +66,7 @@ export function VideoDescription({ text, onTimeSelect }: VideoDescriptionProps) 
                   type="button"
                   onClick={() => onTimeSelect(seconds)}
                   className={cn(
-                    "font-mono text-[0.88em] font-medium no-underline",
+                    "text-[0.88em] font-medium tabular-nums no-underline",
                     "text-primary bg-primary/10 border border-primary/20 rounded",
                     "px-1.5 py-px align-baseline",
                     "hover:bg-primary/20 transition-colors cursor-pointer"
