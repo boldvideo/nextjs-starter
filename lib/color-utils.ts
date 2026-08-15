@@ -54,3 +54,76 @@ export function hexToOklch(hex: string): string | null {
   // Format as OKLCH string (rounded to reasonable precision)
   return `oklch(${(oklchL * 100).toFixed(1)}% ${oklchC.toFixed(3)} ${normalizedH.toFixed(1)})`;
 }
+
+/**
+ * Convert an OKLCH color string to hex. Inverse of hexToOklch, using
+ * Björn Ottosson's OKLab ↔ linear sRGB matrices. Accepts both number
+ * (0.97) and percentage (97%) lightness. Returns null if unparseable.
+ */
+export function oklchToHex(oklch: string): string | null {
+  const match = oklch
+    .trim()
+    .match(
+      /^oklch\(\s*([\d.]+%?)\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*(?:\/\s*[\d.%]+\s*)?\)$/i
+    );
+  if (!match) return null;
+
+  const L = match[1].endsWith("%")
+    ? parseFloat(match[1]) / 100
+    : parseFloat(match[1]);
+  const C = parseFloat(match[2]);
+  const H = parseFloat(match[3]);
+
+  // OKLCH -> OKLab
+  const hRad = (H * Math.PI) / 180;
+  const labA = C * Math.cos(hRad);
+  const labB = C * Math.sin(hRad);
+
+  // OKLab -> LMS (cube roots)
+  const lPrime = L + 0.3963377774 * labA + 0.2158037573 * labB;
+  const mPrime = L - 0.1055613458 * labA - 0.0638541728 * labB;
+  const sPrime = L - 0.0894841775 * labA - 1.291485548 * labB;
+
+  const l = lPrime * lPrime * lPrime;
+  const m = mPrime * mPrime * mPrime;
+  const s = sPrime * sPrime * sPrime;
+
+  // LMS -> linear sRGB
+  const linearR = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+  const linearG = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+  const linearB = -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s;
+
+  // Gamma encode + clamp to sRGB gamut
+  const encode = (v: number) => {
+    const clamped = Math.min(1, Math.max(0, v));
+    const srgb =
+      clamped <= 0.0031308
+        ? clamped * 12.92
+        : 1.055 * Math.pow(clamped, 1 / 2.4) - 0.055;
+    return Math.round(srgb * 255)
+      .toString(16)
+      .padStart(2, "0");
+  };
+
+  return `#${encode(linearR)}${encode(linearG)}${encode(linearB)}`;
+}
+
+/**
+ * Normalize a CSS color from tenant settings to hex for renderers that
+ * don't speak modern CSS color spaces (satori/OG images). Passes hex and
+ * legacy formats through; converts oklch; falls back otherwise.
+ */
+export function cssColorToHex(
+  color: string | undefined | null,
+  fallback: string
+): string {
+  if (!color) return fallback;
+  const trimmed = color.trim();
+  if (trimmed.toLowerCase().startsWith("oklch(")) {
+    return oklchToHex(trimmed) || fallback;
+  }
+  if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed) || /^rgba?\(/i.test(trimmed)) {
+    return trimmed;
+  }
+  return fallback;
+}

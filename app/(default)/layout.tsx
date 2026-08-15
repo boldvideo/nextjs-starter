@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import "./globals.css";
 
@@ -23,6 +24,7 @@ import { isAuthEnabled } from "@/config/auth";
 import SignIn from "@/components/auth/sign-in";
 import type { ExtendedMetaData } from "@/types/bold-extensions";
 import { getAllFontVariables, getFontVar } from "@/lib/fonts";
+import { fixUploadUrl } from "@/lib/utils";
 
 // Force dynamic rendering — tenant depends on hostname in hosted mode
 export const dynamic = "force-dynamic";
@@ -36,10 +38,16 @@ const defaultMetadata = {
 export async function generateMetadata(): Promise<Metadata> {
   const context = await getTenantContext();
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
+  const headersList = await headers();
+  const host =
+    headersList.get("x-forwarded-host") || headersList.get("host") || "";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || (host ? `https://${host}` : "");
+  const metadataBase = baseUrl ? new URL(baseUrl) : undefined;
 
   if (!context?.settings) {
     return {
+      metadataBase,
       title: defaultMetadata.title,
       description: defaultMetadata.description,
       openGraph: {
@@ -55,42 +63,26 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const settings = context.settings;
   const meta = settings.metaData as ExtendedMetaData | undefined;
+  // Top-level portal name is in the payload but not yet in the SDK types
+  const portalName = (settings as unknown as { name?: string }).name;
   const title = meta?.title
     ? `${meta.title}${meta.titleSuffix || ""}`
-    : defaultMetadata.title;
+    : portalName || defaultMetadata.title;
   const description = meta?.description || defaultMetadata.description;
-  
-  // Fix upload URLs - ensure they point to the correct bucket
-  const fixUploadUrl = (url: string | undefined) => {
-    if (!url) return undefined;
-    // Handle relative paths (with or without leading slash)
-    if (url.startsWith("uploads/")) {
-      return `https://uploads.eu1.boldvideo.io/${url}`;
-    }
-    if (url.startsWith("/uploads/")) {
-      return `https://uploads.eu1.boldvideo.io${url}`;
-    }
-    // Handle any domain with /uploads/ path
-    if (url.includes("/uploads/")) {
-      return url.replace(/^https?:\/\/[^/]+\/uploads\//, "https://uploads.eu1.boldvideo.io/uploads/");
-    }
-    return url;
-  };
-  
-  const ogImageUrl =
-    fixUploadUrl(meta?.socialGraphImageUrl) ||
-    `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(title)}${
-      meta?.image ? `&img=${encodeURIComponent(fixUploadUrl(meta.image) || meta.image)}` : ""
-    }`;
+
+  // Tenant-uploaded social image wins; otherwise the local /og route renders
+  // a card from the portal's name, logo, fonts, and theme colors.
+  const ogImageUrl = fixUploadUrl(meta?.socialGraphImageUrl) || "/og";
 
   return {
+    metadataBase,
     title: title,
     description: description,
     openGraph: {
       title: title,
       description: description,
       url: baseUrl,
-      siteName: title,
+      siteName: portalName || title,
       images: [
         {
           url: ogImageUrl,
@@ -141,11 +133,12 @@ export default async function RootLayout({
   const config = getPortalConfig(settings);
   const showHeader = config.navigation.showHeader;
 
-  // Get fonts from settings (font_header and font_body fields in portal.theme or theme_config)
+  // Get fonts from settings. The SDK camelizes API keys (fontHeader/fontBody);
+  // snake_case kept as fallback for raw payloads.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const themeAny = theme as any;
-  const fontHeaderVar = getFontVar(themeAny?.font_header);
-  const fontBodyVar = getFontVar(themeAny?.font_body);
+  const fontHeaderVar = getFontVar(themeAny?.fontHeader || themeAny?.font_header);
+  const fontBodyVar = getFontVar(themeAny?.fontBody || themeAny?.font_body);
 
   // Check if user should see content
   const showContent = !isAuthEnabled() || session;

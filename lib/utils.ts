@@ -32,6 +32,27 @@ export function getTagNames(tags: unknown): string[] {
 }
 
 /**
+ * Upload URLs from the API may be relative or point at stale hosts.
+ * Normalize them to the uploads bucket.
+ */
+export function fixUploadUrl(url: string | undefined | null): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("uploads/")) {
+    return `https://uploads.eu1.boldvideo.io/${url}`;
+  }
+  if (url.startsWith("/uploads/")) {
+    return `https://uploads.eu1.boldvideo.io${url}`;
+  }
+  if (url.includes("/uploads/")) {
+    return url.replace(
+      /^https?:\/\/[^/]+\/uploads\//,
+      "https://uploads.eu1.boldvideo.io/uploads/"
+    );
+  }
+  return url;
+}
+
+/**
  * Formats seconds into MM:SS format
  */
 export function formatTime(seconds: number): string {
