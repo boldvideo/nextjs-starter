@@ -354,10 +354,9 @@ export function ScrubOverlay({
           title={showScrubUi ? "Play from here" : undefined}
           onClick={showScrubUi ? handleScrubJump : undefined}
           className={cn(
-            "absolute bottom-3 right-3 rounded-md",
-            showScrubUi
-              ? "px-2 py-1 font-mono text-[11px] bg-black text-primary cursor-pointer border border-primary/40 hover:bg-primary hover:text-primary-foreground transition-colors"
-              : "px-2 py-1 font-semibold text-sm bg-black text-white"
+            "absolute bottom-3 right-3 rounded-md px-2 py-1 font-semibold text-sm bg-black text-white",
+            showScrubUi &&
+              "cursor-pointer tabular-nums hover:bg-primary hover:text-primary-foreground transition-colors"
           )}
         >
           {formatDuration(video.duration)}
