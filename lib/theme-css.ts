@@ -8,30 +8,26 @@ export const HEADER_SIZE_MAP: Record<string, string> = {
 
 export const DEFAULT_HEADER_HEIGHT = "73px";
 
+// The SDK camelizes API keys (mutedForeground); snake_case kept as a
+// fallback for raw payloads and hand-written standalone configs.
+interface ThemeColorTokens {
+  background?: string;
+  foreground?: string;
+  muted?: string;
+  mutedForeground?: string;
+  muted_foreground?: string;
+  border?: string;
+  ring?: string;
+  surface?: string;
+  accent?: string;
+  accentForeground?: string;
+  accent_foreground?: string;
+}
+
 interface ThemeTokens {
   radius?: string;
-  light?: {
-    background?: string;
-    foreground?: string;
-    muted?: string;
-    muted_foreground?: string;
-    border?: string;
-    ring?: string;
-    surface?: string;
-    accent?: string;
-    accent_foreground?: string;
-  };
-  dark?: {
-    background?: string;
-    foreground?: string;
-    muted?: string;
-    muted_foreground?: string;
-    border?: string;
-    ring?: string;
-    surface?: string;
-    accent?: string;
-    accent_foreground?: string;
-  };
+  light?: ThemeColorTokens;
+  dark?: ThemeColorTokens;
 }
 
 export function getThemeFromSettings(settings: Settings | null | undefined): ThemeTokens | null {
@@ -58,24 +54,24 @@ export function generateThemeCss(theme: ThemeTokens): string {
       --background: ${theme.light?.background || "#ffffff"};
       --foreground: ${theme.light?.foreground || "#0c0c0b"};
       --muted: ${theme.light?.muted || "#f5f5f3"};
-      --muted-foreground: ${theme.light?.muted_foreground || "#52524f"};
+      --muted-foreground: ${theme.light?.mutedForeground || theme.light?.muted_foreground || "#52524f"};
       --border: ${theme.light?.border || "#e5e5e2"};
       --ring: ${theme.light?.ring || "#0d9488"};
       --surface: ${theme.light?.surface || "#fafaf9"};
       --accent: ${theme.light?.accent || "#0d9488"};
-      --accent-foreground: ${theme.light?.accent_foreground || "#ffffff"};
+      --accent-foreground: ${theme.light?.accentForeground || theme.light?.accent_foreground || "#ffffff"};
       --primary: ${theme.light?.accent || "#0d9488"};
     }
     .dark {
       --background: ${theme.dark?.background || "#0a0a09"};
       --foreground: ${theme.dark?.foreground || "#fafaf9"};
       --muted: ${theme.dark?.muted || "#161614"};
-      --muted-foreground: ${theme.dark?.muted_foreground || "#a8a8a1"};
+      --muted-foreground: ${theme.dark?.mutedForeground || theme.dark?.muted_foreground || "#a8a8a1"};
       --border: ${theme.dark?.border || "#1e1e1c"};
       --ring: ${theme.dark?.ring || "#2dd4bf"};
       --surface: ${theme.dark?.surface || "#0e0e0d"};
       --accent: ${theme.dark?.accent || "#2dd4bf"};
-      --accent-foreground: ${theme.dark?.accent_foreground || "#04201c"};
+      --accent-foreground: ${theme.dark?.accentForeground || theme.dark?.accent_foreground || "#04201c"};
       --primary: ${theme.dark?.accent || "#2dd4bf"};
     }
   `;
