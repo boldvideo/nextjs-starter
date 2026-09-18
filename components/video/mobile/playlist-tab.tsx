@@ -7,15 +7,18 @@ import { ThumbnailImage } from "@/components/video-thumbnail/thumbnail-image";
 import { format } from "date-fns";
 import { formatDuration } from "@/util/format-duration";
 import { buildVideoUrl } from "@/lib/video-path";
+import { videoQuery } from "@/lib/video-voice";
 
 interface PlaylistTabProps {
   playlist: Playlist;
   currentVideoId: string;
+  voicePreview?: string | string[];
 }
 
 export default function PlaylistTab({
   playlist,
   currentVideoId,
+  voicePreview,
 }: PlaylistTabProps) {
   return (
     <div className="divide-y divide-border pb-[60px]">
@@ -40,7 +43,7 @@ export default function PlaylistTab({
           return (
             <li key={video.id}>
               <Link
-                href={buildVideoUrl(video, { playlistId: playlist.id })}
+                href={`${buildVideoUrl(video, { playlistId: playlist.id })}${videoQuery({ voice: voicePreview })}`}
                 className={cn(
                   "flex gap-3 p-3 transition-colors",
                   isCurrent

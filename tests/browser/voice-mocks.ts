@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 
 /** Deterministic browser media/transport; the application still uses the real Bold SDK. */
-export async function mockVoice(page: Page, options: { permission?: "denied" | "pending"; brokerStatus?: number } = {}) {
+export const mockVoice = async (page: Page, options: { permission?: "denied" | "pending"; brokerStatus?: number } = {}): Promise<void> => {
   await page.route("**/ai/voice/sessions", route => route.fulfill({
     status: options.brokerStatus ?? 200,
     contentType: "application/json",
@@ -61,9 +61,9 @@ export async function mockVoice(page: Page, options: { permission?: "denied" | "
     }
     Object.assign(window, { AudioContext: AudioContextMock, Audio: AudioMock, RTCPeerConnection: PeerMock });
   }, options);
-}
+};
 
-export async function preparePlayer(page: Page) {
+export const preparePlayer = async (page: Page): Promise<void> => {
   await page.locator("mux-player").waitFor();
   await page.evaluate(() => {
     const player = document.querySelector("mux-player")!;
@@ -76,11 +76,11 @@ export async function preparePlayer(page: Page) {
       pause: { value: () => { paused = true; player.dispatchEvent(new Event("pause")); } },
     });
   });
-}
+};
 
-export async function caption(page: Page, speaker: "input" | "output", delta: string) {
+export const caption = async (page: Page, speaker: "input" | "output", delta: string): Promise<void> => {
   await page.evaluate(({ speaker, delta }) => {
     const voice = (window as unknown as { __voice: { emit: (event: unknown) => void } }).__voice;
     voice.emit({ type: `session.${speaker}_transcript.delta`, delta });
   }, { speaker, delta });
-}
+};

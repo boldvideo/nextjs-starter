@@ -34,6 +34,42 @@ test("voice is opt-in, survives canonical redirect, and defaults off", async ({ 
   await expect(mic(page)).toHaveCount(0);
 });
 
+for (const preview of ["1", "0"]) {
+  for (const mobile of [false, true]) {
+    test(`voice=${preview} survives playlist links and autoplay ${mobile ? "mobile" : "desktop"}`, async ({ page }) => {
+      await page.setViewportSize(mobile ? { width: 390, height: 844 } : { width: 1440, height: 800 });
+      await page.addInitScript(() => localStorage.setItem("bold-autoplay", "true"));
+      await mockVoice(page);
+      const firstUrl = `/pl/test/v/voice-demo?voice=${preview}`;
+      const nextUrl = `/pl/test/v/voice-next?voice=${preview}`;
+      await page.goto(firstUrl);
+      await expect(page.getByRole("textbox", { name: "Ask about this video" }).filter({ visible: true })).toBeVisible();
+      if (mobile) await page.getByRole("button", { name: "Playlist", exact: true }).click();
+      const nextLink = page.getByRole("link", { name: /Build a daily rhythm/ }).filter({ visible: true });
+      await expect(nextLink).toHaveAttribute("href", nextUrl);
+      if (!mobile) {
+        const sidebar = page.locator('[data-sidebar][data-side="left"]');
+        const toggle = sidebar.getByRole("button", { name: "Close sidebar", exact: true }).filter({ visible: true });
+        await toggle.click();
+        await expect(sidebar).toHaveAttribute("data-collapsed", "true");
+        await expect(nextLink).toHaveAttribute("href", nextUrl);
+        await toggle.click();
+        await expect(sidebar).toHaveAttribute("data-collapsed", "false");
+      }
+      await nextLink.click();
+      await expect(page).toHaveURL(nextUrl);
+      if (mobile) await page.getByRole("button", { name: "Chat", exact: true }).filter({ visible: true }).click();
+      if (preview === "1") await expect(mic(page).filter({ visible: true })).toBeVisible();
+      else await expect(mic(page)).toHaveCount(0);
+
+      await page.goto(firstUrl);
+      await preparePlayer(page);
+      await page.locator("mux-player").evaluate(element => element.dispatchEvent(new Event("ended")));
+      await expect(page).toHaveURL(nextUrl);
+    });
+  }
+}
+
 for (const mobile of [false, true]) {
   test(`captions, draft, mute, timestamp playback, and end ${mobile ? "mobile" : "desktop"}`, async ({ page }) => {
     await page.setViewportSize(mobile ? { width: 390, height: 844 } : { width: 1440, height: 800 });
@@ -75,6 +111,10 @@ for (const mobile of [false, true]) {
       await page.locator("mux-player").evaluate(element => (element as HTMLVideoElement).pause());
       await expect(page.getByText("Listening…").filter({ visible: true })).toBeVisible();
       await page.getByRole("button", { name: "End voice conversation" }).filter({ visible: true }).click();
+    } else {
+      // SDK 1.27 ends voice on playback because it cannot mute both audio directions.
+      await expect(page.getByRole("group", { name: "Voice conversation" }).filter({ visible: true })).toHaveCount(0);
+      await expect(page.getByText("Voice ended. You can keep typing or start again.").filter({ visible: true })).toBeVisible();
     }
     await expect(input).toHaveValue("How can I make this a daily habit?");
     await expect(mic(page).filter({ visible: true })).toBeFocused();
@@ -102,6 +142,7 @@ test("reduced motion keeps the orb still and keyboard controls usable", async ({
   await page.keyboard.press("Enter");
   const bar = page.getByRole("group", { name: "Voice conversation" }).filter({ visible: true });
   await expect(bar).toBeFocused();
+  await expect(bar.locator('[role="status"], [aria-live]')).toHaveCount(0);
   await expect(bar.locator("span")).toHaveCSS("transform", "none");
   await page.keyboard.press("Tab");
   await expect(page.getByRole("button", { name: "Mute microphone", exact: true }).filter({ visible: true })).toBeFocused();

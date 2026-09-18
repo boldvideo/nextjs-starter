@@ -61,7 +61,7 @@ export function VoiceBar() {
         <span ref={orbRef} className={cn("block h-5 w-5 rounded-full", voice.status === "live" && !voice.videoPlaying ? "bg-primary" : "bg-muted-foreground/40")} />
       </div>
       <div className="min-w-0 flex-1">
-        <p role="status" aria-live="polite" className="text-sm font-medium leading-5">{label}</p>
+        <p className="text-sm font-medium leading-5">{label}</p>
         <p className="text-xs leading-4 text-muted-foreground">{hint}</p>
       </div>
       <button type="button" className={cn(buttonClass, "text-foreground hover:bg-muted", voice.muted && "bg-muted")}

@@ -25,7 +25,7 @@ import { buildVideoUrl } from "@/lib/video-path";
 import { MobileVideoMeta } from "./mobile-video-meta";
 import { Breadcrumb } from "@/components/providers/breadcrumb-provider";
 import { getPortalConfig } from "@/lib/portal-config";
-import { isVideoVoiceEnabled } from "@/lib/video-voice";
+import { isVideoVoiceEnabled, videoQuery } from "@/lib/video-voice";
 import { VideoVoiceProvider } from "@/components/video/chat/voice-provider";
 
 interface VideoDetailProps {
@@ -89,9 +89,9 @@ export function VideoDetail({
 
   const handleVideoEnded = useCallback(() => {
     if (isAutoplay && hasNextVideo && nextVideo && playlist) {
-      router.push(buildVideoUrl(nextVideo, { playlistId: playlist.id }));
+      router.push(`${buildVideoUrl(nextVideo, { playlistId: playlist.id })}${videoQuery({ voice: voicePreview })}`);
     }
-  }, [isAutoplay, hasNextVideo, nextVideo, playlist, router]);
+  }, [isAutoplay, hasNextVideo, nextVideo, playlist, router, voicePreview]);
 
   return (
     <AIAssistantProvider key={video.id} onTimeClick={handleTimeSelect}>
@@ -132,6 +132,7 @@ export function VideoDetail({
               <PlaylistSidebar
                 playlist={playlist}
                 currentVideoId={video.id}
+                voicePreview={voicePreview}
                 className="z-30"
                 mode="collapse"
               />
@@ -155,7 +156,7 @@ export function VideoDetail({
           }
           playlistPanel={
             playlist ? (
-              <PlaylistTab playlist={playlist} currentVideoId={video.id} />
+              <PlaylistTab playlist={playlist} currentVideoId={video.id} voicePreview={voicePreview} />
             ) : undefined
           }
           infoPanel={

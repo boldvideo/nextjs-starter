@@ -6,6 +6,7 @@ const video = {
   duration: 320, playback_id: "voice-demo", thumbnail: "/og-static.png",
   transcript: { json: { url: "http://127.0.0.1:4311/transcript" } },
 };
+const nextVideo = { ...video, id: "22222222-2222-4222-8222-222222222222", slug: "voice-next", title: "Build a daily rhythm" };
 const settings = {
   name: "Bold Learning", slug: "voice-test", logo_url: "/bold-logo.svg",
   account: { id: "voice-test", name: "Bold Learning", subdomain: "voice-test", ai: {
@@ -21,8 +22,8 @@ createServer((request, response) => {
   if (request.method === "OPTIONS") { response.end(); return; }
   const path = request.url ?? "";
   const data = path.includes("settings") ? settings
-    : path.includes("/videos/") && !path.includes("/latest") ? video
-    : path.includes("/playlists/") ? { id: "test", title: "Everyday focus", videos: [video] }
+    : path.includes("/videos/") && !path.includes("/latest") ? (path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
+    : path.includes("/playlists/") ? { id: "test", title: "Everyday focus", videos: [video, nextVideo] }
     : [];
   response.end(JSON.stringify({ data }));
 }).listen(4311, "127.0.0.1");
