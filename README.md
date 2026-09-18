@@ -252,6 +252,37 @@ The authentication implementation is in:
 - `components/auth/sign-in.tsx`: Sign-in page component
 - `middleware.ts`: Route protection logic
 
+## Video voice preview
+
+Video chat uses `@boldvideo/bold-js` voice sessions. With AI enabled, the microphone
+appears when `settings.data.account.voice?.enabled === true`. Missing or false
+values keep voice hidden, including older settings responses that omit the flag.
+
+For testing, append `?voice=1` to a video or playlist-video URL to show the
+microphone. Use `?voice=0` to hide it. The override survives playlist links and
+autoplay; it does not grant backend access or persist a tenant setting.
+
+Enable **Voice** for the account in Mission Control before testing a real session.
+The broker still checks AI/voice flags, video access, transcript availability, and
+usage limits. Account voice settings are tracked in BOLD-1850; once the backend
+returns the enabled capability, the frontend shows voice without a URL override.
+
+Voice needs HTTPS (or localhost), microphone permission, and the native video
+player. YouTube play-from-source currently offers text chat only. Starting voice
+pauses the video and preserves your typed draft. Captions stay in the conversation;
+their timestamp buttons play the referenced moment. Text and voice share the
+displayed history, but do not currently share model conversation context.
+
+SDK 1.28.0 keeps the voice session connected while a timestamp clip plays.
+`VoiceSession.setPlaybackState()` mutes both voice audio directions during playback,
+then resumes when paused, preserving manual microphone mute.
+
+Run `bun run test` for voice configuration and caption tests. For browser tests,
+run `bunx playwright install chromium`, then `bun run test:browser`. The suite uses
+local fixture data and mocked microphone/WebRTC transport with the real SDK; it
+does not create paid sessions. `CAPTURE_VOICE_SCREENSHOTS=1 bun run test:browser`
+captures desktop/mobile evidence in `.github/media/`.
+
 ## Deployment
 To deploy your app on [Vercel](https://vercel.com), follow these steps:
 

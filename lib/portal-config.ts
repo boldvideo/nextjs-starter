@@ -13,6 +13,7 @@ export interface AnalyticsConfig {
 export interface PortalConfig {
   ai: {
     enabled: boolean;
+    voiceEnabled: boolean;
     name: string;
     avatar: string;
     greeting: string;
@@ -101,6 +102,7 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
     return {
       ai: {
         enabled: false,
+        voiceEnabled: false,
         name: 'AI Assistant',
         avatar: '/placeholder-avatar.png',
         greeting: 'Hello! How can I help you today?',
@@ -147,6 +149,7 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
 
   // Determine AI configuration (with backward compatibility for legacy fields)
   const aiEnabled = settings.account?.ai?.enabled ?? settings.hasAi ?? false;
+  const voice = settings.account?.voice;
   const aiAvatarRaw = settings.account?.ai?.avatarUrl ?? settings.aiAvatar;
   const aiAvatar = ensureAbsoluteUrl(aiAvatarRaw);
 
@@ -235,6 +238,7 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
   return {
     ai: {
       enabled: aiEnabled,
+      voiceEnabled: aiEnabled && voice?.enabled === true,
       name: aiName,
       avatar: aiAvatar,
       greeting: aiGreeting,

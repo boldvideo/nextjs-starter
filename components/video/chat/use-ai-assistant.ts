@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useAIAssistantContext } from "./context"; // Import context hook
 import type { Message } from "./types"; // Import Message type from types.ts
+import { useVideoVoice } from "@/components/video/chat/voice-provider";
 
 export type { Message }; // Re-export Message type
 
@@ -16,6 +17,7 @@ interface UseAIAssistantProps {
 }
 
 export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
+  const voice = useVideoVoice();
   // Consume state from context
   const {
     messages,
@@ -77,7 +79,7 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
 
   const handleSubmit = async (overrideQuestion?: string, displayLabel?: string, isAction?: boolean) => {
     const question = overrideQuestion || inputValue.trim();
-    if (!question || isPending) return;
+    if (!question || isPending || voice?.active) return;
 
     if (!overrideQuestion) {
       setInputValue(""); // Only clear input if not an override
