@@ -37,6 +37,7 @@ test("caption deltas update their existing turn without mutating typed messages 
   const updated = mergeVoiceCaptions(first, [{ ...turn, text: "Try 0:00 again" }], "session-1");
   assert.equal(updated.length, 2);
   assert.equal(first[1].content, "Try 0:00");
+  assert.equal(updated[1].content, "Try 0:00 again");
   assert.equal(updated[0], typed[0]);
   assert.equal(updated[1].voiceSegments?.[1].type, "timestamp");
   const reconnected = mergeVoiceCaptions(updated, [turn], "session-2");
