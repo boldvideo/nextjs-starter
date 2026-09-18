@@ -1,8 +1,6 @@
 import { test, expect } from "@playwright/test";
-import { createClient } from "@boldvideo/bold-js";
 import { caption, mockVoice, preparePlayer } from "@/tests/browser/voice-mocks";
 
-const playbackSupported = "setPlaybackState" in createClient("test").ai.voice.createSession({ videoId: "test" });
 const mic = (page: import("@playwright/test").Page) => page.getByRole("button", { name: "Start voice conversation" });
 
 test.beforeEach(async ({ page }) => {
@@ -102,20 +100,18 @@ for (const mobile of [false, true]) {
     }
     await page.getByRole("button", { name: "Play video at 0:00" }).filter({ visible: true }).click();
     expect(await page.locator("mux-player").evaluate(element => (element as HTMLVideoElement).currentTime)).toBe(0);
-    if (playbackSupported) {
-      await expect(page.getByText("Video playing", { exact: true }).filter({ visible: true })).toBeVisible();
-      expect(await page.evaluate(() => {
-        const voice = (window as unknown as { __voice: { track: { enabled: boolean }; audioMuted: boolean } }).__voice;
-        return [voice.track.enabled, voice.audioMuted];
-      })).toEqual([false, true]);
-      await page.locator("mux-player").evaluate(element => (element as HTMLVideoElement).pause());
-      await expect(page.getByText("Listening…").filter({ visible: true })).toBeVisible();
-      await page.getByRole("button", { name: "End voice conversation" }).filter({ visible: true }).click();
-    } else {
-      // SDK 1.27 ends voice on playback because it cannot mute both audio directions.
-      await expect(page.getByRole("group", { name: "Voice conversation" }).filter({ visible: true })).toHaveCount(0);
-      await expect(page.getByText("Voice ended. You can keep typing or start again.").filter({ visible: true })).toBeVisible();
-    }
+    await expect(page.getByText("Video playing", { exact: true }).filter({ visible: true })).toBeVisible();
+    expect(await page.evaluate(() => {
+      const voice = (window as unknown as { __voice: { track: { enabled: boolean }; audioMuted: boolean } }).__voice;
+      return [voice.track.enabled, voice.audioMuted];
+    })).toEqual([false, true]);
+    await page.locator("mux-player").evaluate(element => (element as HTMLVideoElement).pause());
+    await expect(page.getByText("Listening…").filter({ visible: true })).toBeVisible();
+    expect(await page.evaluate(() => {
+      const voice = (window as unknown as { __voice: { track: { enabled: boolean }; audioMuted: boolean } }).__voice;
+      return [voice.track.enabled, voice.audioMuted];
+    })).toEqual([true, false]);
+    await page.getByRole("button", { name: "End voice conversation" }).filter({ visible: true }).click();
     await expect(input).toHaveValue("How can I make this a daily habit?");
     await expect(mic(page).filter({ visible: true })).toBeFocused();
     expect(await page.evaluate(() => (window as unknown as { __voice: { requests: number; stops: number } }).__voice)).toMatchObject({ requests: 1, stops: 1 });

@@ -256,7 +256,7 @@ The authentication implementation is in:
 
 Video chat uses `@boldvideo/bold-js` voice sessions. With AI enabled, the microphone
 appears when `settings.data.account.voice?.enabled === true`. Missing or false
-values keep voice hidden. The backend settings update is rolling out separately.
+values keep voice hidden, including older settings responses that omit the flag.
 
 For testing, append `?voice=1` to a video or playlist-video URL to show the
 microphone. Use `?voice=0` to hide it. The override survives playlist links and
@@ -273,10 +273,9 @@ pauses the video and preserves your typed draft. Captions stay in the conversati
 their timestamp buttons play the referenced moment. Text and voice share the
 displayed history, but do not currently share model conversation context.
 
-SDK 1.27.0 ends voice when a clip starts. The companion SDK playback release adds
-`VoiceSession.setPlaybackState()`: both voice audio directions mute during playback,
-then resume when paused, preserving manual microphone mute. After that release is
-published, update the SDK dependency and lockfile to enable continuous clip playback.
+SDK 1.28.0 keeps the voice session connected while a timestamp clip plays.
+`VoiceSession.setPlaybackState()` mutes both voice audio directions during playback,
+then resumes when paused, preserving manual microphone mute.
 
 Run `bun run test` for voice configuration and caption tests. For browser tests,
 run `bunx playwright install chromium`, then `bun run test:browser`. The suite uses

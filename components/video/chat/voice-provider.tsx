@@ -6,12 +6,6 @@ import { useBold } from "@/components/providers/bold-provider";
 import { useAIAssistantContext } from "@/components/video/chat/context";
 import { mergeVoiceCaptions, voiceErrorMessage } from "@/lib/video-voice";
 
-// Additive SDK API in the companion release. 1.27 remains usable during rollout:
-// playing a clip ends voice when playback coordination is unavailable.
-type PlaybackSession = VoiceSession & {
-  setPlaybackState?: (state: { playing: boolean; currentTime: number }) => void;
-};
-
 interface VideoVoice {
   enabled: boolean;
   active: boolean;
@@ -37,7 +31,7 @@ export function VideoVoiceProvider({ children, videoId, enabled, playerRef }: {
 }) {
   const bold = useBold();
   const { setMessages, isPending } = useAIAssistantContext();
-  const sessionRef = useRef<PlaybackSession | null>(null);
+  const sessionRef = useRef<VoiceSession | null>(null);
   const detachPlayer = useRef<() => void>(() => {});
   const surfaces = useRef(new Set<HTMLElement>());
   const [status, setStatus] = useState<VoiceStatus>("idle");
@@ -113,7 +107,7 @@ export function VideoVoiceProvider({ children, videoId, enabled, playerRef }: {
     player.pause();
     const sessionKey = crypto.randomUUID();
     let failed = false;
-    const session: PlaybackSession = bold.ai.voice.createSession({
+    const session: VoiceSession = bold.ai.voice.createSession({
       videoId,
       onStatus: next => {
         if (sessionRef.current === session) setStatus(next);
@@ -148,8 +142,7 @@ export function VideoVoiceProvider({ children, videoId, enabled, playerRef }: {
       const playing = !player.paused && !player.ended;
       const currentTime = Number.isFinite(player.currentTime) ? Math.max(0, player.currentTime) : 0;
       setVideoPlaying(playing);
-      if (session.setPlaybackState) session.setPlaybackState({ playing, currentTime });
-      else if (playing) end();
+      session.setPlaybackState({ playing, currentTime });
     };
     const events = ["play", "pause", "seeked", "ended"];
     for (const event of events) player.addEventListener(event, syncPlayback);
