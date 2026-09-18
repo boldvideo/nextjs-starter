@@ -25,6 +25,8 @@ import { buildVideoUrl } from "@/lib/video-path";
 import { MobileVideoMeta } from "./mobile-video-meta";
 import { Breadcrumb } from "@/components/providers/breadcrumb-provider";
 import { getPortalConfig } from "@/lib/portal-config";
+import { isVideoVoiceEnabled } from "@/lib/video-voice";
+import { VideoVoiceProvider } from "@/components/video/chat/voice-provider";
 
 interface VideoDetailProps {
   video: ExtendedVideo;
@@ -32,6 +34,7 @@ interface VideoDetailProps {
   className?: string;
   settings: Settings | null;
   playlist?: Playlist;
+  voicePreview?: string | string[];
 }
 
 export function VideoDetail({
@@ -40,6 +43,7 @@ export function VideoDetail({
   className = "max-w-5xl",
   settings,
   playlist,
+  voicePreview,
 }: VideoDetailProps): React.JSX.Element {
   const router = useRouter();
   const playerRef = useRef<HTMLVideoElement | null>(null);
@@ -90,88 +94,94 @@ export function VideoDetail({
   }, [isAutoplay, hasNextVideo, nextVideo, playlist, router]);
 
   return (
-    <AIAssistantProvider onTimeClick={handleTimeSelect}>
-      <Breadcrumb label={video.title} />
-      <VideoDetailLayout
-        hasPlaylist={!!playlist}
-        className={className}
-        player={
-          <Player
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ExtendedVideo type compatibility with Player component
-            video={video as any}
-            autoPlay={true}
-            ref={playerRef}
-            startTime={effectiveStartTime}
-            className="w-full h-full"
-            isOutOfView={isOutOfView}
-            onEnded={handleVideoEnded}
-          />
-        }
-        videoMeta={
-          <MobileVideoMeta
-            title={video.title}
-            publishedAt={
-              video.publishedAt
-                ? format(new Date(video.publishedAt), "MMM d, yyyy")
-                : null
-            }
-            durationLabel={video.duration ? formatDuration(video.duration) : null}
-          />
-        }
-        leftSidebar={
-          playlist ? (
-            <PlaylistSidebar
-              playlist={playlist}
-              currentVideoId={video.id}
-              className="z-30"
-              mode="collapse"
+    <AIAssistantProvider key={video.id} onTimeClick={handleTimeSelect}>
+      <VideoVoiceProvider
+        videoId={video.id}
+        playerRef={playerRef}
+        enabled={isVideoVoiceEnabled(aiConfig.enabled, aiConfig.voiceEnabled, voicePreview)}
+      >
+        <Breadcrumb label={video.title} />
+        <VideoDetailLayout
+          hasPlaylist={!!playlist}
+          className={className}
+          player={
+            <Player
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ExtendedVideo type compatibility with Player component
+              video={video as any}
+              autoPlay={true}
+              ref={playerRef}
+              startTime={effectiveStartTime}
+              className="w-full h-full"
+              isOutOfView={isOutOfView}
+              onEnded={handleVideoEnded}
             />
-          ) : undefined
-        }
-        rightSidebar={
-          <VideoCompanionSidebar
-            videoId={video.id}
-            playbackId={video.playbackId}
-            chaptersWebVTT={video.chapters || ""}
-            aiName={aiConfig.name}
-            aiAvatar={aiConfig.avatar || "/default-avatar.png"}
-            subdomain={""}
-            greeting={aiConfig.greeting}
-            onChapterClick={handleTimeSelect}
-            hasChapters={Boolean(video.chapters)}
-            transcriptUrl={video.transcript?.json?.url}
-            playerRef={playerRef}
-            className="z-[35]"
-          />
-        }
-        playlistPanel={
-          playlist ? (
-            <PlaylistTab playlist={playlist} currentVideoId={video.id} />
-          ) : undefined
-        }
-        infoPanel={
-          <VideoMainContent
-            video={video}
-            onTimeSelect={handleTimeSelect}
-            playerRef={playerRef}
-          />
-        }
-        mobileInfoPanel={
-          <InfoTab
-            video={video}
-            onTimeSelect={handleTimeSelect}
-            playerRef={playerRef}
-          />
-        }
-        chaptersPanel={
-          <ChaptersTab
-            chaptersWebVTT={video.chapters || ""}
-            playbackId={video.playbackId}
-            onChapterClick={handleTimeSelect}
-          />
-        }
-        chatPanel={<ChatTab video={video} settings={settings} />}
-      />
+          }
+          videoMeta={
+            <MobileVideoMeta
+              title={video.title}
+              publishedAt={
+                video.publishedAt
+                  ? format(new Date(video.publishedAt), "MMM d, yyyy")
+                  : null
+              }
+              durationLabel={video.duration ? formatDuration(video.duration) : null}
+            />
+          }
+          leftSidebar={
+            playlist ? (
+              <PlaylistSidebar
+                playlist={playlist}
+                currentVideoId={video.id}
+                className="z-30"
+                mode="collapse"
+              />
+            ) : undefined
+          }
+          rightSidebar={
+            <VideoCompanionSidebar
+              videoId={video.id}
+              playbackId={video.playbackId}
+              chaptersWebVTT={video.chapters || ""}
+              aiName={aiConfig.name}
+              aiAvatar={aiConfig.avatar || "/default-avatar.png"}
+              subdomain={""}
+              greeting={aiConfig.greeting}
+              onChapterClick={handleTimeSelect}
+              hasChapters={Boolean(video.chapters)}
+              transcriptUrl={video.transcript?.json?.url}
+              playerRef={playerRef}
+              className="z-[35]"
+            />
+          }
+          playlistPanel={
+            playlist ? (
+              <PlaylistTab playlist={playlist} currentVideoId={video.id} />
+            ) : undefined
+          }
+          infoPanel={
+            <VideoMainContent
+              video={video}
+              onTimeSelect={handleTimeSelect}
+              playerRef={playerRef}
+            />
+          }
+          mobileInfoPanel={
+            <InfoTab
+              video={video}
+              onTimeSelect={handleTimeSelect}
+              playerRef={playerRef}
+            />
+          }
+          chaptersPanel={
+            <ChaptersTab
+              chaptersWebVTT={video.chapters || ""}
+              playbackId={video.playbackId}
+              onChapterClick={handleTimeSelect}
+            />
+          }
+          chatPanel={<ChatTab video={video} settings={settings} />}
+        />
+      </VideoVoiceProvider>
     </AIAssistantProvider>
   );
 }

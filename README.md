@@ -252,6 +252,36 @@ The authentication implementation is in:
 - `components/auth/sign-in.tsx`: Sign-in page component
 - `middleware.ts`: Route protection logic
 
+## Video voice preview
+
+Video chat uses `@boldvideo/bold-js` voice sessions. Voice is hidden by default.
+With AI enabled for the account, append `?voice=1` to a video or playlist-video URL
+to show the microphone. Use `?voice=0` to hide it. The preview is local to that URL;
+it does not grant backend access or persist a tenant setting.
+
+Enable **Voice** for the account in Mission Control before testing a real session.
+The broker still checks AI/voice flags, video access, transcript availability, and
+usage limits. Customer-facing voice settings are tracked in BOLD-1850. The current
+settings API does not expose the voice flag; automatic visibility is ready for
+`account.voice.enabled: true` once that field is added. Missing values stay off.
+
+Voice needs HTTPS (or localhost), microphone permission, and the native video
+player. YouTube play-from-source currently offers text chat only. Starting voice
+pauses the video and preserves your typed draft. Captions stay in the conversation;
+their timestamp buttons play the referenced moment. Text and voice share the
+displayed history, but do not currently share model conversation context.
+
+SDK 1.27.0 ends voice when a clip starts. The companion SDK playback release adds
+`VoiceSession.setPlaybackState()`: both voice audio directions mute during playback,
+then resume when paused, preserving manual microphone mute. After that release is
+published, update the SDK dependency and lockfile to enable continuous clip playback.
+
+Run `bun run test` for voice configuration and caption tests. For browser tests,
+run `bunx playwright install chromium`, then `bun run test:browser`. The suite uses
+local fixture data and mocked microphone/WebRTC transport with the real SDK; it
+does not create paid sessions. `CAPTURE_VOICE_SCREENSHOTS=1 bun run test:browser`
+captures desktop/mobile evidence in `.github/media/`.
+
 ## Deployment
 To deploy your app on [Vercel](https://vercel.com), follow these steps:
 

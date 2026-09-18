@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
+import { videoQuery } from "@/lib/video-voice";
 import { VideoSchema } from "@/components/seo/video-schema";
 import { isUUID } from "@/util/is-uuid";
 import { getVideoPathStyle, getCanonicalVideoPath } from "@/lib/video-path";
@@ -86,10 +87,10 @@ export default async function VideoPage({
 }: {
   // `params` and `searchParams` are Promises starting from Next.js 15.
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ t?: string }>;
+  searchParams: Promise<{ t?: string; voice?: string | string[] }>;
 }) {
   const { id } = await params;
-  const { t } = await searchParams;
+  const { t, voice } = await searchParams;
 
   const { settings, video } = await getVideoPageData(id);
 
@@ -109,7 +110,7 @@ export default async function VideoPage({
   if (pathStyle === "root" || (video.slug && isUUID(id))) {
     const currentPath = `/v/${id}`;
     if (currentPath !== canonicalPath) {
-      const redirectUrl = t ? `${canonicalPath}?t=${t}` : canonicalPath;
+      const redirectUrl = `${canonicalPath}${videoQuery({ t, voice })}`;
       redirect(redirectUrl);
     }
   }
@@ -126,6 +127,7 @@ export default async function VideoPage({
       <VideoDetail
         video={video as unknown as ExtendedVideo}
         startTime={startTime}
+        voicePreview={voice}
         settings={settings}
         className="max-w-7xl"
       />

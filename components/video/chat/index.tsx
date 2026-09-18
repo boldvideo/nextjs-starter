@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState, useLayoutEffect, useCallback, useMe
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { X, Send } from "lucide-react";
+import { X, Send, Mic, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAIAssistant } from "./use-ai-assistant";
 import { useAIStream } from "./use-ai-stream";
@@ -12,6 +12,8 @@ import { useAIAssistantContext } from "./context";
 import { TimestampPill } from "@/components/timestamp-pill";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
+import { useVideoVoice } from "@/components/video/chat/voice-provider";
+import { VoiceBar } from "@/components/video/chat/voice-bar";
 
 /**
  * Props for the AIAssistant component
@@ -183,6 +185,26 @@ export const AIAssistant = ({
   compact = false, // Compact mode for embeds
 }: AIAssistantProps) => {
   const { onTimeClick } = useAIAssistantContext();
+  const voice = useVideoVoice();
+  const voiceActive = voice?.active ?? false;
+  const voiceAnnouncement = voice?.notice || (voice?.status === "connecting" ? "Connecting voice. Allow microphone access if asked."
+    : voice?.status === "live" ? "Voice connected."
+    : voice?.status === "ending" ? "Ending voice." : "");
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const micRef = useRef<HTMLButtonElement>(null);
+  const wasVoiceActive = useRef(false);
+  const observeSurface = voice?.observeSurface;
+
+  useEffect(() => {
+    if (surfaceRef.current && observeSurface) return observeSurface(surfaceRef.current);
+  }, [observeSurface]);
+
+  useEffect(() => {
+    if (wasVoiceActive.current && !voiceActive && micRef.current?.getClientRects().length) {
+      micRef.current.focus({ preventScroll: true });
+    }
+    wasVoiceActive.current = voiceActive;
+  }, [voiceActive]);
 
   const handleAIQuestion = useAIStream({
     videoId,
@@ -234,13 +256,14 @@ export const AIAssistant = ({
 
   // Generate a stable ID for the current streaming message
   const streamingMessageId = useMemo(() => {
+    if (voiceActive) return messages.at(-1)?.id ?? null;
     if (!isPending) return null;
     const lastMsg = messages[messages.length - 1];
     if (lastMsg?.role === "assistant") {
       return `streaming-${messages.length}`;
     }
     return null;
-  }, [isPending, messages]);
+  }, [isPending, messages, voiceActive]);
 
   // Streaming scroll behavior - scrolls to message top, not bottom
   const {
@@ -248,7 +271,7 @@ export const AIAssistant = ({
     showScrollButton,
     jumpToLive,
   } = useStreamingScroll({
-    isStreaming: isPending,
+    isStreaming: isPending || voiceActive,
     streamingMessageId,
     messageSelector: "[data-streaming-message]",
   });
@@ -309,12 +332,13 @@ export const AIAssistant = ({
 
   // Focus input when sidebar opens
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        textareaRef.current?.focus();
+    if (!isEmbedded && isOpen && !voiceActive) {
+      const timer = setTimeout(() => {
+        if (textareaRef.current?.getClientRects().length) textareaRef.current.focus();
       }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isEmbedded, isOpen, voiceActive]);
 
   const handleTimestampInteraction = (e: React.MouseEvent<HTMLDivElement>) => {
     const button = (e.target as HTMLElement).closest("[data-time]");
@@ -431,11 +455,11 @@ export const AIAssistant = ({
 
         {messages.map((message, index) => {
           const isLastAssistant = message.role === "assistant" && index === messages.length - 1;
-          const isStreamingMessage = isLastAssistant && isPending;
+          const isStreamingMessage = (isLastAssistant && isPending) || (voiceActive && index === messages.length - 1);
           
           return (
           <div 
-            key={index} 
+            key={message.id ?? index}
             className="mb-4"
             {...(isStreamingMessage ? { "data-streaming-message": true } : {})}
           >
@@ -451,7 +475,22 @@ export const AIAssistant = ({
                 compact && "text-sm"
               )}
             >
-              {message.content ? (
+              {message.voiceSegments ? (
+                <>
+                  <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                    <Mic size={12} aria-hidden="true" />{message.role === "user" ? "You" : name}<span className="sr-only">, voice caption</span>
+                  </p>
+                  <p className="whitespace-pre-wrap">
+                    {message.voiceSegments.map((segment, segmentIndex) => segment.type === "timestamp" ? (
+                      <button key={segmentIndex} type="button" onClick={() => onTimeClick(segment.seconds)}
+                        aria-label={`Play video at ${segment.text}`}
+                        className="mx-1 inline-flex min-h-11 items-center gap-1.5 rounded-full border border-primary/30 bg-background px-3 text-xs font-medium text-foreground hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        <Play size={12} aria-hidden="true" />{segment.text}
+                      </button>
+                    ) : <React.Fragment key={segmentIndex}>{segment.text}</React.Fragment>)}
+                  </p>
+                </>
+              ) : message.content ? (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
@@ -529,7 +568,7 @@ export const AIAssistant = ({
                               handleSubmit(action.value, action.label, true)
                             }
                             className="px-3 py-1 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-full transition-colors cursor-pointer font-medium"
-                            disabled={isPending}
+                            disabled={isPending || voiceActive}
                           >
                             {action.label}
                           </button>
@@ -557,10 +596,11 @@ export const AIAssistant = ({
         <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-10">
           <ScrollToLiveButton
             visible={showScrollButton}
-            isStreaming={isPending}
+            isStreaming={isPending || voiceActive}
             onClick={jumpToLive}
           />
         </div>
+        {voiceActive ? <VoiceBar /> : (
         <div className={cn("relative flex gap-2", compact ? "items-center mb-2" : "items-end")} ref={inputContainerRef}>
           {compact ? (
             <input
@@ -574,8 +614,9 @@ export const AIAssistant = ({
                 }
               }}
               placeholder="Ask about this video..."
+              aria-label="Ask about this video"
               className={cn(
-                "w-full rounded-full py-2 px-4 text-base sm:text-sm",
+                "min-w-0 w-full min-h-11 rounded-full py-2 px-4 text-base sm:text-sm",
                 "focus:outline-none focus:ring-2 focus:ring-primary/50",
                 "bg-muted text-foreground placeholder:text-muted-foreground"
               )}
@@ -592,9 +633,10 @@ export const AIAssistant = ({
                 }
               }}
               placeholder="Ask me something about this video..."
+              aria-label="Ask about this video"
               rows={2}
               className={cn(
-                "w-full rounded-2xl resize-none overflow-hidden",
+                "min-w-0 w-full rounded-2xl resize-none overflow-hidden",
                 "focus:outline-none focus:ring-2 focus:ring-primary/50 text-base sm:text-sm",
                 isEmbedded
                   ? "bg-muted text-foreground"
@@ -603,9 +645,18 @@ export const AIAssistant = ({
               )}
             />
           )}
+          {voice?.enabled && (
+            <button ref={micRef} type="button" onClick={voice.start} disabled={isPending}
+              aria-label="Start voice conversation" title="Start voice conversation"
+              className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40", !compact && "mb-1")}>
+              <Mic size={18} aria-hidden="true" />
+            </button>
+          )}
           <button
+            type="button"
+            aria-label="Send question"
             className={cn(
-              "flex-shrink-0 rounded-full transition-colors",
+              "flex h-11 w-11 items-center justify-center flex-shrink-0 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               compact ? "p-2" : "p-3 mb-1",
               inputValue.trim()
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -617,6 +668,11 @@ export const AIAssistant = ({
             <Send size={compact ? 16 : 18} />
           </button>
         </div>
+        )}
+        <p role="status" aria-live="polite" aria-atomic="true"
+          className={cn("text-xs leading-5 text-muted-foreground", voice?.notice ? "mt-2" : "sr-only")}>
+          {voiceAnnouncement}
+        </p>
         {!isEmbedded && (
           <p className="text-xs text-gray-500 mt-2">
             Note: our AI chat can make mistakes.
@@ -629,6 +685,9 @@ export const AIAssistant = ({
   if (isEmbedded) {
     return (
       <div
+        ref={surfaceRef}
+        role="region"
+        aria-label="Video conversation"
         className={cn(
           "flex flex-col flex-1 min-h-0 h-full overflow-hidden",
           className
