@@ -10,6 +10,10 @@ test("voice defaults off and preview never enables a disabled AI account", () =>
   assert.equal(getPortalConfig(settings).ai.voiceEnabled, false);
   const enabled = { ...settings, account: { ...settings.account, voice: { enabled: true } } };
   assert.equal(getPortalConfig(enabled).ai.voiceEnabled, true);
+  const disabled = { ...enabled, account: { ...enabled.account, voice: { enabled: false } } };
+  assert.equal(getPortalConfig(disabled).ai.voiceEnabled, false);
+  const aiDisabled = { ...enabled, account: { ...enabled.account, ai: { ...enabled.account.ai, enabled: false } } };
+  assert.equal(getPortalConfig(aiDisabled).ai.voiceEnabled, false);
   assert.equal(isVideoVoiceEnabled(true, false), false);
   assert.equal(isVideoVoiceEnabled(true, false, "1"), true);
   assert.equal(isVideoVoiceEnabled(false, true, "1"), false);

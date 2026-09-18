@@ -254,16 +254,18 @@ The authentication implementation is in:
 
 ## Video voice preview
 
-Video chat uses `@boldvideo/bold-js` voice sessions. Voice is hidden by default.
-With AI enabled for the account, append `?voice=1` to a video or playlist-video URL
-to show the microphone. Use `?voice=0` to hide it. The preview is local to that URL;
-it does not grant backend access or persist a tenant setting.
+Video chat uses `@boldvideo/bold-js` voice sessions. With AI enabled, the microphone
+appears when `settings.data.account.voice?.enabled === true`. Missing or false
+values keep voice hidden. The backend settings update is rolling out separately.
+
+For testing, append `?voice=1` to a video or playlist-video URL to show the
+microphone. Use `?voice=0` to hide it. The override survives playlist links and
+autoplay; it does not grant backend access or persist a tenant setting.
 
 Enable **Voice** for the account in Mission Control before testing a real session.
 The broker still checks AI/voice flags, video access, transcript availability, and
-usage limits. Customer-facing voice settings are tracked in BOLD-1850. The current
-settings API does not expose the voice flag; automatic visibility is ready for
-`account.voice.enabled: true` once that field is added. Missing values stay off.
+usage limits. Account voice settings are tracked in BOLD-1850; once the backend
+returns the enabled capability, the frontend shows voice without a URL override.
 
 Voice needs HTTPS (or localhost), microphone permission, and the native video
 player. YouTube play-from-source currently offers text chat only. Starting voice

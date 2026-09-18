@@ -149,7 +149,7 @@ export function getPortalConfig(rawSettings: Settings | null): PortalConfig {
 
   // Determine AI configuration (with backward compatibility for legacy fields)
   const aiEnabled = settings.account?.ai?.enabled ?? settings.hasAi ?? false;
-  // Optional until the settings API exposes the account's voice capability.
+  // SDK 1.27 omits this type; older settings responses may omit the capability too.
   const voice = (settings.account as (Settings["account"] & { voice?: { enabled?: boolean } }) | undefined)?.voice;
   const aiAvatarRaw = settings.account?.ai?.avatarUrl ?? settings.aiAvatar;
   const aiAvatar = ensureAbsoluteUrl(aiAvatarRaw);
