@@ -89,6 +89,47 @@ test("failed open retries retain one UUID and never send progress before an acce
   assert.equal(new Set(events.map(e => e.playback_id)).size, 1);
 });
 
+test("final progress retries after a long watch and retains the cumulative counter", async () => {
+  let now = 0;
+  const events: EngagementEvent[] = [];
+  const open = new SourceOpen("video", new AnswerInteraction("answer"), async event => {
+    events.push(event);
+    return event.n === "source_open" || events.filter(e => e.n === "video_progress").length > 1;
+  }, () => now);
+  await tick();
+  open.play();
+  now = 41_250;
+  open.pause();
+  await new Promise(resolve => setTimeout(resolve, 1100));
+  const progress = events.filter(e => e.n === "video_progress");
+  assert.equal(progress.length, 2);
+  assert.deepEqual(progress.map(e => e.watched_seconds), [41.25, 41.25]);
+  assert.equal(new Set(events.map(e => e.playback_id)).size, 1);
+});
+
+test("a pause during in-flight progress preserves the newer counter for retry", async () => {
+  let now = 0;
+  let finish: (accepted: boolean) => void = () => {};
+  const events: EngagementEvent[] = [];
+  const open = new SourceOpen("video", new AnswerInteraction("answer"), async event => {
+    events.push(event);
+    if (event.n === "video_progress" && events.length === 2) {
+      return new Promise<boolean>(resolve => { finish = resolve; });
+    }
+    return true;
+  }, () => now);
+  await tick();
+  open.play();
+  now = 40_000;
+  const flushing = open.flush();
+  now = 75_500;
+  open.pause();
+  finish(true);
+  await flushing;
+  await new Promise(resolve => setTimeout(resolve, 1100));
+  assert.deepEqual(events.filter(e => e.n === "video_progress").map(e => e.watched_seconds), [40, 75.5]);
+});
+
 test("navigation preserves timestamp and encodes the exact originating search", () => {
   const url = sourceUrl("/v/demo?t=83", undefined, { query: "a & b", requestId: "action" });
   assert.equal(url, "/v/demo?t=83&search_query=a+%26+b&search_request_id=action");

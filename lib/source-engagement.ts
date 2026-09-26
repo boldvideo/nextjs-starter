@@ -44,6 +44,7 @@ export class SourceOpen {
   private sentSeconds = 0;
   private retry?: ReturnType<typeof setTimeout>;
   private readonly deadline: number;
+  private progressDeadline = 0;
   private unsubscribe = () => {};
 
   constructor(
@@ -85,7 +86,10 @@ export class SourceOpen {
     return (this.elapsed + (this.started === undefined ? 0 : this.now() - this.started)) / 1000;
   }
 
-  async flush() {
+  async flush(progressDeadline = this.now() + 30_000) {
+    // New playback/pause flushes get a bounded retry window even after a long watch.
+    // A scheduled retry retains that window rather than extending it indefinitely.
+    this.progressDeadline = Math.max(this.progressDeadline, progressDeadline);
     const id = this.interaction.id;
     if (!id || this.sending || (!this.opened && this.now() > this.deadline)) return;
     this.sending = true;
@@ -99,9 +103,10 @@ export class SourceOpen {
       }
     } finally {
       this.sending = false;
-      if ((!this.opened || this.watchedSeconds > this.sentSeconds) && this.now() < this.deadline) {
+      const deadline = this.opened ? this.progressDeadline : this.deadline;
+      if ((!this.opened || this.watchedSeconds > this.sentSeconds) && this.now() < deadline) {
         clearTimeout(this.retry);
-        this.retry = setTimeout(() => { void this.flush(); }, 1_000);
+        this.retry = setTimeout(() => { void this.flush(this.progressDeadline); }, 1_000);
       }
     }
   }
