@@ -19,6 +19,7 @@ const searches: Record<string, string>[] = [];
 const aiSearches: Record<string, unknown>[] = [];
 const events: Record<string, unknown>[] = [];
 const chats: Record<string, unknown>[] = [];
+let settingsRequests = 0;
 const interactions = new Map<string, string>();
 createServer((request, response) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
@@ -27,6 +28,11 @@ createServer((request, response) => {
   if (request.method === "OPTIONS") { response.end(); return; }
   const path = request.url ?? "";
   const url = new URL(path, "http://localhost");
+  if (url.pathname === "/test/settings-requests") {
+    if (request.method === "DELETE") settingsRequests = 0;
+    response.end(JSON.stringify(settingsRequests));
+    return;
+  }
   if (url.pathname === "/test/events" || url.pathname === "/test/chats") {
     const rows = url.pathname === "/test/events" ? events : chats;
     if (request.method === "DELETE") rows.length = 0;
@@ -46,10 +52,13 @@ createServer((request, response) => {
       const interactionId = crypto.randomUUID();
       chats.push({ ...input, path: url.pathname, interactionId });
       const source = { id: "c_abc123", video_id: video.id, title: video.title, timestamp: 83, text: "Pricing source", playback_id: "voice-demo" };
+      const content = input.prompt?.includes("mentions")
+        ? `Watch [1]. **Episode 8 ("${video.title}")**.`
+        : "Watch [1] and [01:23] for pricing.";
       response.setHeader("Content-Type", "text/event-stream");
       response.write(`data: ${JSON.stringify({ type: "sources", sources: [source] })}\n\n`);
-      response.write(`data: ${JSON.stringify({ type: "text_delta", delta: "Watch [1] and [01:23] for pricing." })}\n\n`);
-      setTimeout(() => response.end(`data: ${JSON.stringify({ type: "message_complete", content: "Watch [1] and [01:23] for pricing.", citations: [source], interaction_id: input.prompt === "no-id" ? null : interactionId, response_type: "answer" })}\n\ndata: [DONE]\n\n`), input.prompt === "pending" ? 2500 : 0);
+      response.write(`data: ${JSON.stringify({ type: "text_delta", delta: content })}\n\n`);
+      setTimeout(() => response.end(`data: ${JSON.stringify({ type: "message_complete", content, citations: [source], interaction_id: input.prompt === "no-id" ? null : interactionId, response_type: "answer" })}\n\ndata: [DONE]\n\n`), input.prompt?.includes("pending") ? 2500 : 0);
     });
     return;
   }
@@ -93,6 +102,7 @@ createServer((request, response) => {
     }));
     return;
   }
+  if (path.includes("settings")) settingsRequests++;
   const data = path.includes("settings") ? settings
     : path.includes("/videos/") && !path.includes("/latest") ? (path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
     : path.includes("/playlists/") ? { id: "test", title: "Everyday focus", videos: [video, nextVideo] }

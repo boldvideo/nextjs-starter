@@ -13,13 +13,23 @@ test.beforeEach(async ({ request }) => {
 });
 
 test("event proxy uses the tenant token, strips untrusted viewer, validates IDs and counters", async ({ request }) => {
+  await request.delete("http://127.0.0.1:4311/test/settings-requests");
   const data = { n: "source_open", interaction_id: crypto.randomUUID(), playback_id: crypto.randomUUID(), vid: videoId, viewer: "forged", watched_seconds: 900 };
   expect((await request.post("/event", { data })).ok()).toBe(true);
   expect(await rows(request)).toEqual([{ n: data.n, interaction_id: data.interaction_id, playback_id: data.playback_id, vid: videoId, trustedTenant: true }]);
-  for (const fields of [{ playback_id: "mux-id" }, { interaction_id: "bad" }, { n: "video_progress", watched_seconds: -1 }, { n: "video_progress", watched_seconds: "5" }]) {
+  const invalidFields = [{ playback_id: "mux-id" }, { interaction_id: "bad" }, { n: "video_progress", watched_seconds: -1 }, { n: "video_progress", watched_seconds: "5" }];
+  for (const fields of invalidFields) {
     expect((await request.post("/event", { data: { ...data, ...fields } })).status()).toBe(400);
   }
   expect(await rows(request)).toHaveLength(1);
+  expect((await request.post("/event", { data: { ...data, n: "video_progress", watched_seconds: 12.5 } })).ok()).toBe(true);
+  // Middleware must still check portal authorization once per request. The event
+  // handler must not add a second, redundant settings fetch for accepted events.
+  const authChecks = invalidFields.length + 2;
+  expect(await (await request.get("http://127.0.0.1:4311/test/settings-requests")).json()).toBe(authChecks);
+  // Other consumers retain the default settings-loading contract.
+  expect((await request.post("/api/search", { data: { query: "pricing", search_mode: "preview" } })).ok()).toBe(true);
+  expect(await (await request.get("http://127.0.0.1:4311/test/settings-requests")).json()).toBe(authChecks + 2);
 });
 
 test("ordinary playback is unattributed; explicit URLs survive redirect and count wall time without seek/pause inflation", async ({ page, request }) => {
@@ -91,6 +101,49 @@ test("preview timestamp opened in a new tab settles only at destination and open
   await popup.close();
 });
 
+for (const failureStatus of [408, 503]) {
+  test(`preview settlement retries HTTP ${failureStatus} with the same action and interaction`, async ({ page, request }) => {
+    await request.delete("http://127.0.0.1:4311/test/searches");
+    const action = crypto.randomUUID();
+    const ids: string[] = [];
+    await page.route("**/api/search", async route => {
+      const response = await route.fetch();
+      ids.push((await response.json()).interaction_id);
+      if (ids.length === 1) await route.fulfill({ status: failureStatus, body: "lost response" });
+      else await route.fulfill({ response });
+    });
+    await page.goto(`/v/voice-demo?search_query=pricing&search_request_id=${action}`);
+    await expect.poll(async () => (await engagement(request)).length).toBe(1);
+    expect(ids).toHaveLength(2);
+    expect(ids[1]).toBe(ids[0]);
+    expect((await rows(request, "searches")).map(row => [row.search_mode, row.request_id])).toEqual([
+      ["settled", action], ["settled", action],
+    ]);
+    expect((await engagement(request))[0].interaction_id).toBe(ids[0]);
+  });
+}
+
+for (const end of ["context removed", "deadline expired"] as const) {
+  test(`failed preview settlement stops when ${end}`, async ({ page, request }) => {
+    await page.clock.install();
+    let attempts = 0;
+    await page.route("**/api/search", async route => {
+      attempts++;
+      await route.fulfill({ status: 503, body: "temporary failure" });
+    });
+    const failed = page.waitForResponse(response => response.url().endsWith("/api/search") && response.status() === 503);
+    await page.goto(`/v/voice-demo?search_query=pricing&search_request_id=${crypto.randomUUID()}`);
+    await failed;
+    if (end === "context removed") {
+      await page.evaluate(() => history.replaceState(null, "", location.pathname));
+      await expect(page).toHaveURL("/v/voice-demo");
+    }
+    await page.clock.fastForward(end === "context removed" ? 1500 : 31_000);
+    expect(attempts).toBe(1);
+    expect(await engagement(request)).toHaveLength(0);
+  });
+}
+
 test("Ask keeps an older answer's explicit source ID after a newer answer and retains pending opens", async ({ page, request }) => {
   await page.goto("/ask?q=first");
   const citation = page.getByRole("button", { name: /Source 1:/ }).first();
@@ -118,6 +171,31 @@ test("Ask keeps an older answer's explicit source ID after a newer answer and re
   expect(opens[1].interaction_id).toBe(first);
   expect(opens[1].playback_id).not.toBe(opens[0].playback_id);
   if (process.env.REVIEW_SCREENSHOT) await page.screenshot({ path: process.env.REVIEW_SCREENSHOT });
+});
+
+test("episode links retain pending and older answer attribution in new tabs", async ({ page, request, context }) => {
+  await page.goto("/ask?q=mentions");
+  const episode = page.getByRole("link", { name: /^Episode 8/ });
+  await expect(episode.first()).toHaveAttribute("href", /interaction_id=/);
+  const first = (await rows(request, "chats"))[0].interactionId;
+  const input = page.locator("textarea").filter({ visible: true });
+  await input.fill("mentions-pending");
+  await input.press("Enter");
+  await expect(episode).toHaveCount(2);
+  await expect(episode.last()).toHaveAttribute("href", /answer_request_id=/);
+  const pendingPopup = context.waitForEvent("page");
+  await episode.last().click({ modifiers: ["Control"] });
+  const pending = await pendingPopup;
+  await expect.poll(async () => (await engagement(request)).length).toBe(1);
+  expect((await engagement(request))[0].interaction_id).toBe((await rows(request, "chats"))[1].interactionId);
+  await pending.close();
+  await expect(episode.first()).toHaveAttribute("href", new RegExp(`interaction_id=${first}`));
+  const oldPopup = context.waitForEvent("page");
+  await episode.first().click({ modifiers: ["Control"] });
+  const old = await oldPopup;
+  await expect.poll(async () => (await engagement(request)).length).toBe(2);
+  expect((await engagement(request))[1].interaction_id).toBe(first);
+  await old.close();
 });
 
 test("a new-tab source retains pending completion independently of the inline player", async ({ page, request, context }) => {
