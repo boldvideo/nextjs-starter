@@ -19,6 +19,7 @@ const searches: Record<string, string>[] = [];
 const aiSearches: Record<string, unknown>[] = [];
 const events: Record<string, unknown>[] = [];
 const chats: Record<string, unknown>[] = [];
+let settingsRequests = 0;
 const interactions = new Map<string, string>();
 createServer((request, response) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
@@ -27,6 +28,11 @@ createServer((request, response) => {
   if (request.method === "OPTIONS") { response.end(); return; }
   const path = request.url ?? "";
   const url = new URL(path, "http://localhost");
+  if (url.pathname === "/test/settings-requests") {
+    if (request.method === "DELETE") settingsRequests = 0;
+    response.end(JSON.stringify(settingsRequests));
+    return;
+  }
   if (url.pathname === "/test/events" || url.pathname === "/test/chats") {
     const rows = url.pathname === "/test/events" ? events : chats;
     if (request.method === "DELETE") rows.length = 0;
@@ -96,6 +102,7 @@ createServer((request, response) => {
     }));
     return;
   }
+  if (path.includes("settings")) settingsRequests++;
   const data = path.includes("settings") ? settings
     : path.includes("/videos/") && !path.includes("/latest") ? (path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
     : path.includes("/playlists/") ? { id: "test", title: "Everyday focus", videos: [video, nextVideo] }

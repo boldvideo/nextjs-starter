@@ -13,6 +13,7 @@ test.beforeEach(async ({ request }) => {
 });
 
 test("event proxy uses the tenant token, strips untrusted viewer, validates IDs and counters", async ({ request }) => {
+  await request.delete("http://127.0.0.1:4311/test/settings-requests");
   const data = { n: "source_open", interaction_id: crypto.randomUUID(), playback_id: crypto.randomUUID(), vid: videoId, viewer: "forged", watched_seconds: 900 };
   expect((await request.post("/event", { data })).ok()).toBe(true);
   expect(await rows(request)).toEqual([{ n: data.n, interaction_id: data.interaction_id, playback_id: data.playback_id, vid: videoId, trustedTenant: true }]);
@@ -20,6 +21,11 @@ test("event proxy uses the tenant token, strips untrusted viewer, validates IDs 
     expect((await request.post("/event", { data: { ...data, ...fields } })).status()).toBe(400);
   }
   expect(await rows(request)).toHaveLength(1);
+  expect((await request.post("/event", { data: { ...data, n: "video_progress", watched_seconds: 12.5 } })).ok()).toBe(true);
+  expect(await (await request.get("http://127.0.0.1:4311/test/settings-requests")).json()).toBe(0);
+  // Other consumers retain the default settings-loading contract.
+  expect((await request.post("/api/search", { data: { query: "pricing", search_mode: "preview" } })).ok()).toBe(true);
+  expect(await (await request.get("http://127.0.0.1:4311/test/settings-requests")).json()).toBeGreaterThan(0);
 });
 
 test("ordinary playback is unattributed; explicit URLs survive redirect and count wall time without seek/pause inflation", async ({ page, request }) => {
