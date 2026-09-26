@@ -1,22 +1,23 @@
 # Portal interaction rollout (BOLD-1967 / BOLD-1968)
 
-## Release gate
+## Published SDK and rollout
 
-Do not consider AI channel metadata rolled out with the current dependency.
-The committed SDK is published `@boldvideo/bold-js` 1.29.0. It preserves interaction
-IDs but drops `channel` and `clientName` options. The shared portal options are
-ready for SDK 1.30.0; headers do not satisfy the backend's body/query contract.
+The manifest requires published `@boldvideo/bold-js` ^1.30.0 and the lockfile
+resolves 1.30.0. This release forwards `channel` and `clientName` in AI request
+bodies. SDK 1.29.0 preserved interaction IDs but dropped these options; headers
+do not satisfy the backend's body/query contract.
 
-1. Deploy the backend channel and explicit engagement contract.
-2. Release SDK PR82 (https://github.com/boldvideo/bold-js/pull/82), then upgrade the
-   starter's manifest and lock to the published 1.30.0 or newer.
-3. Run `TEST_SDK_NEXT=1 bun run test:browser`. The metadata release-gate test must
-   execute, not skip. Verify Ask, coach, video chat, and AI search upstream bodies.
-4. Roll out the starter. This PR does not authorize releases or deployments.
+The SDK publication blocker is resolved. Routine `bun run test:browser` and CI
+now unconditionally verify Ask, coach, video chat, and AI search upstream bodies
+and completion IDs. No preview tarball or environment flag is needed.
 
-Local SDK preview testing may replace only `node_modules/@boldvideo/bold-js` with
-the SDK thread's tarball; never commit that tarball, an unavailable dependency,
-or its lockfile. Restore the published dependency and rerun the ordinary suite.
+1. Ensure the backend channel and explicit engagement contract is deployed.
+2. Install with `bun install --frozen-lockfile` and run the checks below.
+3. Deploy this starter revision through the authorized rollout process. Merely
+   publishing the SDK does not update an already-built portal.
+4. After rollout, verify a fresh interaction reports `channel=portal` and
+   `client_name=nextjs-starter`. Older captured rows are not backfilled by this
+   upgrade. Local fixture tests do not prove the production deployment is current.
 
 Keyword search already sends `channel=portal` and `client_name=nextjs-starter`.
 The event proxy uses direct server fetch, so engagement does not depend on the
@@ -52,6 +53,7 @@ SDK release. AI uses the released SDK parser; there is no parallel SSE parser.
 `bun run test`, `bun run lint`, `bunx tsc --noEmit`, and `bun run test:browser`
 cover independent counters, pending/missing IDs, retry order, real proxy tenant
 identity, paused typing, destination settlement, timestamps/new tabs, old-answer
-clicks, and browser playback events. Browser media is deterministic rather than
-real Mux playback. The local fixture proves caller/proxy contracts, not production
-capture durability or backend enforcement.
+clicks, portal metadata through real callers/proxies, and browser playback events.
+Browser media is deterministic rather than real Mux playback. The local fixture
+proves caller/proxy contracts, not production capture durability or backend
+enforcement.

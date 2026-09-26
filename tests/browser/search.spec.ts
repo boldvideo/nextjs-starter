@@ -168,6 +168,7 @@ test("AI proxy forwards action metadata through the published SDK and preserves 
   expect((await complete(false, "settled")).interactionId).toBe(first.interactionId);
   expect((await complete(true, "settled", crypto.randomUUID())).interactionId).not.toBe(first.interactionId);
   const records = await (await request.get("http://127.0.0.1:4311/test/ai-searches")).json();
+  for (const record of records) expect(record).toMatchObject({ channel: "portal", client_name: "nextjs-starter" });
   expect(records.slice(0, 4)).toMatchObject([
     { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "preview" },
     { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "preview", stream: false },
@@ -199,6 +200,7 @@ test("AI explicit submits generate distinct IDs and retain completion IDs in bro
   }
   const records = await (await request.get("http://127.0.0.1:4311/test/ai-searches")).json();
   expect(records).toHaveLength(2);
+  for (const record of records) expect(record).toMatchObject({ channel: "portal", client_name: "nextjs-starter" });
   expect(records[0].request_id).toMatch(uuid);
   expect(records[1].request_id).toMatch(uuid);
   expect(records[0].request_id).not.toBe(records[1].request_id);
