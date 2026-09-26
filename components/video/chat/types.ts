@@ -1,3 +1,5 @@
+import type { AnswerInteraction } from "@/lib/source-engagement";
+
 export type SuggestedAction = {
   id: string;
   label: string;
@@ -9,6 +11,8 @@ export type ToolCall = {
 };
 
 export type Message = {
+  interaction?: AnswerInteraction;
+  interactionId?: string | null;
   role: "user" | "assistant";
   content: string;
   suggested_actions?: SuggestedAction[];

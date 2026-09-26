@@ -1,4 +1,5 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
@@ -58,6 +59,7 @@ function formatSSE(
       }> | undefined;
       return JSON.stringify({
         type: "message_complete",
+        interactionId: event.interactionId,
         responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
         sources: completeSources.map((s: Segment) => ({
@@ -208,6 +210,7 @@ export async function POST(request: Request) {
 
   try {
     const stream = await context.client.ai.coach({
+      ...portalClient,
       prompt: message,
       conversationId,
       // BOLD-1449: pass images per the published SDK shape (cast until SDK types catch up)

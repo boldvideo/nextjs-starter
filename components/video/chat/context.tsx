@@ -2,10 +2,11 @@
 
 import React, { createContext, useContext, useState, useCallback } from "react";
 import type { Message } from "./types"; // Import Message type from types.ts
+import type { AnswerInteraction } from "@/lib/source-engagement";
 
 // Define the shape of the context value
 interface AIAssistantContextValue {
-  onTimeClick: (time: number) => void;
+  onTimeClick: (time: number, interaction?: AnswerInteraction) => void;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   inputValue: string;
@@ -25,7 +26,7 @@ const AIAssistantContext = createContext<AIAssistantContextValue | null>(null);
 // Create a provider component
 interface AIAssistantProviderProps {
   children: React.ReactNode;
-  onTimeClick: (time: number) => void;
+  onTimeClick: (time: number, interaction?: AnswerInteraction) => void;
 }
 
 export const AIAssistantProvider = ({
