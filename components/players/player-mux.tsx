@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { forwardRef, useEffect, useRef, useState, memo } from "react";
 import { useBold } from "@/components/providers/bold-provider";
+import type { SourceOpen } from "@/lib/source-engagement";
 
 // Import MuxPlayer with SSR disabled to prevent hydration errors
 const MuxPlayer = dynamic(
@@ -12,6 +13,8 @@ const MuxPlayer = dynamic(
 
 // Define a type for the Mux Player Element since it's not exported directly
 type MuxPlayerRefElement = {
+  paused: boolean;
+  seeking?: boolean;
   currentTime: number;
   readyState: number;
   play: () => Promise<void>;
@@ -68,6 +71,7 @@ export interface MuxPlayerVideoLike {
  * Interface for MuxPlayer component props
  */
 interface MuxPlayerComponentProps {
+  engagement?: SourceOpen;
   /** The video object containing metadata and playback information */
   video: MuxPlayerVideoLike;
   /** Whether to autoplay the video when it loads */
@@ -98,6 +102,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
     startTime,
     className = "",
     onEnded,
+    engagement,
   }: MuxPlayerComponentProps,
   ref
 ) {
@@ -110,6 +115,17 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
     value: string;
   }> | null>(null);
   const chaptersLoadedRef = useRef(false);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (player && !player.paused && !player.seeking && player.readyState >= 3) engagement?.play();
+    const stop = () => engagement?.pause();
+    window.addEventListener("pagehide", stop);
+    return () => {
+      window.removeEventListener("pagehide", stop);
+      engagement?.pause();
+    };
+  }, [engagement]);
 
   // Get the primary color from CSS variables
   useEffect(() => {
@@ -278,6 +294,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
   };
 
   const handleEnded = (e: Event) => {
+    engagement?.pause();
     bold.trackEvent(video, e);
     if (onEnded) onEnded(e);
   };
@@ -325,7 +342,10 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
           className={`w-full h-full relative z-10 ${className}`}
           onTimeUpdate={handleTimeUpdate}
           onPlay={(e) => bold.trackEvent(video, e)}
-          onPause={(e) => bold.trackEvent(video, e)}
+          onPlaying={() => engagement?.play()}
+          onWaiting={() => engagement?.pause()}
+          onSeeking={() => engagement?.pause()}
+          onPause={(e) => { engagement?.pause(); bold.trackEvent(video, e); }}
           onEnded={handleEnded}
           onLoadedMetadata={(e) => {
             bold.trackEvent(video, e);
@@ -365,6 +385,7 @@ export const MuxPlayerComponent = memo(MuxPlayerComponentBase, (prevProps, nextP
   return (
     prevProps.video.playbackId === nextProps.video.playbackId &&
     prevProps.video.id === nextProps.video.id &&
+    prevProps.engagement === nextProps.engagement &&
     prevProps.startTime === nextProps.startTime &&
     prevProps.autoPlay === nextProps.autoPlay &&
     prevProps.currentTime === nextProps.currentTime &&

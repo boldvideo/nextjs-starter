@@ -1,4 +1,5 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { portalClient } from "@/lib/portal-client";
 import { isSearchRequestId } from "@/lib/search-request";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
@@ -177,6 +178,7 @@ export async function POST(request: Request) {
 
   try {
     const options = {
+      ...portalClient,
       prompt,
       limit,
       context: conversationContext,

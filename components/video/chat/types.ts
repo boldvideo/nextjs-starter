@@ -1,4 +1,5 @@
 import type { VoiceCaptionSegment } from "@boldvideo/bold-js";
+import type { AnswerInteraction } from "@/lib/source-engagement";
 
 export type SuggestedAction = {
   id: string;
@@ -11,6 +12,8 @@ export type ToolCall = {
 };
 
 export type Message = {
+  interaction?: AnswerInteraction;
+  interactionId?: string | null;
   id?: string;
   voiceSegments?: readonly VoiceCaptionSegment[];
   role: "user" | "assistant";

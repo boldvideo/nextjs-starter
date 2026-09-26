@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
+import { AnswerInteraction } from "@/lib/source-engagement";
 
 export interface ChatAttachment {
   id: string;
@@ -14,6 +15,8 @@ export interface ChatAttachment {
 }
 
 export interface AIAskMessage {
+  interaction?: AnswerInteraction;
+  interactionId?: string | null;
   id: string;
   role: "user" | "assistant";
   content: string;
@@ -78,6 +81,7 @@ function normalizeBackendAttachment(raw: BackendAttachment): ChatAttachment {
 }
 
 interface ConversationHistoryMessage {
+  interactionId?: string | null;
   id: string;
   role: "user" | "assistant";
   content: string;
@@ -149,6 +153,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
 
       abortControllerRef.current = new AbortController();
       const messageId = `assistant-${Date.now()}`;
+      const interaction = new AnswerInteraction();
       streamingMessageIdRef.current = messageId;
 
       const optimisticAttachments: ChatAttachment[] | undefined =
@@ -167,6 +172,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
         {
           id: messageId,
           role: "assistant",
+          interaction,
           content: "",
           type: "loading",
           sources: [],
@@ -283,6 +289,9 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 break;
 
               case "message_complete": {
+                interaction.complete(event.interactionId);
+                setMessages(prev => prev.map(message => message.id === messageId
+                  ? { ...message, interactionId: event.interactionId } : message));
                 if (event.conversationId) {
                   setConversationId(event.conversationId);
                 }
@@ -562,6 +571,8 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
         loadedMessages.push({
           id: msg.id,
           role: msg.role,
+          interactionId: msg.interactionId,
+          interaction: new AnswerInteraction(msg.interactionId ?? null),
           content: msg.content,
           type: msg.role === "user" ? "text" : "answer",
           sources: msg.sources?.map(normalizeBackendSource),

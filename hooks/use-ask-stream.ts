@@ -8,6 +8,7 @@ import {
 } from "@/lib/ask";
 import type { ChatAttachment } from "@/hooks/use-ai-ask-stream";
 import { createPlaceholderCitations } from "@/lib/citation-helpers";
+import { AnswerInteraction } from "@/lib/source-engagement";
 
 export interface ChatMessage {
   id: string;
@@ -49,6 +50,7 @@ interface SourcesMessage {
 }
 
 interface MessageCompleteMessage {
+  interactionId?: string | null;
   type: "message_complete";
   responseType: "answer" | "clarification"; // camelCase from server
   content: string;
@@ -208,6 +210,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
     }
 
     abortControllerRef.current = new AbortController();
+    const interaction = new AnswerInteraction();
 
     const optimisticAttachments: ChatAttachment[] | undefined =
       images.length > 0
@@ -341,6 +344,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
 
                   addAssistantMessage(accumulatedText, "answer", {
                     synthesizedResponse: {
+                      interaction,
                       success: true,
                       mode: "synthesized",
                       query,
@@ -377,6 +381,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                 break;
 
               case "message_complete": {
+                interaction.complete(message.interactionId);
                 receivedCompleteEvent = true;
                 if (message.conversationId) {
                   conversationIdRef.current = message.conversationId;
@@ -414,6 +419,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
                       : accumulatedCitations;
 
                   const finalResponse: SynthesizedResponse = {
+                    interaction,
                     success: true,
                     mode: "synthesized",
                     query,
@@ -503,6 +509,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       if (!receivedCompleteEvent && accumulatedText && !abortControllerRef.current?.signal.aborted) {
         const placeholderCitations = createPlaceholderCitations(accumulatedText);
         const partialResponse: SynthesizedResponse = {
+          interaction,
           success: true,
           mode: "synthesized",
           query,

@@ -21,6 +21,7 @@ import { getPortalConfig } from "@/lib/portal-config";
 import { cn } from "@/lib/utils";
 import { SearchHit } from "@/lib/search";
 import { getCanonicalVideoPath } from "@/lib/video-path";
+import { sourceUrl } from "@/lib/source-engagement";
 
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -130,16 +131,7 @@ export function SearchCommandDialog() {
     setIsOpen(false);
   }, [setIsOpen]);
 
-  const handleSelect = () => {
-    // Capture is best-effort; navigation must not await persistence or a response.
-    void fetch("/api/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, search_mode: "settled", request_id: crypto.randomUUID() }),
-      keepalive: true,
-    }).catch(() => {});
-    handleClose();
-  };
+  const previewUrl = (path: string) => sourceUrl(path, undefined, { query, requestId: submitId });
 
   const toggleExpand = (videoId: string) => {
     setExpandedVideos((prev) => ({
@@ -256,9 +248,9 @@ export function SearchCommandDialog() {
                 >
                   {/* Thumbnail */}
                   <Link
-                    href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
-                    onClick={handleSelect}
-                    onAuxClick={(event) => { if (event.button === 1) handleSelect(); }}
+                    href={previewUrl(getCanonicalVideoPath(hit.short_id || hit.internal_id))}
+                    onClick={handleClose}
+                    onAuxClick={(event) => { if (event.button === 1) handleClose(); }}
                     className="relative flex-shrink-0 w-full sm:w-48 aspect-video bg-muted rounded-md overflow-hidden border border-border/50"
                   >
                     {hit.thumbnail ? (
@@ -283,9 +275,9 @@ export function SearchCommandDialog() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <Link
-                      href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
-                      onClick={handleSelect}
-                      onAuxClick={(event) => { if (event.button === 1) handleSelect(); }}
+                      href={previewUrl(getCanonicalVideoPath(hit.short_id || hit.internal_id))}
+                      onClick={handleClose}
+                      onAuxClick={(event) => { if (event.button === 1) handleClose(); }}
                       className="block"
                     >
                       <h3 className="font-semibold text-base leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-1">
@@ -310,9 +302,9 @@ export function SearchCommandDialog() {
                         {getVisibleSegments(hit).map((segment, idx) => (
                           <Link
                             key={`${hit.internal_id}-segment-${idx}`}
-                            href={`${getCanonicalVideoPath(hit.short_id || hit.internal_id)}?t=${Math.floor(segment.start_time)}`}
-                            onClick={handleSelect}
-                            onAuxClick={(event) => { if (event.button === 1) handleSelect(); }}
+                            href={previewUrl(`${getCanonicalVideoPath(hit.short_id || hit.internal_id)}?t=${Math.floor(segment.start_time)}`)}
+                            onClick={handleClose}
+                            onAuxClick={(event) => { if (event.button === 1) handleClose(); }}
                             className="flex items-start gap-2 p-1.5 rounded hover:bg-muted transition-colors group/segment"
                           >
                             <div className="flex-shrink-0 mt-0.5">

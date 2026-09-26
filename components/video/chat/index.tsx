@@ -10,6 +10,7 @@ import { useAIStream } from "./use-ai-stream";
 import { timestampToSeconds } from "@/lib/utils/time";
 import { useAIAssistantContext } from "./context";
 import { TimestampPill } from "@/components/timestamp-pill";
+import type { AnswerInteraction } from "@/lib/source-engagement";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { useVideoVoice } from "@/components/video/chat/voice-provider";
@@ -44,7 +45,7 @@ interface AIAssistantProps {
 /**
  * Component to render text with clickable timestamps
  */
-const TextWithTimestamps: React.FC<{ children: string }> = ({ children }) => {
+const TextWithTimestamps: React.FC<{ children: string; interaction?: AnswerInteraction }> = ({ children, interaction }) => {
   const { onTimeClick } = useAIAssistantContext();
   const timestampRegex =
     /\[(\d{2}:)?(\d{2}:)?(\d{2})(?:-(\d{2}:)?(\d{2}:)?(\d{2}))?\]/g;
@@ -56,7 +57,7 @@ const TextWithTimestamps: React.FC<{ children: string }> = ({ children }) => {
   const handleTimestampClick = (seconds: number, _endSeconds?: number) => {
     // Call the onTimeClick callback to seek the video
     if (onTimeClick) {
-      onTimeClick(seconds);
+      onTimeClick(seconds, interaction);
     }
 
     // Scroll to video player
@@ -120,10 +121,10 @@ const TextWithTimestamps: React.FC<{ children: string }> = ({ children }) => {
 /**
  * Process children recursively to find and replace timestamps
  */
-const processChildren = (children: React.ReactNode): React.ReactNode => {
+const processChildren = (children: React.ReactNode, interaction?: AnswerInteraction): React.ReactNode => {
   return React.Children.map(children, (child) => {
     if (typeof child === 'string') {
-      return <TextWithTimestamps>{child}</TextWithTimestamps>;
+      return <TextWithTimestamps interaction={interaction}>{child}</TextWithTimestamps>;
     }
     if (React.isValidElement(child)) {
       const childProps = child.props as { children?: React.ReactNode };
@@ -132,7 +133,7 @@ const processChildren = (children: React.ReactNode): React.ReactNode => {
           child,
           {
             ...(child.props as object),
-            children: processChildren(childProps.children),
+            children: processChildren(childProps.children, interaction),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any -- React.cloneElement generic typing requires any for props spread
           } as any
         );
@@ -494,18 +495,18 @@ export const AIAssistant = ({
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    p: ({ children }) => <p>{processChildren(children)}</p>,
-                    li: ({ children }) => <li>{processChildren(children)}</li>,
+                    p: ({ children }) => <p>{processChildren(children, message.interaction)}</p>,
+                    li: ({ children }) => <li>{processChildren(children, message.interaction)}</li>,
                     strong: ({ children }) => (
-                      <strong>{processChildren(children)}</strong>
+                      <strong>{processChildren(children, message.interaction)}</strong>
                     ),
-                    em: ({ children }) => <em>{processChildren(children)}</em>,
-                    h1: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
-                    h2: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
-                    h3: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
-                    h4: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
-                    h5: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
-                    h6: ({ children }) => <strong className="block my-2">{processChildren(children)}</strong>,
+                    em: ({ children }) => <em>{processChildren(children, message.interaction)}</em>,
+                    h1: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
+                    h2: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
+                    h3: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
+                    h4: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
+                    h5: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
+                    h6: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
                     a: ({ href, children }) => (
                       <a
                         href={href}

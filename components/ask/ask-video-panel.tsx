@@ -7,14 +7,16 @@ import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { MuxPlayerComponent, MuxPlayerVideoLike } from "@/components/players/player-mux";
 import { getCanonicalVideoPath } from "@/lib/video-path";
+import { sourceUrl, type SourceOpen } from "@/lib/source-engagement";
 
 interface AskVideoPanelProps {
+  engagement?: SourceOpen;
   citation: AskCitation | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps) {
+export function AskVideoPanel({ citation, isOpen, onClose, engagement }: AskVideoPanelProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -75,6 +77,7 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
         <div className="aspect-video bg-black flex-shrink-0">
           <MuxPlayerComponent
             video={video}
+            engagement={engagement}
             startTime={startSeconds}
             autoPlay={true}
             className="w-full h-full"
@@ -102,7 +105,7 @@ export function AskVideoPanel({ citation, isOpen, onClose }: AskVideoPanelProps)
 
           {/* Open Full Video Button */}
           <Link
-            href={`${getCanonicalVideoPath(citation.videoId)}?t=${Math.floor(citation.startMs / 1000)}`}
+            href={sourceUrl(`${getCanonicalVideoPath(citation.videoId)}?t=${Math.floor(citation.startMs / 1000)}`, engagement?.interaction.id, undefined, engagement?.interaction.requestId)}
             className="mt-8 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-sm font-medium"
           >
             <ExternalLink className="h-4 w-4" />
