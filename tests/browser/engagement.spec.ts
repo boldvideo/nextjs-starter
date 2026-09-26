@@ -83,6 +83,7 @@ test("preview timestamp opened in a new tab settles only at destination and open
   const popupPromise = context.waitForEvent("page");
   await link.click({ modifiers: ["Control"] });
   const popup = await popupPromise;
+  await popup.waitForLoadState();
   await expect.poll(async () => (await engagement(request)).length).toBe(1);
   const searches = await rows(request, "searches");
   expect(searches.map(row => row.search_mode)).toEqual(["preview", "settled"]);
@@ -135,6 +136,7 @@ test("custom episode/title links retain pending and older answer attribution in 
   const pendingPopup = context.waitForEvent("page");
   await episode.last().click({ modifiers: ["Control"] });
   const pending = await pendingPopup;
+  await pending.waitForLoadState();
   await expect.poll(async () => (await engagement(request)).length).toBe(1);
   expect((await engagement(request))[0].interaction_id).toBe((await rows(request, "chats"))[1].interactionId);
   await pending.close();
@@ -143,6 +145,7 @@ test("custom episode/title links retain pending and older answer attribution in 
   const oldPopup = context.waitForEvent("page");
   await title.first().click({ modifiers: ["Control"] });
   const old = await oldPopup;
+  await old.waitForLoadState();
   await expect.poll(async () => (await engagement(request)).length).toBe(2);
   expect((await engagement(request))[1].interaction_id).toBe(first);
   await old.close();
@@ -156,6 +159,7 @@ test("a new-tab source retains pending completion independently of the inline pl
   const popupPromise = context.waitForEvent("page");
   await link.click({ modifiers: ["Control"] });
   const popup = await popupPromise;
+  await popup.waitForLoadState();
   await expect.poll(async () => (await engagement(request)).filter(row => row.n === "source_open").length).toBe(2);
   const opens = (await engagement(request)).filter(row => row.n === "source_open");
   expect(opens[0].interaction_id).toBe(opens[1].interaction_id);
