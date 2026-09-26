@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import { AskCitation } from "@/lib/ask";
 import { buildVideoUrl } from "@/lib/video-path";
+import { sourceUrl } from "@/lib/source-engagement";
 import { cn } from "@/lib/utils";
 import { remarkCitations } from "@/lib/remark-citations";
 import { PROSE_CLASS } from "@/lib/prose";
@@ -191,6 +192,8 @@ function CodeBlock({
 interface MarkdownSectionProps {
   content: string;
   citations: AskCitation[];
+  interactionId?: string | null;
+  answerRequestId?: string;
   citationDisplayNumberById?: Map<string, number>;
   onCitationClick: (citation: AskCitation) => void;
   isStreaming: boolean;
@@ -200,6 +203,8 @@ interface MarkdownSectionProps {
 const MarkdownSection = React.memo(function MarkdownSection({
   content,
   citations,
+  interactionId,
+  answerRequestId,
   citationDisplayNumberById,
   onCitationClick,
   isStreaming,
@@ -335,7 +340,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
         if (mentioned) {
           return (
             <Link
-              href={buildVideoUrl({ id: mentioned.videoId })}
+              href={sourceUrl(buildVideoUrl({ id: mentioned.videoId }), interactionId, undefined, answerRequestId)}
               className={cn(
                 "font-semibold text-foreground no-underline",
                 "border-b border-primary/40 hover:border-primary",
@@ -419,6 +424,8 @@ const MarkdownSection = React.memo(function MarkdownSection({
     };
   }, [
     citations,
+    interactionId,
+    answerRequestId,
     citationDisplayNumberById,
     renderCitationBadge,
     renderFallbackBadge,
@@ -434,6 +441,8 @@ const MarkdownSection = React.memo(function MarkdownSection({
 interface AskMessageCardProps {
   content: string;
   citations: AskCitation[];
+  interactionId?: string | null;
+  answerRequestId?: string;
   aiName: string;
   aiAvatar?: string;
   onCitationClick: (citation: AskCitation) => void;
@@ -445,6 +454,8 @@ interface AskMessageCardProps {
 export function AskMessageCard({
   content,
   citations,
+  interactionId,
+  answerRequestId,
   onCitationClick,
   isStreaming,
   citationDisplayNumberById,
@@ -477,6 +488,8 @@ export function AskMessageCard({
 
   const sectionProps = {
     citations,
+    interactionId,
+    answerRequestId,
     citationDisplayNumberById,
     onCitationClick,
     isStreaming: streaming,

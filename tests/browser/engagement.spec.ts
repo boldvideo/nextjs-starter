@@ -120,6 +120,31 @@ test("Ask keeps an older answer's explicit source ID after a newer answer and re
   if (process.env.REVIEW_SCREENSHOT) await page.screenshot({ path: process.env.REVIEW_SCREENSHOT });
 });
 
+test("episode links retain pending and older answer attribution in new tabs", async ({ page, request, context }) => {
+  await page.goto("/ask?q=mentions");
+  const episode = page.getByRole("link", { name: /^Episode 8/ });
+  await expect(episode.first()).toHaveAttribute("href", /interaction_id=/);
+  const first = (await rows(request, "chats"))[0].interactionId;
+  const input = page.locator("textarea").filter({ visible: true });
+  await input.fill("mentions-pending");
+  await input.press("Enter");
+  await expect(episode).toHaveCount(2);
+  await expect(episode.last()).toHaveAttribute("href", /answer_request_id=/);
+  const pendingPopup = context.waitForEvent("page");
+  await episode.last().click({ modifiers: ["Control"] });
+  const pending = await pendingPopup;
+  await expect.poll(async () => (await engagement(request)).length).toBe(1);
+  expect((await engagement(request))[0].interaction_id).toBe((await rows(request, "chats"))[1].interactionId);
+  await pending.close();
+  await expect(episode.first()).toHaveAttribute("href", new RegExp(`interaction_id=${first}`));
+  const oldPopup = context.waitForEvent("page");
+  await episode.first().click({ modifiers: ["Control"] });
+  const old = await oldPopup;
+  await expect.poll(async () => (await engagement(request)).length).toBe(2);
+  expect((await engagement(request))[1].interaction_id).toBe(first);
+  await old.close();
+});
+
 test("a new-tab source retains pending completion independently of the inline player", async ({ page, request, context }) => {
   await page.goto("/ask?q=pending");
   await page.getByRole("button", { name: /Source 1:/ }).first().click();
