@@ -1,7 +1,9 @@
 "use client";
 
 import { Player } from "@/components/players";
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
+import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
+import { useSourceNavigation } from "@/hooks/use-source-navigation";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import type { Settings, Playlist } from "@boldvideo/bold-js";
@@ -43,6 +45,8 @@ export function VideoDetail({
 }: VideoDetailProps): React.JSX.Element {
   const router = useRouter();
   const playerRef = useRef<HTMLVideoElement | null>(null);
+  const navigationOpen = useSourceNavigation(video.id);
+  const [chatOpen, setChatOpen] = useState<{ open: SourceOpen; navigation: SourceOpen | undefined }>();
 
   // Single source of truth for AI name/avatar/greeting (account.ai settings)
   const aiConfig = getPortalConfig(settings).ai;
@@ -78,6 +82,11 @@ export function VideoDetail({
     }
   }, []);
 
+  const handleSourceTimeSelect = useCallback((time: number, interaction?: AnswerInteraction) => {
+    setChatOpen({ open: new SourceOpen(video.id, interaction ?? new AnswerInteraction(null)), navigation: navigationOpen });
+    handleTimeSelect(time);
+  }, [video.id, handleTimeSelect, navigationOpen]);
+
   const {
     hasNext: hasNextVideo,
     next: nextVideo,
@@ -90,7 +99,7 @@ export function VideoDetail({
   }, [isAutoplay, hasNextVideo, nextVideo, playlist, router]);
 
   return (
-    <AIAssistantProvider onTimeClick={handleTimeSelect}>
+    <AIAssistantProvider key={video.id} onTimeClick={handleSourceTimeSelect}>
       <Breadcrumb label={video.title} />
       <VideoDetailLayout
         hasPlaylist={!!playlist}
@@ -101,6 +110,7 @@ export function VideoDetail({
             video={video as any}
             autoPlay={true}
             ref={playerRef}
+            engagement={chatOpen?.open.videoId === video.id && chatOpen.navigation === navigationOpen ? chatOpen.open : navigationOpen}
             startTime={effectiveStartTime}
             className="w-full h-full"
             isOutOfView={isOutOfView}

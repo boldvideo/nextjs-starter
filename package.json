@@ -7,12 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test": "bun test tests/source-engagement.test.ts",
+    "test:browser": "playwright test",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "changeset publish"
   },
   "dependencies": {
-    "@boldvideo/bold-js": "1.20.0",
+    "@boldvideo/bold-js": "^1.30.0",
     "@boldvideo/ui": "^0.2.0",
     "@mux/mux-player-react": "^3.6.1",
     "@types/mdast": "^4.0.4",
@@ -47,6 +49,7 @@
     "@changesets/cli": "^2.29.6",
     "@eslint/eslintrc": "^3.3.1",
     "@next/eslint-plugin-next": "^16.0.4",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.1.14",
     "@tailwindcss/typography": "^0.5.19",
     "@types/hast": "^3.0.4",

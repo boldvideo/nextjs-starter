@@ -27,6 +27,7 @@ import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 import { PoweredByBold } from "@/components/powered-by-bold";
+import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
 
 type PageState =
   | { status: "idle" }
@@ -46,6 +47,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [sourceOpen, setSourceOpen] = useState<SourceOpen>();
   const [images, setImages] = useState<File[]>([]);
 
   const settings = useSettings();
@@ -224,14 +226,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     return () => window.removeEventListener("bold:ask-new-chat", onNewChat);
   }, [reset, stop]);
 
-  const handleCitationClick = useCallback((citation: AskCitation) => {
+  const handleCitationClick = useCallback((citation: AskCitation, interaction?: AnswerInteraction) => {
+    setSourceOpen(interaction ? new SourceOpen(citation.videoId, interaction) : undefined);
     setSelectedCitation(citation);
     setIsPanelOpen(true);
-  }, []);
-
-  const handleSelectCitation = useCallback((citation: AskCitation | null) => {
-    setSelectedCitation(citation);
-    setIsPanelOpen(!!citation);
   }, []);
 
   const handleClosePanel = useCallback(() => {
@@ -418,6 +416,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   // The sources rail always reflects the latest answer.
   const lastPair = qaPairs[qaPairs.length - 1];
+  const selectedPair = sourceOpen && qaPairs.find(pair => pair.assistantMessage?.interaction === sourceOpen.interaction);
 
   if (pageState.status === "loading") {
     return <AskLoadingState />;
@@ -530,7 +529,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                       citations={pair.citations}
                       aiName={aiName}
                       aiAvatar={aiAvatar}
-                      onCitationClick={handleCitationClick}
+                      onCitationClick={citation => handleCitationClick(citation, pair.assistantMessage?.interaction)}
                       isStreaming={isCurrentlyStreaming}
                       citationDisplayNumberById={pair.citationDisplayNumberById}
                       selectedCitationId={selectedCitation?.id}
@@ -542,7 +541,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     <div className="lg:hidden">
                       <AskSourcesCarousel
                         citations={pair.orderedCitations}
-                        onCitationClick={handleCitationClick}
+                        onCitationClick={citation => handleCitationClick(citation, pair.assistantMessage?.interaction)}
                         selectedCitationId={selectedCitation?.id}
                       />
                     </div>
@@ -607,10 +606,13 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       {/* Sources rail (desktop) — expands into the video source panel */}
       {isDesktop && (
         <AskSourcesRail
-          citations={lastPair?.orderedCitations ?? []}
-          displayNumberById={lastPair?.citationDisplayNumberById}
+          citations={(selectedCitation ? selectedPair : lastPair)?.orderedCitations ?? []}
+          displayNumberById={(selectedCitation ? selectedPair : lastPair)?.citationDisplayNumberById}
           selectedCitation={selectedCitation}
-          onSelect={handleSelectCitation}
+          engagement={sourceOpen}
+          onSelect={citation => citation
+            ? handleCitationClick(citation, selectedCitation ? sourceOpen?.interaction : lastPair?.assistantMessage?.interaction)
+            : handleClosePanel()}
           isStreaming={isStreaming}
         />
       )}
@@ -619,6 +621,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       {!isDesktop && (
         <AskVideoPanel
           citation={selectedCitation}
+          engagement={sourceOpen}
           isOpen={isPanelOpen}
           onClose={handleClosePanel}
         />

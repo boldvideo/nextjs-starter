@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useAIAssistantContext } from "./context"; // Import context hook
 import type { Message } from "./types"; // Import Message type from types.ts
+import { AnswerInteraction } from "@/lib/source-engagement";
 
 export type { Message }; // Re-export Message type
 
@@ -8,7 +9,8 @@ type AIResponseHandler = (
   question: string,
   conversationId: string | null,
   appendChunk?: (chunk: string) => void,
-  actionData?: { label: string; value: string }
+  actionData?: { label: string; value: string },
+  interaction?: AnswerInteraction
 ) => Promise<void>;
 
 interface UseAIAssistantProps {
@@ -42,6 +44,7 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
         return [
           ...previousMessages,
           {
+            ...lastMessage,
             role: "assistant",
             content: lastMessage.content + chunk,
           },
@@ -105,12 +108,13 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
     }
 
     // Create temporary message for response & add it
-    const tempMessage: Message = { role: "assistant", content: "" };
+    const interaction = new AnswerInteraction();
+    const tempMessage: Message = { role: "assistant", content: "", interaction };
     setMessages((prev) => [...prev, tempMessage]);
 
     try {
       const actionData = isAction && displayLabel ? { label: displayLabel, value: question } : undefined;
-      await onAskQuestion(question, conversationId, appendChunk, actionData);
+      await onAskQuestion(question, conversationId, appendChunk, actionData, interaction);
     } catch (error) {
       handleError(error as Error);
     } finally {
