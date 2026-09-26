@@ -1,4 +1,5 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
@@ -60,6 +61,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       }> | undefined;
       return JSON.stringify({
         type: "message_complete",
+        interactionId: event.interactionId,
         responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
         sources: completeSources.map((s: Segment) => ({
@@ -233,6 +235,7 @@ export async function POST(request: Request) {
 
   try {
     const stream = await context.client.ai.ask({
+      ...portalClient,
       prompt,
       stream: true,
       conversationId,

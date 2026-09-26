@@ -1,24 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Play, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { SearchHit } from "@/lib/search";
+import { SearchHit, SearchResponse } from "@/lib/search";
+import { isSearchRequestId } from "@/lib/search-request";
 import { formatTime } from "@/lib/utils";
 import { getCanonicalVideoPath } from "@/lib/video-path";
+import { sourceUrl } from "@/lib/source-engagement";
 
 /**
  * Individual search result component
  */
-function SearchResult({ hit }: { hit: SearchHit }) {
+function SearchResult({ hit, interactionId }: { hit: SearchHit; interactionId?: string | null }) {
   return (
     <div className="p-6 rounded-lg hover:bg-background transition-colors">
       <div className="flex flex-col sm:flex-row items-start gap-6">
         <div className="relative flex-shrink-0 w-full sm:w-auto mb-3 sm:mb-0">
           <Link
-            href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
+            href={sourceUrl(getCanonicalVideoPath(hit.short_id || hit.internal_id), interactionId)}
             className="block group"
           >
             {hit.thumbnail ? (
@@ -41,7 +43,7 @@ function SearchResult({ hit }: { hit: SearchHit }) {
         </div>
         <div className="flex-1 min-w-0 w-full">
           <Link
-            href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
+            href={sourceUrl(getCanonicalVideoPath(hit.short_id || hit.internal_id), interactionId)}
             className="block group"
           >
             <h3 className="text-2xl font-semibold mb-3 group-hover:text-primary">
@@ -59,9 +61,9 @@ function SearchResult({ hit }: { hit: SearchHit }) {
               {hit.segments.map((segment, idx) => (
                 <Link
                   key={`${hit.internal_id}-segment-${idx}`}
-                  href={`${getCanonicalVideoPath(hit.short_id || hit.internal_id)}?t=${Math.floor(
+                  href={sourceUrl(`${getCanonicalVideoPath(hit.short_id || hit.internal_id)}?t=${Math.floor(
                     segment.start_time
-                  )}`}
+                  )}`, interactionId)}
                   className="block py-2 hover:bg-primary/10 dark:hover:bg-primary/20 rounded-md -mx-2 px-2"
                 >
                   <div className="flex items-start gap-3">
@@ -144,46 +146,68 @@ function NoResultsState() {
 export function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams?.get("q") || "";
+  const requestId = searchParams?.get("request_id");
+  const action = useRef<{ query: string; requestId: string; result: Promise<SearchResponse> } | null>(null);
 
   const [results, setResults] = useState<SearchHit[]>([]);
+  const [interactionId, setInteractionId] = useState<string | null>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
   useEffect(() => {
     if (!query) {
+      action.current = null;
       setResults([]);
       return;
     }
 
+    // Put direct visits on the same navigation-scoped contract as modal submits.
+    // Read the live URL so Strict Mode's second setup sees the ID just installed.
+    const url = new URL(window.location.href);
+    let id = url.searchParams.get("request_id");
+    if (!isSearchRequestId(id)) {
+      id = crypto.randomUUID();
+      url.searchParams.set("request_id", id);
+      window.history.replaceState(window.history.state, "", url);
+    }
+    if (action.current?.query !== query || action.current.requestId !== id) {
+      action.current = {
+        query,
+        requestId: id,
+        result: fetch("/api/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, search_mode: "settled", request_id: id }),
+        }).then(async (response) => {
+          if (!response.ok) throw new Error(`Search failed with status ${response.status}`);
+          return response.json();
+        }),
+      };
+    }
+    const result = action.current.result;
+    let active = true;
     const fetchResults = async () => {
       setIsLoading(true);
       setError(undefined);
 
       try {
-        const response = await fetch("/api/search", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Search failed with status ${response.status}`);
+        const data = await result;
+        if (active) {
+          setResults(data.hits || []);
+          setInteractionId(data.interaction_id);
         }
-
-        const data = await response.json();
-        setResults(data.hits || []);
       } catch (err) {
+        if (!active) return;
         console.error("[Search Page] Error:", err);
         setError(err instanceof Error ? err.message : "Search failed");
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     };
 
     fetchResults();
-  }, [query]);
+    return () => { active = false; };
+  }, [query, requestId]);
 
   if (!query) {
     return <EmptyQueryState />;
@@ -205,7 +229,7 @@ export function SearchResults() {
               </p>
               <div className="space-y-6">
                 {results.map((hit, index) => (
-                  <SearchResult key={`${hit.internal_id}-${index}`} hit={hit} />
+                  <SearchResult key={`${hit.internal_id}-${index}`} hit={hit} interactionId={interactionId} />
                 ))}
               </div>
             </>
