@@ -29,6 +29,8 @@ export type SearchHit = {
 };
 
 export type SearchResponse = {
+  // Best-effort capture identifier, not acknowledgement of durable persistence.
+  interaction_id?: string | null;
   hits: SearchHit[];
   page: number;
   per_page: number;

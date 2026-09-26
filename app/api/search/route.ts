@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { isSearchRequestId } from "@/lib/search-request";
 
 // Handle GET requests
 export async function GET(request: NextRequest) {
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest) {
   // Support both 'q' and 'query' parameter names for compatibility
   const query = searchParams.get("q") || searchParams.get("query");
 
-  return processSearch(query);
+  return processSearch(query, searchParams.get("search_mode") ?? undefined, searchParams.get("request_id") ?? undefined);
 }
 
 // Handle POST requests to avoid URL parsing issues
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const query = body.query || body.q;
 
-    return processSearch(query);
+    return processSearch(query, body.search_mode, body.request_id);
   } catch (error) {
     console.error("[Search API] POST parsing error:", error);
     return NextResponse.json(
@@ -27,12 +28,17 @@ export async function POST(request: NextRequest) {
 }
 
 // Common search processing function
-async function processSearch(query: string | null) {
-  if (!query) {
+async function processSearch(query: unknown, searchMode: unknown = "settled", requestId?: unknown) {
+  if (typeof query !== "string" || !query.trim()) {
     return NextResponse.json(
       { error: "Missing query parameter" },
       { status: 400 }
     );
+  }
+
+  if ((searchMode !== "preview" && searchMode !== "settled") ||
+      (requestId !== undefined && !isSearchRequestId(requestId))) {
+    return NextResponse.json({ error: "Invalid search_mode or request_id" }, { status: 400 });
   }
 
   // Get tenant context for multitenancy support
@@ -65,6 +71,8 @@ async function processSearch(query: string | null) {
     // Safely construct the URL
     const endpointUrl = new URL("/api/v1/search", baseUrl);
     endpointUrl.searchParams.append("query", query);
+    endpointUrl.searchParams.set("search_mode", searchMode);
+    if (isSearchRequestId(requestId)) endpointUrl.searchParams.set("request_id", requestId);
 
     const endpoint = endpointUrl.toString();
 

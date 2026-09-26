@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Play, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { SearchHit } from "@/lib/search";
+import { SearchHit, SearchResponse } from "@/lib/search";
+import { isSearchRequestId } from "@/lib/search-request";
 import { formatTime } from "@/lib/utils";
 import { getCanonicalVideoPath } from "@/lib/video-path";
 
@@ -144,6 +145,8 @@ function NoResultsState() {
 export function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams?.get("q") || "";
+  const requestId = searchParams?.get("request_id");
+  const action = useRef<{ query: string; requestId: string; result: Promise<SearchResponse> } | null>(null);
 
   const [results, setResults] = useState<SearchHit[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -151,39 +154,55 @@ export function SearchResults() {
 
   useEffect(() => {
     if (!query) {
+      action.current = null;
       setResults([]);
       return;
     }
 
+    // Put direct visits on the same navigation-scoped contract as modal submits.
+    // Read the live URL so Strict Mode's second setup sees the ID just installed.
+    const url = new URL(window.location.href);
+    let id = url.searchParams.get("request_id");
+    if (!isSearchRequestId(id)) {
+      id = crypto.randomUUID();
+      url.searchParams.set("request_id", id);
+      window.history.replaceState(window.history.state, "", url);
+    }
+    if (action.current?.query !== query || action.current.requestId !== id) {
+      action.current = {
+        query,
+        requestId: id,
+        result: fetch("/api/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, search_mode: "settled", request_id: id }),
+        }).then(async (response) => {
+          if (!response.ok) throw new Error(`Search failed with status ${response.status}`);
+          return response.json();
+        }),
+      };
+    }
+    const result = action.current.result;
+    let active = true;
     const fetchResults = async () => {
       setIsLoading(true);
       setError(undefined);
 
       try {
-        const response = await fetch("/api/search", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Search failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        setResults(data.hits || []);
+        const data = await result;
+        if (active) setResults(data.hits || []);
       } catch (err) {
+        if (!active) return;
         console.error("[Search Page] Error:", err);
         setError(err instanceof Error ? err.message : "Search failed");
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     };
 
     fetchResults();
-  }, [query]);
+    return () => { active = false; };
+  }, [query, requestId]);
 
   if (!query) {
     return <EmptyQueryState />;
