@@ -96,6 +96,7 @@ test("Ask keeps an older answer's explicit source ID after a newer answer and re
   const citation = page.getByRole("button", { name: /Source 1:/ }).first();
   await expect(citation).toBeVisible();
   await expect.poll(async () => (await rows(request, "chats")).length).toBe(1);
+  expect((await rows(request, "chats"))[0]).toMatchObject({ channel: "portal", client_name: "nextjs-starter" });
   const first = (await rows(request, "chats"))[0].interactionId;
   const input = page.locator("textarea").filter({ visible: true });
   await expect(input).toBeEnabled();
@@ -144,6 +145,7 @@ test("video chat timestamp uses its answer interaction; missing ID never emits e
   await expect(timestamp).toBeVisible();
   await timestamp.click();
   await expect.poll(async () => (await engagement(request)).length).toBe(1);
+  expect((await rows(request, "chats"))[0]).toMatchObject({ channel: "portal", client_name: "nextjs-starter" });
   expect((await engagement(request))[0].interaction_id).toBe((await rows(request, "chats"))[0].interactionId);
   await input.fill("no-id");
   await input.press("Enter");
@@ -167,8 +169,7 @@ test("early EOF settles an unanswered interaction as null instead of leaving a p
   expect(await engagement(request)).toHaveLength(0);
 });
 
-test("SDK 1.30 release gate: all AI proxies forward portal metadata and completion IDs", async ({ request }) => {
-  test.skip(!process.env.TEST_SDK_NEXT, "Requires local SDK preview or released 1.30+, not the committed 1.29 dependency");
+test("all AI proxies forward portal metadata and completion IDs through the published SDK", async ({ request }) => {
   for (const [path, data] of [
     ["/api/ai-ask", { prompt: "test", channel: "mcp", viewer: "forged" }],
     ["/api/coach", { message: "test" }],
@@ -182,6 +183,7 @@ test("SDK 1.30 release gate: all AI proxies forward portal metadata and completi
     expect(chat.viewer).toBeUndefined();
     expect(text).toContain(`"interactionId":"${chat.interactionId}"`);
   }
-  await request.post("/api/ai-search", { data: { prompt: "test", request_id: crypto.randomUUID(), stream: false } });
+  const response = await request.post("/api/ai-search", { data: { prompt: "test", request_id: crypto.randomUUID(), stream: false } });
+  expect(response.ok()).toBe(true);
   expect((await rows(request, "ai-searches")).at(-1)).toMatchObject({ channel: "portal", client_name: "nextjs-starter" });
 });
