@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "bun test tests/video-voice.test.ts",
+    "test": "bun test tests/video-voice.test.ts tests/source-engagement.test.ts",
     "test:browser": "playwright test",
     "changeset": "changeset",
     "version": "changeset version",

@@ -1,8 +1,17 @@
 import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const recorded = async (request: APIRequestContext): Promise<Record<string, string>[]> =>
-  (await request.get("http://127.0.0.1:4311/test/searches")).json();
+const recorded = async (request: APIRequestContext): Promise<Record<string, string>[]> => {
+  const rows: Record<string, string>[] = await (await request.get("http://127.0.0.1:4311/test/searches")).json();
+  return rows.map(row => {
+    expect(row.channel).toBe("portal");
+    expect(row.client_name).toBe("nextjs-starter");
+    const search = { ...row };
+    delete search.channel;
+    delete search.client_name;
+    return search;
+  });
+};
 
 async function preview(page: Page) {
   await page.keyboard.press("Control+k");
@@ -29,7 +38,7 @@ for (const action of ["Enter", "See all", "title", "thumbnail", "timestamp"]) {
     else if (action === "See all") await page.getByRole("link", { name: /See all results/ }).click();
     else if (action === "title") await page.getByRole("link", { name: /Result for pricing/ }).click();
     else if (action === "timestamp") await page.getByRole("link", { name: /Pricing moment/ }).click();
-    else await page.locator('a[href="/v/voice-demo"]').first().click();
+    else await page.locator('a[href^="/v/voice-demo?"]').first().click();
     await expect.poll(async () => (await recorded(request)).filter(r => r.search_mode === "settled").length).toBe(1);
     await page.waitForTimeout(500);
     const searches = await recorded(request);
@@ -46,7 +55,9 @@ for (const action of ["Enter", "See all", "title", "thumbnail", "timestamp"]) {
       const settled = (await recorded(request)).filter(r => r.search_mode === "settled");
       expect(settled[1].request_id).not.toBe(settled[0].request_id);
     } else {
-      await expect(page).toHaveURL(action === "timestamp" ? /\/v\/voice-demo\?t=83$/ : /\/v\/voice-demo$/);
+      await expect(page).toHaveURL(/\/v\/voice-demo\?/);
+      expect(new URL(page.url()).searchParams.get("search_request_id")).toBe(searches[3].request_id);
+      if (action === "timestamp") expect(new URL(page.url()).searchParams.get("t")).toBe("83");
     }
   });
 }
@@ -157,7 +168,7 @@ test("AI proxy forwards action metadata through the published SDK and preserves 
   expect((await complete(false, "settled")).interactionId).toBe(first.interactionId);
   expect((await complete(true, "settled", crypto.randomUUID())).interactionId).not.toBe(first.interactionId);
   const records = await (await request.get("http://127.0.0.1:4311/test/ai-searches")).json();
-  expect(records.slice(0, 4)).toEqual([
+  expect(records.slice(0, 4)).toMatchObject([
     { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "preview" },
     { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "preview", stream: false },
     { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "settled" },

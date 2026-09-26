@@ -10,6 +10,7 @@ import {
   MuxPlayerVideoLike,
 } from "@/components/players/player-mux";
 import { getCanonicalVideoPath } from "@/lib/video-path";
+import { sourceUrl, type SourceOpen } from "@/lib/source-engagement";
 
 interface FramePreview {
   citation: AskCitation;
@@ -61,6 +62,7 @@ function MomentFramePreview({ preview }: { preview: FramePreview }) {
 }
 
 interface AskSourcesRailProps {
+  engagement?: SourceOpen;
   citations: AskCitation[];
   displayNumberById?: Map<string, number>;
   selectedCitation: AskCitation | null;
@@ -76,6 +78,7 @@ interface AskSourcesRailProps {
  * and the episode's other cited moments.
  */
 export function AskSourcesRail({
+  engagement,
   citations,
   displayNumberById,
   selectedCitation,
@@ -107,6 +110,7 @@ export function AskSourcesRail({
   if (selectedCitation) {
     return (
       <VideoSourcePanel
+        engagement={engagement}
         citation={selectedCitation}
         citations={citations}
         onSelect={onSelect}
@@ -204,12 +208,14 @@ export function AskSourcesRail({
 }
 
 function VideoSourcePanel({
+  engagement,
   citation,
   citations,
   onSelect,
   onClose,
   className,
 }: {
+  engagement?: SourceOpen;
   citation: AskCitation;
   citations: AskCitation[];
   onSelect: (citation: AskCitation) => void;
@@ -259,6 +265,7 @@ function VideoSourcePanel({
         >
           <MuxPlayerComponent
             video={video}
+            engagement={engagement}
             startTime={startSeconds}
             autoPlay={false}
             className="w-full h-full"
@@ -278,7 +285,7 @@ function VideoSourcePanel({
         )}
 
         <Link
-          href={`${getCanonicalVideoPath(citation.videoId)}?t=${startSeconds}`}
+          href={sourceUrl(`${getCanonicalVideoPath(citation.videoId)}?t=${startSeconds}`, engagement?.interaction.id, undefined, engagement?.interaction.requestId)}
           className={cn(
             "flex items-center justify-center gap-2 w-full h-[42px] rounded-lg",
             "border border-border bg-muted text-sm font-medium",

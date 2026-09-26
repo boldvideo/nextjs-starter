@@ -72,6 +72,8 @@ async function processSearch(query: unknown, searchMode: unknown = "settled", re
     const endpointUrl = new URL("/api/v1/search", baseUrl);
     endpointUrl.searchParams.append("query", query);
     endpointUrl.searchParams.set("search_mode", searchMode);
+    endpointUrl.searchParams.set("channel", "portal");
+    endpointUrl.searchParams.set("client_name", "nextjs-starter");
     if (isSearchRequestId(requestId)) endpointUrl.searchParams.set("request_id", requestId);
 
     const endpoint = endpointUrl.toString();

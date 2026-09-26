@@ -4,6 +4,7 @@ import { forwardRef, memo } from "react";
 import { MuxPlayerComponent } from "./player-mux";
 import type { MuxPlayerVideoLike } from "./player-mux";
 import { extractYouTubeId, YouTubePlayerComponent } from "./player-youtube";
+import type { SourceOpen } from "@/lib/source-engagement";
 
 type SmartPlayerVideo = MuxPlayerVideoLike & {
   importedFrom?: string | null;
@@ -12,6 +13,7 @@ type SmartPlayerVideo = MuxPlayerVideoLike & {
 };
 
 interface SmartPlayerProps {
+  engagement?: SourceOpen;
   video: SmartPlayerVideo;
   autoPlay?: boolean;
   onTimeUpdate?: (e: Event) => void;

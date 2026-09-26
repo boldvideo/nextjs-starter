@@ -17,6 +17,8 @@ const settings = {
 };
 const searches: Record<string, string>[] = [];
 const aiSearches: Record<string, unknown>[] = [];
+const events: Record<string, unknown>[] = [];
+const chats: Record<string, unknown>[] = [];
 const interactions = new Map<string, string>();
 createServer((request, response) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
@@ -25,6 +27,32 @@ createServer((request, response) => {
   if (request.method === "OPTIONS") { response.end(); return; }
   const path = request.url ?? "";
   const url = new URL(path, "http://localhost");
+  if (url.pathname === "/test/events" || url.pathname === "/test/chats") {
+    const rows = url.pathname === "/test/events" ? events : chats;
+    if (request.method === "DELETE") rows.length = 0;
+    response.end(JSON.stringify(rows));
+    return;
+  }
+  if (url.pathname === "/api/v1/event" || (url.pathname.includes("/ai/") && url.pathname.includes("/chat") && request.method === "POST")) {
+    let body = "";
+    request.on("data", chunk => { body += chunk; });
+    request.on("end", () => {
+      const input = JSON.parse(body);
+      if (url.pathname === "/api/v1/event") {
+        events.push({ ...input, trustedTenant: request.headers.authorization === process.env.EXPECTED_API_KEY });
+        response.end("{}");
+        return;
+      }
+      const interactionId = crypto.randomUUID();
+      chats.push({ ...input, path: url.pathname, interactionId });
+      const source = { id: "c_abc123", video_id: video.id, title: video.title, timestamp: 83, text: "Pricing source", playback_id: "voice-demo" };
+      response.setHeader("Content-Type", "text/event-stream");
+      response.write(`data: ${JSON.stringify({ type: "sources", sources: [source] })}\n\n`);
+      response.write(`data: ${JSON.stringify({ type: "text_delta", delta: "Watch [1] and [01:23] for pricing." })}\n\n`);
+      setTimeout(() => response.end(`data: ${JSON.stringify({ type: "message_complete", content: "Watch [1] and [01:23] for pricing.", citations: [source], interaction_id: input.prompt === "no-id" ? null : interactionId, response_type: "answer" })}\n\ndata: [DONE]\n\n`), input.prompt === "pending" ? 2500 : 0);
+    });
+    return;
+  }
   if (url.pathname === "/test/ai-searches") {
     if (request.method === "DELETE") aiSearches.length = 0;
     response.end(JSON.stringify(aiSearches));
