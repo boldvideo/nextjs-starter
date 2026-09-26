@@ -21,6 +21,7 @@ import { getPortalConfig } from "@/lib/portal-config";
 import { cn } from "@/lib/utils";
 import { SearchHit } from "@/lib/search";
 import { getCanonicalVideoPath } from "@/lib/video-path";
+import { sourceUrl } from "@/lib/source-engagement";
 
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -53,6 +54,7 @@ export function SearchCommandDialog() {
   const config = getPortalConfig(settings);
   const { isOpen, setIsOpen } = useSearch();
   const [query, setQuery] = useState("");
+  const [submitId, setSubmitId] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -83,10 +85,12 @@ export function SearchCommandDialog() {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
+    setResults([]);
+    setError(undefined);
+    setIsLoading(isOpen && !!query.trim());
+    if (!isOpen || !query.trim()) return;
+
+    const controller = new AbortController();
 
     const timer = setTimeout(async () => {
       setIsLoading(true);
@@ -98,7 +102,8 @@ export function SearchCommandDialog() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify({ query, search_mode: "preview" }),
+          signal: controller.signal,
         });
 
         if (!response.ok) {
@@ -106,21 +111,27 @@ export function SearchCommandDialog() {
         }
 
         const data = await response.json();
-        setResults(data.hits || []);
+        if (!controller.signal.aborted) setResults(data.hits || []);
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error("[Search] Error:", err);
         setError(err instanceof Error ? err.message : "Search failed");
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }, 300);
 
-    return () => clearTimeout(timer);
-  }, [query]);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query, isOpen]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
   }, [setIsOpen]);
+
+  const previewUrl = (path: string) => sourceUrl(path, undefined, { query, requestId: submitId });
 
   const toggleExpand = (videoId: string) => {
     setExpandedVideos((prev) => ({
@@ -139,7 +150,7 @@ export function SearchCommandDialog() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    router.push(`/s?q=${encodeURIComponent(query)}`);
+    router.push(`/s?q=${encodeURIComponent(query)}&request_id=${submitId}`);
     handleClose();
   };
 
@@ -192,7 +203,10 @@ export function SearchCommandDialog() {
               placeholder="Search videos, transcripts..."
               className="w-full h-10 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/20 text-lg placeholder:text-muted-foreground px-3 shadow-sm"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSubmitId(crypto.randomUUID());
+              }}
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -234,8 +248,9 @@ export function SearchCommandDialog() {
                 >
                   {/* Thumbnail */}
                   <Link
-                    href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
+                    href={previewUrl(getCanonicalVideoPath(hit.short_id || hit.internal_id))}
                     onClick={handleClose}
+                    onAuxClick={(event) => { if (event.button === 1) handleClose(); }}
                     className="relative flex-shrink-0 w-full sm:w-48 aspect-video bg-muted rounded-md overflow-hidden border border-border/50"
                   >
                     {hit.thumbnail ? (
@@ -260,8 +275,9 @@ export function SearchCommandDialog() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <Link
-                      href={getCanonicalVideoPath(hit.short_id || hit.internal_id)}
+                      href={previewUrl(getCanonicalVideoPath(hit.short_id || hit.internal_id))}
                       onClick={handleClose}
+                      onAuxClick={(event) => { if (event.button === 1) handleClose(); }}
                       className="block"
                     >
                       <h3 className="font-semibold text-base leading-tight mb-1 group-hover:text-primary transition-colors line-clamp-1">
@@ -286,8 +302,9 @@ export function SearchCommandDialog() {
                         {getVisibleSegments(hit).map((segment, idx) => (
                           <Link
                             key={`${hit.internal_id}-segment-${idx}`}
-                            href={`${getCanonicalVideoPath(hit.short_id || hit.internal_id)}?t=${Math.floor(segment.start_time)}`}
+                            href={previewUrl(`${getCanonicalVideoPath(hit.short_id || hit.internal_id)}?t=${Math.floor(segment.start_time)}`)}
                             onClick={handleClose}
+                            onAuxClick={(event) => { if (event.button === 1) handleClose(); }}
                             className="flex items-start gap-2 p-1.5 rounded hover:bg-muted transition-colors group/segment"
                           >
                             <div className="flex-shrink-0 mt-0.5">
@@ -330,8 +347,9 @@ export function SearchCommandDialog() {
 
               {results.length > 0 && (
                 <Link
-                  href={`/s?q=${encodeURIComponent(query)}`}
+                  href={`/s?q=${encodeURIComponent(query)}&request_id=${submitId}`}
                   onClick={handleClose}
+                  onAuxClick={(event) => { if (event.button === 1) handleClose(); }}
                   className="flex items-center justify-center gap-2 w-full py-3 mt-2 text-sm font-medium text-primary hover:bg-muted rounded-lg transition-colors"
                 >
                   See all results for &quot;{query}&quot;
