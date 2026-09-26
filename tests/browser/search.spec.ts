@@ -26,7 +26,7 @@ for (const action of ["Enter", "See all", "title", "thumbnail", "timestamp"]) {
     const input = await preview(page);
     expect(await recorded(request)).toEqual(["pri", "pric", "pricing"].map(query => ({ query, search_mode: "preview" })));
     if (action === "Enter") await input.press("Enter");
-    else if (action === "See all") await page.getByRole("button", { name: /See all results/ }).click();
+    else if (action === "See all") await page.getByRole("link", { name: /See all results/ }).click();
     else if (action === "title") await page.getByRole("link", { name: /Result for pricing/ }).click();
     else if (action === "timestamp") await page.getByRole("link", { name: /Pricing moment/ }).click();
     else await page.locator('a[href="/v/voice-demo"]').first().click();
@@ -64,6 +64,25 @@ test("direct visits install one ID; reload retries preserve it and new visits ro
   await expect(page.getByText('1 match for “pricing”')).toBeVisible();
   expect(new URL(page.url()).searchParams.get("request_id")).not.toBe(first);
   expect(await recorded(request)).toHaveLength(3);
+});
+
+test("See all preserves new-tab navigation and pending previews never claim no results", async ({ page, request, context }) => {
+  await page.goto("/s");
+  await page.keyboard.press("Control+k");
+  const input = page.getByPlaceholder("Search videos, transcripts...");
+  await input.fill("pricing");
+  await expect(page.getByText("Searching...", { exact: true })).toBeVisible();
+  await expect(page.getByText(/No results found/)).toHaveCount(0);
+  const link = page.getByRole("link", { name: /See all results/ });
+  await expect(link).toBeVisible();
+  const href = await link.getAttribute("href");
+  const popupPromise = context.waitForEvent("page");
+  await link.click({ modifiers: ["Control"] });
+  const popup = await popupPromise;
+  await expect(popup).toHaveURL(`http://localhost:4310${href}`);
+  await expect(popup.getByText('1 match for “pricing”')).toBeVisible();
+  expect((await recorded(request)).filter(r => r.search_mode === "settled")).toHaveLength(1);
+  await popup.close();
 });
 
 test("late preview responses cannot replace current results or reopen a cleared modal", async ({ page }) => {
@@ -119,4 +138,58 @@ test("real proxy validates and forwards GET/POST metadata and preserves interact
   }
   expect((await request.get("/api/search?q=x&search_mode=invalid")).status()).toBe(400);
   expect(await recorded(request)).toHaveLength(3);
+});
+
+test("AI proxy forwards action metadata through the published SDK and preserves SSE/JSON interactionId", async ({ request }) => {
+  await request.delete("http://127.0.0.1:4311/test/ai-searches");
+  const requestId = crypto.randomUUID();
+  const complete = async (stream: boolean, search_mode: string, id = requestId) => {
+    const response = await request.post("/api/ai-search", { data: { prompt: "pricing", request_id: id, search_mode, stream } });
+    expect(response.ok()).toBe(true);
+    if (!stream) return response.json();
+    const events = (await response.text()).split("\n").filter(line => line.startsWith("data: {")).map(line => JSON.parse(line.slice(6)));
+    return events.find(event => event.type === "message_complete");
+  };
+  expect((await complete(true, "preview")).interactionId).toBeNull();
+  expect((await complete(false, "preview")).interactionId).toBeNull();
+  const first = await complete(true, "settled");
+  expect(first.interactionId).toMatch(uuid);
+  expect((await complete(false, "settled")).interactionId).toBe(first.interactionId);
+  expect((await complete(true, "settled", crypto.randomUUID())).interactionId).not.toBe(first.interactionId);
+  const records = await (await request.get("http://127.0.0.1:4311/test/ai-searches")).json();
+  expect(records.slice(0, 4)).toEqual([
+    { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "preview" },
+    { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "preview", stream: false },
+    { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "settled" },
+    { prompt: "pricing", limit: 5, request_id: requestId, search_mode: "settled", stream: false },
+  ]);
+  for (const fields of [{ request_id: "bad" }, { search_mode: "bad" }]) {
+    expect((await request.post("/api/ai-search", { data: { prompt: "pricing", ...fields } })).status()).toBe(400);
+  }
+});
+
+test("AI explicit submits generate distinct IDs and retain completion IDs in browser result JSON", async ({ page, request }) => {
+  await request.delete("http://127.0.0.1:4311/test/ai-searches");
+  await page.goto("/playground");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  const input = page.getByPlaceholder("Search your video library...");
+  await input.fill("pricing");
+  await page.waitForTimeout(400);
+  expect(await (await request.get("http://127.0.0.1:4311/test/ai-searches")).json()).toHaveLength(0);
+  for (let i = 0; i < 2; i++) {
+    const responsePromise = page.waitForResponse(response => response.url().endsWith("/api/ai-search"));
+    await page.getByRole("button", { name: "Submit", exact: true }).click();
+    const response = await responsePromise;
+    const events = (await response.text()).split("\n").filter(line => line.startsWith("data: {")).map(line => JSON.parse(line.slice(6)));
+    const id = events.find(event => event.type === "message_complete").interactionId;
+    expect(id).toMatch(uuid);
+    await expect(page.getByRole("button", { name: "Submit", exact: true })).toBeEnabled();
+    await expect(page.getByRole("treeitem", { name: `interactionId:"${id}"`, exact: true })).toBeVisible();
+  }
+  const records = await (await request.get("http://127.0.0.1:4311/test/ai-searches")).json();
+  expect(records).toHaveLength(2);
+  expect(records[0].request_id).toMatch(uuid);
+  expect(records[1].request_id).toMatch(uuid);
+  expect(records[0].request_id).not.toBe(records[1].request_id);
+  expect(records.every((record: Record<string, unknown>) => record.search_mode === "settled")).toBe(true);
 });

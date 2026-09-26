@@ -1,4 +1,5 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { isSearchRequestId } from "@/lib/search-request";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
@@ -13,6 +14,9 @@ interface AISearchRequestBody {
   prompt: string;
   limit?: number;
   context?: AIContextMessage[];
+  request_id?: string;
+  search_mode?: "preview" | "settled";
+  stream?: boolean;
 }
 
 interface StreamState {
@@ -54,6 +58,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       const completeSources = event.citations || state.sources;
       return JSON.stringify({
         type: "message_complete",
+        interactionId: event.interactionId,
         responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
         sources: completeSources.map((s: Segment) => ({
@@ -156,7 +161,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const { prompt, limit = 5, context: conversationContext } = body;
+  const { prompt, limit = 5, context: conversationContext, request_id, search_mode = "settled", stream = true } = body;
+
+  if ((request_id !== undefined && !isSearchRequestId(request_id)) ||
+      (search_mode !== "preview" && search_mode !== "settled") || typeof stream !== "boolean") {
+    return Response.json({ error: "Invalid search_mode, request_id, or stream" }, { status: 400 });
+  }
 
   if (!prompt || typeof prompt !== "string") {
     return new Response(
@@ -166,13 +176,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    const stream = await context.client.ai.search({
+    const options = {
       prompt,
       limit,
       context: conversationContext,
-    });
+      requestId: request_id,
+      searchMode: search_mode,
+    };
+    if (!stream) {
+      return Response.json(await context.client.ai.search({ ...options, stream: false }));
+    }
+    const events = await context.client.ai.search({ ...options, stream: true });
 
-    const responseStream = asyncIterableToStream(stream as AsyncIterable<AIEvent>);
+    const responseStream = asyncIterableToStream(events);
 
     return new Response(responseStream, {
       headers: {

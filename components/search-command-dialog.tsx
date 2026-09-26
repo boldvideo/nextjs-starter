@@ -53,6 +53,7 @@ export function SearchCommandDialog() {
   const config = getPortalConfig(settings);
   const { isOpen, setIsOpen } = useSearch();
   const [query, setQuery] = useState("");
+  const [submitId, setSubmitId] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -85,7 +86,7 @@ export function SearchCommandDialog() {
   useEffect(() => {
     setResults([]);
     setError(undefined);
-    setIsLoading(false);
+    setIsLoading(isOpen && !!query.trim());
     if (!isOpen || !query.trim()) return;
 
     const controller = new AbortController();
@@ -157,7 +158,7 @@ export function SearchCommandDialog() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
-    router.push(`/s?q=${encodeURIComponent(query)}&request_id=${crypto.randomUUID()}`);
+    router.push(`/s?q=${encodeURIComponent(query)}&request_id=${submitId}`);
     handleClose();
   };
 
@@ -210,7 +211,10 @@ export function SearchCommandDialog() {
               placeholder="Search videos, transcripts..."
               className="w-full h-10 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/20 text-lg placeholder:text-muted-foreground px-3 shadow-sm"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setSubmitId(crypto.randomUUID());
+              }}
               onKeyDown={handleKeyDown}
             />
           </div>
@@ -350,14 +354,15 @@ export function SearchCommandDialog() {
               ))}
 
               {results.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
+                <Link
+                  href={`/s?q=${encodeURIComponent(query)}&request_id=${submitId}`}
+                  onClick={handleClose}
+                  onAuxClick={(event) => { if (event.button === 1) handleClose(); }}
                   className="flex items-center justify-center gap-2 w-full py-3 mt-2 text-sm font-medium text-primary hover:bg-muted rounded-lg transition-colors"
                 >
                   See all results for &quot;{query}&quot;
                   <ArrowRight size={16} />
-                </button>
+                </Link>
               )}
             </div>
           )}
