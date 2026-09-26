@@ -7,14 +7,16 @@ import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { MuxPlayerComponent, MuxPlayerVideoLike } from "@/components/players/player-mux";
 import { getCanonicalVideoPath } from "@/lib/video-path";
+import { sourceUrl, type SourceOpen } from "@/lib/source-engagement";
 
 interface CitationModalProps {
+  engagement?: SourceOpen;
   citation: AskCitation | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function CitationModal({ citation, isOpen, onClose }: CitationModalProps) {
+export function CitationModal({ citation, isOpen, onClose, engagement }: CitationModalProps) {
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -81,6 +83,7 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
         <div className="aspect-video bg-black flex-shrink-0">
           <MuxPlayerComponent
             video={video}
+            engagement={engagement}
             startTime={startSeconds}
             autoPlay={true}
             className="w-full h-full"
@@ -101,7 +104,7 @@ export function CitationModal({ citation, isOpen, onClose }: CitationModalProps)
           {/* Watch full video link */}
           <div className="px-6 pb-6">
             <Link
-              href={`${getCanonicalVideoPath(citation.videoId)}?t=${Math.floor(citation.startMs / 1000)}`}
+              href={sourceUrl(`${getCanonicalVideoPath(citation.videoId)}?t=${Math.floor(citation.startMs / 1000)}`, engagement?.interaction.id, undefined, engagement?.interaction.requestId)}
               className="w-full flex items-center justify-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
             >
               Watch full video

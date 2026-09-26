@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useAIAssistantContext } from "./context";
+import type { AnswerInteraction } from "@/lib/source-engagement";
 
 interface UseAIStreamOptions {
   /** Video ID to get AI responses for */
@@ -32,7 +33,8 @@ export function useAIStream({
       question: string,
       conversationId: string | null,
       appendChunk?: (chunk: string) => void,
-      actionData?: { label: string; value: string }
+      actionData?: { label: string; value: string },
+      interaction?: AnswerInteraction
     ) => {
       if (!appendChunk) {
         throw new Error("Streaming requires an appendChunk function");
@@ -147,6 +149,9 @@ export function useAIStream({
                     });
                     break;
                   case "complete":
+                    interaction?.complete(data.interactionId);
+                    setMessages(prev => prev.map(message => message.interaction === interaction
+                      ? { ...message, interactionId: data.interactionId } : message));
                     // Final answer payload; `done` carries the conversation id.
                     break;
                   case "error":
@@ -193,6 +198,8 @@ export function useAIStream({
           throw new Error('Request timed out. Please try again.');
         }
         throw error;
+      } finally {
+        interaction?.complete(null);
       }
     },
     [videoId, subdomain, endpoint, config, setMessages, setConversationId]

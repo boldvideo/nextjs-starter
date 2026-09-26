@@ -1,16 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getTenantContext } from "@/lib/get-tenant-context";
+import { isSearchRequestId } from "@/lib/search-request";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "Invalid event" }, { status: 400 });
+    }
+    // The starter has no server-established Bold viewer mapping. Never trust one
+    // supplied by the browser, including on legacy playback events.
+    delete body.viewer;
+    if (body.n === "source_open" || body.n === "video_progress") {
+      if (!isSearchRequestId(body.interaction_id) || !isSearchRequestId(body.playback_id) ||
+          typeof body.vid !== "string" || !body.vid ||
+          (body.n === "video_progress" && (typeof body.watched_seconds !== "number" ||
+            !Number.isFinite(body.watched_seconds) || body.watched_seconds < 0))) {
+        return NextResponse.json({ error: "Invalid engagement event" }, { status: 400 });
+      }
+      if (body.n === "source_open") delete body.watched_seconds;
+    }
 
     const apiHost = process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1";
-    const apiKey = process.env.NEXT_PUBLIC_BOLD_API_KEY;
+    // Frequent progress events need the trusted tenant token, not portal settings.
+    const context = await getTenantContext({ includeSettings: false });
+    const apiKey = context?.tenantToken;
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Missing API configuration" },
-        { status: 500 }
+        { error: "Tenant not found" },
+        { status: 404 }
       );
     }
 

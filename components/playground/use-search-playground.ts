@@ -5,6 +5,7 @@ import type { SSEEvent } from "./sse-event-log";
 
 interface SearchPlaygroundOptions {
   limit?: number;
+  requestId?: string;
 }
 
 interface SearchSource {
@@ -20,6 +21,8 @@ interface SearchSource {
 interface SearchResult {
   content: string;
   sources: SearchSource[];
+  requestId: string;
+  interactionId?: string | null;
 }
 
 export function useSearchPlayground() {
@@ -43,6 +46,7 @@ export function useSearchPlayground() {
 
   const submit = useCallback(
     async (prompt: string, options: SearchPlaygroundOptions = {}) => {
+      const requestId = options.requestId ?? crypto.randomUUID();
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -62,6 +66,8 @@ export function useSearchPlayground() {
           },
           body: JSON.stringify({
             prompt,
+            request_id: requestId,
+            search_mode: "settled",
             limit: options.limit || 5,
           }),
           signal: abortControllerRef.current.signal,
@@ -80,6 +86,7 @@ export function useSearchPlayground() {
         let buffer = "";
         let accumulatedContent = "";
         let sources: SearchSource[] = [];
+        let interactionId: string | null | undefined;
 
         while (true) {
           const { done, value } = await reader.read();
@@ -131,6 +138,7 @@ export function useSearchPlayground() {
                   sources = event.sources || [];
                   break;
                 case "message_complete":
+                  interactionId = event.interactionId;
                   accumulatedContent = event.content || accumulatedContent;
                   sources = event.sources || sources;
                   break;
@@ -145,7 +153,7 @@ export function useSearchPlayground() {
         }
 
         reader.releaseLock();
-        setResult({ content: accumulatedContent, sources });
+        setResult({ content: accumulatedContent, sources, requestId, interactionId });
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
           return;

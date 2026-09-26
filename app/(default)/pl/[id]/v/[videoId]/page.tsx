@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
+import { videoQuery, type VideoQueryParams } from "@/lib/video-query";
 import { isUUID } from "@/util/is-uuid";
 import { getCanonicalVideoPath } from "@/lib/video-path";
 import type { Video, Settings, Playlist } from "@boldvideo/bold-js";
@@ -100,10 +101,11 @@ export default async function PlaylistVideoPage({
   searchParams,
 }: {
   params: Promise<{ id: string; videoId: string }>;
-  searchParams: Promise<{ t?: string }>;
+  searchParams: Promise<VideoQueryParams>;
 }) {
   const { id: playlistId, videoId } = await params;
-  const { t } = await searchParams;
+  const query = await searchParams;
+  const { t } = query;
 
   const { playlist, video, settings } = await getPlaylistVideoData(
     playlistId,
@@ -117,14 +119,14 @@ export default async function PlaylistVideoPage({
 
   // Redirect to slug-based URL if accessed by UUID and video has a slug
   if (video.slug && isUUID(videoId)) {
-    const redirectUrl = t ? `/pl/${playlistId}/v/${video.slug}?t=${t}` : `/pl/${playlistId}/v/${video.slug}`;
+    const redirectUrl = `/pl/${playlistId}/v/${video.slug}${videoQuery(query)}`;
     redirect(redirectUrl);
   }
 
   // If playlist doesn't exist or video is not in playlist, redirect to standalone video
   const videoIdentifier = video.slug || videoId;
   if (!playlist || !playlist.videos.some((v) => v.id === video.id)) {
-    redirect(getCanonicalVideoPath(videoIdentifier));
+    redirect(`${getCanonicalVideoPath(videoIdentifier)}${videoQuery(query)}`);
   }
 
   const startTime = t ? Number(t) : undefined;

@@ -1,18 +1,20 @@
 "use client";
 
 import "@videojs/react/video/skin.css";
-import { forwardRef, memo, useCallback, useRef } from "react";
+import { forwardRef, memo, useCallback, useEffect, useRef } from "react";
 import { createPlayer } from "@videojs/react";
 import { VideoSkin, videoFeatures } from "@videojs/react/video";
 import { MuxVideo } from "@videojs/react/media/mux-video";
 import { useBold } from "@/components/providers/bold-provider";
 import type { MuxPlayerVideoLike } from "./player-mux";
+import type { SourceOpen } from "@/lib/source-engagement";
 
 // Video.js v10 (beta) — the rebuilt player. One player instance type for the
 // whole module; Provider scopes state per mounted player.
 const VjsPlayer = createPlayer({ features: videoFeatures });
 
 interface VideoJsPlayerProps {
+  engagement?: SourceOpen;
   video: MuxPlayerVideoLike;
   autoPlay?: boolean;
   onTimeUpdate?: (e: Event) => void;
@@ -37,11 +39,23 @@ const VideoJsPlayerBase = forwardRef(function VideoJsPlayer(
     startTime,
     className = "",
     onEnded,
+    engagement,
   }: VideoJsPlayerProps,
   ref
 ) {
   const bold = useBold();
   const mediaRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const player = mediaRef.current;
+    if (player && !player.paused && !player.seeking && player.readyState >= 3) engagement?.play();
+    const stop = () => engagement?.pause();
+    window.addEventListener("pagehide", stop);
+    return () => {
+      window.removeEventListener("pagehide", stop);
+      engagement?.pause();
+    };
+  }, [engagement]);
 
   const attachMedia = useCallback(
     (el: HTMLVideoElement | null) => {
@@ -96,8 +110,16 @@ const VideoJsPlayerBase = forwardRef(function VideoJsPlayer(
               onTimeUpdate?.(e.nativeEvent);
             }}
             onPlay={(e) => bold.trackEvent(video, e.nativeEvent)}
-            onPause={(e) => bold.trackEvent(video, e.nativeEvent)}
+            onPlaying={() => engagement?.play()}
+            onWaiting={() => engagement?.pause()}
+            onSeeking={() => engagement?.pause()}
+            onSeeked={() => {
+              const player = mediaRef.current;
+              if (player && !player.paused && !player.seeking && player.readyState >= 3) engagement?.play();
+            }}
+            onPause={(e) => { engagement?.pause(); bold.trackEvent(video, e.nativeEvent); }}
             onEnded={(e) => {
+              engagement?.pause();
               bold.trackEvent(video, e.nativeEvent);
               onEnded?.(e.nativeEvent);
             }}
@@ -113,6 +135,7 @@ export const VideoJsPlayerComponent = memo(
   (prev, next) =>
     prev.video.playbackId === next.video.playbackId &&
     prev.video.id === next.video.id &&
+    prev.engagement === next.engagement &&
     prev.startTime === next.startTime &&
     prev.autoPlay === next.autoPlay &&
     prev.currentTime === next.currentTime &&

@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
+import { videoQuery, type VideoQueryParams } from "@/lib/video-query";
 import { VideoSchema } from "@/components/seo/video-schema";
 import { isUUID } from "@/util/is-uuid";
 import { getVideoPathStyle, getCanonicalVideoPath } from "@/lib/video-path";
@@ -78,10 +79,11 @@ export default async function RootVideoPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ t?: string }>;
+  searchParams: Promise<VideoQueryParams>;
 }) {
   const { id } = await params;
-  const { t } = await searchParams;
+  const query = await searchParams;
+  const { t } = query;
 
   const { settings, video } = await getVideoPageData(id);
 
@@ -99,7 +101,7 @@ export default async function RootVideoPage({
   if (pathStyle === "v" || (video.slug && isUUID(id))) {
     const currentPath = `/${id}`;
     if (currentPath !== canonicalPath) {
-      const redirectUrl = t ? `${canonicalPath}?t=${t}` : canonicalPath;
+      const redirectUrl = `${canonicalPath}${videoQuery(query)}`;
       redirect(redirectUrl);
     }
   }
