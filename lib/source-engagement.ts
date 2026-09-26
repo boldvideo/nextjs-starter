@@ -41,6 +41,7 @@ export class SourceOpen {
   private interval?: ReturnType<typeof setInterval>;
   private opened = false;
   private sending = false;
+  private flushPending = false;
   private sentSeconds = 0;
   private retry?: ReturnType<typeof setTimeout>;
   private readonly deadline: number;
@@ -91,20 +92,26 @@ export class SourceOpen {
     // A scheduled retry retains that window rather than extending it indefinitely.
     this.progressDeadline = Math.max(this.progressDeadline, progressDeadline);
     const id = this.interaction.id;
-    if (!id || this.sending || (!this.opened && this.now() > this.deadline)) return;
+    if (!id || (!this.opened && this.now() > this.deadline)) return;
+    if (this.sending) { this.flushPending = true; return; }
+    clearTimeout(this.retry);
+    this.flushPending = false;
     this.sending = true;
+    let progressFailed = false;
     const base = { interaction_id: id, playback_id: this.openId, vid: this.videoId };
     try {
       if (!this.opened) this.opened = await this.send({ n: "source_open", ...base });
       if (!this.opened) return;
       const seconds = this.watchedSeconds;
-      if (seconds > this.sentSeconds && await this.send({ n: "video_progress", ...base, watched_seconds: seconds })) {
-        this.sentSeconds = seconds;
+      if (seconds > this.sentSeconds) {
+        if (await this.send({ n: "video_progress", ...base, watched_seconds: seconds })) this.sentSeconds = seconds;
+        else progressFailed = true;
       }
     } finally {
       this.sending = false;
       const deadline = this.opened ? this.progressDeadline : this.deadline;
-      if ((!this.opened || this.watchedSeconds > this.sentSeconds) && this.now() < deadline) {
+      const pending = this.flushPending && this.watchedSeconds > this.sentSeconds;
+      if ((!this.opened || progressFailed || pending) && this.now() < deadline) {
         clearTimeout(this.retry);
         this.retry = setTimeout(() => { void this.flush(this.progressDeadline); }, 1_000);
       }
