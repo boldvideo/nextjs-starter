@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
     }
 
     const apiHost = process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1";
-    const context = await getTenantContext();
+    // Frequent progress events need the trusted tenant token, not portal settings.
+    const context = await getTenantContext({ includeSettings: false });
     const apiKey = context?.tenantToken;
 
     if (!apiKey) {
