@@ -36,12 +36,16 @@ test("ordinary playback is unattributed; explicit URLs survive redirect and coun
   const open = (await engagement(request))[0];
   expect(open).toMatchObject({ n: "source_open", interaction_id: id, vid: videoId, trustedTenant: true });
   expect(open.playback_id).not.toBe("voice-demo");
+  await page.locator("mux-player").evaluate(player => {
+    Object.defineProperties(player, { readyState: { get: () => 4 }, seeking: { get: () => false } });
+    (player as unknown as HTMLVideoElement).play();
+  });
   await emit(page, "playing");
   await page.waitForTimeout(250);
   await emit(page, "seeking");
   await page.locator("mux-player").evaluate(player => { (player as unknown as HTMLVideoElement).currentTime = 300; });
   await page.waitForTimeout(400);
-  await emit(page, "playing");
+  await emit(page, "seeked"); // Buffered seek: no new playing event.
   await page.waitForTimeout(250);
   await emit(page, "waiting");
   await page.waitForTimeout(400);
@@ -51,6 +55,22 @@ test("ordinary playback is unattributed; explicit URLs survive redirect and coun
   expect(progress.at(-1)?.watched_seconds).toBeGreaterThan(0.4);
   expect(progress.at(-1)?.watched_seconds).toBeLessThan(1.1);
   expect(progress.every(row => row.playback_id === open.playback_id)).toBe(true);
+  await page.locator("mux-player").evaluate(player => (player as unknown as HTMLVideoElement).pause());
+  await emit(page, "seeking");
+  await emit(page, "seeked");
+  await page.waitForTimeout(400);
+  await emit(page, "pause");
+  expect((await engagement(request)).filter(row => row.n === "video_progress")).toEqual(progress);
+  // A different timestamp navigation is a deliberate new open, not more time on the previous one.
+  await page.evaluate(() => {
+    const url = new URL(location.href);
+    url.searchParams.set("t", "120");
+    history.pushState(null, "", url);
+  });
+  await expect.poll(async () => (await engagement(request)).filter(row => row.n === "source_open").length).toBe(2);
+  const next = (await engagement(request)).filter(row => row.n === "source_open")[1];
+  expect(next.interaction_id).toBe(id);
+  expect(next.playback_id).not.toBe(open.playback_id);
 });
 
 test("preview timestamp opened in a new tab settles only at destination and opens that interaction", async ({ page, request, context }) => {
@@ -133,6 +153,18 @@ test("video chat timestamp uses its answer interaction; missing ID never emits e
   await emit(page, "pause");
   await page.waitForTimeout(300);
   expect((await engagement(request)).filter(row => row.n === "source_open")).toHaveLength(1);
+});
+
+test("early EOF settles an unanswered interaction as null instead of leaving a pending handoff", async ({ page, request }) => {
+  await page.route("**/api/ai-ask", route => route.fulfill({
+    contentType: "text/event-stream",
+    body: 'data: {"type":"text_delta","delta":"Partial answer"}\n\n',
+  }));
+  await page.goto("/ask?q=early-eof");
+  await expect.poll(() => page.evaluate(() => Object.keys(localStorage)
+    .filter(key => key.startsWith("bold:interaction:"))
+    .map(key => JSON.parse(localStorage.getItem(key)!).id))).toEqual([null]);
+  expect(await engagement(request)).toHaveLength(0);
 });
 
 test("SDK 1.30 release gate: all AI proxies forward portal metadata and completion IDs", async ({ request }) => {

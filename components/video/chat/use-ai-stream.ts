@@ -198,6 +198,8 @@ export function useAIStream({
           throw new Error('Request timed out. Please try again.');
         }
         throw error;
+      } finally {
+        interaction?.complete(null);
       }
     },
     [videoId, subdomain, endpoint, config, setMessages, setConversationId]

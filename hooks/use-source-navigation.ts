@@ -12,7 +12,8 @@ export function useSourceNavigation(videoId: string) {
   const query = params?.get("search_query");
   const requestId = params?.get("search_request_id");
   const answerRequestId = params?.get("answer_request_id");
-  const key = JSON.stringify([videoId, interactionId, query, requestId, answerRequestId]);
+  const timestamp = params?.get("t");
+  const key = JSON.stringify([videoId, interactionId, query, requestId, answerRequestId, timestamp]);
   const current = useRef<{ key: string; open: SourceOpen } | null>(null);
   const [open, setOpen] = useState<SourceOpen>();
 

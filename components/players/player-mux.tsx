@@ -345,6 +345,11 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
           onPlaying={() => engagement?.play()}
           onWaiting={() => engagement?.pause()}
           onSeeking={() => engagement?.pause()}
+          onSeeked={() => {
+            const player = playerRef.current;
+            // Buffered seeks need not emit another playing event.
+            if (player && !player.paused && !player.seeking && player.readyState >= 3) engagement?.play();
+          }}
           onPause={(e) => { engagement?.pause(); bold.trackEvent(video, e); }}
           onEnded={handleEnded}
           onLoadedMetadata={(e) => {

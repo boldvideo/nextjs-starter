@@ -111,7 +111,7 @@ export class SourceOpen {
 export function sourceUrl(path: string, interactionId?: string | null, search?: { query: string; requestId: string }, pendingAnswer?: string) {
   const url = new URL(path, "https://portal.invalid");
   if (interactionId) url.searchParams.set("interaction_id", interactionId);
-  else if (pendingAnswer) url.searchParams.set("answer_request_id", pendingAnswer);
+  else if (interactionId === undefined && pendingAnswer) url.searchParams.set("answer_request_id", pendingAnswer);
   if (search) {
     url.searchParams.set("search_query", search.query);
     url.searchParams.set("search_request_id", search.requestId);

@@ -555,6 +555,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
       );
       options.onError?.(errorMessage);
     } finally {
+      interaction.complete(null);
       setIsStreaming(false);
       setStatusMessage(null);
       streamingMessageIdRef.current = null;
