@@ -46,10 +46,13 @@ createServer((request, response) => {
       const interactionId = crypto.randomUUID();
       chats.push({ ...input, path: url.pathname, interactionId });
       const source = { id: "c_abc123", video_id: video.id, title: video.title, timestamp: 83, text: "Pricing source", playback_id: "voice-demo" };
+      const content = input.prompt?.includes("mentions")
+        ? `Watch [1]. **Episode 8 ("${video.title}")**.`
+        : "Watch [1] and [01:23] for pricing.";
       response.setHeader("Content-Type", "text/event-stream");
       response.write(`data: ${JSON.stringify({ type: "sources", sources: [source] })}\n\n`);
-      response.write(`data: ${JSON.stringify({ type: "text_delta", delta: "Watch [1] and [01:23] for pricing." })}\n\n`);
-      setTimeout(() => response.end(`data: ${JSON.stringify({ type: "message_complete", content: "Watch [1] and [01:23] for pricing.", citations: [source], interaction_id: input.prompt === "no-id" ? null : interactionId, response_type: "answer" })}\n\ndata: [DONE]\n\n`), input.prompt === "pending" ? 2500 : 0);
+      response.write(`data: ${JSON.stringify({ type: "text_delta", delta: content })}\n\n`);
+      setTimeout(() => response.end(`data: ${JSON.stringify({ type: "message_complete", content, citations: [source], interaction_id: input.prompt === "no-id" ? null : interactionId, response_type: "answer" })}\n\ndata: [DONE]\n\n`), input.prompt?.includes("pending") ? 2500 : 0);
     });
     return;
   }
