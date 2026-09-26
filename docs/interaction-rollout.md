@@ -29,7 +29,7 @@ Taki uses Webpack for development, production builds, and browser checks.
 Turbopack fails to parse some Google Fonts URLs containing query parameters
 (`next/font/google queries have exactly one entry`), reproduced in CI with
 Next 16.1.6 and 16.2.12. The supported `--webpack` option keeps the existing
-font choices while Next is updated to 16.2.12; no font or test is removed to
+font choices while Next is updated to 16.3.3; no font or test is removed to
 avoid the failure.
 
 ## Attribution and identity
