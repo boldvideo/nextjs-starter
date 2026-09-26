@@ -130,30 +130,34 @@ test("a pause during in-flight progress preserves the newer counter for retry", 
   assert.deepEqual(events.filter(e => e.n === "video_progress").map(e => e.watched_seconds), [40, 75.5]);
 });
 
-test("successful progress during uninterrupted playback waits for the normal cadence", async () => {
-  let now = 0;
-  let finish: (accepted: boolean) => void = () => {};
-  const events: EngagementEvent[] = [];
-  const open = new SourceOpen("video", new AnswerInteraction("answer"), async event => {
-    events.push(event);
-    if (event.n === "video_progress" && events.length === 2) {
-      return new Promise<boolean>(resolve => { finish = resolve; });
-    }
-    return true;
-  }, () => now);
-  await tick();
-  open.play();
-  now = 5000;
-  const flushing = open.flush();
-  now = 5250; // Playback continues during upload latency, without another flush.
-  finish(true);
-  await flushing;
-  await new Promise(resolve => setTimeout(resolve, 1100));
-  assert.deepEqual(events.filter(e => e.n === "video_progress").map(e => e.watched_seconds), [5]);
-  open.pause();
-  await tick();
-  assert.deepEqual(events.filter(e => e.n === "video_progress").map(e => e.watched_seconds), [5, 5.25]);
-});
+for (const uploadDelay of [0, 5100]) {
+  test(`successful progress with ${uploadDelay}ms latency waits for the normal cadence`, { timeout: 10_000 }, async () => {
+    let now = 0;
+    let finish: (accepted: boolean) => void = () => {};
+    const events: EngagementEvent[] = [];
+    const open = new SourceOpen("video", new AnswerInteraction("answer"), async event => {
+      events.push(event);
+      if (event.n === "video_progress" && events.length === 2) {
+        return new Promise<boolean>(resolve => { finish = resolve; });
+      }
+      return true;
+    }, () => now);
+    await tick();
+    open.play();
+    now = 5000;
+    const flushing = open.flush();
+    // Exercise both no interval overlap and a timer tick during a slow upload.
+    await new Promise(resolve => setTimeout(resolve, uploadDelay));
+    now += uploadDelay + 250;
+    finish(true);
+    await flushing;
+    await new Promise(resolve => setTimeout(resolve, 1100));
+    assert.deepEqual(events.filter(e => e.n === "video_progress").map(e => e.watched_seconds), [5]);
+    open.pause();
+    await tick();
+    assert.deepEqual(events.filter(e => e.n === "video_progress").map(e => e.watched_seconds), [5, uploadDelay === 0 ? 5.25 : 10.35]);
+  });
+}
 
 test("navigation preserves timestamp and encodes the exact originating search", () => {
   const url = sourceUrl("/v/demo?t=83", undefined, { query: "a & b", requestId: "action" });

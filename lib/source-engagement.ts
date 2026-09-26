@@ -73,7 +73,9 @@ export class SourceOpen {
   play() {
     if (this.started !== undefined) return;
     this.started = this.now();
-    this.interval = setInterval(() => { void this.flush(); }, 5_000);
+    // An interval tick can wait for the next cadence; only explicit/final flushes
+    // queue a follow-up while a slow upload is still running.
+    this.interval = setInterval(() => { if (!this.sending) void this.flush(); }, 5_000);
   }
 
   pause() {
