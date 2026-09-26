@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import { AskCitation } from "@/lib/ask";
 import { buildVideoUrl } from "@/lib/video-path";
+import { sourceUrl, type AnswerInteraction } from "@/lib/source-engagement";
 import { cn } from "@/lib/utils";
 import { remarkCitations } from "@/lib/remark-citations";
 import { PROSE_CLASS } from "@/lib/prose";
@@ -150,6 +151,7 @@ function extractReactText(children: React.ReactNode): string {
 // anchor (invalid HTML, hydration error) — the link renderer flags its
 // subtree with this context and mentions fall back to plain formatting.
 const InsideLinkContext = React.createContext(false);
+const SourceInteractionContext = React.createContext<Pick<AnswerInteraction, "id" | "requestId"> | undefined>(undefined);
 
 // The inverse case: the model writes **[title](url)** — a link inside the
 // bold mention. Wrapping that in a <Link> nests anchors too, so mentions
@@ -173,6 +175,7 @@ function MentionStrong({
   children?: React.ReactNode;
 }) {
   const insideLink = React.useContext(InsideLinkContext);
+  const interaction = React.useContext(SourceInteractionContext);
   const mentioned =
     insideLink || hastContainsAnchor(node)
       ? null
@@ -180,7 +183,7 @@ function MentionStrong({
   if (mentioned) {
     return (
       <Link
-        href={buildVideoUrl({ id: mentioned.videoId })}
+        href={sourceUrl(buildVideoUrl({ id: mentioned.videoId }), interaction?.id, undefined, interaction?.requestId)}
         className={cn(
           "font-semibold text-foreground no-underline",
           "border-b border-primary/40 hover:border-primary",
@@ -204,6 +207,7 @@ function MentionEm({
   children?: React.ReactNode;
 }) {
   const insideLink = React.useContext(InsideLinkContext);
+  const interaction = React.useContext(SourceInteractionContext);
   const mentioned =
     insideLink || hastContainsAnchor(node)
       ? null
@@ -211,7 +215,7 @@ function MentionEm({
   if (mentioned) {
     return (
       <Link
-        href={buildVideoUrl({ id: mentioned.videoId })}
+        href={sourceUrl(buildVideoUrl({ id: mentioned.videoId }), interaction?.id, undefined, interaction?.requestId)}
         className={cn(
           "italic text-foreground no-underline",
           "border-b border-primary/40 hover:border-primary",
@@ -489,6 +493,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
 interface AskMessageCardProps {
   content: string;
   citations: AskCitation[];
+  interaction?: AnswerInteraction;
   aiName: string;
   aiAvatar?: string;
   onCitationClick: (citation: AskCitation) => void;
@@ -500,6 +505,7 @@ interface AskMessageCardProps {
 export function AskMessageCard({
   content,
   citations,
+  interaction,
   onCitationClick,
   isStreaming,
   citationDisplayNumberById,
@@ -539,6 +545,7 @@ export function AskMessageCard({
   };
 
   return (
+    <SourceInteractionContext.Provider value={interaction ? { id: interaction.id, requestId: interaction.requestId } : undefined}>
     <div className="w-full">
       <div
         className={cn(PROSE_CLASS, streaming && "chat-stream-cursor")}
@@ -551,5 +558,6 @@ export function AskMessageCard({
         ) : null}
       </div>
     </div>
+    </SourceInteractionContext.Provider>
   );
 }

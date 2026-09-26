@@ -9,6 +9,8 @@ export interface AISearchMessage {
   content: string;
   type: "text" | "answer" | "error" | "loading";
   sources?: AISearchSource[];
+  requestId?: string;
+  interactionId?: string | null;
 }
 
 export interface AISearchSource {
@@ -55,7 +57,8 @@ export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
   }, []);
 
   const streamQuestion = useCallback(
-    async (query: string) => {
+    // A new invocation is a new action unless a caller explicitly retries its saved ID.
+    async (query: string, requestId: string = crypto.randomUUID()) => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -71,6 +74,7 @@ export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
         {
           id: messageId,
           role: "assistant",
+          requestId,
           content: "",
           type: "loading",
           sources: [],
@@ -88,6 +92,8 @@ export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
           },
           body: JSON.stringify({
             prompt: query,
+            request_id: requestId,
+            search_mode: "settled",
             limit: 5,
             context: context.length > 0 ? context : undefined,
           }),
@@ -162,6 +168,7 @@ export function useAISearchStream(options: UseAISearchStreamOptions = {}) {
                           content: accumulatedResponse || msg.content,
                           type: "answer",
                           sources: accumulatedSources,
+                          interactionId: event.interactionId,
                         }
                       : msg
                   )

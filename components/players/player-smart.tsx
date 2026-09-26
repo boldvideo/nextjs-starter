@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { forwardRef, memo } from "react";
 import type { MuxPlayerVideoLike } from "./player-mux";
 import { extractYouTubeId, YouTubePlayerComponent } from "./player-youtube";
+import type { SourceOpen } from "@/lib/source-engagement";
 
 // Video.js v10 pulls in the skin + hls machinery — load it client-side only,
 // and only when a native-playback video actually renders.
@@ -20,6 +21,7 @@ type SmartPlayerVideo = MuxPlayerVideoLike & {
 };
 
 interface SmartPlayerProps {
+  engagement?: SourceOpen;
   video: SmartPlayerVideo;
   autoPlay?: boolean;
   onTimeUpdate?: (e: Event) => void;

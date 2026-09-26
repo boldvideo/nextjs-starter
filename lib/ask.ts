@@ -1,4 +1,5 @@
 // Types for the ask API response
+import type { AnswerInteraction } from "@/lib/source-engagement";
 
 export type AskCitation = {
   // API v2.0 citation format
@@ -59,6 +60,7 @@ export type ClarificationResponse = {
 
 // Synthesized answer response type
 export type SynthesizedResponse = {
+  interaction?: AnswerInteraction;
   success: true;
   mode: "synthesized";
   query: string;

@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+
+const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
+function subscribeReducedMotion(onChange: () => void) {
+  const media = window.matchMedia(reducedMotionQuery);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
 
 export interface TakiChatChip {
   /** Short handwritten label shown on the chip. */
@@ -36,7 +43,10 @@ export function TakiChat({
   className,
 }: TakiChatProps) {
   const router = useRouter();
-  const [step, setStep] = useState<ScriptStep>(0);
+  const reducedMotion = useSyncExternalStore(subscribeReducedMotion,
+    () => window.matchMedia(reducedMotionQuery).matches, () => false);
+  const [animatedStep, setStep] = useState<ScriptStep>(0);
+  const step = reducedMotion ? 4 : animatedStep;
   const [query, setQuery] = useState("");
   const [leaving, setLeaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,10 +59,7 @@ export function TakiChat({
   ];
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setStep(4);
-      return;
-    }
+    if (reducedMotion) return;
     const timers = [
       window.setTimeout(() => setStep(1), 450),
       window.setTimeout(() => setStep(2), 1650),
@@ -60,7 +67,7 @@ export function TakiChat({
       window.setTimeout(() => setStep(4), 3050),
     ];
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [reducedMotion]);
 
   const ask = (question: string) => {
     const q = question.trim();

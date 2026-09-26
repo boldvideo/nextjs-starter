@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { Wordmark } from "@/components/wordmark";
 import { askLabel } from "@/lib/utils";
 import { useSettings } from "@/components/providers/settings-provider";

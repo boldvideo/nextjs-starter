@@ -9,6 +9,7 @@ import { SynthesizedResponse, AskCitation } from "@/lib/ask";
 import { CitationModal } from "./citation";
 import { ChevronDown, ChevronUp, PlayCircle, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SourceOpen } from "@/lib/source-engagement";
 
 interface AnswerCardProps {
   response: SynthesizedResponse;
@@ -22,6 +23,7 @@ export function AnswerCard({
   aiAvatar = "/placeholder-avatar.png"
 }: AnswerCardProps) {
   const [selectedCitation, setSelectedCitation] = useState<AskCitation | null>(null);
+  const [sourceOpen, setSourceOpen] = useState<SourceOpen>();
   const [showRelatedQuestions, setShowRelatedQuestions] = useState(false);
   const { answer, expandedQueries } = response;
 
@@ -107,7 +109,10 @@ export function AnswerCard({
         parts.push(
           <button
             key={`cite-${citationId}-${match.index}`}
-            onClick={() => setSelectedCitation(citation)}
+            onClick={() => {
+              setSourceOpen(response.interaction ? new SourceOpen(citation.videoId, response.interaction) : undefined);
+              setSelectedCitation(citation);
+            }}
             className="inline-flex items-center gap-1 text-primary hover:text-primary/80 transition-colors mx-1"
             title={`Click to watch video segment`}
           >
@@ -132,7 +137,7 @@ export function AnswerCard({
     }
     
     return parts.length > 1 ? <>{parts}</> : text;
-  }, [answer.citations]);
+  }, [answer.citations, response.interaction]);
 
   return (
     <div className="flex gap-3 w-full">
@@ -272,6 +277,7 @@ export function AnswerCard({
       {/* Citation Modal */}
       <CitationModal
         citation={selectedCitation}
+        engagement={sourceOpen}
         isOpen={!!selectedCitation}
         onClose={() => setSelectedCitation(null)}
       />
