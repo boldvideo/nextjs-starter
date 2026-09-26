@@ -23,6 +23,14 @@ Keyword search already sends `channel=portal` and `client_name=nextjs-starter`.
 The event proxy uses direct server fetch, so engagement does not depend on the
 SDK release. AI uses the released SDK parser; there is no parallel SSE parser.
 
+## Taki build compatibility
+
+Taki uses Webpack for development, production builds, and browser checks.
+Turbopack fails to parse some Google Fonts URLs containing query parameters
+(`next/font/google queries have exactly one entry`), reproduced in CI with
+Next 16.1.6 and 16.2.12. The supported `--webpack` option keeps the existing
+font choices and Next version; no font or test is removed to avoid the failure.
+
 ## Attribution and identity
 
 - Each answer/results response owns its interaction ID. Older answers never

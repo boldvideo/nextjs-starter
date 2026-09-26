@@ -24,6 +24,6 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: [
     { command: "bun tests/fixtures/voice-api.ts", port: 4311, env: { EXPECTED_API_KEY: env.BOLD_API_KEY }, reuseExistingServer: false },
-    { command: "node node_modules/next/dist/bin/next dev --port 4310", url: "http://localhost:4310/v/voice-demo", env, timeout: 120_000, reuseExistingServer: false },
+    { command: "node node_modules/next/dist/bin/next dev --webpack --port 4310", url: "http://localhost:4310/v/voice-demo", env, timeout: 120_000, reuseExistingServer: false },
   ],
 });
