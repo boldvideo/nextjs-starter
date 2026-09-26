@@ -41,9 +41,11 @@ export class SourceOpen {
   private interval?: ReturnType<typeof setInterval>;
   private opened = false;
   private sending = false;
+  private flushPending = false;
   private sentSeconds = 0;
   private retry?: ReturnType<typeof setTimeout>;
   private readonly deadline: number;
+  private progressDeadline = 0;
   private unsubscribe = () => {};
 
   constructor(
@@ -71,7 +73,9 @@ export class SourceOpen {
   play() {
     if (this.started !== undefined) return;
     this.started = this.now();
-    this.interval = setInterval(() => { void this.flush(); }, 5_000);
+    // An interval tick can wait for the next cadence; only explicit/final flushes
+    // queue a follow-up while a slow upload is still running.
+    this.interval = setInterval(() => { if (!this.sending) void this.flush(); }, 5_000);
   }
 
   pause() {
@@ -85,23 +89,33 @@ export class SourceOpen {
     return (this.elapsed + (this.started === undefined ? 0 : this.now() - this.started)) / 1000;
   }
 
-  async flush() {
+  async flush(progressDeadline = this.now() + 30_000) {
+    // New playback/pause flushes get a bounded retry window even after a long watch.
+    // A scheduled retry retains that window rather than extending it indefinitely.
+    this.progressDeadline = Math.max(this.progressDeadline, progressDeadline);
     const id = this.interaction.id;
-    if (!id || this.sending || (!this.opened && this.now() > this.deadline)) return;
+    if (!id || (!this.opened && this.now() > this.deadline)) return;
+    if (this.sending) { this.flushPending = true; return; }
+    clearTimeout(this.retry);
+    this.flushPending = false;
     this.sending = true;
+    let progressFailed = false;
     const base = { interaction_id: id, playback_id: this.openId, vid: this.videoId };
     try {
       if (!this.opened) this.opened = await this.send({ n: "source_open", ...base });
       if (!this.opened) return;
       const seconds = this.watchedSeconds;
-      if (seconds > this.sentSeconds && await this.send({ n: "video_progress", ...base, watched_seconds: seconds })) {
-        this.sentSeconds = seconds;
+      if (seconds > this.sentSeconds) {
+        if (await this.send({ n: "video_progress", ...base, watched_seconds: seconds })) this.sentSeconds = seconds;
+        else progressFailed = true;
       }
     } finally {
       this.sending = false;
-      if ((!this.opened || this.watchedSeconds > this.sentSeconds) && this.now() < this.deadline) {
+      const deadline = this.opened ? this.progressDeadline : this.deadline;
+      const pending = this.flushPending && this.watchedSeconds > this.sentSeconds;
+      if ((!this.opened || progressFailed || pending) && this.now() < deadline) {
         clearTimeout(this.retry);
-        this.retry = setTimeout(() => { void this.flush(); }, 1_000);
+        this.retry = setTimeout(() => { void this.flush(this.progressDeadline); }, 1_000);
       }
     }
   }

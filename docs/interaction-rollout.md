@@ -47,6 +47,12 @@ SDK release. AI uses the released SDK parser; there is no parallel SSE parser.
   trusted Bold viewer mapping, so all AI and engagement remain anonymous and
   the event proxy strips browser `viewer`. Auth.js identities are not invented
   Bold viewer IDs. Backend scope/source validation remains authoritative.
+- Hosted events retain the independent authenticated site lookup as well as the
+  middleware authorization lookup. Removing that duplication is a deferred
+  optimization, not grounds to trust a client-supplied tenant header or cache
+  authorization settings. The event handler skips the additional SDK settings
+  fetch. Successful progress sends retain the normal five-second cadence;
+  failures and flushes queued during an upload can retry sooner.
 
 ## Checks
 

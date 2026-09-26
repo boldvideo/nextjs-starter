@@ -520,6 +520,8 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     <AskMessageCard
                       content={pair.assistantMessage.content}
                       citations={pair.citations}
+                      interactionId={pair.assistantMessage.interaction?.id}
+                      answerRequestId={pair.assistantMessage.interaction?.requestId}
                       aiName={aiName}
                       aiAvatar={aiAvatar}
                       onCitationClick={citation => handleCitationClick(citation, pair.assistantMessage?.interaction)}
