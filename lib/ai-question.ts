@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
 
 export type Message = {
@@ -52,6 +53,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       if (event.conversationId) state.conversationId = event.conversationId;
       return JSON.stringify({
         type: "complete",
+        interactionId: event.interactionId,
         success: true,
         answer: {
           text: event.content || state.accumulatedAnswer,
@@ -154,6 +156,7 @@ export async function streamAIQuestion(
     : question;
 
   const stream = (await context.client.ai.chat({
+    ...portalClient,
     ...(videoId ? { videoId } : {}),
     prompt,
     ...(conversationId ? { conversationId } : {}),
