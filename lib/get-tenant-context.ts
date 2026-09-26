@@ -28,7 +28,7 @@ export interface TenantContext {
  *
  * Returns null if tenant cannot be resolved (invalid domain, etc).
  */
-export async function getTenantContext(): Promise<TenantContext | null> {
+export async function getTenantContext({ includeSettings = true }: { includeSettings?: boolean } = {}): Promise<TenantContext | null> {
   const config = getPortalMode();
   const baseURL = process.env.BACKEND_URL || DEFAULT_API_BASE_URL;
 
@@ -42,7 +42,7 @@ export async function getTenantContext(): Promise<TenantContext | null> {
     });
 
     try {
-      const { data: settings } = await client.settings();
+      const { data: settings } = includeSettings ? await client.settings() : { data: null };
       return {
         client,
         settings,
@@ -95,7 +95,7 @@ export async function getTenantContext(): Promise<TenantContext | null> {
   // Use SDK to fetch settings - this ensures consistent camelCase transformation
   // and uses the same code path as standalone mode
   try {
-    const { data: settings } = await client.settings();
+    const { data: settings } = includeSettings ? await client.settings() : { data: null };
     return {
       client,
       settings,
