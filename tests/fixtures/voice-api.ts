@@ -53,7 +53,7 @@ createServer((request, response) => {
       chats.push({ ...input, path: url.pathname, interactionId });
       const source = { id: "c_abc123", video_id: video.id, title: video.title, timestamp: 83, text: "Pricing source", playback_id: "voice-demo" };
       const content = input.prompt?.includes("mentions")
-        ? `Watch [1]. **Episode 8 ("${video.title}")** and *${video.title}*.`
+        ? `Watch [1]. "${video.title}" and *${video.title}*.`
         : "Watch [1] and [01:23] for pricing.";
       response.setHeader("Content-Type", "text/event-stream");
       response.write(`data: ${JSON.stringify({ type: "sources", sources: [source] })}\n\n`);

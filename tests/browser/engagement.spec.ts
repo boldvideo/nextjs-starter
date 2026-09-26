@@ -172,9 +172,9 @@ test("Ask keeps an older answer's explicit source ID after a newer answer and re
   if (process.env.REVIEW_SCREENSHOT) await page.screenshot({ path: process.env.REVIEW_SCREENSHOT });
 });
 
-test("custom episode/title links retain pending and older answer attribution in new tabs", async ({ page, request, context }) => {
+test("custom quoted/italic title links retain pending and older answer attribution in new tabs", async ({ page, request, context }) => {
   await page.goto("/ask?q=mentions");
-  const episode = page.getByRole("link", { name: /^Episode 8/ });
+  const episode = page.getByRole("link", { name: '"Make room for your best work"', exact: true });
   const title = page.getByRole("link", { name: "Make room for your best work", exact: true });
   await expect(episode.first()).toHaveAttribute("href", /interaction_id=/);
   const first = (await rows(request, "chats"))[0].interactionId;
