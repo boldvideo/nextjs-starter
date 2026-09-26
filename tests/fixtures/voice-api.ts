@@ -15,12 +15,56 @@ const settings = {
   } },
   portal: { layout: { type: "library" }, navigation: { show_header: true }, color_scheme: "toggle" },
 };
+const searches: Record<string, string>[] = [];
+const aiSearches: Record<string, unknown>[] = [];
+const interactions = new Map<string, string>();
 createServer((request, response) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
   response.setHeader("Access-Control-Allow-Headers", "*");
   response.setHeader("Content-Type", "application/json");
   if (request.method === "OPTIONS") { response.end(); return; }
   const path = request.url ?? "";
+  const url = new URL(path, "http://localhost");
+  if (url.pathname === "/test/ai-searches") {
+    if (request.method === "DELETE") aiSearches.length = 0;
+    response.end(JSON.stringify(aiSearches));
+    return;
+  }
+  if (url.pathname === "/api/v1/ai/search") {
+    let body = "";
+    request.on("data", chunk => { body += chunk; });
+    request.on("end", () => {
+      const search = JSON.parse(body);
+      aiSearches.push(search);
+      const key = search.request_id || crypto.randomUUID();
+      if (!interactions.has(key)) interactions.set(key, crypto.randomUUID());
+      const result = { content: "Pricing answer", citations: [], response_type: "answer",
+        interaction_id: search.search_mode === "preview" ? null : interactions.get(key) };
+      if (search.stream === false) response.end(JSON.stringify(result));
+      else {
+        response.setHeader("Content-Type", "text/event-stream");
+        response.end(`data: ${JSON.stringify({ type: "text_delta", delta: result.content })}\n\ndata: ${JSON.stringify({ type: "message_complete", ...result })}\n\ndata: [DONE]\n\n`);
+      }
+    });
+    return;
+  }
+  if (url.pathname === "/test/searches") {
+    if (request.method === "DELETE") searches.length = 0;
+    response.end(JSON.stringify(searches));
+    return;
+  }
+  if (url.pathname === "/api/v1/search") {
+    const search = Object.fromEntries(url.searchParams);
+    searches.push(search);
+    const key = search.request_id || crypto.randomUUID();
+    if (!interactions.has(key)) interactions.set(key, crypto.randomUUID());
+    response.end(JSON.stringify({
+      interaction_id: search.search_mode === "preview" ? null : interactions.get(key),
+      hits: [{ internal_id: video.id, short_id: video.slug, title: `Result for ${search.query}`,
+        thumbnail: null, duration: 320, segments: [{ start_time: 83, text: "Pricing moment" }] }],
+    }));
+    return;
+  }
   const data = path.includes("settings") ? settings
     : path.includes("/videos/") && !path.includes("/latest") ? (path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
     : path.includes("/playlists/") ? { id: "test", title: "Everyday focus", videos: [video, nextVideo] }
