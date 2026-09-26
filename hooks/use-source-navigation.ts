@@ -48,7 +48,7 @@ export function useSourceNavigation(videoId: string) {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query, request_id: requestId, search_mode: "settled" }),
         }).then(async response => {
-          if (response.status >= 400 && response.status < 500 && response.status !== 429) return null;
+          if (response.status >= 400 && response.status < 500 && response.status !== 408 && response.status !== 429) return null;
           if (!response.ok) throw new Error("Search settlement failed");
           return (await response.json()).interaction_id as string | null | undefined;
         });
