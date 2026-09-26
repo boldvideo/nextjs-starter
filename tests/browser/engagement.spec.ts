@@ -102,25 +102,27 @@ test("preview timestamp opened in a new tab settles only at destination and open
   await popup.close();
 });
 
-test("preview settlement retries a lost response with the same action and interaction", async ({ page, request }) => {
-  await request.delete("http://127.0.0.1:4311/test/searches");
-  const action = crypto.randomUUID();
-  const ids: string[] = [];
-  await page.route("**/api/search", async route => {
-    const response = await route.fetch();
-    ids.push((await response.json()).interaction_id);
-    if (ids.length === 1) await route.fulfill({ status: 503, body: "lost response" });
-    else await route.fulfill({ response });
+for (const failureStatus of [408, 503]) {
+  test(`preview settlement retries HTTP ${failureStatus} with the same action and interaction`, async ({ page, request }) => {
+    await request.delete("http://127.0.0.1:4311/test/searches");
+    const action = crypto.randomUUID();
+    const ids: string[] = [];
+    await page.route("**/api/search", async route => {
+      const response = await route.fetch();
+      ids.push((await response.json()).interaction_id);
+      if (ids.length === 1) await route.fulfill({ status: failureStatus, body: "lost response" });
+      else await route.fulfill({ response });
+    });
+    await page.goto(`/v/voice-demo?search_query=pricing&search_request_id=${action}`);
+    await expect.poll(async () => (await engagement(request)).length).toBe(1);
+    expect(ids).toHaveLength(2);
+    expect(ids[1]).toBe(ids[0]);
+    expect((await rows(request, "searches")).map(row => [row.search_mode, row.request_id])).toEqual([
+      ["settled", action], ["settled", action],
+    ]);
+    expect((await engagement(request))[0].interaction_id).toBe(ids[0]);
   });
-  await page.goto(`/v/voice-demo?search_query=pricing&search_request_id=${action}`);
-  await expect.poll(async () => (await engagement(request)).length).toBe(1);
-  expect(ids).toHaveLength(2);
-  expect(ids[1]).toBe(ids[0]);
-  expect((await rows(request, "searches")).map(row => [row.search_mode, row.request_id])).toEqual([
-    ["settled", action], ["settled", action],
-  ]);
-  expect((await engagement(request))[0].interaction_id).toBe(ids[0]);
-});
+}
 
 for (const end of ["context removed", "deadline expired"] as const) {
   test(`failed preview settlement stops when ${end}`, async ({ page, request }) => {
