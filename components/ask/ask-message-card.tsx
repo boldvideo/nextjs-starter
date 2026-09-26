@@ -360,7 +360,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
         if (mentioned) {
           return (
             <Link
-              href={buildVideoUrl({ id: mentioned.videoId })}
+              href={sourceUrl(buildVideoUrl({ id: mentioned.videoId }), interactionId, undefined, answerRequestId)}
               className={cn(
                 "italic text-foreground no-underline",
                 "border-b border-primary/40 hover:border-primary",

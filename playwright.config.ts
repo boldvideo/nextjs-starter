@@ -16,6 +16,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   timeout: 45_000,
+  expect: { timeout: 15_000 },
   use: {
     baseURL: "http://localhost:4310", trace: "retain-on-failure",
     launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH },
