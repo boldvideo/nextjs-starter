@@ -206,13 +206,13 @@ const MarkdownSection = React.memo(function MarkdownSection({
           type="button"
           onClick={() => onCitationClick(citation)}
           className={cn(
-            "inline-block align-[0.38em] mx-px px-1 py-0.5 rounded",
-            "text-[10px] font-semibold leading-none tabular-nums",
+            "inline-flex items-center gap-0.5 align-[0.3em] mx-0.5 px-1.5 py-[3px] rounded-md",
+            "font-display text-[10px] leading-none",
             "border border-[var(--signal-line)]",
-            "transition-colors cursor-pointer",
+            "transition-[background-color,color,box-shadow] cursor-pointer",
             isActive
-              ? "bg-signal text-background"
-              : "text-signal bg-[var(--signal-soft)] hover:bg-signal hover:text-background"
+              ? "bg-signal text-background shadow-[0_0_12px_var(--gym-cyan)]"
+              : "text-signal bg-[var(--signal-soft)] hover:bg-signal hover:text-background hover:shadow-[0_0_12px_var(--gym-cyan)]"
           )}
           title={
             hasValidTimestamp
@@ -223,6 +223,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
             hasValidTimestamp ? ` at ${citation.timestampStart}` : ""
           }`}
         >
+          <span aria-hidden className="text-[7px]">▶</span>
           {displayNum}
         </button>
       );

@@ -46,34 +46,39 @@ export function AskVideoPanel({ citation, isOpen, onClose, engagement }: AskVide
 
   return (
     <>
-      {/* Backdrop - only on mobile */}
+      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 lg:hidden animate-in fade-in"
+        className="fixed inset-0 bg-[rgba(6,3,14,0.72)] backdrop-blur-sm z-40 lg:hidden animate-in fade-in"
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Bottom sheet: instant replay */}
       <div
         className={cn(
-          "fixed right-0 top-0 h-full w-full md:w-[500px] lg:w-[500px] xl:w-[600px] bg-background z-50",
-          "shadow-2xl animate-in slide-in-from-right duration-300",
-          "flex flex-col",
-          "lg:border-l lg:border-border"
+          "fixed inset-x-0 bottom-0 z-50 max-h-[88dvh] rounded-t-2xl",
+          "bg-[var(--gym-night-2)] border-t border-[var(--gym-cyan)]",
+          "shadow-[0_-12px_60px_-12px_rgba(34,230,255,0.5)]",
+          "animate-in slide-in-from-bottom duration-300 ease-out",
+          "flex flex-col overflow-hidden"
         )}
+        role="dialog"
+        aria-label="Instant replay"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold">Video Source</h3>
+        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-white/20" />
+        <div className="flex items-center justify-between px-4 pt-2 pb-3">
+          <div className="flex items-baseline gap-3">
+            <h3 className="font-display text-base uppercase gym-sunset-text">Instant replay</h3>
+            <span className="font-osd text-[19px] text-[var(--gym-cyan)]">▶ {formatTime(citation.startMs)}</span>
+          </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-accent rounded-lg transition-colors cursor-pointer"
+            className="p-2 -mr-2 text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Video Player */}
         <div className="aspect-video bg-black flex-shrink-0">
           <MuxPlayerComponent
             video={video}
@@ -84,32 +89,19 @@ export function AskVideoPanel({ citation, isOpen, onClose, engagement }: AskVide
           />
         </div>
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* Video Title */}
-          <h2 className="text-xl font-semibold mb-6">
-            {citation.videoTitle}
-          </h2>
-
-          {/* Transcript Section */}
+        <div className="flex-1 overflow-y-auto px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+          <h2 className="text-lg font-semibold leading-snug mb-3">{citation.videoTitle}</h2>
           {citation.text && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-muted-foreground">
-                Transcript at {formatTime(citation.startMs)}
-              </h4>
-              <blockquote className="border-l-2 border-primary pl-4 text-muted-foreground leading-relaxed italic line-clamp-5">
-                &ldquo;{citation.text}&rdquo;
-              </blockquote>
-            </div>
+            <blockquote className="border-l-2 border-[var(--gym-cyan)] pl-3.5 text-foreground/80 leading-relaxed line-clamp-5">
+              &ldquo;{citation.text.trim()}&rdquo;
+            </blockquote>
           )}
-
-          {/* Open Full Video Button */}
           <Link
             href={sourceUrl(`${getCanonicalVideoPath(citation.videoId)}?t=${Math.floor(citation.startMs / 1000)}`, engagement?.interaction.id, undefined, engagement?.interaction.requestId)}
-            className="mt-8 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors text-sm font-medium"
+            className="mt-5 w-full flex items-center justify-center gap-2 h-12 rounded-xl border border-[var(--gym-line)] bg-white/[0.03] hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)] transition-colors text-sm font-semibold"
           >
+            Watch the full session from {formatTime(citation.startMs)}
             <ExternalLink className="h-4 w-4" />
-            Open Full Video
           </Link>
         </div>
       </div>

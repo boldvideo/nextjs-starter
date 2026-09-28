@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Header } from "@/components/header";
+import { GymBar } from "@/components/gym/gym-bar";
 import { SearchCommandDialog } from "@/components/search-command-dialog";
 import { PlaylistProvider } from "@/components/providers/playlist-provider";
 import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
@@ -15,17 +15,11 @@ interface LayoutWithPlaylistProps {
   showHeader?: boolean;
 }
 
-function LayoutContent({ children, settings, session, showHeader = true }: LayoutWithPlaylistProps) {
+// Fork: the gym bar replaces the tenant header on every page.
+function LayoutContent({ children }: LayoutWithPlaylistProps) {
   return (
     <>
-      {showHeader && (
-        <Header
-          logo={settings?.logoUrl || "/bold-logo.svg"}
-          logoDark={settings?.logoDarkUrl}
-          menuItems={settings?.menuItems || []}
-          session={session}
-        />
-      )}
+      <GymBar />
       <SearchCommandDialog />
       <main className="flex-1 relative flex flex-col min-h-0 overflow-hidden pt-[var(--header-height)]">{children}</main>
     </>

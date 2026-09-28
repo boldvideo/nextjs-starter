@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Plus, Loader2 } from "lucide-react";
-import { PersonaAvatar } from "@/components/persona-avatar";
+import Image from "next/image";
 import {
   useAIAskStream,
   askSourceToCitation,
@@ -11,17 +10,16 @@ import {
 } from "@/hooks/use-ai-ask-stream";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
-import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { AskMessageCard } from "./ask-message-card";
-import { AskSourcesCarousel } from "./ask-sources-carousel";
 import { AskSourcesRail } from "./ask-sources-rail";
 
 import { AskVideoPanel } from "./ask-video-panel";
-import { AskEmptyState } from "./ask-empty-state";
-import { ChatInput } from "@/components/coach";
-import { AskLoadingState } from "./ask-loading-state";
-import { AskReadOnlyFooter } from "./ask-read-only-footer";
+import { GymBackdrop } from "@/components/gym/gym-backdrop";
+import { GymAskHero } from "@/components/gym/gym-ask-hero";
+import { GymFollowUp } from "@/components/gym/gym-follow-up";
+import { GymLoading } from "@/components/gym/gym-loading";
+import { GymReceiptCard } from "@/components/gym/gym-receipt-card";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
@@ -54,16 +52,8 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const multimodal = config.ai.multimodal;
   const aiName = config.ai.name;
   const aiAvatar = config.ai.avatar;
-  const greeting = config.ai.greeting || "What do you want to know?";
   const chatDisclaimer = config.ai.chatDisclaimer;
   
-  // Deterministic pick — shuffling with Math.random() here caused a
-  // server/client hydration mismatch.
-  const suggestions = useMemo(() => {
-    const starters = config.ai.conversationStarters || [];
-    return starters.slice(0, 4);
-  }, [config.ai.conversationStarters]);
-
   const [pageState, setPageState] = useState<PageState>(
     routeConversationId ? { status: "loading" } : { status: "idle" }
   );
@@ -92,9 +82,9 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     messageSelector: "[data-streaming-message]",
   });
 
-  // Determine if this is a read-only historical view
-  // Read-only when: loaded from URL route parameter
-  const isReadOnly = Boolean(routeConversationId);
+  // Every thread stays open — a shared or reloaded /ask/<id> link picks the
+  // conversation back up (loadConversation restores its id) instead of
+  // freezing it read-only.
 
   const [selectedCitation, setSelectedCitation] = useState<AskCitation | null>(
     null
@@ -199,16 +189,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     stop();
   }, [stop]);
 
-  const handleReset = useCallback(() => {
-    reset();
-    setQuery("");
-    setSelectedCitation(null);
-    setIsPanelOpen(false);
-    setPageState({ status: "idle" });
-    // Update URL without navigation - state is already cleared
-    window.history.replaceState(null, "", "/ask");
-  }, [reset]);
-
   // Header "Ask …" pill starts a new chat even when this page is already
   // mounted with an active conversation.
   useEffect(() => {
@@ -236,15 +216,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     setSelectedCitation(null);
   }, []);
 
-  // Handle clicking a suggestion in read-only mode
-  // Navigates to /ask and triggers the question
-  const handleReadOnlySuggestionClick = useCallback(
-    (suggestion: string) => {
-      // Navigate to /ask with the question as a query param
-      router.push(`/ask?q=${encodeURIComponent(suggestion)}`, { scroll: false });
-    },
-    [router]
-  );
 
   // Per-message caches keyed by assistant message id. Citation arrays and the
   // display-number map keep a stable identity across text_delta re-renders so
@@ -281,6 +252,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       citations: AskCitation[];
       orderedCitations: AskCitation[];
       citationDisplayNumberById: Map<string, number>;
+      primaryCount: number;
     }> = [];
 
     for (let i = 0; i < messages.length; i++) {
@@ -329,6 +301,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         const stillStreaming = isStreaming && i >= messages.length - 2;
         let orderedCitations = stillStreaming ? [] : citations;
         let displayMap = EMPTY_DISPLAY_MAP;
+        let primaryCount = 0;
 
         if (assistantMsg?.content && citations.length > 0) {
           const matches = Array.from(
@@ -354,6 +327,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             seenIds.add(citation.id);
             ordered.push(citation);
           }
+          primaryCount = ordered.length;
 
           // Unreferenced leftovers only from the retrieval set — the
           // citation_map carries every candidate moment and would flood the
@@ -398,14 +372,14 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           citations,
           orderedCitations,
           citationDisplayNumberById: displayMap,
+          // No inline refs at all → every retrieved moment is a receipt
+          primaryCount: primaryCount || orderedCitations.length,
         });
       }
     }
 
     return pairs;
   }, [messages, isStreaming]);
-
-  const placeholder = "Ask a follow-up…";
 
   const hasMessages = messages.length > 0;
 
@@ -417,132 +391,166 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const lastPair = qaPairs[qaPairs.length - 1];
   const selectedPair = sourceOpen && qaPairs.find(pair => pair.assistantMessage?.interaction === sourceOpen.interaction);
 
-  if (pageState.status === "loading") {
-    return <AskLoadingState />;
+  // /ask?q=… paints the thread shape straight away (the stream starts in an
+  // effect) instead of flashing the empty hero for a frame.
+  const pendingQuery = !hasMessages && !routeConversationId ? searchParams?.get("q") : null;
+
+  if (pageState.status === "loading" || pendingQuery) {
+    return (
+      <div className="relative flex flex-1 min-h-0 w-full overflow-hidden">
+        <GymBackdrop variant="dim" />
+        <div className="relative w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
+          <div className="h-11 mb-10" />
+          {pendingQuery ? (
+            <div className="space-y-7">
+              <div>
+                <span className="inline-block -rotate-2 mb-3 rounded-md bg-[var(--gym-pink)] px-2.5 py-1 font-display text-[13px] uppercase leading-none text-[#1a0616] shadow-[3px_3px_0_var(--gym-yellow)]">
+                  Rep 01
+                </span>
+                <h2 className="font-bold text-[26px] md:text-[34px] tracking-[-0.02em] leading-[1.12] text-foreground text-balance">
+                  {pendingQuery}
+                </h2>
+              </div>
+              <GymLoading />
+            </div>
+          ) : (
+            <GymLoading status="Rewinding the tape…" />
+          )}
+        </div>
+      </div>
+    );
   }
 
   if (!hasMessages) {
     return (
-      <AskEmptyState
-        query={query}
-        setQuery={setQuery}
-        onSubmit={handleSubmit}
-        onStop={handleStop}
-        isStreaming={isStreaming}
-        aiName={aiName}
-        aiAvatar={aiAvatar}
-        greeting={greeting}
-        suggestions={suggestions}
-        placeholder="What's on your mind?"
-        disclaimer={chatDisclaimer}
-        onAsk={(q) => streamQuestion(q)}
-        multimodalEnabled={multimodal.enabled}
-        images={images}
-        onImagesChange={setImages}
-        maxImages={multimodal.maxImages}
-        acceptedMediaTypes={multimodal.acceptedMediaTypes}
-      />
+      <div className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+        <div className="relative min-h-full flex flex-col overflow-hidden">
+          <GymBackdrop />
+          <section className="relative z-10 flex-1 flex items-center px-4 py-14">
+            <GymAskHero onAsk={(q) => streamQuestion(q)} />
+          </section>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-1 min-h-0 w-full overflow-hidden">
-      <div className="flex flex-col flex-1 min-h-0 min-w-0">
+    <div className="relative flex flex-1 min-h-0 w-full overflow-hidden">
+      <GymBackdrop variant="dim" />
+      <div className="relative flex flex-col flex-1 min-h-0 min-w-0">
         {/* Scrollable content area */}
         <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-y-auto">
-          <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8">
-            {/* Thread head — lives inside the content column */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-2.5">
-                <PersonaAvatar name={personaDisplayName} avatar={aiAvatar} size={30} />
-                <span className="font-[family-name:var(--font-heading)] text-base tracking-tight">
-                  <span className="text-muted-foreground/70 font-normal mr-1.5">
-                    Ask
+          <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
+            {/* Thread head */}
+            <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center gap-3">
+                <Image
+                  src="/gym/coach.webp"
+                  alt=""
+                  width={44}
+                  height={44}
+                  className="h-11 w-11 drop-shadow-[0_0_12px_rgba(255,46,166,0.5)]"
+                />
+                <div className="flex flex-col leading-none">
+                  <span className="font-display text-base uppercase text-foreground">
+                    {personaDisplayName.replace(/^the gtm gym\s*/i, "") || "Coach"}
                   </span>
-                  <span className="font-semibold">{personaDisplayName}</span>
-                </span>
+                  <span className="mt-1 font-osd text-[17px] text-muted-foreground">
+                    SET 01 · {qaPairs.length} {qaPairs.length === 1 ? "REP" : "REPS"}
+                  </span>
+                </div>
               </div>
-              <button
-                onClick={handleReset}
-                className={cn(
-                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer",
-                  "text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
-                  "text-sm whitespace-nowrap"
-                )}
-                title="Start new chat"
-              >
-                <Plus className="h-[15px] w-[15px]" />
-                <span className="hidden sm:inline">New chat</span>
-              </button>
+              {isStreaming && (
+                <span className="flex items-center gap-1.5 font-osd text-[19px] text-[var(--gym-pink)]">
+                  <span className="gym-rec inline-block h-2 w-2 rounded-full bg-[var(--gym-pink)]" />
+                  LIVE
+                </span>
+              )}
             </div>
 
-            <div className="space-y-12">
+            <div className="space-y-14">
             {qaPairs.map((pair, pairIndex) => {
               const isLastPair = pairIndex === qaPairs.length - 1;
               const isCurrentlyStreaming = isStreaming && isLastPair;
+              const repLabel = String(pairIndex + 1).padStart(2, "0");
 
               return (
                 <div
                   key={pair.userMessage.id}
-                  className="space-y-8"
+                  className="space-y-7"
                   {...(isCurrentlyStreaming ? { "data-streaming-message": true } : {})}
                 >
-                  {/* User's question as title, with optional attachment thumbnails */}
                   {pair.userMessage.attachments && pair.userMessage.attachments.length > 0 && (
                     <AttachmentThumbnails attachments={pair.userMessage.attachments} />
                   )}
-                  <div className="flex items-start gap-3">
-                    <span className="shrink-0 mt-[7px] text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/70 border border-border rounded px-1.5 py-[3px]">
-                      You
+                  {/* The rep: stamp + your question */}
+                  <div>
+                    <span className="gym-slam inline-block -rotate-2 mb-3 rounded-md bg-[var(--gym-pink)] px-2.5 py-1 font-display text-[13px] uppercase leading-none text-[#1a0616] shadow-[3px_3px_0_var(--gym-yellow)]">
+                      Rep {repLabel}
                     </span>
-                    <h2 className="font-[family-name:var(--font-heading)] font-semibold text-2xl md:text-3xl tracking-tight leading-[1.15]">
+                    <h2 className="font-bold text-[26px] md:text-[34px] tracking-[-0.02em] leading-[1.12] text-foreground text-balance">
                       {pair.userMessage.content}
                     </h2>
                   </div>
 
-                  {/* Loading state */}
                   {pair.assistantMessage?.type === "loading" && (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm">{statusMessage || "Reading across the series…"}</span>
-                    </div>
+                    <GymLoading status={statusMessage} />
                   )}
 
-                  {/* Error state */}
                   {pair.assistantMessage?.type === "error" && (
-                    <div className="text-destructive text-sm py-2">
+                    <div className="rounded-xl border border-[var(--destructive)]/40 bg-[var(--destructive)]/10 px-4 py-3 text-sm text-foreground/90">
+                      <span className="font-display uppercase text-[var(--destructive)] mr-2">Dropped the bar.</span>
                       {pair.assistantMessage.content}
                     </div>
                   )}
 
-                  {/* Answer */}
                   {pair.assistantMessage && pair.assistantMessage.type !== "loading" && pair.assistantMessage.type !== "error" && (
-                    <AskMessageCard
-                      content={pair.assistantMessage.content}
-                      citations={pair.citations}
-                      aiName={aiName}
-                      aiAvatar={aiAvatar}
-                      onCitationClick={citation => handleCitationClick(citation, pair.assistantMessage?.interaction)}
-                      isStreaming={isCurrentlyStreaming}
-                      citationDisplayNumberById={pair.citationDisplayNumberById}
-                      selectedCitationId={selectedCitation?.id}
-                    />
-                  )}
-
-                  {/* Video sources carousel — mobile only; desktop uses the rail */}
-                  {pair.orderedCitations.length > 0 && !isCurrentlyStreaming && (
-                    <div className="lg:hidden">
-                      <AskSourcesCarousel
-                        citations={pair.orderedCitations}
+                    <div>
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="font-display text-[13px] uppercase text-[var(--gym-cyan)] [text-shadow:0_0_12px_rgba(34,230,255,0.6)]">
+                          The play
+                        </span>
+                        <span className="h-px flex-1 bg-[linear-gradient(90deg,var(--gym-cyan),transparent)] opacity-50" />
+                      </div>
+                      <AskMessageCard
+                        content={pair.assistantMessage.content}
+                        citations={pair.citations}
+                        aiName={aiName}
+                        aiAvatar={aiAvatar}
                         onCitationClick={citation => handleCitationClick(citation, pair.assistantMessage?.interaction)}
+                        isStreaming={isCurrentlyStreaming}
+                        citationDisplayNumberById={pair.citationDisplayNumberById}
                         selectedCitationId={selectedCitation?.id}
                       />
                     </div>
                   )}
 
-                  {/* Divider between Q&A pairs (not after the last one) */}
+                  {/* Receipts — mobile only; desktop uses the rail */}
+                  {pair.orderedCitations.length > 0 && !isCurrentlyStreaming && (
+                    <div className="lg:hidden">
+                      <div className="flex items-baseline justify-between mb-3">
+                        <span className="font-display text-sm uppercase gym-sunset-text">Receipts</span>
+                        <span className="font-osd text-[17px] text-muted-foreground">
+                          {pair.primaryCount} {pair.primaryCount === 1 ? "CLIP" : "CLIPS"}
+                        </span>
+                      </div>
+                      <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1 snap-x snap-mandatory">
+                        {pair.orderedCitations.slice(0, pair.primaryCount).map((c) => (
+                          <GymReceiptCard
+                            key={c.id}
+                            citation={c}
+                            number={pair.citationDisplayNumberById.get(c.id)}
+                            selected={selectedCitation?.id === c.id}
+                            onClick={() => handleCitationClick(c, pair.assistantMessage?.interaction)}
+                            className="shrink-0 w-[230px] m-0 snap-start"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {!isLastPair && (
-                    <div className="border-t border-border/50 pt-4" />
+                    <div className="h-px bg-[linear-gradient(90deg,transparent,var(--gym-line),transparent)]" />
                   )}
                 </div>
               );
@@ -551,44 +559,28 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           </div>
         </div>
 
-        {/* Footer: Input for active conversations, CTA for read-only */}
-        {isReadOnly ? (
-          <AskReadOnlyFooter
-            onStartNew={handleReset}
-            suggestions={suggestions}
-            onSuggestionClick={handleReadOnlySuggestionClick}
-          />
-        ) : (
-          <div className="relative flex-shrink-0 border-t border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            {/* Scroll to live button */}
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-10">
+        {/* Footer: follow-up bar */}
+        {(
+          <div className="relative flex-shrink-0 bg-[linear-gradient(180deg,transparent,var(--gym-night)_35%)] pt-4">
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-10">
               <ScrollToLiveButton
                 visible={showScrollButton}
                 isStreaming={isStreaming}
                 onClick={jumpToLive}
               />
             </div>
-            <div className="w-full max-w-3xl mx-auto px-4 py-3 md:px-6 md:py-4">
-              <ChatInput
+            <div className="w-full max-w-3xl mx-auto px-4 pb-3 md:px-6 md:pb-4">
+              <GymFollowUp
                 value={query}
                 onChange={setQuery}
-                onSubmit={handleSubmit}
+                onSubmit={() => handleSubmit()}
                 onStop={handleStop}
-                placeholder={placeholder}
-                disabled={false}
                 isStreaming={isStreaming}
-                autoFocus={false}
-                suggestions={[]}
-                showSuggestions={false}
-                disclaimer={chatDisclaimer}
-                multimodalEnabled={multimodal.enabled}
-                images={images}
-                onImagesChange={setImages}
-                maxImages={multimodal.maxImages}
-                acceptedMediaTypes={multimodal.acceptedMediaTypes}
               />
-              {/* The moment of wow is a cited answer — that's when this sells */}
-              <div className="flex justify-center mt-2">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 mt-2.5 px-1">
+                {chatDisclaimer ? (
+                  <p className="text-[11px] text-muted-foreground/60 text-center sm:text-left">{chatDisclaimer}</p>
+                ) : <span />}
                 <PoweredByBold variant="pitch" />
               </div>
             </div>
@@ -607,6 +599,8 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             ? handleCitationClick(citation, selectedCitation ? sourceOpen?.interaction : lastPair?.assistantMessage?.interaction)
             : handleClosePanel()}
           isStreaming={isStreaming}
+          primaryCount={(selectedCitation ? selectedPair : lastPair)?.primaryCount}
+          className="relative"
         />
       )}
 

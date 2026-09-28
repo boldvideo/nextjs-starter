@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { X, ExternalLink } from "lucide-react";
+import { X, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
@@ -11,6 +11,7 @@ import {
 } from "@/components/players/player-mux";
 import { getCanonicalVideoPath } from "@/lib/video-path";
 import { sourceUrl, type SourceOpen } from "@/lib/source-engagement";
+import { GymReceiptCard } from "@/components/gym/gym-receipt-card";
 
 interface FramePreview {
   citation: AskCitation;
@@ -68,6 +69,8 @@ interface AskSourcesRailProps {
   selectedCitation: AskCitation | null;
   onSelect: (citation: AskCitation | null) => void;
   isStreaming: boolean;
+  /** How many leading citations the answer text references */
+  primaryCount?: number;
   className?: string;
 }
 
@@ -84,6 +87,7 @@ export function AskSourcesRail({
   selectedCitation,
   onSelect,
   isStreaming,
+  primaryCount,
   className,
 }: AskSourcesRailProps) {
   const episodeCount = new Set(citations.map((c) => c.videoId)).size;
@@ -120,87 +124,81 @@ export function AskSourcesRail({
     );
   }
 
-  // Group moments by episode, preserving first-appearance order — repeated
-  // titles per moment aren't scannable.
-  const groups: { videoId: string; title: string; items: AskCitation[] }[] = [];
-  const byVideo = new Map<string, (typeof groups)[number]>();
-  for (const c of citations) {
-    let g = byVideo.get(c.videoId);
-    if (!g) {
-      g = { videoId: c.videoId, title: c.videoTitle || "Untitled", items: [] };
-      byVideo.set(c.videoId, g);
-      groups.push(g);
-    }
-    g.items.push(c);
-  }
+  // Receipts = the moments the answer actually leans on (referenced in the
+  // text, numbered first). Leftover retrieval hits go under "More on tape".
+  const primary = primaryCount != null ? citations.slice(0, primaryCount) : citations;
+  const extras = primaryCount != null ? citations.slice(primaryCount, primaryCount + 6) : [];
 
   return (
     <aside
       className={cn(
-        "w-[300px] shrink-0 border-l border-border",
+        "w-[340px] shrink-0 border-l border-[var(--gym-line)]",
+        "bg-[color-mix(in_srgb,var(--gym-night-2)_70%,transparent)]",
         "flex flex-col min-h-0 overflow-y-auto",
-        "px-5 py-8",
+        "px-5 py-7",
         className
       )}
       // Preview position is viewport-fixed — drop it when the rail scrolls
       onScroll={hidePreview}
     >
-      <h4 className="font-[family-name:var(--font-heading)] font-semibold text-sm tracking-tight mb-1">
-        Sources
-      </h4>
-      <p className="text-xs text-muted-foreground/70 mb-5">
-        {isStreaming && citations.length === 0
-          ? "retrieving…"
-          : `${citations.length} ${citations.length === 1 ? "moment" : "moments"} · ${episodeCount} ${episodeCount === 1 ? "video" : "videos"}`}
-      </p>
-      <div className="flex flex-col gap-4" onMouseLeave={hidePreview}>
-        {groups.map((g) => (
-          <div key={g.videoId}>
-            <p className="text-[12.5px] font-medium text-muted-foreground leading-snug mb-1.5 line-clamp-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
-              {g.title}
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {g.items.map((c) => {
-                const num = displayNumberById?.get(c.id);
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => onSelect(c)}
-                    onMouseEnter={(e) => showPreview(c, e.currentTarget)}
-                    onMouseLeave={hidePreview}
-                    onFocus={(e) => showPreview(c, e.currentTarget)}
-                    onBlur={hidePreview}
-                    className={cn(
-                      "flex items-center gap-2.5 px-2 py-1.5 -ml-2 rounded-md text-left w-full",
-                      "cursor-pointer hover:bg-muted",
-                      "transition-[background-color,transform] duration-150 ease-out",
-                      "active:scale-[0.98]",
-                      "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 motion-safe:duration-300"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "shrink-0 w-[18px] h-[18px] grid place-items-center rounded",
-                        "text-[10.5px] font-semibold tabular-nums",
-                        "text-signal bg-[var(--signal-soft)] border border-[var(--signal-line)]"
-                      )}
-                    >
-                      {num ?? "·"}
-                    </span>
-                    <span className="text-[11px] tabular-nums text-muted-foreground/70">
-                      {c.timestampStart}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-[11.5px] text-muted-foreground/50">
-                      {c.text}
-                    </span>
-                  </button>
-                );
-              })}
+      <div className="flex items-baseline justify-between mb-5">
+        <h4 className="font-display text-lg uppercase gym-sunset-text">Receipts</h4>
+        <span className="font-osd text-[18px] text-muted-foreground">
+          {isStreaming && citations.length === 0
+            ? "SEARCHING TAPE…"
+            : `${primary.length} ${primary.length === 1 ? "CLIP" : "CLIPS"} · ${episodeCount} ${episodeCount === 1 ? "TAPE" : "TAPES"}`}
+        </span>
+      </div>
+
+      {isStreaming && citations.length === 0 && (
+        <div className="flex flex-col gap-5" aria-hidden>
+          {[0, 1].map((i) => (
+            <div key={i}>
+              <div className="aspect-video rounded-lg bg-white/[0.04] animate-pulse" />
+              <div className="mt-2 h-3 w-4/5 rounded bg-white/[0.05] animate-pulse" />
             </div>
-          </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-5">
+        {primary.map((c) => (
+          <GymReceiptCard
+            key={c.id}
+            citation={c}
+            number={displayNumberById?.get(c.id)}
+            onClick={() => onSelect(c)}
+            className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+          />
         ))}
       </div>
+
+      {extras.length > 0 && (
+        <div className="mt-7 pt-5 border-t border-[var(--gym-line)]" onMouseLeave={hidePreview}>
+          <p className="font-osd text-[18px] text-muted-foreground mb-2">MORE ON TAPE</p>
+          <div className="flex flex-col gap-0.5">
+            {extras.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => onSelect(c)}
+                onMouseEnter={(e) => showPreview(c, e.currentTarget)}
+                onMouseLeave={hidePreview}
+                onFocus={(e) => showPreview(c, e.currentTarget)}
+                onBlur={hidePreview}
+                className="flex items-baseline gap-2.5 px-2 py-1.5 -mx-2 rounded-md text-left w-full cursor-pointer hover:bg-white/[0.04] transition-colors"
+              >
+                <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">
+                  {c.timestampStart}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-[12.5px] text-muted-foreground">
+                  {c.videoTitle}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {preview && <MomentFramePreview preview={preview} />}
     </aside>
@@ -237,21 +235,22 @@ function VideoSourcePanel({
   return (
     <aside
       className={cn(
-        "w-[460px] shrink-0 border-l border-border bg-surface",
+        "w-[460px] shrink-0 border-l border-[var(--gym-line)] bg-[var(--gym-night-2)]",
         "flex flex-col min-h-0",
         className
       )}
     >
       {/* Head */}
-      <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-border shrink-0">
-        <h3 className="font-[family-name:var(--font-heading)] font-semibold text-base">
-          Video source
-        </h3>
+      <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-[var(--gym-line)] shrink-0">
+        <div className="flex items-baseline gap-3">
+          <h3 className="font-display text-base uppercase gym-sunset-text">Instant replay</h3>
+          <span className="font-osd text-[18px] text-[var(--gym-cyan)]">▶ {citation.timestampStart}</span>
+        </div>
         <button
           type="button"
           onClick={onClose}
-          className="w-[30px] h-[30px] grid place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-          aria-label="Close"
+          className="w-[30px] h-[30px] grid place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors cursor-pointer"
+          aria-label="Back to receipts"
         >
           <X className="h-[18px] w-[18px]" />
         </button>
@@ -261,45 +260,42 @@ function VideoSourcePanel({
       <div className="flex-1 min-h-0 overflow-y-auto p-[18px]">
         <div
           key={`${citation.videoId}-${citation.startMs}`}
-          className="relative aspect-video rounded-lg overflow-hidden border border-border bg-black mb-4"
+          className="relative aspect-video rounded-lg overflow-hidden border border-[var(--gym-cyan)] shadow-[0_0_32px_-8px_var(--gym-cyan)] bg-black mb-4"
         >
           <MuxPlayerComponent
             video={video}
             engagement={engagement}
             startTime={startSeconds}
-            autoPlay={false}
+            autoPlay={true}
             className="w-full h-full"
           />
         </div>
 
-        <p className="font-[family-name:var(--font-heading)] font-semibold text-lg leading-snug mb-1">
+        <p className="font-semibold text-lg leading-snug mb-3">
           {citation.videoTitle}
         </p>
-        <p className="text-sm font-medium tabular-nums text-signal mb-3">
-          Transcript at {citation.timestampStart}
-        </p>
         {citation.text && (
-          <blockquote className="border-l-2 border-signal pl-3.5 py-1 text-base leading-relaxed text-muted-foreground italic mb-5">
-            &ldquo;{citation.text}&rdquo;
+          <blockquote className="border-l-2 border-[var(--gym-cyan)] pl-3.5 py-1 text-base leading-relaxed text-foreground/80 mb-5">
+            &ldquo;{citation.text.trim()}&rdquo;
           </blockquote>
         )}
 
         <Link
           href={sourceUrl(`${getCanonicalVideoPath(citation.videoId)}?t=${startSeconds}`, engagement?.interaction.id, undefined, engagement?.interaction.requestId)}
           className={cn(
-            "flex items-center justify-center gap-2 w-full h-[42px] rounded-lg",
-            "border border-border bg-muted text-sm font-medium",
-            "hover:border-primary/40 transition-colors"
+            "flex items-center justify-center gap-2 w-full h-[44px] rounded-xl",
+            "border border-[var(--gym-line)] bg-white/[0.03] text-sm font-semibold",
+            "hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)] transition-colors"
           )}
         >
-          <ExternalLink className="h-[15px] w-[15px]" />
-          Open full video at {citation.timestampStart}
+          Watch the full session from {citation.timestampStart}
+          <ArrowUpRight className="h-4 w-4" />
         </Link>
 
         {nearby.length > 1 && (
-          <div className="mt-6 pt-4 border-t border-border">
-            <p className="text-xs font-semibold tracking-[0.1em] uppercase text-muted-foreground/70 mb-2">
-              Other moments in this video
+          <div className="mt-6 pt-4 border-t border-[var(--gym-line)]">
+            <p className="font-osd text-[18px] text-muted-foreground mb-2">
+              OTHER REPS ON THIS TAPE
             </p>
             {nearby.map((c) => {
               const isHit = c.id === citation.id;
@@ -308,12 +304,12 @@ function VideoSourcePanel({
                   key={c.id}
                   type="button"
                   onClick={() => onSelect(c)}
-                  className="flex gap-2.5 py-[7px] w-full text-left text-sm leading-normal cursor-pointer"
+                  className="flex items-baseline gap-2.5 py-[7px] w-full text-left text-sm leading-normal cursor-pointer group"
                 >
                   <span
                     className={cn(
-                      "shrink-0 tabular-nums",
-                      isHit ? "text-signal font-medium" : "text-muted-foreground/60"
+                      "shrink-0 font-osd text-[18px] leading-none",
+                      isHit ? "text-[var(--gym-cyan)]" : "text-muted-foreground/70 group-hover:text-foreground"
                     )}
                   >
                     {c.timestampStart}
@@ -321,7 +317,7 @@ function VideoSourcePanel({
                   <span
                     className={cn(
                       "line-clamp-2",
-                      isHit ? "text-foreground" : "text-muted-foreground"
+                      isHit ? "text-foreground" : "text-muted-foreground group-hover:text-foreground/90"
                     )}
                   >
                     {c.text}

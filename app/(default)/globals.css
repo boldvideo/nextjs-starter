@@ -45,45 +45,50 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-:root {
-  --radius: 0.625rem;
-  --header-height: 73px;
-  /* Core 9 tokens - Bold brand defaults */
-  --background: oklch(0.98 0.02 95);
-  --foreground: oklch(0.22 0.04 175);
-  --muted: oklch(0.96 0.01 95);
-  --muted-foreground: oklch(0.45 0.03 175);
-  --border: oklch(0.90 0.02 95);
-  --ring: oklch(0.73 0.12 175);
-  --surface: oklch(0.99 0.01 95);
-  --accent: oklch(0.73 0.12 175);
-  --accent-foreground: oklch(0.22 0.04 175);
-  --primary: oklch(0.73 0.12 175);
-  /* Citation "signal" derives from the tenant accent so provenance UI
-     follows the portal theme (resolves per light/dark automatically) */
-  --signal: var(--accent);
-  --signal-soft: color-mix(in srgb, var(--accent) 12%, transparent);
-  --signal-line: color-mix(in srgb, var(--accent) 32%, transparent);
-  /* Derived tokens */
-  --input: var(--border);
-  --destructive: oklch(0.577 0.245 27.325);
-}
-
+:root,
 .dark {
-  /* Core 9 tokens - Bold brand defaults */
-  --background: oklch(0.18 0.02 175);
-  --foreground: oklch(0.96 0.01 95);
-  --muted: oklch(0.25 0.02 175);
-  --muted-foreground: oklch(0.65 0.03 175);
-  --border: oklch(0.30 0.02 175);
-  --ring: oklch(0.73 0.12 175);
-  --surface: oklch(0.22 0.02 175);
-  --accent: oklch(0.73 0.12 175);
-  --accent-foreground: oklch(0.18 0.02 175);
-  --primary: oklch(0.73 0.12 175);
-  /* Derived tokens */
-  --input: oklch(1 0 0 / 15%);
-  --destructive: oklch(0.704 0.191 22.216);
+  /* GTM Gym fork — design-owned in code (tenant theme is not injected).
+     One theme: 1987 workout tape at 2am. Night-purple floor, sunset
+     gradient (yellow → orange → hot pink), cyan neon for anything that
+     points at a video. Sampled from the tenant's logo + coach avatar. */
+  --radius: 0.75rem;
+  --header-height: 64px;
+
+  --gym-night: #0b0618;
+  --gym-night-2: #120a26;
+  --gym-panel: #170e2f;
+  --gym-panel-2: #1f1440;
+  --gym-line: rgba(196, 170, 255, 0.14);
+  --gym-chalk: #f6f0ff;
+  --gym-haze: #a99bcc;
+  --gym-pink: #ff2ea6;
+  --gym-cyan: #22e6ff;
+  --gym-orange: #ff8a1f;
+  --gym-yellow: #ffd23f;
+  --gym-violet: #7b2cff;
+  --gym-sunset: linear-gradient(90deg, #ffd23f 0%, #ff8a1f 38%, #ff2ea6 100%);
+
+  --background: var(--gym-night);
+  --foreground: var(--gym-chalk);
+  --muted: var(--gym-panel-2);
+  --muted-foreground: var(--gym-haze);
+  --border: var(--gym-line);
+  --ring: var(--gym-cyan);
+  --surface: var(--gym-panel);
+  --accent: var(--gym-pink);
+  --accent-foreground: #16061a;
+  --primary: var(--gym-pink);
+  /* Citations/receipts are cyan — everything that points at tape */
+  --signal: var(--gym-cyan);
+  --signal-soft: color-mix(in srgb, var(--gym-cyan) 12%, transparent);
+  --signal-line: color-mix(in srgb, var(--gym-cyan) 38%, transparent);
+  --input: var(--gym-line);
+  --destructive: #ff5a5a;
+
+  --font-display: var(--font-bungee), "Arial Black", sans-serif;
+  --font-osd: var(--font-vt323), ui-monospace, monospace;
+
+  color-scheme: dark;
 }
 
 @layer base {
@@ -166,5 +171,220 @@
     vertical-align: -0.15em;
     background-color: color-mix(in srgb, var(--color-primary) 75%, transparent);
     animation: cursor-blink 1s steps(2) infinite;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* GTM Gym — signature pieces                                           */
+/* ------------------------------------------------------------------ */
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.font-osd {
+  font-family: var(--font-osd);
+  letter-spacing: 0.04em;
+}
+
+/* 80s chrome lettering: sky on top, horizon line, sunset below */
+.gym-chrome {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #c9f6ff 30%,
+    #5fdcff 48%,
+    #2a1060 50%,
+    #ff4fc2 53%,
+    #ff8a1f 78%,
+    #ffd23f 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 2px #1a0633;
+  filter: drop-shadow(0 3px 0 #2a0845) drop-shadow(0 6px 0 #14052a)
+    drop-shadow(0 0 28px rgba(255, 46, 166, 0.45));
+}
+
+.gym-sunset-text {
+  background: var(--gym-sunset);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gym-sunset-bg {
+  background: var(--gym-sunset);
+}
+
+/* The sun: sunset gradient disc with the classic horizontal slats */
+.gym-sun {
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, #ffe45c 0%, #ffb03a 35%, #ff5a8a 65%, #ff2ea6 100%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 46%,
+    transparent 46%, transparent 49%, #000 49%, #000 56%,
+    transparent 56%, transparent 60%, #000 60%, #000 66%,
+    transparent 66%, transparent 71%, #000 71%, #000 76%,
+    transparent 76%, transparent 82%, #000 82%, #000 86%,
+    transparent 86%, transparent 93%, #000 93%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 46%,
+    transparent 46%, transparent 49%, #000 49%, #000 56%,
+    transparent 56%, transparent 60%, #000 60%, #000 66%,
+    transparent 66%, transparent 71%, #000 71%, #000 76%,
+    transparent 76%, transparent 82%, #000 82%, #000 86%,
+    transparent 86%, transparent 93%, #000 93%
+  );
+  box-shadow: 0 0 120px 30px rgba(255, 46, 166, 0.25);
+}
+
+/* Neon perspective floor — the lines roll toward you */
+.gym-floor {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  bottom: 0;
+  height: 100%;
+  transform-origin: 50% 0%;
+  transform: perspective(420px) rotateX(62deg);
+  background-image:
+    linear-gradient(to right, rgba(255, 46, 166, 0.55) 1.5px, transparent 1.5px),
+    linear-gradient(to bottom, rgba(34, 230, 255, 0.5) 1.5px, transparent 1.5px);
+  background-size: 64px 64px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+  animation: gym-floor-roll 2.4s linear infinite;
+}
+
+@keyframes gym-floor-roll {
+  from { background-position: 0 0; }
+  to { background-position: 0 64px; }
+}
+
+/* Faint CRT scanlines over hero surfaces */
+.gym-scanlines {
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.035) 0px,
+    rgba(255, 255, 255, 0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+}
+
+/* Neon input frame: sunset border that glows when you're about to lift */
+.gym-neon-frame {
+  position: relative;
+  border-radius: 1.1rem;
+  padding: 2px;
+  background: linear-gradient(90deg, var(--gym-cyan), var(--gym-violet) 45%, var(--gym-pink));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 10px 40px -10px rgba(255, 46, 166, 0.55),
+    0 0 60px -20px rgba(34, 230, 255, 0.6);
+  transition: box-shadow 200ms ease-out;
+}
+
+.gym-neon-frame:focus-within {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 12px 50px -8px rgba(255, 46, 166, 0.8),
+    0 0 80px -16px rgba(34, 230, 255, 0.85);
+}
+
+/* Big chunky arcade button */
+.gym-button {
+  font-family: var(--font-display);
+  background: var(--gym-sunset);
+  color: #1a0616;
+  box-shadow:
+    inset 0 -3px 0 rgba(0, 0, 0, 0.22),
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 6px 24px -6px rgba(255, 46, 166, 0.7);
+  transition: transform 120ms ease-out, filter 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+.gym-button:hover {
+  filter: brightness(1.08) saturate(1.1);
+}
+
+.gym-button:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.gym-button:disabled {
+  filter: grayscale(0.6) brightness(0.7);
+  cursor: not-allowed;
+}
+
+/* Ticker tape along the gym floor */
+.gym-marquee {
+  display: flex;
+  width: max-content;
+  animation: gym-marquee 90s linear infinite;
+}
+
+.gym-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes gym-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* Empty submit: the bar shakes its head at you */
+@keyframes gym-nudge {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(3px); }
+}
+
+.gym-nudge {
+  animation: gym-nudge 380ms ease-out;
+}
+
+/* REC dot */
+@keyframes gym-rec {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0.15; }
+}
+
+.gym-rec {
+  animation: gym-rec 1.2s steps(1) infinite;
+}
+
+/* Rep stamp slam-in for new questions */
+@keyframes gym-slam {
+  0% { transform: scale(1.35) rotate(-4deg); opacity: 0; }
+  60% { transform: scale(0.96) rotate(-2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-2deg); opacity: 1; }
+}
+
+.gym-slam {
+  animation: gym-slam 360ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gym-floor,
+  .gym-marquee,
+  .gym-rec,
+  .gym-nudge,
+  .gym-slam {
+    animation: none;
   }
 }

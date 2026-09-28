@@ -12,13 +12,7 @@ import { BoldProvider } from "@/components/providers/bold-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { Analytics } from "@/components/analytics";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import {
-  getThemeFromSettings,
-  getHeaderHeight,
-  getCssOverrides,
-  generateThemeCss,
-  generateHeaderHeightCss,
-} from "@/lib/theme-css";
+import { getCssOverrides } from "@/lib/theme-css";
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
 import SignIn from "@/components/auth/sign-in";
@@ -26,13 +20,20 @@ import type { ExtendedMetaData } from "@/types/bold-extensions";
 import { getAllFontVariables, getFontVar } from "@/lib/fonts";
 import { fixUploadUrl } from "@/lib/utils";
 
-// Force dynamic rendering — tenant depends on hostname in hosted mode
-export const dynamic = "force-dynamic";
+// Fork override: this build is single-tenant standalone (no hostname
+// resolution), so pages render static with ISR instead of per-request.
+export const revalidate = 60;
 
-// Default metadata values - only used as fallback when settings unavailable
+export const viewport = {
+  // Matches the night-purple gym floor
+  themeColor: "#0b0618",
+};
+
+// Default metadata values - used as fallback when settings don't provide them
 const defaultMetadata = {
-  title: "Video Portal",
-  description: "",
+  title: "The GTM Gym",
+  description:
+    "Ask the GTM Gym coach anything about going to market — positioning, outbound, demos, pricing — and get the answer with receipts: the exact minute of FounderWell training that backs it up.",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -68,7 +69,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = meta?.title
     ? `${meta.title}${meta.titleSuffix || ""}`
     : portalName || defaultMetadata.title;
-  const description = meta?.description || defaultMetadata.description;
+  // The tenant's description is written for the fictional-demo disclosure;
+  // the share card sells the experience instead.
+  const description = defaultMetadata.description;
 
   // Tenant-uploaded social image wins; otherwise the local /og route renders
   // a card from the portal's name, logo, fonts, and theme colors.
@@ -128,21 +131,17 @@ export default async function RootLayout({
   // Get auth session if auth is enabled
   const session = isAuthEnabled() ? await auth() : null;
 
-  // Theme configuration (BOLD-925, BOLD-924)
-  const theme = getThemeFromSettings(settings);
   const cssOverrides = getCssOverrides(settings);
-  const headerHeight = getHeaderHeight(settings);
 
   // Get portal configuration to determine if we should show header
   const config = getPortalConfig(settings);
   const showHeader = config.navigation.showHeader;
 
-  // Get fonts from settings. The SDK camelizes API keys (fontHeader/fontBody);
-  // snake_case kept as fallback for raw payloads.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const themeAny = theme as any;
-  const fontHeaderVar = getFontVar(themeAny?.fontHeader || themeAny?.font_header);
-  const fontBodyVar = getFontVar(themeAny?.fontBody || themeAny?.font_body);
+  // Fork is design-owned: Space Grotesk for reading, Bungee (.font-display)
+  // for the arcade moments, VT323 (.font-osd) for VHS on-screen text.
+  // Tenant font settings are intentionally ignored.
+  const fontHeaderVar = getFontVar("Space Grotesk");
+  const fontBodyVar = getFontVar("Space Grotesk");
 
   // Check if user should see content
   const showContent = !isAuthEnabled() || session;
@@ -151,6 +150,8 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning className={getAllFontVariables()}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Receipt thumbnails and frame previews come from Mux */}
+        <link rel="preconnect" href="https://image.mux.com" />
         <style
           dangerouslySetInnerHTML={{
             __html: `
@@ -161,18 +162,9 @@ export default async function RootLayout({
             `,
           }}
         />
-        {theme && (
-          <style
-            dangerouslySetInnerHTML={{ __html: generateThemeCss(theme) }}
-          />
-        )}
-        {headerHeight && (
-          <style
-            dangerouslySetInnerHTML={{
-              __html: generateHeaderHeightCss(headerHeight),
-            }}
-          />
-        )}
+        {/* Tenant theme tokens and header sizing are deliberately NOT
+            injected in this fork — globals.css is the design source of
+            truth (the gym theme, incl. the bar baked into --header-height). */}
         {cssOverrides && (
           <style
             dangerouslySetInnerHTML={{
@@ -194,7 +186,7 @@ export default async function RootLayout({
             <AppProviders
               session={session}
               settings={settings}
-              themeConfig={config.theme}
+              themeConfig={{ ...config.theme, forcedTheme: "dark" }}
             >
               <LayoutWithPlaylist
                 settings={settings}
