@@ -3,9 +3,12 @@ import type { Video } from "@boldvideo/bold-js";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { getPortalConfig } from "@/lib/portal-config";
 import { GymHomepage } from "@/components/gym/gym-homepage";
+import { gymMeta } from "@/lib/gym-meta";
 
 // How often this page should revalidate (in seconds)
 export const revalidate = 60;
+
+export const metadata = gymMeta({ path: "/" });
 
 /**
  * Fork: the homepage is always the gym's ask surface. Videos are fetched

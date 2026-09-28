@@ -1,4 +1,6 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { gymMeta } from "@/lib/gym-meta";
+import type { Metadata } from "next";
 import { PlaylistVideoList } from "@/components/playlist-video-list";
 import { PlaylistMetadataSidebar } from "@/components/playlist-metadata-sidebar";
 import { SponsorBox } from "@/components/sponsor-box";
@@ -19,30 +21,23 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
-}) {
+}): Promise<Metadata> {
   const resolvedParams = await params;
   const context = await getTenantContext();
   if (!context) return {};
 
-  const { data: playlist } = await context.client.playlists.get(resolvedParams.id);
-  const first = playlist.videos[0];
-  return {
-    title: playlist.title,
-    description: playlist.description,
-    openGraph: {
+  try {
+    const { data: playlist } = await context.client.playlists.get(resolvedParams.id);
+    const first = playlist.videos[0];
+    return gymMeta({
       title: playlist.title,
-      description: playlist.description,
-      images: [
-        {
-          url: `https://og.boldvideo.io/api/og-image?text=${encodeURIComponent(
-            playlist.title
-          )}${first ? `&img=${encodeURIComponent(first.thumbnail)}` : ""}`,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-  };
+      description: playlist.description || undefined,
+      path: `/pl/${resolvedParams.id}`,
+      ...(first ? { image: `/og?v=${encodeURIComponent(first.id)}`, imageAlt: `The GTM Gym: ${playlist.title}` } : {}),
+    });
+  } catch {
+    return {};
+  }
 }
 
 export default async function PlaylistPage({

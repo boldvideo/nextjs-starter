@@ -248,27 +248,37 @@
   box-shadow: 0 0 120px 30px rgba(255, 46, 166, 0.25);
 }
 
-/* Neon perspective floor — the lines roll toward you */
+/* Neon perspective floor — the lines roll toward you. The plane is tilted
+   once; only the inner grid layer animates, via transform (compositor-only,
+   no per-frame repaint of a viewport-sized layer). */
 .gym-floor {
   position: absolute;
   left: -50%;
   right: -50%;
+  top: 0;
   bottom: 0;
-  height: 100%;
+  overflow: hidden;
   transform-origin: 50% 0%;
   transform: perspective(420px) rotateX(62deg);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+}
+
+.gym-floor::before {
+  content: "";
+  position: absolute;
+  inset: -64px 0 0 0;
   background-image:
     linear-gradient(to right, rgba(255, 46, 166, 0.55) 1.5px, transparent 1.5px),
     linear-gradient(to bottom, rgba(34, 230, 255, 0.5) 1.5px, transparent 1.5px);
   background-size: 64px 64px;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%);
+  will-change: transform;
   animation: gym-floor-roll 2.4s linear infinite;
 }
 
 @keyframes gym-floor-roll {
-  from { background-position: 0 0; }
-  to { background-position: 0 64px; }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 64px, 0); }
 }
 
 /* Faint CRT scanlines over hero surfaces */
@@ -380,7 +390,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .gym-floor,
+  .gym-floor::before,
   .gym-marquee,
   .gym-rec,
   .gym-nudge,

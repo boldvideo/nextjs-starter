@@ -235,7 +235,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
               style={{ animationDelay: `${120 + i * 70}ms` }}
               className={cn(
                 "group relative text-left rounded-xl p-3.5 md:p-4 cursor-pointer",
-                "bg-[color-mix(in_srgb,var(--gym-panel)_78%,transparent)] backdrop-blur-sm",
+                "bg-[color-mix(in_srgb,var(--gym-panel)_90%,transparent)]",
                 "border border-[var(--gym-line)]",
                 "transition-[border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0",
                 "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500 motion-safe:fill-mode-both",

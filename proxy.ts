@@ -118,6 +118,25 @@ async function fetchTenantSettings(subdomain: string): Promise<unknown> {
   }
 }
 
+// Standalone fork: the proxy runs in front of the CDN cache, so an uncached
+// settings fetch here taxed every request — ISR pages included — with a
+// ~300KB round trip. Redirect and portal-auth settings change rarely; reuse
+// them for a minute per instance.
+const STANDALONE_SETTINGS_TTL_MS = 60_000;
+let standaloneSettingsCache: { value: unknown; expires: number } | null = null;
+
+async function getStandaloneSettings(tenant: string): Promise<unknown> {
+  const now = Date.now();
+  if (standaloneSettingsCache && standaloneSettingsCache.expires > now) {
+    return standaloneSettingsCache.value;
+  }
+  const value = await fetchTenantSettings(tenant);
+  if (value) {
+    standaloneSettingsCache = { value, expires: now + STANDALONE_SETTINGS_TTL_MS };
+  }
+  return value;
+}
+
 function shouldSkipPortalAuth(pathname: string): boolean {
   const skipPaths = [
     "/login",
@@ -187,7 +206,7 @@ export default auth(async (req) => {
 
   if (!shouldSkipPortalAuth(pathname)) {
     const tenant = process.env.DEV_TENANT_SUBDOMAIN || "standalone";
-    const settings = await fetchTenantSettings(tenant);
+    const settings = await getStandaloneSettings(tenant);
 
     const redirectResponse = tryCustomRedirect(pathname, settings as TenantSettings, req.url);
     if (redirectResponse) return redirectResponse;

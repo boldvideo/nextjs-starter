@@ -1,4 +1,6 @@
 import { notFound, redirect } from "next/navigation";
+import { gymVideoMeta } from "@/lib/gym-meta";
+import type { Metadata } from "next";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
 import { videoQuery, type VideoQueryParams } from "@/lib/video-voice";
@@ -12,42 +14,25 @@ export const revalidate = 30;
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   // `params` is a Promise in Next.js 15+
   params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+  searchParams: Promise<{ t?: string | string[] }>;
+}): Promise<Metadata> {
+  const [{ id }, sp] = await Promise.all([params, searchParams]);
   const context = await getTenantContext();
   if (!context) return {};
 
-  const { data } = await context.client.videos.get(id);
-  const video = data as ExtendedVideo;
-  const description = video.teaser || video.description || "";
-
-  // Mux thumbnails are guaranteed JPEG (imported thumbs can be WebP behind a
-  // .jpg name, which some scrapers can't parse).
-  const ogThumb = video.playbackId
-    ? `https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=1200&fit_mode=preserve`
-    : video.thumbnail;
-
-  return {
-    title: video.title,
-    description,
-    openGraph: {
-      title: video.title,
-      description,
-      images: [
-        {
-          url: ogThumb,
-          width: 1200,
-          height: 630,
-        },
-      ],
-    },
-    alternates: {
-      canonical: getCanonicalVideoPath(video.slug || id),
-    },
-  };
+  try {
+    const { data } = await context.client.videos.get(id);
+    const video = data as ExtendedVideo;
+    if (!video?.title) return {};
+    const t = parseInt(String(Array.isArray(sp.t) ? sp.t[0] : sp.t ?? ""), 10);
+    return gymVideoMeta(video, getCanonicalVideoPath(video.slug || id), t);
+  } catch {
+    return {};
+  }
 }
 
 /**

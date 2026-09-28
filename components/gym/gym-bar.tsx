@@ -15,7 +15,7 @@ export function GymBar() {
   const onHome = pathname === "/";
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 h-[var(--header-height)] bg-[color-mix(in_srgb,var(--gym-night)_82%,transparent)] backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-40 h-[var(--header-height)] bg-[var(--gym-night)]">
       <div className="h-full max-w-[1440px] mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-3 min-w-0 group" aria-label="The GTM Gym — home">
           <Image

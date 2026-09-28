@@ -1,150 +1,286 @@
 import { ImageResponse } from "next/og";
-import { headers } from "next/headers";
 
 import { getTenantContext } from "@/lib/get-tenant-context";
-import { fixUploadUrl } from "@/lib/utils";
-import { cssColorToHex } from "@/lib/color-utils";
-import type { ExtendedMetaData } from "@/types/bold-extensions";
 
-// Tenant depends on the request hostname in hosted mode
-export const dynamic = "force-dynamic";
+/**
+ * GTM Gym social cards (fork-owned; replaces the tenant-branded card).
+ *
+ *   /og?q=<question>        a shared answer: REP stamp + the question
+ *   /og?v=<videoId>[&t=s]   a session: frame at t, title, PLAY timecode
+ *   /og                     → the static homepage card (/gym/og-home.jpg),
+ *                             rendered from real CSS — satori can't do the
+ *                             perspective floor or the chrome lettering.
+ *
+ * Satori/resvg can't decode webp, so the logo and coach are PNG copies.
+ */
 
 const WIDTH = 1200;
 const HEIGHT = 630;
 
-// Matches the Bold brand defaults in globals.css / theme-css.ts
-const DEFAULTS = {
-  background: "#fdfaf3",
-  foreground: "#1c2b28",
-  accent: "#14b8a6",
-  mutedForeground: "#52524f",
+const COLORS = {
+  night: "#0b0618",
+  chalk: "#f6f0ff",
+  haze: "#a99bcc",
+  pink: "#ff2ea6",
+  cyan: "#22e6ff",
+  orange: "#ff8a1f",
+  yellow: "#ffd23f",
 };
 
-interface OgTheme {
-  background: string;
-  foreground: string;
-  accent: string;
-  mutedForeground: string;
-  fontHeader?: string;
-}
+const CACHE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
 
-/**
- * Pull the light-theme card colors out of tenant settings, normalized to hex
- * (satori can't parse oklch). The SDK camelizes API keys; snake_case kept as
- * fallback for raw payloads.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function themeFromSettings(settings: any): OgTheme {
-  const theme = settings?.portal?.theme || settings?.themeConfig;
-  const light = theme?.light;
-  return {
-    background: cssColorToHex(
-      light?.background || theme?.background,
-      DEFAULTS.background
-    ),
-    foreground: cssColorToHex(
-      light?.foreground || theme?.foreground,
-      DEFAULTS.foreground
-    ),
-    accent: cssColorToHex(light?.accent || theme?.primary, DEFAULTS.accent),
-    mutedForeground: cssColorToHex(
-      light?.mutedForeground || light?.muted_foreground,
-      DEFAULTS.mutedForeground
-    ),
-    fontHeader: theme?.fontHeader || theme?.font_header,
-  };
-}
-
-/**
- * Fetch a Google-hosted font as TTF for satori, subset to the rendered text.
- * Node's fetch UA gets the truetype CSS variant from the fonts API.
- */
+/** Google font as TTF for satori, subset to the text it renders. */
 async function loadGoogleFont(
   family: string,
-  text: string
+  text: string,
+  weight?: number
 ): Promise<ArrayBuffer | null> {
-  // Not every family ships a 600 weight (e.g. Economica is 400/700 only);
-  // an unavailable weight makes the css2 endpoint 400, so fall back to the
-  // family default.
-  const variants = [
-    `${encodeURIComponent(family)}:wght@600`,
-    encodeURIComponent(family),
-  ];
-  for (const variant of variants) {
-    try {
-      const cssUrl = `https://fonts.googleapis.com/css2?family=${variant}&text=${encodeURIComponent(
-        text
-      )}`;
-      const css = await fetch(cssUrl).then((r) => (r.ok ? r.text() : ""));
-      const match = css.match(
-        /src: url\((.+?)\) format\('(?:opentype|truetype)'\)/
-      );
-      if (!match) continue;
-      const res = await fetch(match[1]);
-      if (!res.ok) continue;
-      return await res.arrayBuffer();
-    } catch {
-      continue;
-    }
-  }
-  return null;
-}
-
-/**
- * Fetch the tenant logo and normalize it to a PNG data URI. Satori/resvg
- * can't decode webp/avif uploads, so everything goes through sharp (bundled
- * with Next). Returns null on any failure — the card renders without a logo.
- */
-async function loadLogo(
-  url: string | undefined
-): Promise<{ src: string; width: number; height: number } | null> {
-  if (!url) return null;
+  const fam = encodeURIComponent(family) + (weight ? `:wght@${weight}` : "");
   try {
+    const css = await fetch(
+      `https://fonts.googleapis.com/css2?family=${fam}&text=${encodeURIComponent(text)}`
+    ).then((r) => (r.ok ? r.text() : ""));
+    const url = css.match(/src: url\((.+?)\) format\('(?:opentype|truetype)'\)/)?.[1];
+    if (!url) return null;
     const res = await fetch(url);
-    if (!res.ok) return null;
-    const input = Buffer.from(await res.arrayBuffer());
-    const { default: sharp } = await import("sharp");
-    const resized = sharp(input).resize({
-      height: 180,
-      width: 480,
-      fit: "inside",
-      withoutEnlargement: false,
-    });
-    const { data, info } = await resized
-      .png()
-      .toBuffer({ resolveWithObject: true });
-    return {
-      src: `data:image/png;base64,${data.toString("base64")}`,
-      width: info.width,
-      height: info.height,
-    };
+    return res.ok ? await res.arrayBuffer() : null;
   } catch {
     return null;
   }
 }
 
+async function loadImage(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const type = res.headers.get("content-type") || "image/png";
+    const buf = Buffer.from(await res.arrayBuffer());
+    return `data:${type};base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
+function formatTime(total: number): string {
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = Math.floor(total % 60);
+  const mm = h ? String(m).padStart(2, "0") : String(m);
+  return `${h ? `${h}:` : ""}${mm}:${String(s).padStart(2, "0")}`;
+}
+
+function clamp(text: string, max: number): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  return t.length > max ? `${t.slice(0, max - 1).trimEnd()}…` : t;
+}
+
+function Brand({ logo }: { logo: string | null }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+      {logo && <img src={logo} width={64} height={64} alt="" />}
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ fontFamily: "Bungee", fontSize: 26, color: COLORS.orange, lineHeight: 1 }}>
+          THE GTM GYM
+        </div>
+        <div style={{ display: "flex", marginTop: 6, fontSize: 18, color: COLORS.haze }}>
+          by&nbsp;<span style={{ color: COLORS.chalk }}>FounderWell</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export async function GET(request: Request) {
-  const context = await getTenantContext();
-  const settings = context?.settings;
-  const meta = settings?.metaData as ExtendedMetaData | undefined;
+  const { searchParams } = new URL(request.url);
+  const origin = new URL(request.url).origin;
+  const question = searchParams.get("q")?.trim();
+  const videoId = searchParams.get("v")?.trim();
 
-  // Top-level portal name is in the payload but not yet in the SDK types
-  const portalName = (settings as { name?: string } | null | undefined)?.name;
-  const name = meta?.title || portalName || "Video Portal";
-  // Display host — the real request host, not x-bold-hostname (that header
-  // carries the resolved tenant key, e.g. just the subdomain)
-  const headersList = await headers();
-  const host =
-    headersList.get("x-forwarded-host") ||
-    headersList.get("host") ||
-    new URL(request.url).host;
-  const theme = themeFromSettings(settings);
+  if (!question && !videoId) {
+    return Response.redirect(new URL("/gym/og-home.jpg", request.url), 302);
+  }
 
-  const [font, logo] = await Promise.all([
-    theme.fontHeader
-      ? loadGoogleFont(theme.fontHeader, `${name}${host}`)
-      : Promise.resolve(null),
-    loadLogo(fixUploadUrl(settings?.logoUrl)),
+  // ── Session card ───────────────────────────────────────────────────────
+  if (videoId) {
+    const context = await getTenantContext();
+    const res = await context?.client.videos.get(videoId).catch(() => null);
+    const video = res?.data as
+      | { title?: string; playbackId?: string; duration?: number }
+      | undefined;
+    if (!video?.title) {
+      return Response.redirect(new URL("/gym/og-home.jpg", request.url), 302);
+    }
+
+    const t = Math.max(0, parseInt(searchParams.get("t") || "", 10) || 0);
+    const title = clamp(video.title, 90);
+    const timecode = t ? formatTime(t) : video.duration ? formatTime(video.duration) : "";
+    const frame = video.playbackId
+      ? `https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=1120&height=630&fit_mode=smartcrop${t ? `&time=${t}` : ""}`
+      : null;
+
+    const text = `THE GTM GYMby FounderWellON TAPE${title}PLAY ▶ ${timecode}WATCH THE REP ▶ GYM.BOLD.VIDEO`;
+    const [bungee, grotesk, osd, logo, bg, frameSrc] = await Promise.all([
+      loadGoogleFont("Bungee", text),
+      loadGoogleFont("Space Grotesk", text, 700),
+      loadGoogleFont("VT323", text),
+      loadImage(`${origin}/gym/logo-og.png`),
+      loadImage(`${origin}/gym/og-bg.jpg`),
+      frame ? loadImage(frame) : Promise.resolve(null),
+    ]);
+
+    const titleSize = title.length <= 40 ? 50 : title.length <= 70 ? 42 : 36;
+
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            position: "relative",
+            backgroundColor: COLORS.night,
+            fontFamily: "Space Grotesk",
+            color: COLORS.chalk,
+          }}
+        >
+          {bg && (
+            <img src={bg} width={WIDTH} height={HEIGHT} alt="" style={{ position: "absolute", top: 0, left: 0 }} />
+          )}
+
+          {/* The screen, in front of the sunset */}
+          <div
+            style={{
+              position: "absolute",
+              left: 596,
+              top: 128,
+              width: 560,
+              height: 315,
+              display: "flex",
+              borderRadius: 16,
+              border: `3px solid ${COLORS.cyan}`,
+              backgroundColor: "#000",
+              overflow: "hidden",
+              boxShadow: "0 0 50px rgba(34,230,255,0.55), 0 20px 60px rgba(0,0,0,0.6)",
+            }}
+          >
+            {frameSrc && (
+              <img src={frameSrc} width={560} height={315} alt="" style={{ objectFit: "cover" }} />
+            )}
+            <div
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 560,
+                height: 315,
+                display: "flex",
+                backgroundImage: "linear-gradient(180deg, rgba(11,6,24,0) 55%, rgba(11,6,24,0.9) 100%)",
+              }}
+            />
+            {timecode && (
+              <div
+                style={{
+                  position: "absolute",
+                  left: 18,
+                  bottom: 12,
+                  display: "flex",
+                  fontFamily: "VT323",
+                  fontSize: 38,
+                  lineHeight: 1,
+                  color: "#ffffff",
+                  textShadow: "0 0 10px rgba(34,230,255,0.9)",
+                }}
+              >
+                {`PLAY ▶ ${timecode}`}
+              </div>
+            )}
+          </div>
+
+          <div style={{ position: "absolute", top: 36, left: 48, display: "flex" }}>
+            <Brand logo={logo} />
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              left: 48,
+              top: 150,
+              width: 500,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                fontFamily: "Bungee",
+                fontSize: 22,
+                lineHeight: 1,
+                color: "#06121a",
+                backgroundColor: COLORS.cyan,
+                padding: "9px 14px",
+                borderRadius: 8,
+                boxShadow: `4px 4px 0 ${COLORS.pink}`,
+                transform: "rotate(-2deg)",
+                marginBottom: 24,
+              }}
+            >
+              ON TAPE
+            </div>
+            <div
+              style={{
+                display: "flex",
+                fontSize: titleSize,
+                fontWeight: 700,
+                lineHeight: 1.1,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {title}
+            </div>
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              left: 48,
+              bottom: 40,
+              display: "flex",
+              fontFamily: "VT323",
+              fontSize: 32,
+              color: COLORS.cyan,
+            }}
+          >
+            WATCH THE REP ▶ GYM.BOLD.VIDEO
+          </div>
+        </div>
+      ),
+      {
+        width: WIDTH,
+        height: HEIGHT,
+        fonts: [
+          bungee && { name: "Bungee", data: bungee, weight: 400 as const, style: "normal" as const },
+          grotesk && { name: "Space Grotesk", data: grotesk, weight: 700 as const, style: "normal" as const },
+          osd && { name: "VT323", data: osd, weight: 400 as const, style: "normal" as const },
+        ].filter((f): f is NonNullable<typeof f> => Boolean(f)),
+        headers: { "Cache-Control": CACHE },
+      }
+    );
+  }
+
+  // ── Question card ──────────────────────────────────────────────────────
+  const q = clamp(question!, 140);
+  const size = q.length <= 38 ? 72 : q.length <= 70 ? 60 : q.length <= 105 ? 50 : 44;
+  const text = `THE GTM GYMby FounderWellREP 01“${q}”THE PLAY + RECEIPTS ▶ GYM.BOLD.VIDEO`;
+  const [bungee, grotesk, grotesk500, osd, logo, coach, bg] = await Promise.all([
+    loadGoogleFont("Bungee", text),
+    loadGoogleFont("Space Grotesk", text, 700),
+    loadGoogleFont("Space Grotesk", text, 500),
+    loadGoogleFont("VT323", text),
+    loadImage(`${origin}/gym/logo-og.png`),
+    loadImage(`${origin}/gym/coach-og.png`),
+    loadImage(`${origin}/gym/og-bg.jpg`),
   ]);
 
   return new ImageResponse(
@@ -154,67 +290,92 @@ export async function GET(request: Request) {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: theme.background,
-          // Satori reads the raw style object — an explicit `fontFamily:
-          // undefined` crashes it, so the key must be absent entirely
-          ...(font ? { fontFamily: '"Heading"' } : {}),
+          position: "relative",
+          backgroundColor: COLORS.night,
+          fontFamily: "Space Grotesk",
+          color: COLORS.chalk,
         }}
       >
-        {logo && (
+        {bg && (
+          <img src={bg} width={WIDTH} height={HEIGHT} alt="" style={{ position: "absolute", top: 0, left: 0 }} />
+        )}
+        {coach && (
           <img
-            src={logo.src}
-            width={logo.width}
-            height={logo.height}
-            style={{ marginBottom: 48 }}
+            src={coach}
+            width={230}
+            height={230}
             alt=""
+            style={{ position: "absolute", left: 836, top: 178 }}
           />
         )}
-        <div
-          style={{
-            fontSize: name.length > 28 ? 56 : 72,
-            fontWeight: 600,
-            color: theme.foreground,
-            textAlign: "center",
-            maxWidth: 1000,
-            lineHeight: 1.15,
-          }}
-        >
-          {name}
-        </div>
-        <div
-          style={{
-            marginTop: 28,
-            fontSize: 28,
-            color: theme.mutedForeground,
-          }}
-        >
-          {host}
+        <div style={{ position: "absolute", top: 36, left: 48, display: "flex" }}>
+          <Brand logo={logo} />
         </div>
         <div
           style={{
             position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            height: 20,
-            backgroundColor: theme.accent,
+            left: 48,
+            top: 150,
+            width: 700,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
           }}
-        />
+        >
+          <div
+            style={{
+              display: "flex",
+              fontFamily: "Bungee",
+              fontSize: 24,
+              lineHeight: 1,
+              color: "#1a0616",
+              backgroundColor: COLORS.pink,
+              padding: "9px 14px",
+              borderRadius: 8,
+              boxShadow: `4px 4px 0 ${COLORS.yellow}`,
+              transform: "rotate(-2deg)",
+              marginBottom: 26,
+            }}
+          >
+            REP 01
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontSize: size,
+              fontWeight: 700,
+              lineHeight: 1.1,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {`“${q}”`}
+          </div>
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            left: 48,
+            bottom: 40,
+            display: "flex",
+            fontFamily: "VT323",
+            fontSize: 32,
+            color: COLORS.cyan,
+          }}
+        >
+          THE PLAY + RECEIPTS ▶ GYM.BOLD.VIDEO
+        </div>
       </div>
     ),
     {
       width: WIDTH,
       height: HEIGHT,
-      fonts: font
-        ? [{ name: "Heading", data: font, weight: 600, style: "normal" }]
-        : undefined,
-      headers: {
-        "Cache-Control":
-          "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
-      },
+      fonts: [
+        bungee && { name: "Bungee", data: bungee, weight: 400 as const, style: "normal" as const },
+        grotesk && { name: "Space Grotesk", data: grotesk, weight: 700 as const, style: "normal" as const },
+        grotesk500 && { name: "Space Grotesk", data: grotesk500, weight: 500 as const, style: "normal" as const },
+        osd && { name: "VT323", data: osd, weight: 400 as const, style: "normal" as const },
+      ].filter((f): f is NonNullable<typeof f> => Boolean(f)),
+      headers: { "Cache-Control": CACHE },
     }
   );
 }

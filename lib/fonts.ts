@@ -16,8 +16,6 @@ import {
   DM_Sans,
   JetBrains_Mono,
   Poppins,
-  Bungee,
-  VT323,
 } from "next/font/google";
 
 // Pre-load all fonts at build time
@@ -131,21 +129,6 @@ const poppins = Poppins({
   display: "swap",
 });
 
-// GTM Gym fork: arcade display face + VHS on-screen-display face
-const bungee = Bungee({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-bungee",
-  display: "swap",
-});
-
-const vt323 = VT323({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-vt323",
-  display: "swap",
-});
-
 // All font instances for className injection
 export const fontInstances = {
   inter,
@@ -165,8 +148,6 @@ export const fontInstances = {
   dmSans,
   jetbrainsMono,
   poppins,
-  bungee,
-  vt323,
 };
 
 // Map font names (as they come from API) to CSS variables
@@ -189,8 +170,6 @@ const fontNameToVar: Record<string, string> = {
   "DM Sans": "var(--font-dm-sans)",
   "JetBrains Mono": "var(--font-jetbrains-mono)",
   "Poppins": "var(--font-poppins)",
-  "Bungee": "var(--font-bungee)",
-  "VT323": "var(--font-vt323)",
 };
 
 // Default font (Inter)

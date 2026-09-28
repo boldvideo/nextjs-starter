@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import "./globals.css";
 
@@ -16,8 +15,13 @@ import { getCssOverrides } from "@/lib/theme-css";
 import { auth } from "@/auth";
 import { isAuthEnabled } from "@/config/auth";
 import SignIn from "@/components/auth/sign-in";
-import type { ExtendedMetaData } from "@/types/bold-extensions";
-import { getAllFontVariables, getFontVar } from "@/lib/fonts";
+import { gymFontVariables } from "@/lib/gym-fonts";
+import {
+  gymMeta,
+  GYM_BASE_URL,
+  GYM_DEFAULT_TITLE,
+  GYM_SITE_NAME,
+} from "@/lib/gym-meta";
 import { fixUploadUrl } from "@/lib/utils";
 
 // Fork override: this build is single-tenant standalone (no hostname
@@ -29,78 +33,24 @@ export const viewport = {
   themeColor: "#0b0618",
 };
 
-// Default metadata values - used as fallback when settings don't provide them
-const defaultMetadata = {
-  title: "The GTM Gym",
-  description:
-    "Ask the GTM Gym coach anything about going to market — positioning, outbound, demos, pricing — and get the answer with receipts: the exact minute of FounderWell training that backs it up.",
-};
-
 export async function generateMetadata(): Promise<Metadata> {
   const context = await getTenantContext();
+  const settings = context?.settings;
 
-  const headersList = await headers();
-  const host =
-    headersList.get("x-forwarded-host") || headersList.get("host") || "";
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || (host ? `https://${host}` : "");
-  const metadataBase = baseUrl ? new URL(baseUrl) : undefined;
-
-  if (!context?.settings) {
-    return {
-      metadataBase,
-      title: defaultMetadata.title,
-      description: defaultMetadata.description,
-      openGraph: {
-        title: defaultMetadata.title,
-        description: defaultMetadata.description,
-        url: baseUrl,
-        siteName: defaultMetadata.title,
-        locale: "en-US",
-        type: "website",
-      },
-    };
-  }
-
-  const settings = context.settings;
-  const meta = settings.metaData as ExtendedMetaData | undefined;
-  // Top-level portal name is in the payload but not yet in the SDK types
-  const portalName = (settings as unknown as { name?: string }).name;
-  const title = meta?.title
-    ? `${meta.title}${meta.titleSuffix || ""}`
-    : portalName || defaultMetadata.title;
-  // The tenant's description is written for the fictional-demo disclosure;
-  // the share card sells the experience instead.
-  const description = defaultMetadata.description;
-
-  // Tenant-uploaded social image wins; otherwise the local /og route renders
-  // a card from the portal's name, logo, fonts, and theme colors.
-  const ogImageUrl = fixUploadUrl(meta?.socialGraphImageUrl) || "/og";
-
+  // Share metadata is fork-owned (lib/gym-meta.ts). The tenant's description
+  // is written for the fictional-demo disclosure, and its default card is
+  // replaced by the gym's static homepage card.
   return {
-    metadataBase,
-    title: title,
-    description: description,
-    openGraph: {
-      title: title,
-      description: description,
-      url: baseUrl,
-      siteName: portalName || title,
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-        },
-      ],
-      locale: "en-US",
-      type: "website",
-    },
+    // No headers() here — it would force every page dynamic and kill ISR.
+    metadataBase: new URL(GYM_BASE_URL),
+    title: { default: GYM_DEFAULT_TITLE, template: `%s · ${GYM_SITE_NAME}` },
+    applicationName: GYM_SITE_NAME,
+    ...gymMeta(),
     // Explicit favicon wins; otherwise /favicon derives one from the header
     // logo (normalized to square PNG); static Bold icon as last resort.
-    icons: fixUploadUrl(settings.faviconUrl)
-      ? { icon: fixUploadUrl(settings.faviconUrl) }
-      : settings.logoUrl
+    icons: fixUploadUrl(settings?.faviconUrl)
+      ? { icon: fixUploadUrl(settings?.faviconUrl) }
+      : settings?.logoUrl
         ? { icon: "/favicon", apple: "/favicon?size=180" }
         : { icon: "/favicon.ico" },
   };
@@ -140,14 +90,19 @@ export default async function RootLayout({
   // Fork is design-owned: Space Grotesk for reading, Bungee (.font-display)
   // for the arcade moments, VT323 (.font-osd) for VHS on-screen text.
   // Tenant font settings are intentionally ignored.
-  const fontHeaderVar = getFontVar("Space Grotesk");
-  const fontBodyVar = getFontVar("Space Grotesk");
+  const fontHeaderVar = "var(--font-space-grotesk)";
+  const fontBodyVar = "var(--font-space-grotesk)";
+
+  // The settings payload rides to the client in every page's RSC stream.
+  // featuredPlaylists carries full video objects (transcripts, subtitles,
+  // chapters) — ~290KB nothing client-side in this skin reads.
+  const clientSettings = settings ? { ...settings, featuredPlaylists: [] } : null;
 
   // Check if user should see content
   const showContent = !isAuthEnabled() || session;
 
   return (
-    <html lang="en" suppressHydrationWarning className={getAllFontVariables()}>
+    <html lang="en" suppressHydrationWarning className={gymFontVariables}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Receipt thumbnails and frame previews come from Mux */}
@@ -185,11 +140,11 @@ export default async function RootLayout({
           {showContent ? (
             <AppProviders
               session={session}
-              settings={settings}
+              settings={clientSettings}
               themeConfig={{ ...config.theme, forcedTheme: "dark" }}
             >
               <LayoutWithPlaylist
-                settings={settings}
+                settings={clientSettings}
                 session={session}
                 showHeader={showHeader}
               >
@@ -197,8 +152,8 @@ export default async function RootLayout({
               </LayoutWithPlaylist>
             </AppProviders>
           ) : (
-            <SettingsProvider settings={settings}>
-              <SignIn settings={settings ?? undefined} />
+            <SettingsProvider settings={clientSettings}>
+              <SignIn settings={clientSettings ?? undefined} />
             </SettingsProvider>
           )}
         </BoldProvider>

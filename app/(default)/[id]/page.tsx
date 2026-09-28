@@ -1,4 +1,6 @@
 import { notFound, redirect } from "next/navigation";
+import { gymVideoMeta } from "@/lib/gym-meta";
+import type { Metadata } from "next";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
 import { videoQuery, type VideoQueryParams } from "@/lib/video-voice";
@@ -14,7 +16,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string }>;
-}) {
+}): Promise<Metadata> {
   const { id } = await params;
   const context = await getTenantContext();
   if (!context) return {};
@@ -22,28 +24,8 @@ export async function generateMetadata({
   try {
     const { data } = await context.client.videos.get(id);
     const video = data as ExtendedVideo;
-    if (!video) return {};
-
-    const description = video.teaser || video.description || "";
-
-    return {
-      title: video.title,
-      description,
-      openGraph: {
-        title: video.title,
-        description,
-        images: [
-          {
-            url: video.thumbnail,
-            width: 1200,
-            height: 630,
-          },
-        ],
-      },
-      alternates: {
-        canonical: getCanonicalVideoPath(video.slug || id),
-      },
-    };
+    if (!video?.title) return {};
+    return gymVideoMeta(video, getCanonicalVideoPath(video.slug || id));
   } catch {
     return {};
   }

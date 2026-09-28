@@ -1,4 +1,6 @@
 import { notFound, redirect } from "next/navigation";
+import { gymVideoMeta } from "@/lib/gym-meta";
+import type { Metadata } from "next";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { VideoDetail } from "@/components/video/detail";
 import { videoQuery, type VideoQueryParams } from "@/lib/video-voice";
@@ -18,44 +20,17 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ id: string; videoId: string }>;
-}) {
-  const { id: playlistId, videoId } = await params;
+}): Promise<Metadata> {
+  const { videoId } = await params;
   const context = await getTenantContext();
   if (!context) return {};
 
   try {
-    const [playlistResponse, videoResponse] = await Promise.all([
-      context.client.playlists.get(playlistId),
-      context.client.videos.get(videoId),
-    ]);
-
-    const playlist = playlistResponse?.data;
-    const video = videoResponse?.data;
-
-    if (!video) return {};
-
-    const extVideo = video as ExtendedVideo;
-    const description = extVideo.teaser || extVideo.description || "";
-
-    return {
-      title: `${video.title} - ${playlist?.title || "Playlist"}`,
-      description,
-      openGraph: {
-        title: video.title,
-        description,
-        images: [
-          {
-            url: video.thumbnail,
-            width: 1200,
-            height: 630,
-          },
-        ],
-      },
-      // Canonical URL pointing to standalone video page (prefer slug)
-      alternates: {
-        canonical: getCanonicalVideoPath(video.slug || videoId),
-      },
-    };
+    const { data } = await context.client.videos.get(videoId);
+    const video = data as ExtendedVideo;
+    if (!video?.title) return {};
+    // Canonical points at the standalone video page (prefer slug)
+    return gymVideoMeta(video, getCanonicalVideoPath(video.slug || videoId));
   } catch (error) {
     console.error("Failed to generate metadata for playlist video:", error);
     return {};

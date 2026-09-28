@@ -34,7 +34,7 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
         </section>
 
         {tape.length > 0 && (
-          <div className="relative z-10 border-y border-[var(--gym-line)] bg-[color-mix(in_srgb,var(--gym-night)_70%,transparent)] backdrop-blur-sm overflow-hidden">
+          <div className="relative z-10 border-y border-[var(--gym-line)] bg-[color-mix(in_srgb,var(--gym-night)_88%,transparent)] overflow-hidden">
             <div className="gym-marquee py-2.5">
               {[0, 1].map((copy) => (
                 <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
@@ -45,6 +45,7 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
                     <Link
                       key={`${copy}-${v.id}`}
                       href={`/v/${v.id}`}
+                      prefetch={false}
                       tabIndex={copy === 1 ? -1 : undefined}
                       className="flex items-center gap-5 px-5 whitespace-nowrap text-sm font-medium text-foreground/75 hover:text-[var(--gym-cyan)] transition-colors"
                     >
