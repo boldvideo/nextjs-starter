@@ -61,6 +61,26 @@ async function loadImage(url: string): Promise<string | null> {
   }
 }
 
+/**
+ * ImageResponse only emits PNG (~380KB for these cards); WhatsApp drops
+ * previews over ~300KB. Re-encode as JPEG with the sharp that ships with
+ * Next; fall back to the PNG if that fails.
+ */
+async function asJpeg(image: ImageResponse): Promise<Response> {
+  const png = Buffer.from(await image.arrayBuffer());
+  try {
+    const { default: sharp } = await import("sharp");
+    const jpg = await sharp(png).jpeg({ quality: 86, mozjpeg: true }).toBuffer();
+    return new Response(new Uint8Array(jpg), {
+      headers: { "Content-Type": "image/jpeg", "Cache-Control": CACHE },
+    });
+  } catch {
+    return new Response(new Uint8Array(png), {
+      headers: { "Content-Type": "image/png", "Cache-Control": CACHE },
+    });
+  }
+}
+
 function formatTime(total: number): string {
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
@@ -130,7 +150,7 @@ export async function GET(request: Request) {
 
     const titleSize = title.length <= 40 ? 50 : title.length <= 70 ? 42 : 36;
 
-    return new ImageResponse(
+    return asJpeg(new ImageResponse(
       (
         <div
           style={{
@@ -264,9 +284,8 @@ export async function GET(request: Request) {
           grotesk && { name: "Space Grotesk", data: grotesk, weight: 700 as const, style: "normal" as const },
           osd && { name: "VT323", data: osd, weight: 400 as const, style: "normal" as const },
         ].filter((f): f is NonNullable<typeof f> => Boolean(f)),
-        headers: { "Cache-Control": CACHE },
       }
-    );
+    ));
   }
 
   // ── Question card ──────────────────────────────────────────────────────
@@ -283,7 +302,7 @@ export async function GET(request: Request) {
     loadImage(`${origin}/gym/og-bg.jpg`),
   ]);
 
-  return new ImageResponse(
+  return asJpeg(new ImageResponse(
     (
       <div
         style={{
@@ -375,7 +394,6 @@ export async function GET(request: Request) {
         grotesk500 && { name: "Space Grotesk", data: grotesk500, weight: 500 as const, style: "normal" as const },
         osd && { name: "VT323", data: osd, weight: 400 as const, style: "normal" as const },
       ].filter((f): f is NonNullable<typeof f> => Boolean(f)),
-      headers: { "Cache-Control": CACHE },
     }
-  );
+  ));
 }
