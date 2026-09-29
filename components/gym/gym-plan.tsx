@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { Check, Play, Share2 } from "lucide-react";
+import { Check, Play, Printer, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AskCitation } from "@/lib/ask";
 import { PROSE_CLASS } from "@/lib/prose";
@@ -10,6 +10,9 @@ import { useSmoothText } from "@/hooks/use-smooth-text";
 import { MarkdownSection, stripTrailingCitationList } from "@/components/ask/ask-message-card";
 import { MuxPlayerComponent } from "@/components/players/player-mux";
 import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
+import { coachLabel, type Coach } from "./gym-coaches-data";
+import { useCoachOf } from "./use-coach-map";
+import { refsIn, splitPlan } from "@/lib/gym-plan-parse";
 
 /**
  * An answer, written up the way a fitness coach writes a program:
@@ -23,53 +26,6 @@ import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
  * doesn't fit (no bullets, headings, code) degrades to plain paragraphs.
  */
 
-type Block = { kind: "para"; text: string } | { kind: "item"; text: string };
-
-const ITEM_RE = /^\s*(?:[-*•]|\d+[.)])\s+/;
-const REF_RE = /\[(\d+|c_[^\]]+)\]/g;
-
-function parseBlocks(markdown: string): Block[] {
-  const blocks: Block[] = [];
-  let para: string[] = [];
-  const flushPara = () => {
-    const text = para.join("\n").trim();
-    if (text) blocks.push({ kind: "para", text });
-    para = [];
-  };
-
-  for (const line of markdown.split("\n")) {
-    if (ITEM_RE.test(line)) {
-      flushPara();
-      blocks.push({ kind: "item", text: line.replace(ITEM_RE, "") });
-    } else if (!line.trim()) {
-      flushPara();
-    } else if (blocks.length && blocks[blocks.length - 1].kind === "item" && !para.length && /^\s{2,}/.test(line)) {
-      // Indented continuation of a bullet
-      blocks[blocks.length - 1].text += `\n${line.trim()}`;
-    } else {
-      para.push(line);
-    }
-  }
-  flushPara();
-  return blocks;
-}
-
-function refsIn(text: string, citations: AskCitation[]): AskCitation[] {
-  const seen = new Set<string>();
-  const out: AskCitation[] = [];
-  for (const m of Array.from(text.matchAll(REF_RE))) {
-    const ref = m[1];
-    const c = ref.startsWith("c_")
-      ? citations.find((x) => x.id === ref)
-      : citations[parseInt(ref, 10) - 1];
-    if (c && !seen.has(c.id)) {
-      seen.add(c.id);
-      out.push(c);
-    }
-  }
-  return out;
-}
-
 interface GymPlanProps {
   content: string;
   citations: AskCitation[];
@@ -79,6 +35,8 @@ interface GymPlanProps {
   selectedCitationId?: string;
   interaction?: AnswerInteraction;
   shareUrl?: string;
+  /** Printable training-plan sheet for this conversation */
+  printUrl?: string;
 }
 
 export function GymPlan({
@@ -90,7 +48,9 @@ export function GymPlan({
   selectedCitationId,
   interaction,
   shareUrl,
+  printUrl,
 }: GymPlanProps) {
+  const coachOf = useCoachOf();
   const streaming = !!isStreaming;
   const smoothed = useSmoothText(content, streaming);
   const revealed = streaming ? smoothed : stripTrailingCitationList(content);
@@ -99,33 +59,7 @@ export function GymPlan({
     [revealed]
   );
 
-  const { intro, drills, notes, set } = useMemo(() => {
-    const blocks = parseBlocks(text);
-    const firstItem = blocks.findIndex((b) => b.kind === "item");
-    if (firstItem === -1) {
-      // No bullets: the take, then the last paragraph as the set (at rest only)
-      const paras = blocks.map((b) => b.text);
-      const hasSet = !streaming && paras.length >= 2;
-      return {
-        intro: hasSet ? paras.slice(0, -1) : paras,
-        drills: [] as string[],
-        notes: [] as string[],
-        set: hasSet ? paras[paras.length - 1] : null,
-      };
-    }
-    let lastItem = firstItem;
-    blocks.forEach((b, i) => {
-      if (b.kind === "item") lastItem = i;
-    });
-    const after = blocks.slice(lastItem + 1).map((b) => b.text);
-    const setText = after.length ? after[after.length - 1] : null;
-    return {
-      intro: blocks.slice(0, firstItem).map((b) => b.text),
-      drills: blocks.slice(firstItem, lastItem + 1).map((b) => b.text),
-      notes: after.slice(0, -1),
-      set: setText,
-    };
-  }, [text, streaming]);
+  const { intro, drills, notes, set } = useMemo(() => splitPlan(text, streaming), [text, streaming]);
 
   // Each clip appears once, next to the first beat that cites it
   const clipFor = useMemo(() => {
@@ -142,6 +76,16 @@ export function GymPlan({
     };
   }, [intro, drills, notes, citations]);
 
+  // The coaches whose tape backs this answer, most-cited first
+  const coaches = useMemo(() => {
+    const counts = new Map<Coach, number>();
+    for (const c of [...clipFor.intro, ...clipFor.drills, ...clipFor.notes]) {
+      const coach = coachOf(c);
+      if (coach) counts.set(coach, (counts.get(coach) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).map(([coach]) => coach);
+  }, [clipFor, coachOf]);
+
   const section = {
     citations,
     citationDisplayNumberById,
@@ -155,7 +99,27 @@ export function GymPlan({
 
   return (
     <div className="space-y-5">
-      {/* THE PLAY: explain → show the tape → explain */}
+      {/* Whose tape this is */}
+      <div className="flex items-center gap-3">
+        <span className="font-display text-[13px] uppercase text-[var(--gym-cyan)] [text-shadow:0_0_12px_rgba(34,230,255,0.6)] whitespace-nowrap">
+          Coach&apos;s take
+        </span>
+        <span className="h-px flex-1 bg-[linear-gradient(90deg,var(--gym-cyan),transparent)] opacity-50" />
+        {coaches.length > 0 && (
+          <span className="flex items-center gap-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
+            <span className="flex -space-x-2">
+              {coaches.slice(0, 3).map((c) => (
+                <Image key={c.slug} src={`/gym/coaches/${c.slug}.webp`} alt="" width={30} height={30} className="h-[30px] w-[30px]" />
+              ))}
+            </span>
+            <span className="font-osd text-[17px] leading-none text-muted-foreground whitespace-nowrap">
+              WITH {coaches.slice(0, 2).map((c) => coachLabel(c).toUpperCase()).join(" & ")}
+            </span>
+          </span>
+        )}
+      </div>
+
+      {/* The take: explain → show the tape → explain */}
       {intro.map((para, i) => {
         const growing = streaming && tail === "intro" && i === intro.length - 1;
         const clip = clipFor.intro[i];
@@ -177,6 +141,7 @@ export function GymPlan({
                 number={citationDisplayNumberById?.get(clip.id)}
                 interaction={interaction}
                 label={i === 0 ? "The proof" : undefined}
+                coach={coachOf(clip)}
                 className="mt-4"
               />
             )}
@@ -199,9 +164,9 @@ export function GymPlan({
                   <span className="font-display text-[13px] uppercase text-[var(--gym-cyan)]">
                     Drill {String(i + 1).padStart(2, "0")}
                   </span>
-                  {clip && (
+                  {clip && coachOf(clip) && (
                     <span className="font-osd text-[16px] leading-none text-muted-foreground">
-                      ON TAPE ▶ {clip.timestampStart}
+                      WITH {coachLabel(coachOf(clip)!).toUpperCase()}
                     </span>
                   )}
                 </div>
@@ -213,6 +178,7 @@ export function GymPlan({
                     citation={clip}
                     number={citationDisplayNumberById?.get(clip.id)}
                     interaction={interaction}
+                    coach={coachOf(clip)}
                     className="mt-4"
                   />
                 )}
@@ -235,6 +201,7 @@ export function GymPlan({
                 citation={clip}
                 number={citationDisplayNumberById?.get(clip.id)}
                 interaction={interaction}
+                coach={coachOf(clip)}
                 className="mt-4"
               />
             )}
@@ -242,11 +209,13 @@ export function GymPlan({
         );
       })}
 
-      {/* TODAY'S SET */}
+      {/* YOUR WORKOUT */}
       {set && (
         <GymSet
           streaming={streaming && tail === "set"}
           shareUrl={shareUrl}
+          printUrl={printUrl}
+          coach={coaches[0] ?? null}
         >
           <MarkdownSection content={set} {...section} />
         </GymSet>
@@ -261,12 +230,14 @@ function GymClip({
   number,
   interaction,
   label,
+  coach,
   className,
 }: {
   citation: AskCitation;
   number?: number;
   interaction?: AnswerInteraction;
   label?: string;
+  coach?: Coach | null;
   className?: string;
 }) {
   const [open, setOpen] = useState<SourceOpen | null>(null);
@@ -322,8 +293,13 @@ function GymClip({
         </span>
       </div>
       <div className="min-w-0">
-        <p className="font-osd text-[16px] leading-none text-[var(--gym-cyan)] uppercase">
-          {label ?? "Watch the rep"}{number != null ? ` · ${number}` : ""}
+        <p className="flex items-center gap-1.5 font-osd text-[16px] leading-none text-[var(--gym-cyan)] uppercase">
+          {coach && (
+            <Image src={`/gym/coaches/${coach.slug}.webp`} alt="" width={22} height={22} className="h-[22px] w-[22px] -my-1" />
+          )}
+          {coach ? `${coachLabel(coach)} · ` : ""}
+          {label ?? "Watch the clip"}
+          {number != null ? ` · ${number}` : ""}
         </p>
         <p className="mt-1.5 text-[14px] font-semibold leading-snug text-foreground line-clamp-2">{citation.videoTitle}</p>
         {citation.text && (
@@ -336,24 +312,28 @@ function GymClip({
   );
 }
 
-/** The closing action, framed as today's set. Log it, share it. */
+/** The closing action as this week's workout. Do it, share it, print it. */
 function GymSet({
   children,
   streaming,
   shareUrl,
+  printUrl,
+  coach,
 }: {
   children: React.ReactNode;
   streaming: boolean;
   shareUrl?: string;
+  printUrl?: string;
+  coach: Coach | null;
 }) {
-  const [logged, setLogged] = useState(false);
+  const [done, setDone] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
     const url = shareUrl || window.location.href;
     try {
       if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
-        await navigator.share({ url, title: "My rep at The GTM Gym" });
+        await navigator.share({ url, title: "My workout from The GTM Gym" });
         return;
       }
       await navigator.clipboard.writeText(url);
@@ -364,12 +344,26 @@ function GymSet({
     }
   };
 
+  const button =
+    "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg font-display text-[12px] uppercase cursor-pointer transition-[background-color,color,border-color,transform] active:scale-95";
+
   return (
     <div className="gym-neon-frame">
       <div className="rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] p-4 md:p-5">
         <div className="flex items-center gap-2.5 mb-2">
-          <Image src="/gym/coach.webp" alt="" width={28} height={28} className="h-7 w-7" />
-          <span className="font-display text-[13px] uppercase gym-sunset-text">Today&apos;s set</span>
+          <Image
+            src={coach ? `/gym/coaches/${coach.slug}.webp` : "/gym/coach.webp"}
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8"
+          />
+          <span className="font-display text-[13px] uppercase gym-sunset-text">This week&apos;s workout</span>
+          {coach && (
+            <span className="ml-auto font-osd text-[16px] leading-none text-muted-foreground">
+              — {coachLabel(coach).toUpperCase()}
+            </span>
+          )}
         </div>
         <div className={cn(PROSE_CLASS, "prose-p:my-0 prose-p:text-[17px] prose-p:text-foreground", streaming && "chat-stream-cursor")}>
           {children}
@@ -378,23 +372,36 @@ function GymSet({
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setLogged((v) => !v)}
+              onClick={() => setDone((v) => !v)}
               className={cn(
-                "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg font-display text-[12px] uppercase cursor-pointer transition-[background-color,color,transform] active:scale-95",
-                logged ? "bg-[var(--gym-cyan)] text-[#06121a]" : "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)]"
+                button,
+                done
+                  ? "bg-[var(--gym-cyan)] text-[#06121a]"
+                  : "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)]"
               )}
             >
               <Check className="h-4 w-4" strokeWidth={3} />
-              {logged ? "Rep logged. Hydrate." : "Log the rep"}
+              {done ? "Done. Now hydrate." : "I did it"}
             </button>
             <button
               type="button"
               onClick={share}
-              className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg font-display text-[12px] uppercase cursor-pointer border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)] transition-colors active:scale-95"
+              className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)]")}
             >
               <Share2 className="h-4 w-4" />
-              {copied ? "Link copied. Recruit a spotter." : "Share this rep"}
+              {copied ? "Link copied. Recruit a spotter." : "Share"}
             </button>
+            {printUrl && (
+              <a
+                href={printUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]")}
+              >
+                <Printer className="h-4 w-4" />
+                Print the plan
+              </a>
+            )}
           </div>
         )}
       </div>

@@ -142,7 +142,7 @@ export function AskSourcesRail({
       onScroll={hidePreview}
     >
       <div className="flex items-baseline justify-between mb-5">
-        <h4 className="font-display text-lg uppercase gym-sunset-text">Receipts</h4>
+        <h4 className="font-display text-lg uppercase gym-sunset-text">The proof</h4>
         <span className="font-osd text-[18px] text-muted-foreground">
           {isStreaming && citations.length === 0
             ? "SEARCHING TAPE…"
@@ -175,7 +175,7 @@ export function AskSourcesRail({
 
       {extras.length > 0 && (
         <div className="mt-7 pt-5 border-t border-[var(--gym-line)]" onMouseLeave={hidePreview}>
-          <p className="font-osd text-[18px] text-muted-foreground mb-2">MORE ON TAPE</p>
+          <p className="font-osd text-[18px] text-muted-foreground mb-2">MORE FROM THE LIBRARY</p>
           <div className="flex flex-col gap-0.5">
             {extras.map((c) => (
               <button
@@ -250,7 +250,7 @@ function VideoSourcePanel({
           type="button"
           onClick={onClose}
           className="w-[30px] h-[30px] grid place-items-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors cursor-pointer"
-          aria-label="Back to receipts"
+          aria-label="Back to the proof"
         >
           <X className="h-[18px] w-[18px]" />
         </button>
@@ -295,7 +295,7 @@ function VideoSourcePanel({
         {nearby.length > 1 && (
           <div className="mt-6 pt-4 border-t border-[var(--gym-line)]">
             <p className="font-osd text-[18px] text-muted-foreground mb-2">
-              OTHER REPS ON THIS TAPE
+              MORE FROM THIS SESSION
             </p>
             {nearby.map((c) => {
               const isHit = c.id === citation.id;

@@ -40,7 +40,7 @@ export async function generateMetadata({
     return gymMeta({
       title: question,
       shareTitle: `“${question}” — The GTM Gym`,
-      description: answerTeaser(answer) || "The play, with receipts: the exact minutes of FounderWell training that back it up.",
+      description: answerTeaser(answer) || "The coach's take, with proof: the exact minutes of FounderWell training that back it up.",
       path,
       image: `/og?q=${encodeURIComponent(question)}`,
       imageAlt: `The GTM Gym: “${question}”`,

@@ -11,8 +11,9 @@ export const GYM_SITE_NAME = "The GTM Gym";
 export const GYM_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gym.bold.video";
 export const GYM_DEFAULT_TITLE = "The GTM Gym — by FounderWell";
 export const GYM_DEFAULT_DESCRIPTION =
-  "What's the move? Ask the GTM Gym coach anything about going to market — positioning, outbound, demos, pricing — and get the answer with receipts: the exact minute of FounderWell training that backs it up.";
-export const GYM_HOME_IMAGE = "/gym/og-home.jpg";
+  "What's the move? Ask the GTM Gym coach anything about going to market — positioning, outbound, demos, pricing — and get a training plan with proof: the exact minute of FounderWell training that backs it up.";
+// Bump ?v= when the card changes; crawlers cache by URL
+export const GYM_HOME_IMAGE = "/gym/og-home.jpg?v=2";
 
 interface GymMetaInput {
   /** Page title (the layout template appends " · The GTM Gym") */
@@ -33,7 +34,7 @@ export function gymMeta({
   description = GYM_DEFAULT_DESCRIPTION,
   path,
   image = GYM_HOME_IMAGE,
-  imageAlt = "The GTM Gym — What's the move? Ask the coach, get receipts.",
+  imageAlt = "The GTM Gym — What's the move? Ask the coach, see the proof.",
   type = "website",
 }: GymMetaInput = {}): Metadata {
   const ogTitle = shareTitle || title || GYM_DEFAULT_TITLE;

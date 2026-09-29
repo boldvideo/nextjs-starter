@@ -171,8 +171,8 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
       <p className="relative z-10 mt-12 md:mt-14 max-w-[640px] text-base md:text-lg leading-relaxed text-foreground/80 text-pretty">
         Bring a messy go-to-market problem. The coach has studied
         {hours ? <> <strong className="text-foreground">{hours} hours</strong> of</> : " every hour of"} FounderWell
-        tape and answers with <span className="text-[var(--gym-cyan)] font-semibold">receipts</span>
-        {" "}— the exact minute that backs it up.
+        tape and backs every answer with <span className="text-[var(--gym-cyan)] font-semibold">proof</span>:
+        {" "}the exact minute of video that says so.
       </p>
 
       {/* The bar */}
@@ -211,7 +211,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
             disabled={lifting}
             className="gym-button shrink-0 h-11 md:h-14 px-3.5 md:px-6 rounded-xl text-[15px] md:text-lg uppercase inline-flex items-center gap-2 cursor-pointer"
           >
-            {lifting ? "Lifting…" : "Spot me"}
+            {lifting ? "Warming up…" : "Coach me"}
             {!lifting && <ArrowRight className="hidden sm:block h-5 w-5" strokeWidth={3} />}
           </button>
         </div>

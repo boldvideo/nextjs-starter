@@ -59,7 +59,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     routeConversationId ? { status: "loading" } : { status: "idle" }
   );
 
-  const { messages, isStreaming, statusMessage, conversationId, streamQuestion, stop, reset, loadConversation } =
+  const { messages, isStreaming, statusMessage, conversationId, canContinue, streamQuestion, stop, reset, loadConversation } =
     useAIAskStream();
 
   // Generate stable streaming message ID for scroll behavior
@@ -193,8 +193,9 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   // Update URL when a new conversation starts - use History API to avoid navigation
   // This keeps the component mounted with all state intact while making URL shareable
   useEffect(() => {
-    // Only update if we have a conversation ID and we're not already on a conversation route
-    if (conversationId && !routeConversationId) {
+    // Only update when the live conversation isn't the one in the URL (a new
+    // thread, or a visitor who started their own from someone's shared link)
+    if (conversationId && conversationId !== routeConversationId) {
       window.history.replaceState(null, "", `/ask/${conversationId}`);
     }
   }, [conversationId, routeConversationId]);
@@ -517,7 +518,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     )}
                   >
                     <Film className="h-4 w-4" />
-                    {receiptsOpen ? "HIDE RECEIPTS" : `RECEIPTS · ${lastPair?.primaryCount ?? 0}`}
+                    {receiptsOpen ? "HIDE PROOF" : `PROOF · ${lastPair?.primaryCount ?? 0} CLIPS`}
                   </button>
                 )}
               </div>
@@ -561,12 +562,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
                   {pair.assistantMessage && pair.assistantMessage.type !== "loading" && pair.assistantMessage.type !== "error" && (
                     <div>
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="font-display text-[13px] uppercase text-[var(--gym-cyan)] [text-shadow:0_0_12px_rgba(34,230,255,0.6)]">
-                          The play
-                        </span>
-                        <span className="h-px flex-1 bg-[linear-gradient(90deg,var(--gym-cyan),transparent)] opacity-50" />
-                      </div>
                       <GymPlan
                         content={pair.assistantMessage.content}
                         citations={pair.citations}
@@ -576,6 +571,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                         selectedCitationId={selectedCitation?.id}
                         interaction={pair.assistantMessage.interaction}
                         shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}` : undefined}
+                        printUrl={conversationId && !isCurrentlyStreaming ? `/plan/${conversationId}` : undefined}
                       />
                     </div>
                   )}
@@ -586,7 +582,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     !/\[(?:\d+|c_[^\]]+)\]/.test(pair.assistantMessage?.content ?? "") && (
                     <div className="lg:hidden">
                       <div className="flex items-baseline justify-between mb-3">
-                        <span className="font-display text-sm uppercase gym-sunset-text">Receipts</span>
+                        <span className="font-display text-sm uppercase gym-sunset-text">The proof</span>
                         <span className="font-osd text-[17px] text-muted-foreground">
                           {pair.primaryCount} {pair.primaryCount === 1 ? "CLIP" : "CLIPS"}
                         </span>
@@ -627,13 +623,40 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
               />
             </div>
             <div className="w-full max-w-3xl mx-auto px-4 pb-3 md:px-6 md:pb-4">
-              <GymFollowUp
-                value={query}
-                onChange={setQuery}
-                onSubmit={() => handleSubmit()}
-                onStop={handleStop}
-                isStreaming={isStreaming}
-              />
+              {canContinue ? (
+                <GymFollowUp
+                  value={query}
+                  onChange={setQuery}
+                  onSubmit={() => handleSubmit()}
+                  onStop={handleStop}
+                  isStreaming={isStreaming}
+                />
+              ) : (
+                <>
+                  {/* Someone else's shared set: read it, then start your own.
+                      The server refuses follow-ups without the owner token. */}
+                  <p className="mb-2.5 px-1 text-center text-sm text-foreground/85">
+                    <span className="font-display text-[12px] uppercase text-[var(--gym-yellow)] mr-2">Someone else&apos;s set</span>
+                    Your turn. What&apos;s your go-to-market problem?
+                  </p>
+                  <GymFollowUp
+                    value={query}
+                    onChange={setQuery}
+                    onSubmit={() => {
+                      const q = query.trim();
+                      if (!q) return;
+                      setQuery("");
+                      setSelectedCitation(null);
+                      setIsPanelOpen(false);
+                      reset();
+                      streamQuestion(q, [], { fresh: true });
+                    }}
+                    onStop={handleStop}
+                    isStreaming={isStreaming}
+                    placeholder="Ask your own question…"
+                  />
+                </>
+              )}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 mt-2.5 px-1">
                 {chatDisclaimer ? (
                   <p className="text-[11px] text-muted-foreground/60 text-center sm:text-left">{chatDisclaimer}</p>

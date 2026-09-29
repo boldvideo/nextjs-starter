@@ -138,7 +138,7 @@ export async function GET(request: Request) {
       ? `https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=1120&height=630&fit_mode=smartcrop${t ? `&time=${t}` : ""}`
       : null;
 
-    const text = `THE GTM GYMby FounderWellON TAPE${title}PLAY ▶ ${timecode}WATCH THE REP ▶ GYM.BOLD.VIDEO`;
+    const text = `THE GTM GYMby FounderWellON TAPE${title}PLAY ▶ ${timecode}WATCH THE CLIP ▶ GYM.BOLD.VIDEO`;
     const [bungee, grotesk, osd, logo, bg, frameSrc] = await Promise.all([
       loadGoogleFont("Bungee", text),
       loadGoogleFont("Space Grotesk", text, 700),
@@ -272,7 +272,7 @@ export async function GET(request: Request) {
               color: COLORS.cyan,
             }}
           >
-            WATCH THE REP ▶ GYM.BOLD.VIDEO
+            WATCH THE CLIP ▶ GYM.BOLD.VIDEO
           </div>
         </div>
       ),
@@ -291,7 +291,7 @@ export async function GET(request: Request) {
   // ── Question card ──────────────────────────────────────────────────────
   const q = clamp(question!, 140);
   const size = q.length <= 38 ? 72 : q.length <= 70 ? 60 : q.length <= 105 ? 50 : 44;
-  const text = `THE GTM GYMby FounderWellREP 01“${q}”THE PLAY + RECEIPTS ▶ GYM.BOLD.VIDEO`;
+  const text = `THE GTM GYMby FounderWellREP 01“${q}”COACH'S TAKE + THE PROOF ▶ GYM.BOLD.VIDEO`;
   const [bungee, grotesk, grotesk500, osd, logo, coach, bg] = await Promise.all([
     loadGoogleFont("Bungee", text),
     loadGoogleFont("Space Grotesk", text, 700),
@@ -381,7 +381,7 @@ export async function GET(request: Request) {
             color: COLORS.cyan,
           }}
         >
-          THE PLAY + RECEIPTS ▶ GYM.BOLD.VIDEO
+          COACH&apos;S TAKE + THE PROOF ▶ GYM.BOLD.VIDEO
         </div>
       </div>
     ),

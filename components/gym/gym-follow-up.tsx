@@ -19,7 +19,7 @@ export function GymFollowUp({
   onSubmit,
   onStop,
   isStreaming,
-  placeholder = "Next rep…",
+  placeholder = "Next rep: ask a follow-up…",
 }: GymFollowUpProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,14 +60,14 @@ export function GymFollowUp({
             className="shrink-0 h-11 px-4 rounded-xl inline-flex items-center gap-2 font-display text-sm uppercase border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)] transition-colors cursor-pointer"
           >
             <Square className="h-3.5 w-3.5 fill-current" />
-            Rack it
+            Stop
           </button>
         ) : (
           <button
             type="submit"
             className="gym-button shrink-0 h-11 px-4 md:px-5 rounded-xl text-sm md:text-base uppercase inline-flex items-center gap-2 cursor-pointer"
           >
-            Spot me
+            Coach me
             <ArrowRight className="h-4 w-4" strokeWidth={3} />
           </button>
         )}

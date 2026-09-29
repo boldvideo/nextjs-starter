@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* The printable training plan: paper, ink, and just enough neon to feel like
+   the gym. Deeper pink/cyan than the site so they survive a laser printer. */
+:root {
+  --paper: #fdfbf6;
+  --ink: #17121f;
+  --ink-soft: #5b5368;
+  --rule: #d9d2c6;
+  --pink: #d6187f;
+  --cyan: #0a8fb0;
+  --orange: #f07a12;
+  --yellow: #f5c21b;
+  --font-display: var(--font-bungee), "Arial Black", sans-serif;
+  --font-body: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-hand: var(--font-caveat), "Comic Sans MS", cursive;
+  --font-osd: var(--font-vt323), ui-monospace, monospace;
+}
+
+html,
+body {
+  background: #0b0618;
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+.font-display { font-family: var(--font-display); font-weight: 400; }
+.font-hand { font-family: var(--font-hand); }
+.font-osd { font-family: var(--font-osd); letter-spacing: 0.04em; }
+
+.sunset-bar {
+  background: linear-gradient(90deg, var(--yellow), var(--orange) 38%, var(--pink));
+}
+
+@page {
+  size: auto;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body {
+    background: white !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .sheet {
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: none !important;
+    border-radius: 0 !important;
+  }
+  .avoid-break {
+    break-inside: avoid;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

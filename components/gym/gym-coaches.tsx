@@ -2,81 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Video } from "@boldvideo/bold-js";
 import { cn } from "@/lib/utils";
+import { COACHES, type Tone } from "./gym-coaches-data";
 
 /**
  * The staff. Three coaches whose sessions are on tape, plus the two people
  * who keep the building standing. Portraits are AI-polished from real
  * photos/frames in the gym's synthwave style (public/gym/coaches).
  */
-
-type Tone = "pink" | "cyan" | "orange" | "yellow" | "violet";
-
-interface Coach {
-  slug: string;
-  name: string;
-  role: string;
-  title: string;
-  bio: string;
-  /** Matches sessions this coach leads (by name in the title/description) */
-  match?: RegExp;
-  /** Static stat for staff without sessions (clearly a joke) */
-  stat?: string;
-  cta: { label: string; href: string; external?: boolean };
-  tone: Tone;
-}
-
-const COACHES: Coach[] = [
-  {
-    slug: "cameron",
-    name: "Cameron Brown",
-    role: "Outbound",
-    title: "Cardio coach",
-    bio: "Runs The GTM Company. Treats 24 cold emails as one warm-up set, and won't let you near the send button until your deliverability passes inspection.",
-    match: /Cameron Brown|Cameron (walks|provides|breaks)/,
-    cta: { label: "Ask his tape", href: `/ask?q=${encodeURIComponent("What is the 24:1 outbound system and how do I run it?")}` },
-    tone: "cyan",
-  },
-  {
-    slug: "drew",
-    name: "Drew Williams",
-    role: "Sales",
-    title: "Sparring partner",
-    bio: "Bans feature dumps on sight. Buyers don't buy because they saw everything; they buy because they saw themselves. Then he makes you pause.",
-    match: /Drew Williams|Coach Drew/,
-    cta: { label: "Ask his tape", href: `/ask?q=${encodeURIComponent("How do I create urgency without being salesy?")}` },
-    tone: "pink",
-  },
-  {
-    slug: "joel",
-    name: "Joel Smith",
-    role: "Product & growth UX",
-    title: "Form coach",
-    bio: "Three-time founder. Asks what job your product was hired to do before he lets you bolt on another feature. Checks your form, every rep.",
-    match: /Joel Smith|Coach Joel|\bJoel (works|guides|explores)/,
-    cta: { label: "Ask his tape", href: `/ask?q=${encodeURIComponent("How do I make my product's value impossible to miss?")}` },
-    tone: "orange",
-  },
-  {
-    slug: "vanessa",
-    name: "Vanessa Roberts",
-    role: "FounderWell",
-    title: "Owns the building",
-    bio: "Four-time founder, three exits, resident shrink. Keeps your head in the game when the reps get heavy and the momentum going when you'd rather skip leg day.",
-    stat: "KEYS: ALL OF THEM",
-    cta: { label: "FounderWell", href: "https://www.founderwell.com", external: true },
-    tone: "yellow",
-  },
-  {
-    slug: "marcel",
-    name: "Marcel Fahle",
-    role: "Bold",
-    title: "Keeps the stack oiled",
-    bio: "Runs the tech. Built the machine that finds the exact minute of tape you need. If a rep glitches, he's already under it with a wrench.",
-    stat: "WRENCH: ALWAYS",
-    cta: { label: "Bold", href: "https://www.boldvideo.com?utm_source=gtm-gym&utm_medium=coaches", external: true },
-    tone: "violet",
-  },
-];
 
 const TONE: Record<Tone, { text: string; ring: string }> = {
   pink: { text: "text-[var(--gym-pink)]", ring: "hover:border-[var(--gym-pink)] hover:shadow-[0_0_40px_-12px_var(--gym-pink)]" },

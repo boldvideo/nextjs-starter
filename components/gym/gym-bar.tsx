@@ -53,14 +53,14 @@ export function GymBar() {
             <Link
               href="/"
               className={cn(
-                "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg",
-                "font-display text-[13px] tracking-wide",
-                "border border-[var(--gym-line)] text-foreground/90",
-                "hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)] hover:shadow-[0_0_18px_-4px_var(--gym-cyan)]",
-                "transition-[color,border-color,box-shadow] duration-150"
+                "inline-flex items-center gap-2 h-10 px-4 md:px-5 rounded-xl",
+                "font-display text-[14px] md:text-[15px] tracking-wide",
+                "border-2 border-[var(--gym-pink)] text-foreground",
+                "shadow-[0_0_18px_-6px_var(--gym-pink)] hover:bg-[var(--gym-pink)] hover:text-[#1a0616] hover:shadow-[0_0_26px_-4px_var(--gym-pink)]",
+                "transition-[color,background-color,box-shadow] duration-150 active:scale-95"
               )}
             >
-              <Plus className="h-4 w-4" strokeWidth={3} />
+              <Plus className="h-[18px] w-[18px]" strokeWidth={3} />
               New set
             </Link>
           )}
