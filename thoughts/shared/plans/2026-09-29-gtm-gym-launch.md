@@ -38,7 +38,11 @@ shareable thing has an epic OG card; SEO-ready; teaser-only access to full sessi
 - [ ] Onboarding, Ploy-style (see notes): one big question per screen → website with live favicon → "what do you want help with" → lands in chat with a "Your membership card" summary card and 3 recommended first reps
 - [ ] One-click login (Google via Auth.js) → Bold viewer by email → `viewer` on every ask (memory)
 - [ ] Gate: voice behind login; soft ask after ~3 reps ("want the coach to remember you?")
-- [ ] Share snapshots: "Share this rep" creates a public snapshot; live threads become owner-private once profiles exist
+- [x] Only the asker continues a thread (server-enforced: httpOnly member cookie + HMAC owner token on /api/ai-ask, /api/ask, /api/coach); shared-link visitors get "Someone else's set. Your turn." and start their own
+- [x] Coaches identified per clip/drill/take (`/api/gym/coach-map`, matched from session descriptions)
+- [x] Printable training plan `/plan/<id>`: goal, coach's note, drills with sets × reps blanks + QR to each clip, weekly tick row, house rules, coach signature
+- [x] One video plays at a time; proof rail opt-in
+- [ ] Share snapshots: live threads are public-read today; once profiles land, share should create a snapshot and live threads go owner-private
 - [ ] Shareable artifacts rendered in the gym skin (`/plan/<id>`), dynamic OG ("Acme's 4-week outbound program")
 - [ ] Easter eggs: Konami → 1987 aerobics mode, 404 "You skipped this rep.", "Gym rat" badge at 10 reps, hydrate reminder, streak on share cards
 - [ ] SEO: sitemap, robots, JSON-LD (Organization, FAQPage for shared reps, VideoObject for clips), per-page canonical (done), indexable public reps/plans
@@ -114,3 +118,18 @@ so this version asks for exactly that shape.
 > leg day (positioning); no ego lifting (don't copy enterprise playbooks at seed stage);
 > rest days (let data land before changing the campaign); log your PRs (track what works).
 > Never impersonate or name real podcast hosts.
+
+### Copy vocabulary (2026-09-29)
+Gym words only where they explain themselves; plain words where jargon would lose non-gym people.
+| Thing | Word |
+|---|---|
+| A question | Rep ("Rep 01", "Next rep") |
+| A conversation | Set ("New set", "Someone else's set") |
+| Answer header | Coach's take |
+| Bullet actions | Drills |
+| Closing action | This week's workout ("I did it" → "Done. Now hydrate.") |
+| Evidence clips | The proof ("Proof · 5 clips", "Watch the clip") |
+| Clip player | Instant replay |
+| Submit | Coach me |
+| Stop streaming | Stop |
+Dropped: Spot me, Receipts, Rack it, Today's set (clashed with "set"), The play.
