@@ -8,6 +8,7 @@ import { gymMeta, GYM_BASE_URL } from "@/lib/gym-meta";
 import { plainText, refsIn, splitPlan } from "@/lib/gym-plan-parse";
 import { coachForVideo, coachLabel, COACHES, type Coach } from "@/components/gym/gym-coaches-data";
 import { PrintButton } from "./print-button";
+import { cn } from "@/lib/utils";
 
 /**
  * A conversation, printed like a personal trainer's program sheet: goal,
@@ -95,14 +96,18 @@ async function loadPlan(conversationId: string) {
   });
   if (!messages.some((m) => m.role === "assistant")) return null;
 
-  // Which coach leads each session, by internal video id
+  // Which coach leads each session, and each session's short id (citations
+  // carry the internal UUID; the short id keeps QR codes small and scannable)
   const coachByVideo = new Map<string, Coach>();
+  const shortIdByVideo = new Map<string, string>();
   try {
     const res = await context.client.videos.list({ page: 1 });
     for (const v of res?.data ?? []) {
       const coach = coachForVideo(v);
       const internalId = (v as typeof v & { internalId?: string }).internalId;
-      if (coach && internalId) coachByVideo.set(internalId, coach);
+      if (!internalId) continue;
+      shortIdByVideo.set(internalId, v.id);
+      if (coach) coachByVideo.set(internalId, coach);
     }
   } catch {
     /* plan still prints without coach faces */
@@ -110,14 +115,21 @@ async function loadPlan(conversationId: string) {
 
   const toClip = async (s: StoredSource): Promise<Clip> => {
     const seconds = Math.floor(s.timestampSeconds ?? s.timestamp ?? 0);
-    const url = `${GYM_BASE_URL}/v/${s.videoId}?t=${seconds}`;
+    const url = `${GYM_BASE_URL}/v/${shortIdByVideo.get(s.videoId) ?? s.videoId}?t=${seconds}`;
     return {
       id: s.id,
       videoId: s.videoId,
       title: s.videoTitle || s.title || "Session",
       seconds,
       coach: coachByVideo.get(s.videoId) ?? null,
-      qr: await QRCode.toString(url, { type: "svg", margin: 0, color: { dark: "#17121f", light: "#00000000" } }),
+      // Medium error correction + a 2-module quiet zone on white: survives a
+      // laser printer and a phone camera at arm's length
+      qr: await QRCode.toString(url, {
+        type: "svg",
+        errorCorrectionLevel: "M",
+        margin: 2,
+        color: { dark: "#17121f", light: "#ffffff" },
+      }),
     };
   };
 
@@ -275,7 +287,7 @@ export default async function PlanPage({
             {/* Drills */}
             {rep.drills.length > 0 && (
               <div className="mt-6">
-                <div className="grid grid-cols-[44px_1fr_120px_96px_36px] gap-3 pb-1.5 border-b-2 border-[var(--ink)] font-display text-[10.5px] tracking-wider text-[var(--ink-soft)]">
+                <div className="grid grid-cols-[44px_1fr_110px_100px_36px] gap-3 pb-1.5 border-b-2 border-[var(--ink)] font-display text-[10.5px] tracking-wider text-[var(--ink-soft)]">
                   <span>#</span>
                   <span>DRILL</span>
                   <span className="text-center">SETS × REPS</span>
@@ -285,7 +297,7 @@ export default async function PlanPage({
                 {rep.drills.map((d, i) => (
                   <div
                     key={i}
-                    className="avoid-break grid grid-cols-[44px_1fr_120px_96px_36px] gap-3 py-3 border-b border-[var(--rule)] items-center"
+                    className="avoid-break grid grid-cols-[44px_1fr_110px_100px_36px] gap-3 py-3 border-b border-[var(--rule)] items-center"
                   >
                     <span className="font-display text-[22px] text-[var(--cyan)] leading-none">{String(i + 1).padStart(2, "0")}</span>
                     <div>
@@ -371,7 +383,7 @@ function ProofCode({ clip, small }: { clip: Clip; small?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <div
-        className={small ? "h-[58px] w-[58px]" : "h-[76px] w-[76px]"}
+        className={cn("rounded-sm [&>svg]:h-full [&>svg]:w-full", small ? "h-[84px] w-[84px]" : "h-[96px] w-[96px]")}
         // qrcode renders a self-contained SVG string
         dangerouslySetInnerHTML={{ __html: clip.qr }}
       />

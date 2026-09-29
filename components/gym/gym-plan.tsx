@@ -97,120 +97,136 @@ export function GymPlan({
   // Which block is still growing (gets the caret)
   const tail = set ? "set" : notes.length ? "notes" : drills.length ? `drill-${drills.length - 1}` : "intro";
 
+  // The lead coach is named once in the header; clips only repeat a coach
+  // when it's someone else.
+  const lead = coaches[0] ?? null;
+  const clipCoach = (c: AskCitation | null) => {
+    const coach = coachOf(c);
+    return coach && coach !== lead ? coach : null;
+  };
+
   return (
-    <div className="space-y-5">
-      {/* Whose tape this is */}
-      <div className="flex items-center gap-3">
-        <span className="font-display text-[13px] uppercase text-[var(--gym-cyan)] [text-shadow:0_0_12px_rgba(34,230,255,0.6)] whitespace-nowrap">
-          Coach&apos;s take
-        </span>
-        <span className="h-px flex-1 bg-[linear-gradient(90deg,var(--gym-cyan),transparent)] opacity-50" />
-        {coaches.length > 0 && (
-          <span className="flex items-center gap-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
+    <div>
+      {/* Whose tape this is: the only place the coach is named up front */}
+      <div className="flex items-center gap-3 mb-6">
+        {coaches.length > 0 ? (
+          <span className="flex items-center gap-2.5 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
             <span className="flex -space-x-2">
               {coaches.slice(0, 3).map((c) => (
-                <Image key={c.slug} src={`/gym/coaches/${c.slug}.webp`} alt="" width={30} height={30} className="h-[30px] w-[30px]" />
+                <Image key={c.slug} src={`/gym/coaches/${c.slug}.webp`} alt="" width={32} height={32} className="h-8 w-8" />
               ))}
             </span>
-            <span className="font-osd text-[17px] leading-none text-muted-foreground whitespace-nowrap">
-              WITH {coaches.slice(0, 2).map((c) => coachLabel(c).toUpperCase()).join(" & ")}
+            <span className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">{coaches.slice(0, 2).map(coachLabel).join(" & ")}</span>
+              {"'s take"}
             </span>
           </span>
+        ) : (
+          <span className="text-sm font-semibold text-muted-foreground">Coach&apos;s take</span>
         )}
       </div>
 
       {/* The take: explain → show the tape → explain */}
-      {intro.map((para, i) => {
-        const growing = streaming && tail === "intro" && i === intro.length - 1;
-        const clip = clipFor.intro[i];
-        return (
-          <div key={i}>
-            <div
-              className={cn(
-                PROSE_CLASS,
-                "prose-p:my-0",
-                i === 0 ? "prose-p:text-[20px] prose-p:leading-[1.55] prose-p:text-foreground" : "prose-p:text-[18px] prose-p:text-foreground/85",
-                growing && "chat-stream-cursor"
+      <div className="space-y-7">
+        {intro.map((para, i) => {
+          const growing = streaming && tail === "intro" && i === intro.length - 1;
+          const clip = clipFor.intro[i];
+          return (
+            <div key={i}>
+              <div
+                className={cn(
+                  PROSE_CLASS,
+                  "prose-p:my-0 max-w-[62ch]",
+                  i === 0
+                    ? "prose-p:text-[21px] prose-p:leading-[1.55] prose-p:text-foreground prose-p:font-medium"
+                    : "prose-p:text-[18px] prose-p:leading-[1.75] prose-p:text-foreground/80",
+                  growing && "chat-stream-cursor"
+                )}
+              >
+                <MarkdownSection content={para} {...section} />
+              </div>
+              {clip && !growing && (
+                <GymClip
+                  citation={clip}
+                  number={citationDisplayNumberById?.get(clip.id)}
+                  interaction={interaction}
+                  coach={clipCoach(clip)}
+                  className="mt-5"
+                />
               )}
-            >
-              <MarkdownSection content={para} {...section} />
             </div>
-            {clip && !growing && (
-              <GymClip
-                citation={clip}
-                number={citationDisplayNumberById?.get(clip.id)}
-                interaction={interaction}
-                label={i === 0 ? "The proof" : undefined}
-                coach={coachOf(clip)}
-                className="mt-4"
-              />
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
-      {/* DRILLS */}
+      {/* Drills: an open, numbered timeline (no boxes) */}
       {drills.length > 0 && (
-        <ol className="space-y-4">
+        <ol className="mt-12 relative">
           {drills.map((d, i) => {
             const clip = clipFor.drills[i];
             const growing = streaming && tail === `drill-${i}`;
+            const last = i === drills.length - 1;
             return (
               <li
                 key={i}
-                className="relative rounded-2xl border border-[var(--gym-line)] bg-[color-mix(in_srgb,var(--gym-panel)_85%,transparent)] p-4 md:p-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+                className="relative grid grid-cols-[48px_1fr] md:grid-cols-[64px_1fr] gap-x-3 md:gap-x-4 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
               >
-                <div className="flex items-baseline gap-3 mb-2">
-                  <span className="font-display text-[13px] uppercase text-[var(--gym-cyan)]">
-                    Drill {String(i + 1).padStart(2, "0")}
+                {/* Number + the rail connecting drills */}
+                <div className="flex flex-col items-center">
+                  <span className="font-display text-[26px] md:text-[32px] leading-none text-transparent [-webkit-text-stroke:1.5px_var(--gym-cyan)]">
+                    {String(i + 1).padStart(2, "0")}
                   </span>
-                  {clip && coachOf(clip) && (
-                    <span className="font-osd text-[16px] leading-none text-muted-foreground">
-                      WITH {coachLabel(coachOf(clip)!).toUpperCase()}
-                    </span>
+                  {!last && <span className="mt-3 w-px flex-1 bg-[var(--gym-line)]" />}
+                </div>
+                <div className={cn("min-w-0", last ? "pb-2" : "pb-11")}>
+                  <p className="font-osd text-[16px] leading-none text-muted-foreground/80 mb-2 pt-1.5">DRILL</p>
+                  <div className={cn(PROSE_CLASS, "prose-p:my-0 max-w-[60ch] prose-p:text-[18px] prose-p:leading-[1.7] prose-p:text-foreground/90", growing && "chat-stream-cursor")}>
+                    <MarkdownSection content={d} {...section} />
+                  </div>
+                  {clip && !growing && (
+                    <GymClip
+                      citation={clip}
+                      number={citationDisplayNumberById?.get(clip.id)}
+                      interaction={interaction}
+                      coach={clipCoach(clip)}
+                      className="mt-5"
+                    />
                   )}
                 </div>
-                <div className={cn(PROSE_CLASS, "prose-p:my-0 prose-p:text-[17px]", growing && "chat-stream-cursor")}>
-                  <MarkdownSection content={d} {...section} />
-                </div>
-                {clip && !growing && (
-                  <GymClip
-                    citation={clip}
-                    number={citationDisplayNumberById?.get(clip.id)}
-                    interaction={interaction}
-                    coach={coachOf(clip)}
-                    className="mt-4"
-                  />
-                )}
               </li>
             );
           })}
         </ol>
       )}
 
-      {notes.map((para, i) => {
-        const growing = streaming && tail === "notes" && i === notes.length - 1;
-        const clip = clipFor.notes[i];
-        return (
-          <div key={i}>
-            <div className={cn(PROSE_CLASS, "prose-p:my-0 prose-p:text-[18px] prose-p:text-foreground/85", growing && "chat-stream-cursor")}>
-              <MarkdownSection content={para} {...section} />
-            </div>
-            {clip && !growing && (
-              <GymClip
-                citation={clip}
-                number={citationDisplayNumberById?.get(clip.id)}
-                interaction={interaction}
-                coach={coachOf(clip)}
-                className="mt-4"
-              />
-            )}
-          </div>
-        );
-      })}
+      {notes.length > 0 && (
+        <div className="mt-10 space-y-7">
+          {notes.map((para, i) => {
+            const growing = streaming && tail === "notes" && i === notes.length - 1;
+            const clip = clipFor.notes[i];
+            return (
+              <div key={i}>
+                <div className={cn(PROSE_CLASS, "prose-p:my-0 max-w-[62ch] prose-p:text-[18px] prose-p:leading-[1.75] prose-p:text-foreground/80", growing && "chat-stream-cursor")}>
+                  <MarkdownSection content={para} {...section} />
+                </div>
+                {clip && !growing && (
+                  <GymClip
+                    citation={clip}
+                    number={citationDisplayNumberById?.get(clip.id)}
+                    interaction={interaction}
+                    coach={clipCoach(clip)}
+                    className="mt-5"
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-      {/* YOUR WORKOUT */}
+      {/* YOUR WORKOUT: the one loud element in the answer */}
       {set && (
+        <div className="mt-12">
         <GymSet
           streaming={streaming && tail === "set"}
           shareUrl={shareUrl}
@@ -219,6 +235,7 @@ export function GymPlan({
         >
           <MarkdownSection content={set} {...section} />
         </GymSet>
+        </div>
       )}
     </div>
   );
@@ -271,39 +288,49 @@ function GymClip({
       type="button"
       onClick={() => interaction && setOpen(new SourceOpen(citation.videoId, interaction))}
       className={cn(
-        "group w-full text-left grid grid-cols-[minmax(0,168px)_1fr] sm:grid-cols-[220px_1fr] gap-3 sm:gap-4 items-center",
+        "group w-full max-w-[560px] text-left grid grid-cols-[132px_1fr] sm:grid-cols-[168px_1fr] gap-3.5 sm:gap-4 items-center",
         "rounded-xl p-2 -m-2 cursor-pointer hover:bg-white/[0.03] transition-colors",
         className
       )}
     >
-      <div className="relative aspect-video rounded-lg overflow-hidden bg-black border border-[var(--gym-line)] group-hover:border-[var(--gym-cyan)] group-hover:shadow-[0_0_24px_-8px_var(--gym-cyan)] transition-[border-color,box-shadow]">
+      <div className="relative aspect-video rounded-lg overflow-hidden bg-black ring-1 ring-[var(--gym-line)] group-hover:ring-[var(--gym-cyan)] transition-[box-shadow]">
         {thumb && (
           // Plain img: Mux serves exact-second frames; next/image would proxy each one
-          <img src={thumb} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+          <img src={thumb} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-90 transition-[transform,opacity] duration-500 group-hover:scale-[1.04] group-hover:opacity-100" />
         )}
-        <div className="absolute inset-0 gym-scanlines opacity-70" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_50%,rgba(11,6,24,0.88))]" />
-        <span className="absolute inset-0 grid place-items-center">
-          <span className="grid place-items-center h-10 w-10 rounded-full gym-sunset-bg text-[#1a0616] shadow-[0_0_20px_rgba(255,46,166,0.7)] transition-transform group-hover:scale-110">
-            <Play className="h-4 w-4 fill-current translate-x-px" />
+        {number != null && (
+          <span className="absolute top-1.5 left-1.5 min-w-5 h-5 px-1 grid place-items-center rounded bg-black/65 font-display text-[10px] leading-none text-white/90">
+            {number}
           </span>
-        </span>
-        <span className="absolute left-2 bottom-1 font-osd text-[17px] leading-none text-white [text-shadow:0_0_6px_rgba(34,230,255,0.9)]">
-          ▶ {citation.timestampStart}
+        )}
+        <span className="absolute inset-0 grid place-items-center">
+          <span className="grid place-items-center h-9 w-9 rounded-full bg-black/55 text-white ring-1 ring-white/30 backdrop-blur-[2px] transition-all group-hover:scale-110 group-hover:bg-[var(--gym-pink)] group-hover:ring-0">
+            <Play className="h-3.5 w-3.5 fill-current translate-x-px" />
+          </span>
         </span>
       </div>
       <div className="min-w-0">
-        <p className="flex items-center gap-1.5 font-osd text-[16px] leading-none text-[var(--gym-cyan)] uppercase">
-          {coach && (
-            <Image src={`/gym/coaches/${coach.slug}.webp`} alt="" width={22} height={22} className="h-[22px] w-[22px] -my-1" />
-          )}
-          {coach ? `${coachLabel(coach)} · ` : ""}
-          {label ?? "Watch the clip"}
-          {number != null ? ` · ${number}` : ""}
+        <p className="text-[14.5px] font-semibold leading-snug text-foreground/95 line-clamp-2 group-hover:text-foreground">
+          {citation.videoTitle}
         </p>
-        <p className="mt-1.5 text-[14px] font-semibold leading-snug text-foreground line-clamp-2">{citation.videoTitle}</p>
+        <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-muted-foreground">
+          <span className="font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {citation.timestampStart}</span>
+          {coach && (
+            <>
+              <span aria-hidden>·</span>
+              <Image src={`/gym/coaches/${coach.slug}.webp`} alt="" width={18} height={18} className="h-[18px] w-[18px]" />
+              <span>{coachLabel(coach)}</span>
+            </>
+          )}
+          {label && (
+            <>
+              <span aria-hidden>·</span>
+              <span>{label}</span>
+            </>
+          )}
+        </p>
         {citation.text && (
-          <p className="mt-1 text-[13px] leading-snug text-muted-foreground line-clamp-2 italic">
+          <p className="mt-1 text-[13px] leading-snug text-muted-foreground/70 line-clamp-1">
             &ldquo;{citation.text.trim()}&rdquo;
           </p>
         )}

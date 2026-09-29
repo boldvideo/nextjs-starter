@@ -208,11 +208,11 @@ export const MarkdownSection = React.memo(function MarkdownSection({
           className={cn(
             "inline-flex items-center gap-0.5 align-[0.3em] mx-0.5 px-1.5 py-[3px] rounded-md",
             "font-display text-[10px] leading-none",
-            "border border-[var(--signal-line)]",
+            "border",
             "transition-[background-color,color,box-shadow] cursor-pointer",
             isActive
-              ? "bg-signal text-background shadow-[0_0_12px_var(--gym-cyan)]"
-              : "text-signal bg-[var(--signal-soft)] hover:bg-signal hover:text-background hover:shadow-[0_0_12px_var(--gym-cyan)]"
+              ? "bg-signal text-background border-transparent shadow-[0_0_12px_var(--gym-cyan)]"
+              : "text-muted-foreground border-[var(--gym-line)] hover:text-background hover:bg-signal hover:border-transparent hover:shadow-[0_0_12px_var(--gym-cyan)]"
           )}
           title={
             hasValidTimestamp
@@ -369,8 +369,8 @@ export const MarkdownSection = React.memo(function MarkdownSection({
             {...props}
             className={cn(
               "font-mono text-[0.86em] font-normal",
-              "text-primary bg-muted",
-              "border border-border/50 rounded-[4px] px-[5px] py-px",
+              "text-foreground/90 bg-white/[0.06]",
+              "rounded-[4px] px-[5px] py-px [box-decoration-break:clone]",
               "before:content-none after:content-none"
             )}
           >

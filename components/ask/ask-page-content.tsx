@@ -524,7 +524,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
               </div>
             </div>
 
-            <div className="space-y-14">
+            <div className="space-y-20">
             {qaPairs.map((pair, pairIndex) => {
               const isLastPair = pairIndex === qaPairs.length - 1;
               const isCurrentlyStreaming = isStreaming && isLastPair;
@@ -533,7 +533,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
               return (
                 <div
                   key={pair.userMessage.id}
-                  className="space-y-7"
+                  className="space-y-10"
                   {...(isCurrentlyStreaming ? { "data-streaming-message": true } : {})}
                 >
                   {pair.userMessage.attachments && pair.userMessage.attachments.length > 0 && (
