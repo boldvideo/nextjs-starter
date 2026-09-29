@@ -18,7 +18,7 @@ import type { Element, ElementContent } from "hast";
  * These are redundant since the sources rail already displays citations.
  * Destructive, so only ever applied at rest — never mid-stream.
  */
-function stripTrailingCitationList(content: string): string {
+export function stripTrailingCitationList(content: string): string {
   const idx = content.lastIndexOf("\n\n");
   if (idx === -1) return content;
 
@@ -169,7 +169,7 @@ function CodeBlock({
   );
 }
 
-interface MarkdownSectionProps {
+export interface MarkdownSectionProps {
   content: string;
   citations: AskCitation[];
   citationDisplayNumberById?: Map<string, number>;
@@ -178,7 +178,7 @@ interface MarkdownSectionProps {
   selectedCitationId?: string;
 }
 
-const MarkdownSection = React.memo(function MarkdownSection({
+export const MarkdownSection = React.memo(function MarkdownSection({
   content,
   citations,
   citationDisplayNumberById,

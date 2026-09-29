@@ -11,7 +11,6 @@ import {
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { AskCitation } from "@/lib/ask";
-import { AskMessageCard } from "./ask-message-card";
 import { AskSourcesRail } from "./ask-sources-rail";
 
 import { AskVideoPanel } from "./ask-video-panel";
@@ -20,6 +19,7 @@ import { GymAskHero } from "@/components/gym/gym-ask-hero";
 import { GymFollowUp } from "@/components/gym/gym-follow-up";
 import { GymLoading } from "@/components/gym/gym-loading";
 import { GymReceiptCard } from "@/components/gym/gym-receipt-card";
+import { GymPlan } from "@/components/gym/gym-plan";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
@@ -51,7 +51,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const config = getPortalConfig(settings);
   const multimodal = config.ai.multimodal;
   const aiName = config.ai.name;
-  const aiAvatar = config.ai.avatar;
   const chatDisclaimer = config.ai.chatDisclaimer;
   
   const [pageState, setPageState] = useState<PageState>(
@@ -512,21 +511,23 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                         </span>
                         <span className="h-px flex-1 bg-[linear-gradient(90deg,var(--gym-cyan),transparent)] opacity-50" />
                       </div>
-                      <AskMessageCard
+                      <GymPlan
                         content={pair.assistantMessage.content}
                         citations={pair.citations}
-                        aiName={aiName}
-                        aiAvatar={aiAvatar}
                         onCitationClick={citation => handleCitationClick(citation, pair.assistantMessage?.interaction)}
                         isStreaming={isCurrentlyStreaming}
                         citationDisplayNumberById={pair.citationDisplayNumberById}
                         selectedCitationId={selectedCitation?.id}
+                        interaction={pair.assistantMessage.interaction}
+                        shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}` : undefined}
                       />
                     </div>
                   )}
 
-                  {/* Receipts — mobile only; desktop uses the rail */}
-                  {pair.orderedCitations.length > 0 && !isCurrentlyStreaming && (
+                  {/* Receipts — mobile only, and only when the plan couldn't pin
+                      clips inline (no refs in the text); desktop uses the rail */}
+                  {pair.orderedCitations.length > 0 && !isCurrentlyStreaming &&
+                    !/\[(?:\d+|c_[^\]]+)\]/.test(pair.assistantMessage?.content ?? "") && (
                     <div className="lg:hidden">
                       <div className="flex items-baseline justify-between mb-3">
                         <span className="font-display text-sm uppercase gym-sunset-text">Receipts</span>

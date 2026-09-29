@@ -3,6 +3,7 @@ import type { Video } from "@boldvideo/bold-js";
 import { GymBackdrop } from "./gym-backdrop";
 import { GymAskHero } from "./gym-ask-hero";
 import { GymOsd } from "./gym-osd";
+import { GymCoaches } from "./gym-coaches";
 import { PoweredByBold } from "@/components/powered-by-bold";
 
 interface GymHomepageProps {
@@ -58,6 +59,10 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
             </div>
           </div>
         )}
+
+        <div className="relative z-10 bg-[linear-gradient(180deg,rgba(11,6,24,0.6),var(--gym-night)_18%)]">
+          <GymCoaches videos={videos} />
+        </div>
 
         <footer className="relative z-10 px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 max-w-[1440px] w-full mx-auto text-xs text-muted-foreground/70">
           <p className="text-center md:text-left">
