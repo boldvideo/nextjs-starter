@@ -36,7 +36,8 @@ shareable thing has an epic OG card; SEO-ready; teaser-only access to full sessi
   - Marcel Fahle: keeps the weight stack oiled; runs the tech
 - [ ] Teaser mode (UI): receipts play only the cited segment, end card to FounderWell; drop full watch pages + ticker deep links; persona CTA points at FounderWell
 - [ ] Onboarding, Ploy-style (see notes): one big question per screen → website with live favicon → "what do you want help with" → lands in chat with a "Your membership card" summary card and 3 recommended first reps
-- [ ] One-click login (Google via Auth.js) → Bold viewer by email → `viewer` on every ask (memory)
+- [x] One-click login: Better Auth (stateless, Google only; next-auth removed) → Bold viewer by email → `viewer` on every ask. `/member` = membership card + profile form (viewer traits: business_name, website, business_description). Google app is in Testing (Marcel + Vanessa are test users); publish before launch
+- [ ] Owner tokens are per browser; tie ownership to the viewer when signed in (cross-device)
 - [ ] Gate: voice behind login; soft ask after ~3 reps ("want the coach to remember you?")
 - [x] Only the asker continues a thread (server-enforced: httpOnly member cookie + HMAC owner token on /api/ai-ask, /api/ask, /api/coach); shared-link visitors get "Someone else's set. Your turn." and start their own
 - [x] Coaches identified per clip/drill/take (`/api/gym/coach-map`, matched from session descriptions)
@@ -53,7 +54,7 @@ shareable thing has an epic OG card; SEO-ready; teaser-only access to full sessi
 - [ ] **Segment-only answers (teaser mode), BOLD-1994:** public chat answers from the full library but exposes only cited segments. Mux instant clipping + signed tokens with clip claims (see notes)
 - [ ] **Interview engine, BOLD-1995:** viewer interview (profile → traits) + tenant interview (onboarding). Template of fields; pre-fill from traits + memory; websites as sources; asks only gaps; frontend-triggerable ("catch-up" summarizes recent convos and asks follow-ups); text + `gpt-live-1` voice (needs non-video voice session kind)
 - [ ] **Public artifact mode + new kinds:** portal-rendered, long-lived shares, receipts kept as clip refs; kinds: training plan, script, scorecard, cheat sheet (BOLD-1980 v1 is private-only, 7-day shares, generic OG, strips citations)
-- [ ] **SDK:** `viewer` / `viewerProfile` on `ai.chat` (API already accepts them; only voice exposes them)
+- [~] **SDK:** `viewer` / `viewerProfile` on `ai.chat`: patched locally via `patches/@boldvideo%2Fbold-js@1.29.0.patch`; needs a real bold-js release
 - [ ] **Persona:** gym-coach voice in account persona settings, so text, voice and artifacts all sound the same (rep-obsessed, gym wisdom → GTM principles)
 - [ ] **Conversation share snapshots** (public, immutable) vs private live threads
 
