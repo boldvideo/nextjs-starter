@@ -122,11 +122,36 @@ interface UseAIAskStreamOptions {
   onError?: (error: string) => void;
 }
 
+/**
+ * Owner tokens prove "I started this conversation" to the server (see
+ * lib/gym-ownership.ts). The token is useless without the asker's httpOnly
+ * member cookie, so browser storage is fine; it only lets the UI know
+ * whether to offer a follow-up box.
+ */
+const OWNER_KEY = (id: string) => `gym:owner:${id}`;
+function readOwnerToken(id: string): string | null {
+  try {
+    return localStorage.getItem(OWNER_KEY(id));
+  } catch {
+    return null;
+  }
+}
+function storeOwnerToken(id: string, token: string) {
+  try {
+    localStorage.setItem(OWNER_KEY(id), token);
+  } catch {
+    /* storage unavailable: follow-ups still work for this page's lifetime */
+  }
+}
+
 export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
   const [messages, setMessages] = useState<AIAskMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | undefined>();
+  const ownerTokenRef = useRef<string | null>(null);
+  // False when viewing someone else's shared conversation
+  const [canContinue, setCanContinue] = useState(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const streamingMessageIdRef = useRef<string | null>(null);
 
@@ -145,8 +170,13 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
     return messageId;
   }, []);
 
+  const currentConversationId = conversationId;
   const streamQuestion = useCallback(
-    async (query: string, images: File[] = []) => {
+    async (query: string, images: File[] = [], opts: { fresh?: boolean } = {}) => {
+      // `fresh` starts a new conversation even if this hook still holds one
+      // (a shared-link visitor asking their own question).
+      const conversationId = opts.fresh ? undefined : currentConversationId;
+      if (opts.fresh) ownerTokenRef.current = null;
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -191,6 +221,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 const fd = new FormData();
                 fd.append("prompt", query);
                 if (conversationId) fd.append("conversationId", conversationId);
+                if (conversationId && ownerTokenRef.current) fd.append("ownerToken", ownerTokenRef.current);
                 for (const f of images) fd.append("image", f, f.name);
                 return fd;
               })(),
@@ -202,13 +233,25 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 "Content-Type": "application/json",
                 Accept: "text/event-stream",
               },
-              body: JSON.stringify({ prompt: query, conversationId }),
+              body: JSON.stringify({
+                prompt: query,
+                conversationId,
+                ...(conversationId && ownerTokenRef.current ? { ownerToken: ownerTokenRef.current } : {}),
+              }),
               signal: abortControllerRef.current.signal,
             };
         const response = await fetch("/api/ai-ask", init);
 
         if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
+          let message = `Request failed with status ${response.status}`;
+          try {
+            const body = await response.json();
+            if (body?.code === "NOT_OWNER") setCanContinue(false);
+            if (typeof body?.message === "string") message = body.message;
+          } catch {
+            /* keep the status message */
+          }
+          throw new Error(message);
         }
 
         if (!response.body) {
@@ -241,6 +284,14 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
               case "message_start":
                 if (event.id) {
                   setConversationId(event.id);
+                }
+                break;
+
+              case "owner":
+                if (event.conversationId && event.token) {
+                  ownerTokenRef.current = event.token;
+                  storeOwnerToken(event.conversationId, event.token);
+                  setCanContinue(true);
                 }
                 break;
 
@@ -491,7 +542,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
         abortControllerRef.current = null;
       }
     },
-    [addUserMessage, conversationId, options]
+    [addUserMessage, currentConversationId, options]
   );
 
   const revokeMessageObjectURLs = useCallback((msgs: AIAskMessage[]) => {
@@ -511,6 +562,8 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       return [];
     });
     setConversationId(undefined);
+    ownerTokenRef.current = null;
+    setCanContinue(true);
     setIsStreaming(false);
     streamingMessageIdRef.current = null;
   }, [revokeMessageObjectURLs]);
@@ -583,6 +636,9 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
 
       setMessages(loadedMessages);
       setConversationId(data.conversationId);
+      const token = readOwnerToken(data.conversationId);
+      ownerTokenRef.current = token;
+      setCanContinue(Boolean(token));
       return true;
     } catch (error) {
       console.error("[useAIAskStream] Failed to load conversation:", error);
@@ -595,6 +651,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
     isStreaming,
     statusMessage,
     conversationId,
+    canContinue,
     streamQuestion,
     reset,
     stop,

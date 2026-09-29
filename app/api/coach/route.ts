@@ -1,6 +1,7 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
+import { getMember, isOwner, notOwnerResponse } from "@/lib/gym-ownership";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -8,6 +9,7 @@ export const maxDuration = 300;
 interface CoachRequestBody {
   message: string;
   conversationId?: string;
+  ownerToken?: string;
 }
 
 /**
@@ -171,6 +173,7 @@ export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
   let message: string | undefined;
   let conversationId: string | undefined;
+  let ownerTokenValue: string | undefined;
   let images: File[] = [];
 
   if (contentType.startsWith("multipart/form-data")) {
@@ -180,6 +183,8 @@ export async function POST(request: Request) {
       message = typeof messageValue === "string" ? messageValue : undefined;
       const cid = form.get("conversationId");
       conversationId = typeof cid === "string" ? cid : undefined;
+      const tok = form.get("ownerToken");
+      ownerTokenValue = typeof tok === "string" ? tok : undefined;
       images = form.getAll("image").filter((v): v is File => v instanceof File);
     } catch {
       return new Response(
@@ -199,6 +204,7 @@ export async function POST(request: Request) {
     }
     message = body.message;
     conversationId = body.conversationId;
+    ownerTokenValue = body.ownerToken;
   }
 
   if (!message || typeof message !== "string") {
@@ -206,6 +212,12 @@ export async function POST(request: Request) {
       JSON.stringify({ type: "error", content: "Message is required" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
+  }
+
+  // Same rule as /api/ai-ask: only the asker continues a conversation.
+  if (conversationId) {
+    const member = await getMember();
+    if (!isOwner(conversationId, member.id, ownerTokenValue)) return notOwnerResponse();
   }
 
   try {

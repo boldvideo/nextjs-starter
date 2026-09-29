@@ -1,4 +1,5 @@
-import { streamAIQuestion } from "../../../lib/ai-question";
+import { streamAIQuestion } from "@/lib/ai-question";
+import { getMember, isOwner, memberCookie, notOwnerResponse, ownerToken } from "@/lib/gym-ownership";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5 minutes for web search support
@@ -8,6 +9,7 @@ interface QuestionBody {
   videoId: string;
   subdomain: string;
   conversationId?: string | null;
+  ownerToken?: string | null;
 }
 
 interface ActionBody {
@@ -16,6 +18,7 @@ interface ActionBody {
   label: string;
   id: string;
   conversation_id?: string | null;
+  owner_token?: string | null;
 }
 
 /** A conversation id is either absent, null (first turn), or a string. */
@@ -101,14 +104,25 @@ export async function POST(request: Request) {
     return errorResponse("Request body was not valid JSON.", 400, "bad_json");
   }
 
+  // Only the asker continues a conversation (lib/gym-ownership)
+  const member = await getMember();
+  const ownerFor = (cid: string) => ownerToken(cid, member.id);
+  const withCookie = (response: Response) => {
+    const cookie = memberCookie(member);
+    if (cookie) response.headers.append("Set-Cookie", cookie);
+    return response;
+  };
+
   try {
     // Check if it's an action request
     if (validateActionBody(body)) {
-      const { id: videoId, conversation_id, type, value, label } = body;
-      return await streamAIQuestion(videoId, "", value, conversation_id ?? undefined, {
-        type,
-        label,
-      });
+      const { id: videoId, conversation_id, type, value, label, owner_token } = body;
+      if (conversation_id && !isOwner(conversation_id, member.id, owner_token)) {
+        return notOwnerResponse();
+      }
+      return withCookie(
+        await streamAIQuestion(videoId, "", value, conversation_id ?? undefined, { type, label }, ownerFor)
+      );
     }
 
     // Otherwise validate as a regular question
@@ -120,12 +134,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const { question, videoId, subdomain, conversationId } = body;
-    return await streamAIQuestion(
-      videoId,
-      subdomain,
-      question,
-      conversationId ?? undefined
+    const { question, videoId, subdomain, conversationId, ownerToken: token } = body;
+    if (conversationId && !isOwner(conversationId, member.id, token)) {
+      return notOwnerResponse();
+    }
+    return withCookie(
+      await streamAIQuestion(videoId, subdomain, question, conversationId ?? undefined, undefined, ownerFor)
     );
   } catch (error) {
     // Surface the real reason. An opaque 500 here is what the chat UI can only

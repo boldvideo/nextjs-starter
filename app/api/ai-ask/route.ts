@@ -1,6 +1,7 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
+import { getMember, isOwner, memberCookie, notOwnerResponse, ownerToken } from "@/lib/gym-ownership";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ interface AskRequestBody {
   prompt: string;
   conversationId?: string;
   collectionId?: string;
+  ownerToken?: string;
 }
 
 interface StreamState {
@@ -143,7 +145,8 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
 
 function asyncIterableToStream(
   iterable: AsyncIterable<AIEvent>,
-  conversationId?: string
+  conversationId?: string,
+  ownerFor?: (conversationId: string) => string
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   const state: StreamState = {
@@ -155,12 +158,31 @@ function asyncIterableToStream(
   return new ReadableStream({
     start(controller) {
       (async () => {
+        // The asker (and only the asker) gets the token that lets them
+        // continue this conversation; see lib/gym-ownership.ts.
+        let ownerSent = false;
+        const sendOwner = () => {
+          if (ownerSent || !ownerFor || !state.conversationId) return;
+          ownerSent = true;
+          const owner = JSON.stringify({
+            type: "owner",
+            conversationId: state.conversationId,
+            token: ownerFor(state.conversationId),
+          });
+          controller.enqueue(encoder.encode(`data: ${owner}\n\n`));
+        };
         for await (const event of iterable) {
           const sseData = formatSSE(event, state);
           if (sseData) {
             controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
           }
+          if (event.type === "message_start") sendOwner();
+          if (event.type === "message_complete" && event.conversationId) {
+            state.conversationId = state.conversationId || event.conversationId;
+            sendOwner();
+          }
         }
+        sendOwner();
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         controller.close();
       })().catch((error) => {
@@ -193,6 +215,7 @@ export async function POST(request: Request) {
   let prompt: string | undefined;
   let conversationId: string | undefined;
   let collectionId: string | undefined;
+  let ownerTokenValue: string | undefined;
   let images: File[] = [];
 
   if (contentType.startsWith("multipart/form-data")) {
@@ -202,6 +225,8 @@ export async function POST(request: Request) {
       prompt = typeof promptValue === "string" ? promptValue : undefined;
       const cid = form.get("conversationId");
       conversationId = typeof cid === "string" ? cid : undefined;
+      const tok = form.get("ownerToken");
+      ownerTokenValue = typeof tok === "string" ? tok : undefined;
       const colId = form.get("collectionId");
       collectionId = typeof colId === "string" ? colId : undefined;
       images = form.getAll("image").filter((v): v is File => v instanceof File);
@@ -224,6 +249,7 @@ export async function POST(request: Request) {
     prompt = body.prompt;
     conversationId = body.conversationId;
     collectionId = body.collectionId;
+    ownerTokenValue = body.ownerToken;
   }
 
   if (!prompt || typeof prompt !== "string") {
@@ -231,6 +257,12 @@ export async function POST(request: Request) {
       JSON.stringify({ type: "error", code: "MISSING_PROMPT", message: "Prompt is required" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
+  }
+
+  // Follow-ups are for the asker only. A shared link is read-only.
+  const member = await getMember();
+  if (conversationId && !isOwner(conversationId, member.id, ownerTokenValue)) {
+    return notOwnerResponse();
   }
 
   try {
@@ -246,17 +278,19 @@ export async function POST(request: Request) {
 
     const responseStream = asyncIterableToStream(
       stream as AsyncIterable<AIEvent>,
-      conversationId
+      conversationId,
+      (cid) => ownerToken(cid, member.id)
     );
 
-    return new Response(responseStream, {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache, no-transform",
-        Connection: "keep-alive",
-        "X-Accel-Buffering": "no",
-      },
+    const headers = new Headers({
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
     });
+    const cookie = memberCookie(member);
+    if (cookie) headers.append("Set-Cookie", cookie);
+    return new Response(responseStream, { headers });
   } catch (error) {
     return new Response(
       JSON.stringify({

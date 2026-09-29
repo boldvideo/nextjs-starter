@@ -16,6 +16,10 @@ interface UseAIStreamOptions {
   };
 }
 
+// Owner tokens for video conversations started on this page (see
+// lib/gym-ownership.ts); the server only continues a conversation for its asker.
+const ownerTokens = new Map<string, string>();
+
 /**
  * Internal hook for handling streaming AI responses
  * @internal
@@ -54,12 +58,14 @@ export function useAIStream({
               value: actionData.value,
               label: actionData.label,
               ...(conversationId && { conversation_id: conversationId }),
+              ...(conversationId && ownerTokens.has(conversationId) && { owner_token: ownerTokens.get(conversationId) }),
             }
           : {
               question,
               videoId,
               subdomain,
               ...(conversationId && { conversationId }),
+              ...(conversationId && ownerTokens.has(conversationId) && { ownerToken: ownerTokens.get(conversationId) }),
             };
 
         const response = await fetch(endpoint, {
@@ -159,6 +165,7 @@ export function useAIStream({
                   case "done":
                     // Capture conversation_id from backend response
                     if (data.conversation_id) {
+                      if (data.owner_token) ownerTokens.set(data.conversation_id, data.owner_token);
                       setConversationId(data.conversation_id);
                     }
 

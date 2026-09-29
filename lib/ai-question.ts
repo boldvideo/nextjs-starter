@@ -79,16 +79,19 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
  * Terminal event. The client keys off `done` to persist the conversation id,
  * which is what makes the *next* message a follow-up rather than a new chat.
  */
-function formatDone(state: StreamState): string {
+function formatDone(state: StreamState, ownerFor?: (conversationId: string) => string): string {
   return JSON.stringify({
     type: "done",
     conversation_id: state.conversationId ?? null,
+    // Proof the asker presents to continue this conversation (lib/gym-ownership)
+    owner_token: state.conversationId && ownerFor ? ownerFor(state.conversationId) : null,
     citations: toCitations(state.sources),
   });
 }
 
 function asyncIterableToStream(
-  iterable: AsyncIterable<AIEvent>
+  iterable: AsyncIterable<AIEvent>,
+  ownerFor?: (conversationId: string) => string
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   const state: StreamState = {
@@ -104,7 +107,7 @@ function asyncIterableToStream(
         const { done, value } = await iterator.next();
 
         if (done) {
-          controller.enqueue(encoder.encode(`data: ${formatDone(state)}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${formatDone(state, ownerFor)}\n\n`));
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
           return;
@@ -142,7 +145,8 @@ export async function streamAIQuestion(
   _tenant: string,
   question: string,
   conversationId?: string,
-  actionData?: ActionData
+  actionData?: ActionData,
+  ownerFor?: (conversationId: string) => string
 ) {
   const context = await getTenantContext();
   if (!context) {
@@ -162,7 +166,7 @@ export async function streamAIQuestion(
     ...(conversationId ? { conversationId } : {}),
   })) as AsyncIterable<AIEvent>;
 
-  const responseStream = asyncIterableToStream(stream);
+  const responseStream = asyncIterableToStream(stream, ownerFor);
 
   return new Response(responseStream, {
     headers: {
