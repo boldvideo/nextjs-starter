@@ -1,6 +1,4 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAuthEnabled } from "@/config/auth";
+import { NextResponse, type NextRequest } from "next/server";
 import { get } from "@vercel/edge-config";
 import {
   verifyPortalSessionEdge,
@@ -152,7 +150,7 @@ function shouldSkipPortalAuth(pathname: string): boolean {
   return skipPaths.some((path) => pathname.startsWith(path));
 }
 
-export default auth(async (req) => {
+export default async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
 
   if (isHostedMode()) {
@@ -197,10 +195,6 @@ export default auth(async (req) => {
       }
     }
 
-    if (!isAuthEnabled()) {
-      return NextResponse.next({ request: { headers: requestHeaders } });
-    }
-
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
@@ -236,10 +230,7 @@ export default auth(async (req) => {
     }
   }
 
-  if (!isAuthEnabled()) {
-    return;
-  }
-});
+}
 
 export const config = {
   matcher: [

@@ -2,6 +2,7 @@ import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
 import { getMember, isOwner, memberCookie, notOwnerResponse, ownerToken } from "@/lib/gym-ownership";
+import { getMemberViewerId } from "@/lib/gym-viewer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -265,6 +266,10 @@ export async function POST(request: Request) {
     return notOwnerResponse();
   }
 
+  // Signed-in members ask as their Bold viewer: their profile traits
+  // personalize the answer (and memory, when the account has it on).
+  const viewer = await getMemberViewerId();
+
   try {
     const stream = await context.client.ai.ask({
       ...portalClient,
@@ -272,6 +277,7 @@ export async function POST(request: Request) {
       stream: true,
       conversationId,
       collectionId,
+      ...(viewer ? { viewer } : {}),
       // BOLD-1449: pass images per the published SDK shape (cast until SDK types catch up)
       ...(images.length > 0 ? { images } : {}),
     } as Parameters<typeof context.client.ai.ask>[0]);

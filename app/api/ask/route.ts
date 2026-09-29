@@ -1,5 +1,6 @@
 import { streamAIQuestion } from "@/lib/ai-question";
 import { getMember, isOwner, memberCookie, notOwnerResponse, ownerToken } from "@/lib/gym-ownership";
+import { getMemberViewerId } from "@/lib/gym-viewer";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5 minutes for web search support
@@ -107,6 +108,7 @@ export async function POST(request: Request) {
   // Only the asker continues a conversation (lib/gym-ownership)
   const member = await getMember();
   const ownerFor = (cid: string) => ownerToken(cid, member.id);
+  const viewer = await getMemberViewerId();
   const withCookie = (response: Response) => {
     const cookie = memberCookie(member);
     if (cookie) response.headers.append("Set-Cookie", cookie);
@@ -121,7 +123,7 @@ export async function POST(request: Request) {
         return notOwnerResponse();
       }
       return withCookie(
-        await streamAIQuestion(videoId, "", value, conversation_id ?? undefined, { type, label }, ownerFor)
+        await streamAIQuestion(videoId, "", value, conversation_id ?? undefined, { type, label }, ownerFor, viewer)
       );
     }
 
@@ -139,7 +141,7 @@ export async function POST(request: Request) {
       return notOwnerResponse();
     }
     return withCookie(
-      await streamAIQuestion(videoId, subdomain, question, conversationId ?? undefined, undefined, ownerFor)
+      await streamAIQuestion(videoId, subdomain, question, conversationId ?? undefined, undefined, ownerFor, viewer)
     );
   } catch (error) {
     // Surface the real reason. An opaque 500 here is what the chat UI can only

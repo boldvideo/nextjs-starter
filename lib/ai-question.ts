@@ -146,7 +146,8 @@ export async function streamAIQuestion(
   question: string,
   conversationId?: string,
   actionData?: ActionData,
-  ownerFor?: (conversationId: string) => string
+  ownerFor?: (conversationId: string) => string,
+  viewer?: string | null
 ) {
   const context = await getTenantContext();
   if (!context) {
@@ -164,6 +165,8 @@ export async function streamAIQuestion(
     ...(videoId ? { videoId } : {}),
     prompt,
     ...(conversationId ? { conversationId } : {}),
+    // Signed-in member's Bold viewer: personalizes with their profile traits
+    ...(viewer ? { viewer } : {}),
   })) as AsyncIterable<AIEvent>;
 
   const responseStream = asyncIterableToStream(stream, ownerFor);

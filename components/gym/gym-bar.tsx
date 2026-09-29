@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { signInWithGoogle } from "@/lib/auth-client";
+import { useGymMember } from "./use-gym-member";
 
 /**
  * The gym's one piece of chrome: logo lockup left, "open 24/7" OSD and a
@@ -45,7 +47,7 @@ export function GymBar() {
         </Link>
 
         <div className="flex items-center gap-3 md:gap-5">
-          <span className="hidden sm:flex items-center gap-2 font-osd text-[19px] text-muted-foreground">
+          <span className="hidden lg:flex items-center gap-2 font-osd text-[19px] text-muted-foreground">
             <span className="gym-rec inline-block h-2 w-2 rounded-full bg-[var(--gym-pink)] shadow-[0_0_8px_var(--gym-pink)]" />
             OPEN 24/7
           </span>
@@ -64,10 +66,49 @@ export function GymBar() {
               New set
             </Link>
           )}
+          <MemberButton />
         </div>
       </div>
       {/* Sunset hairline */}
       <div className="absolute inset-x-0 bottom-0 h-px gym-sunset-bg opacity-60" />
     </header>
+  );
+}
+
+/** Sign in (Google) when signed out; the member's face → their card when in. */
+function MemberButton() {
+  const { isPending, signedIn, user } = useGymMember();
+  if (isPending) return <span className="h-10 w-10" aria-hidden />;
+
+  if (!signedIn) {
+    return (
+      <button
+        type="button"
+        onClick={() => signInWithGoogle("/member")}
+        className="inline-flex items-center gap-2 h-10 px-3 md:px-4 rounded-xl text-sm font-semibold text-foreground/90 border border-[var(--gym-line)] hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)] transition-colors cursor-pointer"
+      >
+        <span className="hidden sm:inline">Get your card</span>
+        <span className="sm:hidden">Sign in</span>
+      </button>
+    );
+  }
+
+  const first = (user?.name || user?.email || "").split(/[ @]/)[0];
+  return (
+    <Link
+      href="/member"
+      className="group inline-flex items-center gap-2 h-10 pl-1 pr-1 md:pr-3 rounded-full border border-[var(--gym-line)] hover:border-[var(--gym-cyan)] transition-colors"
+      aria-label="Your membership card"
+    >
+      {user?.image ? (
+        // Google avatar: tiny, remote, not worth next/image config
+        <img src={user.image} alt="" referrerPolicy="no-referrer" className="h-8 w-8 rounded-full ring-2 ring-[var(--gym-pink)]" />
+      ) : (
+        <span className="h-8 w-8 rounded-full grid place-items-center gym-sunset-bg font-display text-[13px] text-[#1a0616]">
+          {first.slice(0, 1).toUpperCase()}
+        </span>
+      )}
+      <span className="hidden md:inline text-sm font-semibold text-foreground/90 group-hover:text-[var(--gym-cyan)]">{first}</span>
+    </Link>
   );
 }

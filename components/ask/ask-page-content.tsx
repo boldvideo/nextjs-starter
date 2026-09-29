@@ -22,6 +22,7 @@ import { GymFollowUp } from "@/components/gym/gym-follow-up";
 import { GymLoading } from "@/components/gym/gym-loading";
 import { GymReceiptCard } from "@/components/gym/gym-receipt-card";
 import { GymPlan } from "@/components/gym/gym-plan";
+import { useGymMember } from "@/components/gym/use-gym-member";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
@@ -52,7 +53,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const settings = useSettings();
   const config = getPortalConfig(settings);
   const multimodal = config.ai.multimodal;
-  const aiName = config.ai.name;
   const chatDisclaimer = config.ai.chatDisclaimer;
   
   const [pageState, setPageState] = useState<PageState>(
@@ -421,9 +421,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   const hasMessages = messages.length > 0;
 
-  // "Ask" prefix is rendered separately in the thread head — strip it from
-  // the configured name (e.g. "Ask Anton" → "Anton").
-  const personaDisplayName = aiName.replace(/^ask\s+/i, "");
 
   // The sources rail always reflects the latest answer.
   const lastPair = qaPairs[qaPairs.length - 1];
@@ -481,23 +478,9 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
             {/* Thread head */}
             <div className="flex items-center justify-between mb-10">
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/gym/coach.webp"
-                  alt=""
-                  width={44}
-                  height={44}
-                  className="h-11 w-11 drop-shadow-[0_0_12px_rgba(255,46,166,0.5)]"
-                />
-                <div className="flex flex-col leading-none">
-                  <span className="font-display text-base uppercase text-foreground">
-                    {personaDisplayName.replace(/^the gtm gym\s*/i, "") || "Coach"}
-                  </span>
-                  <span className="mt-1 font-osd text-[17px] text-muted-foreground">
-                    SET 01 · {qaPairs.length} {qaPairs.length === 1 ? "REP" : "REPS"}
-                  </span>
-                </div>
-              </div>
+              {/* Whose set this is. The coaches themselves are named on each
+                  answer ("Coach Drew's take"), since they change per rep. */}
+              <SetHead reps={qaPairs.length} isOwner={canContinue} />
               <div className="flex items-center gap-4">
                 {isStreaming && (
                   <span className="flex items-center gap-1.5 font-osd text-[19px] text-[var(--gym-pink)]">
@@ -694,6 +677,31 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           onClose={handleClosePanel}
         />
       )}
+    </div>
+  );
+}
+
+/** "Your set · 2 reps", or "Marcel's set · coached for Acme" when signed in. */
+function SetHead({ reps, isOwner }: { reps: number; isOwner: boolean }) {
+  const { user, member } = useGymMember();
+  const first = (user?.name || "").split(" ")[0];
+  const company = member?.profile?.business_name;
+  const whose = !isOwner ? "Someone's set" : first ? `${first}'s set` : "Your set";
+
+  return (
+    <div className="flex items-center gap-3">
+      {isOwner && user?.image ? (
+        <img src={user.image} alt="" referrerPolicy="no-referrer" className="h-10 w-10 rounded-full ring-2 ring-[var(--gym-pink)]" />
+      ) : (
+        <Image src="/gym/logo.webp" alt="" width={40} height={40} className="h-10 w-10" />
+      )}
+      <div className="flex flex-col leading-none">
+        <span className="font-display text-base uppercase text-foreground">{whose}</span>
+        <span className="mt-1 font-osd text-[17px] text-muted-foreground">
+          {reps} {reps === 1 ? "REP" : "REPS"}
+          {isOwner && company ? ` · COACHED FOR ${company.toUpperCase()}` : ""}
+        </span>
+      </div>
     </div>
   );
 }

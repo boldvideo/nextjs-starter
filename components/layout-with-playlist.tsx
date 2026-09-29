@@ -5,13 +5,11 @@ import { GymBar } from "@/components/gym/gym-bar";
 import { SearchCommandDialog } from "@/components/search-command-dialog";
 import { PlaylistProvider } from "@/components/providers/playlist-provider";
 import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
-import type { Session } from "next-auth";
 import type { Settings } from "@boldvideo/bold-js";
 
 interface LayoutWithPlaylistProps {
   children: ReactNode;
   settings: Settings | null;
-  session: Session | null;
   showHeader?: boolean;
 }
 
@@ -26,11 +24,11 @@ function LayoutContent({ children }: LayoutWithPlaylistProps) {
   );
 }
 
-export function LayoutWithPlaylist({ children, settings, session, showHeader = true }: LayoutWithPlaylistProps) {
+export function LayoutWithPlaylist({ children, settings, showHeader = true }: LayoutWithPlaylistProps) {
   return (
     <PlaylistProvider>
       <BreadcrumbProvider>
-        <LayoutContent settings={settings} session={session} showHeader={showHeader}>
+        <LayoutContent settings={settings} showHeader={showHeader}>
           {children}
         </LayoutContent>
       </BreadcrumbProvider>

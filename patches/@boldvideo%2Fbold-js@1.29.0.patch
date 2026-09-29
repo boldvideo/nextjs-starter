@@ -1,0 +1,56 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 197eaeb13a15b6845ca03c781e8c5b58dd96e820..6cbc9762238828114da3d8887c077c518f8fec77 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -1252,6 +1252,8 @@ function createAI(config) {
+     if (options.requestId !== void 0) body.request_id = options.requestId;
+     if (options.collectionId) body.collection_id = options.collectionId;
+     if (options.tags) body.tags = options.tags;
++    if (options.viewer) body.viewer = options.viewer;
++    if (options.viewerProfile) body.viewer_profile = options.viewerProfile;
+     if (isVideoScoped && options.currentTime !== void 0) {
+       body.current_time = options.currentTime;
+     }
+diff --git a/dist/index.d.cts b/dist/index.d.cts
+index 67f6952e78abafc2a97fe6a4ecc33f1007155cae..d3534902d28b5864adc6f85921e252c7298068b8 100644
+--- a/dist/index.d.cts
++++ b/dist/index.d.cts
+@@ -348,6 +348,10 @@ interface ChatOptions {
+      * `settings.account.multimodal`.
+      */
+     images?: ImageInput[];
++    /** Viewer UUID or customer external id; with the viewers feature, their traits personalize the answer. */
++    viewer?: string;
++    /** Inline viewer profile (free text or key-value traits), merged over the synced viewer's traits. */
++    viewerProfile?: string | Record<string, string | number | boolean>;
+ }
+ /**
+  * @deprecated Use ChatOptions instead
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 67f6952e78abafc2a97fe6a4ecc33f1007155cae..d3534902d28b5864adc6f85921e252c7298068b8 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -348,6 +348,10 @@ interface ChatOptions {
+      * `settings.account.multimodal`.
+      */
+     images?: ImageInput[];
++    /** Viewer UUID or customer external id; with the viewers feature, their traits personalize the answer. */
++    viewer?: string;
++    /** Inline viewer profile (free text or key-value traits), merged over the synced viewer's traits. */
++    viewerProfile?: string | Record<string, string | number | boolean>;
+ }
+ /**
+  * @deprecated Use ChatOptions instead
+diff --git a/dist/index.js b/dist/index.js
+index 2d6305e5f44e33d5caa632151074959e57700c0a..b84ba1af60b6101c64bbb42dea66249cdf1e8987 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1202,6 +1202,8 @@ function createAI(config) {
+     if (options.requestId !== void 0) body.request_id = options.requestId;
+     if (options.collectionId) body.collection_id = options.collectionId;
+     if (options.tags) body.tags = options.tags;
++    if (options.viewer) body.viewer = options.viewer;
++    if (options.viewerProfile) body.viewer_profile = options.viewerProfile;
+     if (isVideoScoped && options.currentTime !== void 0) {
+       body.current_time = options.currentTime;
+     }

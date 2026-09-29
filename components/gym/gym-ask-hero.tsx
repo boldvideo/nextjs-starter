@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Dices } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GymHorizon } from "./gym-backdrop";
+import { useGymMember } from "./use-gym-member";
 import {
   GYM_PLACEHOLDERS,
   GYM_RANDOM_REPS,
@@ -87,6 +88,12 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
   const [lifting, setLifting] = useState(false);
   const [nudge, setNudge] = useState(0);
   const placeholder = useTypewriter(GYM_PLACEHOLDERS, query.length === 0);
+  const { user, member } = useGymMember();
+  const first = (user?.name || "").split(" ")[0];
+  const company = member?.profile?.business_name;
+  const greeting = first
+    ? `Welcome back, ${first}. What are we fixing${company ? ` at ${company}` : ""} today?`
+    : "Talk to me, bro. What do you want to know about going to market?";
 
   const ask = useCallback(
     (question: string) => {
@@ -141,7 +148,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
           />
         </div>
         <div className="relative mb-3 max-w-[340px] md:max-w-none rounded-2xl rounded-bl-md bg-[var(--gym-chalk)] text-[#1a0a2e] px-4 py-2.5 text-left text-[15px] md:text-base font-semibold leading-snug shadow-[4px_4px_0_var(--gym-pink)]">
-          Talk to me, bro. What do you want to know about going to market?
+          {greeting}
         </div>
       </div>
 

@@ -5,16 +5,12 @@ import "./globals.css";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { isHostedMode } from "@/lib/tenant";
 import { LayoutWithPlaylist } from "@/components/layout-with-playlist";
-import { SettingsProvider } from "@/components/providers/settings-provider";
 import { AppProviders } from "@/components/providers/app-providers";
 import { BoldProvider } from "@/components/providers/bold-provider";
 import { getPortalConfig } from "@/lib/portal-config";
 import { Analytics } from "@/components/analytics";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { getCssOverrides } from "@/lib/theme-css";
-import { auth } from "@/auth";
-import { isAuthEnabled } from "@/config/auth";
-import SignIn from "@/components/auth/sign-in";
 import { gymFontVariables } from "@/lib/gym-fonts";
 import {
   gymMeta,
@@ -78,9 +74,6 @@ export default async function RootLayout({
 
   const { settings, tenantToken } = context;
 
-  // Get auth session if auth is enabled
-  const session = isAuthEnabled() ? await auth() : null;
-
   const cssOverrides = getCssOverrides(settings);
 
   // Get portal configuration to determine if we should show header
@@ -97,9 +90,6 @@ export default async function RootLayout({
   // featuredPlaylists carries full video objects (transcripts, subtitles,
   // chapters) — ~290KB nothing client-side in this skin reads.
   const clientSettings = settings ? { ...settings, featuredPlaylists: [] } : null;
-
-  // Check if user should see content
-  const showContent = !isAuthEnabled() || session;
 
   return (
     <html lang="en" suppressHydrationWarning className={gymFontVariables}>
@@ -137,25 +127,16 @@ export default async function RootLayout({
           token={tenantToken}
           baseURL={process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1"}
         >
-          {showContent ? (
-            <AppProviders
-              session={session}
-              settings={clientSettings}
-              themeConfig={{ ...config.theme, forcedTheme: "dark" }}
-            >
-              <LayoutWithPlaylist
-                settings={clientSettings}
-                session={session}
-                showHeader={showHeader}
-              >
-                {children}
-              </LayoutWithPlaylist>
-            </AppProviders>
-          ) : (
-            <SettingsProvider settings={clientSettings}>
-              <SignIn settings={clientSettings ?? undefined} />
-            </SettingsProvider>
-          )}
+          {/* Sign-in is optional (Better Auth, client-side session) so every
+              page stays static; nothing here reads cookies. */}
+          <AppProviders
+            settings={clientSettings}
+            themeConfig={{ ...config.theme, forcedTheme: "dark" }}
+          >
+            <LayoutWithPlaylist settings={clientSettings} showHeader={showHeader}>
+              {children}
+            </LayoutWithPlaylist>
+          </AppProviders>
         </BoldProvider>
         <SpeedInsights />
       </body>
