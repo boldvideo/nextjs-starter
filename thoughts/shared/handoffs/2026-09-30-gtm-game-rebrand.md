@@ -1,13 +1,27 @@
 ---
 date: 2026-09-30
 branch: gtmgym
-live: https://gym.bold.video
-status: handoff — start here in a fresh session
-next: rebrand "The GTM Gym" → "The GTM Game" (80s arcade), then the backlog below
+live: https://arcade.bold.video (gym.bold.video 308s to it)
+status: rebrand shipped 2026-09-30 (commit beedfe0); the backlog below is next
+next: Google OAuth redirect URI for arcade, paste persona v3, tenant logo upload, approvals
 related: thoughts/shared/plans/2026-09-29-gtm-gym-launch.md (living tracker), BOLD-1994, BOLD-1995
 ---
 
 # Handoff: The GTM Gym → The GTM Game
+
+> **Update 2026-09-30, shipped.** Name "The GTM Game", domain **arcade.bold.video** (Marcel's pick
+> over game.bold.video), gym.bold.video is a project-domain 308 to it (paths + queries kept).
+> What landed is logged at the end of the tracker ("Rebrand log"). Still open:
+> 1. **Google OAuth:** add `https://arcade.bold.video/api/auth/callback/google` to the client's
+>    redirect URIs. `BETTER_AUTH_URL` is already arcade, so sign-in fails until this is added.
+> 2. **Persona v3** ("Game Master") in the tracker: paste into Mission Control (account 110),
+>    plus `ai_name`, greeting, starters.
+> 3. **Tenant logo/favicon:** upload `design/gtm-gym/tenant-logo.png` in Mission Control (the
+>    fork already uses `public/gym/game/*` and the pixel `public/gym/icon.svg`).
+> 4. Approvals: Vanessa (founder note v2), coaches (new portraits in `design/gtm-gym/game/`).
+>
+> Asset paths moved to `public/gym/game/` (logo, master, coaches/*, *-og.png) so the image
+> optimizer and CDN caches miss; the old `public/gym/{logo,coach}.webp` and `coaches/` are gone.
 
 ## TL;DR
 
