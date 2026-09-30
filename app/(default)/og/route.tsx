@@ -323,7 +323,7 @@ export async function GET(request: Request) {
     loadGoogleFont("Space Grotesk", text, 500),
     loadGoogleFont("VT323", text),
     loadImage(`${origin}/gym/game/logo-og.png`),
-    loadImage(`${origin}/gym/game/master-og.png`),
+    loadImage(`${origin}/gym/game/game-master-og.png`),
     loadImage(`${origin}/gym/og-bg.jpg`),
   ]);
 

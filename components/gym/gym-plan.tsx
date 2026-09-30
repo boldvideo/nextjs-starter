@@ -114,7 +114,7 @@ export function GymPlan({
           <span className="flex items-center gap-2.5 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
             <span className="flex -space-x-2">
               {coaches.slice(0, 3).map((c) => (
-                <Image key={c.slug} src={`/gym/game/coaches/${c.slug}.webp`} alt="" width={32} height={32} className="h-8 w-8" />
+                <Image key={c.slug} src={`/gym/game/cast/${c.slug}.webp`} alt="" width={32} height={32} className="h-8 w-8" />
               ))}
             </span>
             <span className="text-sm text-muted-foreground">
@@ -323,7 +323,7 @@ function GymClip({
           {coach && (
             <>
               <span aria-hidden>·</span>
-              <Image src={`/gym/game/coaches/${coach.slug}.webp`} alt="" width={18} height={18} className="h-[18px] w-[18px]" />
+              <Image src={`/gym/game/cast/${coach.slug}.webp`} alt="" width={18} height={18} className="h-[18px] w-[18px]" />
               <span>{coachLabel(coach)}</span>
             </>
           )}
@@ -400,7 +400,7 @@ function GymSet({
       <div className="rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] p-4 md:p-5">
         <div className="flex items-center gap-2.5 mb-2">
           <Image
-            src={coach ? `/gym/game/coaches/${coach.slug}.webp` : "/gym/game/master.webp"}
+            src={coach ? `/gym/game/cast/${coach.slug}.webp` : "/gym/game/game-master.webp"}
             alt=""
             width={32}
             height={32}

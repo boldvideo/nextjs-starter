@@ -62,7 +62,7 @@ export function GymCoaches({ videos }: { videos: Video[] }) {
                   ▶ P1
                 </span>
                 <Image
-                  src={`/gym/game/coaches/${c.slug}.webp`}
+                  src={`/gym/game/cast/${c.slug}.webp`}
                   alt={`${c.name}, ${c.title.toLowerCase()} at The GTM Game`}
                   width={240}
                   height={240}

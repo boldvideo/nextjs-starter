@@ -52,7 +52,7 @@ export function GymSecretCoach() {
     >
       {secret ? (
         <>
-          <Image src="/gym/game/master.webp" alt="The Game Master" width={120} height={120} className="h-20 w-20 md:h-24 md:w-24 shrink-0" />
+          <Image src="/gym/game/game-master.webp" alt="The Game Master" width={120} height={120} className="h-20 w-20 md:h-24 md:w-24 shrink-0" />
           <div className="min-w-0 flex-1">
             <p className="font-osd text-[17px] leading-none text-[var(--gym-yellow)]">SECRET CHARACTER UNLOCKED</p>
             <h3 className="mt-1.5 font-display text-[17px] md:text-[20px] uppercase leading-tight">The Game Master</h3>

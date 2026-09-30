@@ -42,10 +42,12 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
                   <span className="font-osd text-[19px] text-[var(--gym-pink)] px-5 whitespace-nowrap">
                     ▶ NOW PLAYING
                   </span>
+                  {/* Teaser mode: a title starts a level about the session
+                      (answer + cited clips), never the full video */}
                   {tape.map((v) => (
                     <Link
                       key={`${copy}-${v.id}`}
-                      href={`/v/${v.id}`}
+                      href={`/ask?q=${encodeURIComponent(`What's the big idea in "${v.title}"?`)}`}
                       prefetch={false}
                       tabIndex={copy === 1 ? -1 : undefined}
                       className="flex items-center gap-5 px-5 whitespace-nowrap text-sm font-medium text-foreground/75 hover:text-[var(--gym-cyan)] transition-colors"
