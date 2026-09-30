@@ -7,6 +7,8 @@ live: https://gym.bold.video
 
 # The GTM Gym: launch tracker
 
+> **2026-09-30: rebrand to "The GTM Game" (80s arcade) decided.** Start from the handoff: `thoughts/shared/handoffs/2026-09-30-gtm-game-rebrand.md`.
+
 **The play:** FounderWell has the content, Bold has the tech. The GTM Gym is a joint lead
 magnet. Founders get GTM questions answered with receipts from FounderWell sessions, get
 a profile-aware coach (viewers, memory, voice) and shareable plans. FounderWell gets

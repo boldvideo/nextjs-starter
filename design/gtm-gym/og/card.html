@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@500;700&family=VT323&display=block" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: #0b0618; }
+  .card { position: relative; width: 1200px; height: 630px; overflow: hidden;
+    background: linear-gradient(180deg,#0b0618 0%,#140a30 30%,#2a0b4a 60%,#0b0618 100%);
+    font-family: "Space Grotesk", sans-serif; color: #f6f0ff; }
+  .stars { position: absolute; inset: 0 0 40% 0; opacity: .75;
+    background:
+      radial-gradient(1.5px 1.5px at 12% 18%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 28% 8%,#fff,transparent),
+      radial-gradient(2px 2px at 71% 14%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 86% 30%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 44% 26%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 92% 6%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 6% 40%,#fff,transparent),
+      radial-gradient(2px 2px at 58% 4%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 35% 45%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 78% 42%,#fff,transparent); }
+  .sun { position: absolute; left: 50%; width: var(--sun, 520px); aspect-ratio: 1; border-radius: 50%;
+    transform: translate(-50%, -62%); top: var(--horizon, 64%);
+    background: linear-gradient(180deg,#ffe45c 0%,#ffb03a 35%,#ff5a8a 65%,#ff2ea6 100%);
+    -webkit-mask-image: linear-gradient(180deg,#000 0%,#000 46%,transparent 46%,transparent 49%,#000 49%,#000 56%,transparent 56%,transparent 60%,#000 60%,#000 66%,transparent 66%,transparent 71%,#000 71%,#000 76%,transparent 76%,transparent 82%,#000 82%,#000 86%,transparent 86%,transparent 93%,#000 93%);
+    box-shadow: 0 0 120px 30px rgba(255,46,166,.25); }
+  .floor { position: absolute; left: 0; right: 0; top: var(--horizon, 64%); bottom: 0; overflow: hidden;
+    background: linear-gradient(180deg,#1c0838 0%,#0b0618 70%); }
+  .grid { position: absolute; left: -50%; right: -50%; top: 0; height: 200%;
+    transform-origin: 50% 0; transform: perspective(300px) rotateX(62deg);
+    background-image: linear-gradient(to right, rgba(255,46,166,.6) 2px, transparent 2px),
+      linear-gradient(to bottom, rgba(34,230,255,.55) 2px, transparent 2px);
+    background-size: 70px 70px; background-position: 0 30px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 12%); }
+  .horizon { position: absolute; left: 0; right: 0; top: var(--horizon, 64%); height: 2px; background: #ff2ea6;
+    box-shadow: 0 0 28px 5px rgba(255,46,166,.75); }
+  .scan { position: absolute; inset: 0; mix-blend-mode: overlay;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,.05) 0 1px, transparent 1px 3px); }
+  .osd { position: absolute; font-family: VT323, monospace; font-size: 34px; line-height: 1; color: rgba(255,255,255,.9);
+    text-shadow: 0 0 10px rgba(34,230,255,.7); letter-spacing: .04em; }
+  .chrome { font-family: Bungee, sans-serif; text-transform: uppercase; letter-spacing: -.02em; line-height: .9;
+    background: linear-gradient(180deg,#fff 0%,#c9f6ff 30%,#5fdcff 48%,#2a1060 50%,#ff4fc2 53%,#ff8a1f 78%,#ffd23f 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    -webkit-text-stroke: 3px #1a0633;
+    filter: drop-shadow(0 4px 0 #2a0845) drop-shadow(0 8px 0 #14052a) drop-shadow(0 0 30px rgba(255,46,166,.5)); }
+  .brand { position: absolute; top: 34px; left: 44px; display: flex; align-items: center; gap: 14px; }
+  .brand img { width: 64px; height: 64px; }
+  .brand .name { font-family: Bungee; font-size: 26px; line-height: 1;
+    background: linear-gradient(90deg,#ffd23f,#ff8a1f 38%,#ff2ea6); -webkit-background-clip: text; color: transparent; }
+  .brand .by { font-size: 17px; color: #a99bcc; margin-top: 6px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+  .sticker { display: inline-flex; align-items: center; gap: 10px; transform: rotate(-2deg);
+    background: #f6f0ff; padding: 9px 16px 9px 13px; border-radius: 9px;
+    box-shadow: 4px 4px 0 #22e6ff, 0 0 40px -4px rgba(34,230,255,.6); }
+  .sticker .b { font-family: VT323; font-size: 26px; color: #5b4a7a; line-height: 1; }
+  .sticker .fw { font-family: Bungee; font-size: 24px; color: #0F4267; line-height: 1; }
+  .bar { display: flex; align-items: center; gap: 12px; width: 760px; padding: 3px; border-radius: 20px;
+    background: linear-gradient(90deg,#22e6ff,#7b2cff 45%,#ff2ea6);
+    box-shadow: 0 12px 44px -10px rgba(255,46,166,.6), 0 0 60px -20px rgba(34,230,255,.7); }
+  .bar .in { flex: 1; display: flex; align-items: center; justify-content: space-between; background: #120a26; border-radius: 17px; padding: 10px 10px 10px 26px; }
+  .bar .ph { font-size: 25px; color: #a99bcc; }
+  .btn { font-family: Bungee; font-size: 22px; color: #1a0616; padding: 15px 22px; border-radius: 13px;
+    background: linear-gradient(90deg,#ffd23f,#ff8a1f 38%,#ff2ea6);
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.45); }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="stars"></div>
+  <div class="sun"></div>
+  <div class="floor"><div class="grid"></div></div>
+  <div class="horizon"></div>
+
+  <!-- HOME-ONLY -->
+  <div id="home">
+    <div class="brand">
+      <img src="/public/gym/logo.webp" alt="">
+      <div>
+        <div class="name">THE GTM GYM</div>
+        <div class="by">by <img src="/public/gym/founderwell-mark-teal.svg" style="width:15px;height:15px"> <span style="color:#f6f0ff">FounderWell</span></div>
+      </div>
+    </div>
+    <div class="osd" style="top:40px; right:44px; text-align:right">PLAY ▶<br><span style="font-size:26px;color:rgba(255,255,255,.55)">SP · CH 03</span></div>
+
+    <div style="position:absolute; left:0; right:0; top:142px; display:flex; justify-content:center;">
+      <div class="chrome" style="font-size:112px; text-align:center">What's the<br>move?</div>
+    </div>
+    <div style="position:absolute; left:0; right:0; top:372px; display:flex; justify-content:center;">
+      <div class="sticker"><span class="b">by</span><img src="/public/gym/founderwell-mark-teal.svg" style="width:24px;height:24px"><span class="fw">FOUNDERWELL</span></div>
+    </div>
+    <div style="position:absolute; left:0; right:0; top:470px; display:flex; justify-content:center;">
+      <div class="bar"><div class="in"><span class="ph">my cold emails get zero replies…</span><span class="btn">COACH ME →</span></div></div>
+    </div>
+    <div class="osd" style="bottom:22px; left:0; right:0; text-align:center; font-size:26px; color:rgba(255,255,255,.7)">ASK THE COACH · SEE THE PROOF · GYM.BOLD.VIDEO</div>
+  </div>
+</div>
+<script>
+  const p = new URLSearchParams(location.search);
+  if (p.get('bg')) {
+    document.getElementById('home').remove();
+    document.documentElement.style.setProperty('--horizon', p.get('horizon') || '74%');
+    document.documentElement.style.setProperty('--sun', (p.get('sun') || '420') + 'px');
+    const sun = document.querySelector('.sun');
+    sun.style.left = p.get('sunx') || '78%';
+    const shade = document.createElement('div');
+    shade.style.cssText = 'position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,6,24,.92) 0%,rgba(11,6,24,.7) 38%,rgba(11,6,24,0) 58%)';
+    document.getElementById('card').insertBefore(shade, document.querySelector('.scan'));
+  }
+</script>
+<div class="scan" style="position:fixed"></div>
+</body>
+</html>
