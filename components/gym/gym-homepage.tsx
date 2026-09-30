@@ -69,7 +69,12 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
             {disclaimer ||
               "A demo program. Training videos licensed from FounderWell."}
           </p>
-          <PoweredByBold variant="pitch" />
+          <div className="flex items-center gap-4">
+            <a href="#note" className="font-semibold text-foreground/80 hover:text-[var(--gym-yellow)] underline-offset-4 hover:underline">
+              A note from FounderWell
+            </a>
+            <PoweredByBold variant="pitch" />
+          </div>
         </footer>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Bungee, Space_Grotesk, VT323 } from "next/font/google";
+import { Bungee, Caveat, Space_Grotesk, VT323 } from "next/font/google";
 
 // GTM Gym fork: only the three faces the skin uses, preloaded. The shared
 // lib/fonts.ts registry declares ~20 tenant-selectable families and none of
@@ -24,6 +24,15 @@ const vt323 = VT323({
   display: "swap",
 });
 
-export const gymFontVariables = [spaceGrotesk, bungee, vt323]
+// Handwriting for the founder's note signature; only on demand, no preload
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["600"],
+  variable: "--font-caveat",
+  display: "swap",
+  preload: false,
+});
+
+export const gymFontVariables = [spaceGrotesk, bungee, vt323, caveat]
   .map((f) => f.variable)
   .join(" ");

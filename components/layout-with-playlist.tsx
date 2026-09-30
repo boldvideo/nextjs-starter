@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import { GymBar } from "@/components/gym/gym-bar";
+import { GymFounderNote } from "@/components/gym/gym-founder-note";
 import { SearchCommandDialog } from "@/components/search-command-dialog";
 import { PlaylistProvider } from "@/components/providers/playlist-provider";
 import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
@@ -18,6 +19,7 @@ function LayoutContent({ children }: LayoutWithPlaylistProps) {
   return (
     <>
       <GymBar />
+      <GymFounderNote />
       <SearchCommandDialog />
       <main className="flex-1 relative flex flex-col min-h-0 overflow-hidden pt-[var(--header-height)]">{children}</main>
     </>

@@ -7,6 +7,7 @@ import { ArrowRight, Dices } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GymHorizon } from "./gym-backdrop";
 import { useGymMember } from "./use-gym-member";
+import { GymNoteSticker } from "./gym-founder-note";
 import {
   GYM_PLACEHOLDERS,
   GYM_RANDOM_REPS,
@@ -154,6 +155,8 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
 
       <div className="relative w-full">
         <GymHorizon />
+        {/* "Wait, what?" The gym is loud; FounderWell isn't. Opens Vanessa's note. */}
+        <GymNoteSticker className="absolute z-20 bottom-[2%] right-0 h-[72px] w-[72px] md:bottom-auto md:-top-10 md:right-[2%] md:h-[96px] md:w-[96px] rotate-6" />
         <h1 className="relative font-display gym-chrome uppercase leading-[0.9] text-[clamp(52px,9.5vw,118px)] tracking-[-0.02em] pb-[0.28em]">
           What&apos;s the move?
         </h1>

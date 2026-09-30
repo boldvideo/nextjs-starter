@@ -63,6 +63,7 @@ shareable thing has an epic OG card; SEO-ready; teaser-only access to full sessi
 - [?] Clean public tenant (the current `gtm-gym` tenant has fictional viewers/questions/analytics + disclaimer). Reuse the BOLD-1991 copy script. Keep `gtm-gym` for sales demos
 - [?] FounderWell agreement: public use of the content, lead sharing, CTA destination (founderwell.com/invite-next?), consent copy
 - [?] Coaches approve their likeness, bios and humor (Cameron, Drew, Joel)
+- [?] Vanessa rewrites/approves the founder note (`components/gym/gym-founder-note.tsx`, opened by the "WTF?" hero sticker, footer link, or `#note`). Current text is a draft in her voice; uses her boldvideo.com headshot
 - [ ] Lead routing to FounderWell (export / webhook / Clay)
 - [x] `:viewers` flag on account 110 (already on)
 - [ ] `:viewer_memory` flag on account 110 (Mission Control → Accounts → Memory; Marcel)
