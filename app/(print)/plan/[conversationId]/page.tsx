@@ -11,10 +11,11 @@ import { PrintButton } from "./print-button";
 import { cn } from "@/lib/utils";
 
 /**
- * A conversation, printed like a personal trainer's program sheet: goal,
- * coach's note, drills with blanks for sets × reps and a QR code to the
- * exact clip, this week's workout with a tick box per day, gym rules, and
- * the coach's signature. Read-only and shareable like the thread itself.
+ * A conversation, printed like the strategy guide that came folded in the
+ * cartridge box: a level map, then per level the mission, the game plan,
+ * moves with tally boxes for tries and a QR code to the exact clip, your
+ * next quest with a save point per day, cheat codes, and the coach's
+ * signature. Read-only and shareable like the game itself.
  */
 
 interface StoredSource {
@@ -44,7 +45,7 @@ interface Clip {
   qr: string;
 }
 
-interface Rep {
+interface Level {
   question: string;
   intro: string[];
   introClip: Clip | null;
@@ -53,15 +54,17 @@ interface Rep {
   set: string | null;
 }
 
-const RULES = [
-  ["Light weight, more reps.", "Twenty small experiments beat one big launch."],
-  ["Form before weight.", "Fix the positioning before you scale the spend."],
-  ["Warm-up sets.", "Test the message on 20 prospects before 2,000."],
-  ["Progressive overload.", "Raise the volume a little every week."],
-  ["Don't skip leg day.", "Everyone skips positioning. It shows."],
-  ["No ego lifting.", "Seed stage doesn't need an enterprise playbook."],
-  ["Rest days count.", "Let the data land before you change the campaign."],
-  ["Log your PRs.", "Write down what worked, or you'll never repeat it."],
+// [button combo, the cheat, what it actually means]
+const CHEAT_CODES = [
+  ["↑ ↑ ↓ ↓", "Small levels first.", "Twenty small experiments beat one big launch."],
+  ["← → ← →", "Don't skip the tutorial.", "Fix the positioning before you scale the spend."],
+  ["B A B A", "Clear 1-1 before the boss.", "Test the message on 20 prospects before 2,000."],
+  ["↑ A ↑ A", "Level up slowly.", "Raise the volume a little every week."],
+  ["↓ ↓ B", "Play your own game.", "Seed stage doesn't need an enterprise playbook."],
+  ["START", "Pause is a button.", "Let the data land before you change the campaign."],
+  ["A A A", "Hit the save point.", "Write down what worked, or you'll never repeat it."],
+  ["→ → B", "Extra lives are runway.", "Spend them on tests, not guesses."],
+  ["↑ B ↓ A", "Power-ups are offers.", "A better offer beats a louder message."],
 ];
 
 function formatTime(total: number): string {
@@ -133,7 +136,7 @@ async function loadPlan(conversationId: string) {
     };
   };
 
-  const reps: Rep[] = [];
+  const reps: Level[] = [];
   let pendingQuestion = conversation?.metadata?.originalQuery ?? "";
   for (const m of messages) {
     if (m.role === "user") {
@@ -181,9 +184,9 @@ export async function generateMetadata({
   const plan = await loadPlan(conversationId);
   const question = plan?.reps[0]?.question;
   return gymMeta({
-    title: question ? `Training plan: ${question}` : "Training plan",
-    shareTitle: question ? `Training plan: “${question}”` : "A GTM Gym training plan",
-    description: "A printable GTM training plan from The GTM Gym, with a QR code to the exact minute of FounderWell training behind every drill.",
+    title: question ? `Strategy guide: ${question}` : "Strategy guide",
+    shareTitle: question ? `Strategy guide: “${question}”` : "A GTM Game strategy guide",
+    description: "A printable strategy guide from The GTM Game, with a QR code to the exact minute of FounderWell training behind every move.",
     path: `/plan/${conversationId}`,
     image: question ? `/og?q=${encodeURIComponent(question)}` : undefined,
     type: "article",
@@ -202,7 +205,7 @@ export default async function PlanPage({
   const { reps, lead } = plan;
   const planNo = conversationId.slice(0, 6).toUpperCase();
   const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  const rules = [0, 1, 2].map((i) => RULES[(hash(conversationId) + i * 3) % RULES.length]);
+  const cheats = [0, 1, 2].map((i) => CHEAT_CODES[(hash(conversationId) + i * 3) % CHEAT_CODES.length]);
   const coach = lead ?? null;
 
   return (
@@ -210,7 +213,7 @@ export default async function PlanPage({
       {/* Screen-only controls */}
       <div className="no-print mx-auto max-w-[860px] mb-4 flex items-center justify-between gap-3">
         <Link href={`/ask/${conversationId}`} className="text-sm font-semibold text-[#f6f0ff]/80 hover:text-white">
-          ← Back to the set
+          ← Back to the game
         </Link>
         <PrintButton />
       </div>
@@ -221,29 +224,60 @@ export default async function PlanPage({
         {/* Letterhead */}
         <header className="px-6 md:px-10 pt-6 pb-5 flex items-start justify-between gap-6 border-b-2 border-[var(--ink)]">
           <div className="flex items-center gap-3">
-            <Image src="/gym/logo.webp" alt="" width={64} height={64} className="h-16 w-16" />
+            <Image src="/gym/game/logo.webp" alt="" width={64} height={64} className="h-16 w-16" />
             <div>
-              <p className="font-display text-[22px] leading-none">THE GTM GYM</p>
-              <p className="mt-1 text-[12px] text-[var(--ink-soft)]">by FounderWell · gym.bold.video</p>
+              <p className="font-display text-[22px] leading-none">THE GTM GAME</p>
+              <p className="mt-1 text-[12px] text-[var(--ink-soft)]">by FounderWell · arcade.bold.video</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="font-display text-[26px] md:text-[30px] leading-none text-[var(--pink)]">TRAINING PLAN</p>
+            <p className="font-display text-[26px] md:text-[30px] leading-none text-[var(--pink)]">STRATEGY GUIDE</p>
             <p className="mt-1.5 font-osd text-[18px] leading-none text-[var(--ink-soft)]">
               No. {planNo} · {today.toUpperCase()}
             </p>
           </div>
         </header>
 
-        {/* Athlete / coach */}
+        {/* Level map: start → every level → the quest */}
+        <section className="avoid-break px-6 md:px-10 py-4 border-b border-[var(--rule)]">
+          <p className="font-display text-[11px] tracking-wider text-[var(--ink-soft)]">LEVEL MAP</p>
+          <ol className="mt-3 flex items-start">
+            {[
+              { id: "start", label: "START", sub: "" },
+              ...reps.map((rep, r) => ({ id: `l${r}`, label: `1-${r + 1}`, sub: rep.question })),
+              { id: "boss", label: "QUEST", sub: "Do it this week" },
+            ].map((node, i, all) => (
+              <li key={node.id} className="flex-1 min-w-0 flex flex-col items-center text-center relative">
+                {i < all.length - 1 && (
+                  <span className="absolute top-[13px] left-1/2 w-full border-t-2 border-dashed border-[var(--ink-soft)]" aria-hidden />
+                )}
+                <span
+                  className={cn(
+                    "relative z-10 h-7 min-w-7 px-1.5 grid place-items-center font-display text-[11px] border-[3px] border-[var(--ink)] bg-[var(--paper)]",
+                    node.id === "boss" && "bg-[var(--yellow)]",
+                    node.id === "start" && "bg-[var(--cyan)] text-white"
+                  )}
+                >
+                  {node.id === "boss" ? "★" : node.id === "start" ? "▶" : node.label}
+                </span>
+                <span className="mt-1.5 font-osd text-[14px] leading-none text-[var(--ink-soft)]">{node.label}</span>
+                {node.sub && (
+                  <span className="mt-1 px-1 text-[10.5px] leading-tight text-[var(--ink)]/80 line-clamp-2 max-w-[18ch]">{node.sub}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Player / coach */}
         <section className="px-6 md:px-10 py-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-[var(--rule)]">
           <div>
-            <p className="font-display text-[11px] tracking-wider text-[var(--ink-soft)]">ATHLETE</p>
+            <p className="font-display text-[11px] tracking-wider text-[var(--ink-soft)]">PLAYER 1</p>
             <div className="mt-3 border-b-2 border-dotted border-[var(--ink-soft)] h-7" />
           </div>
           <div className="flex items-center gap-3">
             <Image
-              src={coach ? `/gym/coaches/${coach.slug}.webp` : "/gym/coach.webp"}
+              src={coach ? `/gym/game/coaches/${coach.slug}.webp` : "/gym/game/master.webp"}
               alt=""
               width={56}
               height={56}
@@ -251,29 +285,29 @@ export default async function PlanPage({
             />
             <div>
               <p className="font-display text-[11px] tracking-wider text-[var(--ink-soft)]">YOUR COACH</p>
-              <p className="font-display text-[17px] leading-tight">{coach ? coach.name : "The GTM Gym Coach"}</p>
-              <p className="text-[12px] text-[var(--ink-soft)]">{coach ? `${coach.title} · ${coach.role}` : "On call 24/7"}</p>
+              <p className="font-display text-[17px] leading-tight">{coach ? coach.name : "The Game Master"}</p>
+              <p className="text-[12px] text-[var(--ink-soft)]">{coach ? `${coach.title} · ${coach.role}` : "Always on. Free play."}</p>
             </div>
           </div>
         </section>
 
         {reps.map((rep, r) => (
           <section key={r} className="px-6 md:px-10 pt-6 pb-2">
-            {/* Goal */}
+            {/* Mission */}
             <div className="avoid-break">
               <p className="font-display text-[12px] tracking-wider text-[var(--cyan)]">
-                REP {String(r + 1).padStart(2, "0")} · THE GOAL
+                LEVEL {String(r + 1).padStart(2, "0")} · THE MISSION
               </p>
               <p className="font-hand text-[34px] md:text-[40px] leading-[1.05] mt-1 text-[var(--ink)]">
                 {rep.question || "Get better at go-to-market"}
               </p>
             </div>
 
-            {/* Coach's note */}
+            {/* Game plan */}
             {rep.intro.length > 0 && (
               <div className="avoid-break mt-5 grid grid-cols-[1fr_auto] gap-5 items-start">
                 <div>
-                  <p className="font-display text-[12px] tracking-wider text-[var(--pink)]">COACH&apos;S NOTE</p>
+                  <p className="font-display text-[12px] tracking-wider text-[var(--pink)]">GAME PLAN</p>
                   {rep.intro.map((p, i) => (
                     <p key={i} className={i === 0 ? "mt-1.5 text-[16px] font-semibold leading-snug" : "mt-2 text-[14px] leading-relaxed text-[var(--ink)]/85"}>
                       {p}
@@ -284,14 +318,14 @@ export default async function PlanPage({
               </div>
             )}
 
-            {/* Drills */}
+            {/* Moves */}
             {rep.drills.length > 0 && (
               <div className="mt-6">
                 <div className="grid grid-cols-[44px_1fr_110px_100px_36px] gap-3 pb-1.5 border-b-2 border-[var(--ink)] font-display text-[10.5px] tracking-wider text-[var(--ink-soft)]">
                   <span>#</span>
-                  <span>DRILL</span>
-                  <span className="text-center">SETS × REPS</span>
-                  <span className="text-center">PROOF</span>
+                  <span>MOVE</span>
+                  <span className="text-center">TRIES</span>
+                  <span className="text-center">REPLAY</span>
                   <span className="text-center">✓</span>
                 </div>
                 {rep.drills.map((d, i) => (
@@ -308,9 +342,10 @@ export default async function PlanPage({
                         </p>
                       )}
                     </div>
-                    <div className="flex items-end justify-center gap-1.5 font-hand text-[22px] text-[var(--ink-soft)]">
-                      <span className="inline-block w-8 border-b-2 border-[var(--ink-soft)] h-6" />×
-                      <span className="inline-block w-8 border-b-2 border-[var(--ink-soft)] h-6" />
+                    <div className="flex items-center justify-center gap-1">
+                      {[0, 1, 2, 3, 4].map((t) => (
+                        <span key={t} className="h-[15px] w-[15px] border-2 border-[var(--ink-soft)]" />
+                      ))}
                     </div>
                     <div className="flex justify-center">{d.clip ? <ProofCode clip={d.clip} small /> : <span className="text-[var(--rule)]">—</span>}</div>
                     <div className="flex justify-center">
@@ -325,12 +360,13 @@ export default async function PlanPage({
               <p key={i} className="avoid-break mt-4 text-[14px] leading-relaxed">{n}</p>
             ))}
 
-            {/* This week's workout */}
+            {/* Your next quest */}
             {rep.set && (
               <div className="avoid-break mt-6 mb-4 rounded-xl border-[3px] border-[var(--ink)] p-4 md:p-5 relative">
-                <p className="font-display text-[13px] tracking-wider text-[var(--pink)]">THIS WEEK&apos;S WORKOUT</p>
+                <p className="font-display text-[13px] tracking-wider text-[var(--pink)]">YOUR NEXT QUEST</p>
                 <p className="mt-1.5 text-[15.5px] font-semibold leading-snug">{rep.set}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                <p className="mt-4 font-display text-[10px] tracking-wider text-[var(--ink-soft)]">SAVE POINTS</p>
+                <div className="mt-1.5 flex flex-wrap gap-2">
                   {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
                     <span key={i} className="flex flex-col items-center gap-1">
                       <span className="font-display text-[10px] text-[var(--ink-soft)]">{d}</span>
@@ -339,26 +375,27 @@ export default async function PlanPage({
                   ))}
                 </div>
                 <span className="absolute -top-4 right-4 rotate-[-6deg] rounded-md border-[3px] border-[var(--pink)] bg-[var(--paper)] px-2.5 py-1 font-display text-[13px] text-[var(--pink)]">
-                  COACH APPROVED
+                  HIGH SCORE
                 </span>
               </div>
             )}
           </section>
         ))}
 
-        {/* House rules + signature */}
+        {/* Cheat codes + signature */}
         <footer className="avoid-break px-6 md:px-10 pt-4 pb-7 mt-2 border-t-2 border-[var(--ink)] grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6">
           <div>
-            <p className="font-display text-[12px] tracking-wider text-[var(--orange)]">HOUSE RULES</p>
+            <p className="font-display text-[12px] tracking-wider text-[var(--orange)]">CHEAT CODES</p>
             <ul className="mt-2 space-y-1.5">
-              {rules.map(([rule, why]) => (
-                <li key={rule} className="text-[13.5px] leading-snug">
-                  <span className="font-bold">{rule}</span> <span className="text-[var(--ink-soft)]">{why}</span>
+              {cheats.map(([combo, cheat, why]) => (
+                <li key={cheat} className="text-[13.5px] leading-snug">
+                  <span className="inline-block min-w-[76px] font-osd text-[16px] text-[var(--pink)]">{combo}</span>
+                  <span className="font-bold">{cheat}</span> <span className="text-[var(--ink-soft)]">{why}</span>
                 </li>
               ))}
             </ul>
             <p className="mt-4 font-osd text-[16px] leading-tight text-[var(--ink-soft)]">
-              SCAN ANY CODE TO WATCH THE PROOF · MORE REPS AT GYM.BOLD.VIDEO
+              SCAN ANY CODE FOR AN INSTANT REPLAY · MORE LEVELS AT ARCADE.BOLD.VIDEO
             </p>
           </div>
           <div className="md:text-right md:self-end">

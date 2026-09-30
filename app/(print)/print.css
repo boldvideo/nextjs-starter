@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* The printable training plan: paper, ink, and just enough neon to feel like
-   the gym. Deeper pink/cyan than the site so they survive a laser printer. */
+/* The printable strategy guide: paper, ink, and just enough neon to feel like
+   the arcade. Deeper pink/cyan than the site so they survive a laser printer. */
 :root {
   --paper: #fdfbf6;
   --ink: #17121f;

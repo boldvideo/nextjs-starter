@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { GymBar } from "@/components/gym/gym-bar";
 import { GymFounderNote } from "@/components/gym/gym-founder-note";
+import { GymArcade } from "@/components/gym/gym-arcade";
 import { SearchCommandDialog } from "@/components/search-command-dialog";
 import { PlaylistProvider } from "@/components/providers/playlist-provider";
 import { BreadcrumbProvider } from "@/components/providers/breadcrumb-provider";
@@ -14,12 +15,14 @@ interface LayoutWithPlaylistProps {
   showHeader?: boolean;
 }
 
-// Fork: the gym bar replaces the tenant header on every page.
+// Fork: the game bar replaces the tenant header on every page; the arcade
+// layer (Konami code, achievements, sound) rides along everywhere.
 function LayoutContent({ children }: LayoutWithPlaylistProps) {
   return (
     <>
       <GymBar />
       <GymFounderNote />
+      <GymArcade />
       <SearchCommandDialog />
       <main className="flex-1 relative flex flex-col min-h-0 overflow-hidden pt-[var(--header-height)]">{children}</main>
     </>

@@ -24,6 +24,11 @@ const nextConfig = {
     ],
   },
 
+  // The GTM Game: membership cards became player cards
+  async redirects() {
+    return [{ source: "/member", destination: "/player", permanent: true }];
+  },
+
   // Next.js 16: Enable React Compiler for automatic memoization
   reactCompiler: true,
 

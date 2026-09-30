@@ -1,14 +1,14 @@
 /**
- * The gym's program: each workout is a GTM muscle group with the one
- * question that trains it. Questions are phrased the way a founder would
- * blurt them out, and each is answerable from the FounderWell tape.
+ * World 1: the four starter levels, each a GTM skill with the one question
+ * that plays it. Questions are phrased the way a founder would blurt them
+ * out, and each is answerable from the FounderWell sessions.
  */
 export interface GymWorkout {
-  /** Gym framing, shown big */
+  /** Level number, shown big ("World 1-1") */
   label: string;
   /** GTM topic, shown as the category */
   topic: string;
-  /** One-line trash talk */
+  /** One-line level intro */
   bark: string;
   question: string;
   tone: "pink" | "cyan" | "orange" | "yellow";
@@ -16,36 +16,36 @@ export interface GymWorkout {
 
 export const GYM_WORKOUTS: GymWorkout[] = [
   {
-    label: "Leg day",
+    label: "World 1-1",
     topic: "Positioning",
-    bark: "Nobody wants to do it. Everybody needs it.",
+    bark: "The tutorial everyone skips. Don't.",
     question: "How do I know if my positioning is too vague?",
     tone: "pink",
   },
   {
-    label: "Cardio",
+    label: "World 1-2",
     topic: "Outbound",
-    bark: "Volume without becoming spam.",
+    bark: "More sends, without becoming spam.",
     question: "What should my first cold email actually say?",
     tone: "cyan",
   },
   {
-    label: "Heavy lift",
+    label: "World 1-3",
     topic: "Demos",
-    bark: "Stop feature-dumping on people.",
+    bark: "Show the one thing they need.",
     question: "How do I stop feature-dumping in sales demos?",
     tone: "orange",
   },
   {
-    label: "Sparring",
+    label: "World 1-4",
     topic: "Objections",
-    bark: "They said “send me some info.”",
+    bark: "Boss fight: “send me some info.”",
     question: "A prospect says 'send me some info.' What do I do?",
     tone: "yellow",
   },
 ];
 
-/** The dice roll: everything the gym can spot you on. */
+/** Random level: everything the game master can play with you. */
 export const GYM_RANDOM_REPS: string[] = [
   "Who is my ideal customer, really?",
   "Am I charging too little?",

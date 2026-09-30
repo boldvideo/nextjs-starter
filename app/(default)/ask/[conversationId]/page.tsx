@@ -9,7 +9,7 @@ interface HistoryMessage {
 }
 
 /**
- * A shared answer unfurls as the question on a REP card, with the start of
+ * A shared answer unfurls as the question on a LEVEL card, with the start of
  * the coach's answer as the description.
  */
 export async function generateMetadata({
@@ -39,11 +39,11 @@ export async function generateMetadata({
     const answer = messages.find((m) => m.role === "assistant")?.content;
     return gymMeta({
       title: question,
-      shareTitle: `“${question}” — The GTM Gym`,
-      description: answerTeaser(answer) || "The coach's take, with proof: the exact minutes of FounderWell training that back it up.",
+      shareTitle: `“${question}” — The GTM Game`,
+      description: answerTeaser(answer) || "The coach's take and your next quest, with proof: the exact minutes of FounderWell training that back it up.",
       path,
       image: `/og?q=${encodeURIComponent(question)}`,
-      imageAlt: `The GTM Gym: “${question}”`,
+      imageAlt: `The GTM Game: “${question}”`,
       type: "article",
     });
   } catch {

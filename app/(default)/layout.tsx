@@ -18,37 +18,28 @@ import {
   GYM_DEFAULT_TITLE,
   GYM_SITE_NAME,
 } from "@/lib/gym-meta";
-import { fixUploadUrl } from "@/lib/utils";
 
 // Fork override: this build is single-tenant standalone (no hostname
 // resolution), so pages render static with ISR instead of per-request.
 export const revalidate = 60;
 
 export const viewport = {
-  // Matches the night-purple gym floor
+  // Matches the night-purple arcade floor
   themeColor: "#0b0618",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const context = await getTenantContext();
-  const settings = context?.settings;
-
   // Share metadata is fork-owned (lib/gym-meta.ts). The tenant's description
   // is written for the fictional-demo disclosure, and its default card is
-  // replaced by the gym's static homepage card.
+  // replaced by the game's static homepage card.
   return {
     // No headers() here — it would force every page dynamic and kill ISR.
     metadataBase: new URL(GYM_BASE_URL),
     title: { default: GYM_DEFAULT_TITLE, template: `%s · ${GYM_SITE_NAME}` },
     applicationName: GYM_SITE_NAME,
     ...gymMeta(),
-    // Explicit favicon wins; otherwise /favicon derives one from the header
-    // logo (normalized to square PNG); static Bold icon as last resort.
-    icons: fixUploadUrl(settings?.faviconUrl)
-      ? { icon: fixUploadUrl(settings?.faviconUrl) }
-      : settings?.logoUrl
-        ? { icon: "/favicon", apple: "/favicon?size=180" }
-        : { icon: "/favicon.ico" },
+    // Fork: the pixel joystick (our own art) beats any tenant favicon.
+    icons: { icon: "/gym/icon.svg", apple: "/gym/apple-icon.png" },
   };
 }
 
@@ -109,7 +100,7 @@ export default async function RootLayout({
         />
         {/* Tenant theme tokens and header sizing are deliberately NOT
             injected in this fork — globals.css is the design source of
-            truth (the gym theme, incl. the bar baked into --header-height). */}
+            truth (the game theme, incl. the bar baked into --header-height). */}
         {cssOverrides && (
           <style
             dangerouslySetInnerHTML={{

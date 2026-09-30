@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
 
 /**
- * GTM Gym share metadata. Next merges metadata shallowly per key, so a page
+ * The GTM Game share metadata. Next merges metadata shallowly per key, so a page
  * that sets `openGraph` replaces the layout's whole object — every page goes
  * through this to always emit the full OG + Twitter set (site name, type,
  * url, sized image with alt, large-image card).
  */
 
-export const GYM_SITE_NAME = "The GTM Gym";
-export const GYM_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gym.bold.video";
-export const GYM_DEFAULT_TITLE = "The GTM Gym — by FounderWell";
+export const GYM_SITE_NAME = "The GTM Game";
+export const GYM_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://arcade.bold.video";
+export const GYM_DEFAULT_TITLE = "The GTM Game — by FounderWell";
 export const GYM_DEFAULT_DESCRIPTION =
-  "What's the move? Ask the GTM Gym coach anything about going to market — positioning, outbound, demos, pricing — and get a training plan with proof: the exact minute of FounderWell training that backs it up.";
+  "What's your next move? Ask the game master anything about going to market — positioning, outbound, demos, pricing — and get a game plan with proof: the exact minute of FounderWell training that backs it up.";
 // Bump ?v= when the card changes; crawlers cache by URL
-export const GYM_HOME_IMAGE = "/gym/og-home.jpg?v=2";
+export const GYM_HOME_IMAGE = "/gym/og-home.jpg?v=3";
 
 interface GymMetaInput {
-  /** Page title (the layout template appends " · The GTM Gym") */
+  /** Page title (the layout template appends " · The GTM Game") */
   title?: string;
   /** Title for share cards — defaults to title */
   shareTitle?: string;
@@ -34,7 +34,7 @@ export function gymMeta({
   description = GYM_DEFAULT_DESCRIPTION,
   path,
   image = GYM_HOME_IMAGE,
-  imageAlt = "The GTM Gym — What's the move? Ask the coach, see the proof.",
+  imageAlt = "The GTM Game — What's your next move? Press start, see the proof.",
   type = "website",
 }: GymMetaInput = {}): Metadata {
   const ogTitle = shareTitle || title || GYM_DEFAULT_TITLE;
@@ -75,7 +75,7 @@ export function answerTeaser(content: string | undefined, max = 180): string | u
   return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
 }
 
-/** Session pages: the "ON TAPE" card, optionally at the shared timestamp. */
+/** Session pages: the "INSTANT REPLAY" card, optionally at the shared timestamp. */
 export function gymVideoMeta(
   video: { id: string; title: string; slug?: string | null; teaser?: string | null; description?: string | null },
   canonicalPath: string,
@@ -84,13 +84,13 @@ export function gymVideoMeta(
   const t = startSeconds && startSeconds > 0 ? Math.floor(startSeconds) : 0;
   return gymMeta({
     title: video.title,
-    shareTitle: `${video.title} — The GTM Gym`,
+    shareTitle: `${video.title} — The GTM Game`,
     description:
       answerTeaser(video.teaser || video.description || undefined, 200) ||
-      "A FounderWell training session on tape at The GTM Gym.",
+      "A FounderWell training session in The GTM Game.",
     path: canonicalPath,
     image: `/og?v=${encodeURIComponent(video.id)}${t ? `&t=${t}` : ""}`,
-    imageAlt: `The GTM Gym: ${video.title}`,
+    imageAlt: `The GTM Game: ${video.title}`,
     type: "video.other",
   });
 }

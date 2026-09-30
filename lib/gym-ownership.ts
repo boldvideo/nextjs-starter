@@ -57,9 +57,9 @@ export function isOwner(conversationId: string, memberId: string, token: unknown
   return expected.length === given.length && timingSafeEqual(expected, given);
 }
 
-/** The reply a shared-link visitor gets when they try to add a rep. */
+/** The reply a shared-link visitor gets when they try to add a level. */
 export function notOwnerResponse(): Response {
-  const message = "This set belongs to someone else. Ask your own question to start yours.";
+  const message = "This game belongs to someone else. Ask your own question to start yours.";
   return new Response(
     JSON.stringify({ type: "error", code: "NOT_OWNER", message, content: message }),
     { status: 403, headers: { "Content-Type": "application/json; charset=utf-8" } }

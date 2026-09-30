@@ -6,11 +6,10 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * The tonal escape hatch. The gym is loud on purpose; FounderWell is not a
- * hustle-culture brand. A spinning "WTF?" sticker on the hero opens a calm
- * letter from Vanessa in FounderWell's own look (paper, navy, teal), saying
- * what this is (a Bold technology demo on real FounderWell sessions) and
- * what FounderWell actually stands for.
+ * The calm corner of the arcade. A spinning "PSST" sticker on the hero opens
+ * a letter from Vanessa in FounderWell's own look (paper, navy, teal),
+ * saying what this is (a Bold technology demo on real FounderWell sessions),
+ * why it's a game, and what FounderWell actually stands for.
  *
  * Open it from anywhere with `openFounderNote()`, or link to `#note`.
  *
@@ -31,7 +30,7 @@ export function GymNoteSticker({ className }: { className?: string }) {
     <button
       type="button"
       onClick={openFounderNote}
-      aria-label="Wait, what is this? A note from FounderWell"
+      aria-label="Psst. What is this? A note from FounderWell"
       className={cn("group relative h-[96px] w-[96px] cursor-pointer", className)}
     >
       <svg
@@ -47,12 +46,12 @@ export function GymNoteSticker({ className }: { className?: string }) {
           points={Array.from({ length: 24 }, (_, i) => {
             const r = i % 2 === 0 ? 48 : 38;
             const a = (Math.PI * 2 * i) / 24 - Math.PI / 2;
-            return `${50 + r * Math.cos(a)},${50 + r * Math.sin(a)}`;
+            return `${(50 + r * Math.cos(a)).toFixed(2)},${(50 + r * Math.sin(a)).toFixed(2)}`;
           }).join(" ")}
         />
       </svg>
       <span className="relative flex h-full w-full flex-col items-center justify-center -rotate-12 transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6">
-        <span className="font-display text-[18px] md:text-[23px] leading-none text-[#1a0616]">WTF?</span>
+        <span className="font-display text-[18px] md:text-[23px] leading-none text-[#1a0616]">PSST</span>
         <span className="mt-0.5 text-[9px] md:text-[10px] font-bold uppercase tracking-wide text-[#1a0616]/80 leading-none">read me</span>
       </span>
     </button>
@@ -130,16 +129,19 @@ export function GymFounderNote() {
 
           <div className="mt-5 space-y-4 text-[16.5px] leading-[1.75] text-[#33475b]">
             <p>
-              You just walked into a neon gym full of bro talk. Let me explain.
+              You just walked into a neon arcade. Let me explain.
             </p>
             <p>
-              The GTM Gym is a technology demo. Our friends at Bold took real coaching sessions from FounderWell and turned them into a coach you can talk to, one that shows you the exact minute of a real session behind every answer. They dressed it up as a 1987 workout tape because it&apos;s fun, and because going to market really is practice: small reps, done consistently.
+              The GTM Game is a technology demo. Our friends at Bold took real coaching sessions from FounderWell and turned them into a game master you can talk to, one that shows you the exact minute of a real session behind every answer.
             </p>
             <p>
-              What it isn&apos;t is hustle culture. At FounderWell we don&apos;t believe in grinding yourself into the ground, skipping sleep, or measuring your worth by your pipeline. We help founders grow their companies without sacrificing what matters most: their health, their relationships, their people.
+              We made it a game because learning should be fun. And going to market really does work like one: you clear the small levels before the boss fight, you save what worked, and you don&apos;t waste your extra lives.
             </p>
             <p>
-              So take the reps. Skip the ego. Rest when you need to. And when the struggle gets heavy, you don&apos;t have to carry it alone. That&apos;s what we&apos;re here for.
+              At FounderWell we help founders grow their companies without sacrificing what matters most: their health, their relationships, their people. Nobody wins by grinding themselves into the ground. The pause button is part of the game.
+            </p>
+            <p>
+              So play a level. Keep what helps. And when a level gets hard, you don&apos;t have to play it alone. That&apos;s what we&apos;re here for.
             </p>
           </div>
 
@@ -163,10 +165,10 @@ export function GymFounderNote() {
 
           <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between border-t border-[#123644]/10 pt-6">
             <p className="text-[12.5px] leading-snug text-[#8a9dad] max-w-[36ch]">
-              P.S. The coaching videos are real FounderWell sessions. The gym, the neon and the sunglasses are imaginary.
+              P.S. The coaching videos are real FounderWell sessions. The arcade, the neon and the high scores are imaginary.
             </p>
             <a
-              href="https://www.founderwell.com?utm_source=gtm-gym&utm_medium=founder-note"
+              href="https://www.founderwell.com?utm_source=gtm-game&utm_medium=founder-note"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center h-11 px-5 rounded-full bg-[#123644] text-white text-sm font-semibold hover:bg-[#047e90] transition-colors whitespace-nowrap"

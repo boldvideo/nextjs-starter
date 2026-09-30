@@ -12,8 +12,8 @@ interface GymHomepageProps {
 }
 
 /**
- * The whole homepage is the ask. Outrun set in the back, coach up front,
- * the tape rolling along the floor.
+ * The whole homepage is the cabinet screen: HUD on top, the game master up
+ * front, the sessions scrolling along the floor, then coach select.
  */
 export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
   const sessions = videos.length;
@@ -28,9 +28,9 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
       <div className="relative min-h-full flex flex-col overflow-hidden">
         <GymBackdrop />
 
-        <GymOsd sessions={sessions} />
+        <GymOsd />
 
-        <section className="relative z-10 flex-1 flex items-center px-4 pt-14 pb-8 md:pt-12 md:pb-10">
+        <section className="relative z-10 flex-1 flex items-center px-4 pt-16 pb-8 md:pt-20 md:pb-10">
           <GymAskHero sessions={sessions} hours={hours} />
         </section>
 
@@ -40,7 +40,7 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
               {[0, 1].map((copy) => (
                 <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1}>
                   <span className="font-osd text-[19px] text-[var(--gym-pink)] px-5 whitespace-nowrap">
-                    ▶ NOW ON THE FLOOR
+                    ▶ NOW PLAYING
                   </span>
                   {tape.map((v) => (
                     <Link
@@ -67,7 +67,7 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
         <footer className="relative z-10 px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 max-w-[1440px] w-full mx-auto text-xs text-muted-foreground/70">
           <p className="text-center md:text-left">
             {disclaimer ||
-              "A demo program. Training videos licensed from FounderWell."}
+              "A demo game. Training videos licensed from FounderWell."}
           </p>
           <div className="flex items-center gap-4">
             <a href="#note" className="font-semibold text-foreground/80 hover:text-[var(--gym-yellow)] underline-offset-4 hover:underline">

@@ -4,13 +4,13 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 
 /**
- * Optional sign-in for the gym (Google only), fully stateless: no database.
+ * Optional sign-in for the game (Google only), fully stateless: no database.
  * The session is an encrypted cookie (JWE) that refreshes itself; OAuth state
  * and the account live in cookies too. The durable member record is the Bold
  * viewer (see lib/gym-viewer.ts), keyed by email.
  */
 export const auth = betterAuth({
-  appName: "The GTM Gym",
+  appName: "The GTM Game",
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
   socialProviders: {

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { GymHorizon } from "./gym-backdrop";
 import { useGymMember } from "./use-gym-member";
 import { GymNoteSticker } from "./gym-founder-note";
+import { sfx, unlock } from "@/lib/gym-arcade";
 import {
   GYM_PLACEHOLDERS,
   GYM_RANDOM_REPS,
@@ -34,7 +35,7 @@ const TONE: Record<GymWorkout["tone"], { text: string; hover: string }> = {
   },
 };
 
-/** Types, holds, deletes, next — the placeholder heckles you while you think. */
+/** Types, holds, deletes, next: the placeholder riffs while you think. */
 function useTypewriter(lines: string[], enabled: boolean): string {
   const [text, setText] = useState(lines[0] ?? "");
 
@@ -93,8 +94,8 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
   const first = (user?.name || "").split(" ")[0];
   const company = member?.profile?.business_name;
   const greeting = first
-    ? `Welcome back, ${first}. What are we fixing${company ? ` at ${company}` : ""} today?`
-    : "Talk to me, bro. What do you want to know about going to market?";
+    ? `Welcome back, ${first}. Ready for the next level${company ? ` at ${company}` : ""}?`
+    : "Player one, ready? What do you want to know about going to market?";
 
   const ask = useCallback(
     (question: string) => {
@@ -106,6 +107,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
         return;
       }
       setLifting(true);
+      sfx("start");
       if (onAsk) {
         onAsk(q);
         return;
@@ -119,6 +121,8 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
     const pick = GYM_RANDOM_REPS[Math.floor(Math.random() * GYM_RANDOM_REPS.length)];
     setQuery(pick);
     inputRef.current?.focus();
+    sfx("select");
+    unlock("random");
   }, []);
 
   // "/" jumps to the bar from anywhere on the page
@@ -136,12 +140,12 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
 
   return (
     <div className="relative w-full max-w-[880px] mx-auto flex flex-col items-center text-center">
-      {/* Coach calls you over */}
+      {/* The game master waves you over */}
       <div className="relative z-10 flex items-end gap-3 mb-4 md:mb-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
         <div className="relative shrink-0">
           <Image
-            src="/gym/coach.webp"
-            alt="The GTM Gym coach"
+            src="/gym/game/master.webp"
+            alt="The GTM Game master"
             width={76}
             height={76}
             priority
@@ -155,12 +159,12 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
 
       <div className="relative w-full">
         <GymHorizon />
-        {/* "Wait, what?" The gym is loud; FounderWell isn't. Opens Vanessa's note. */}
-        <GymNoteSticker className="absolute z-20 bottom-[2%] right-0 h-[72px] w-[72px] md:bottom-auto md:-top-10 md:right-[2%] md:h-[96px] md:w-[96px] rotate-6" />
-        <h1 className="relative font-display gym-chrome uppercase leading-[0.9] text-[clamp(52px,9.5vw,118px)] tracking-[-0.02em] pb-[0.28em]">
-          What&apos;s the move?
+        {/* "Psst." What this is and who FounderWell is. Opens Vanessa's note. */}
+        <GymNoteSticker className="absolute z-20 -bottom-14 right-1 h-[68px] w-[68px] md:bottom-auto md:-top-16 md:-right-12 lg:-right-20 md:h-[96px] md:w-[96px] rotate-6" />
+        <h1 className="relative font-display gym-chrome uppercase leading-[0.9] text-[clamp(44px,8.6vw,108px)] tracking-[-0.02em] pb-[0.28em]">
+          What&apos;s your next move?
         </h1>
-        {/* Tape-label sticker riding the horizon line */}
+        {/* Sticker riding the horizon line */}
         <div className="absolute left-1/2 bottom-[18%] -translate-x-1/2 translate-y-[125%] z-10">
           <div className="-rotate-2 inline-flex items-center gap-2 rounded-md bg-[var(--gym-chalk)] pl-2.5 pr-3 py-1.5 shadow-[3px_3px_0_var(--gym-cyan),0_0_30px_-4px_rgba(34,230,255,0.6)] whitespace-nowrap">
             <span className="font-osd text-[18px] leading-none text-[#5b4a7a]">by</span>
@@ -179,13 +183,13 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
       </div>
 
       <p className="relative z-10 mt-12 md:mt-14 max-w-[640px] text-base md:text-lg leading-relaxed text-foreground/80 text-pretty">
-        Bring a messy go-to-market problem. The coach has studied
+        Bring a messy go-to-market problem. The game master has watched
         {hours ? <> <strong className="text-foreground">{hours} hours</strong> of</> : " every hour of"} FounderWell
-        tape and backs every answer with <span className="text-[var(--gym-cyan)] font-semibold">proof</span>:
+        sessions and backs every answer with <span className="text-[var(--gym-cyan)] font-semibold">proof</span>:
         {" "}the exact minute of video that says so.
       </p>
 
-      {/* The bar */}
+      {/* The input */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -196,7 +200,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
       >
         <div className="flex items-center gap-2 rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] pl-4 md:pl-6 pr-1.5 md:pr-2 py-1.5 md:py-2">
           <label htmlFor="gym-ask" className="sr-only">
-            Ask the coach
+            Ask the game master
           </label>
           <input
             ref={inputRef}
@@ -210,8 +214,8 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
           <button
             type="button"
             onClick={rollDice}
-            title="Random rep"
-            aria-label="Random question"
+            title="Random level"
+            aria-label="Random level"
             className="shrink-0 h-10 w-9 md:h-12 md:w-12 grid place-items-center rounded-xl text-muted-foreground hover:text-[var(--gym-yellow)] hover:bg-white/5 transition-[color,background-color,transform] duration-150 active:rotate-45 cursor-pointer"
           >
             <Dices className="h-5 w-5" />
@@ -221,18 +225,18 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
             disabled={lifting}
             className="gym-button shrink-0 h-11 md:h-14 px-3.5 md:px-6 rounded-xl text-[15px] md:text-lg uppercase inline-flex items-center gap-2 cursor-pointer"
           >
-            {lifting ? "Warming up…" : "Coach me"}
+            {lifting ? "Loading…" : "Press start"}
             {!lifting && <ArrowRight className="hidden sm:block h-5 w-5" strokeWidth={3} />}
           </button>
         </div>
       </form>
 
-      {/* Today's program */}
+      {/* World 1 */}
       <div className="relative z-10 mt-6 md:mt-7 w-full">
         <div className="flex items-center justify-center gap-3 mb-3">
           <span className="h-px w-10 bg-[var(--gym-line)]" />
           <span className="font-osd text-[19px] text-muted-foreground uppercase">
-            Today&apos;s program
+            Choose your level
           </span>
           <span className="h-px w-10 bg-[var(--gym-line)]" />
         </div>
@@ -242,6 +246,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
               key={w.label}
               type="button"
               onClick={() => ask(w.question)}
+              onMouseEnter={() => sfx("select")}
               style={{ animationDelay: `${120 + i * 70}ms` }}
               className={cn(
                 "group relative text-left rounded-xl p-3.5 md:p-4 cursor-pointer",
@@ -271,7 +276,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
         </div>
         {sessions ? (
           <p className="mt-4 font-osd text-[17px] text-muted-foreground/70">
-            {sessions} sessions on tape · press <kbd className="px-1 rounded border border-[var(--gym-line)] text-foreground/80">/</kbd> to ask
+            {sessions} sessions loaded · press <kbd className="px-1 rounded border border-[var(--gym-line)] text-foreground/80">/</kbd> to play
           </p>
         ) : null}
       </div>

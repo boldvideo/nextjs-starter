@@ -13,13 +13,14 @@ import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
 import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
 import { refsIn, splitPlan } from "@/lib/gym-plan-parse";
+import { addXp, sfx, unlock } from "@/lib/gym-arcade";
 
 /**
- * An answer, written up the way a fitness coach writes a program:
+ * An answer, laid out as a game plan:
  *
- *   THE PLAY      the coach's take (intro paragraphs), with its clip
- *   DRILL 01…     each bullet, with the clip that backs it right underneath
- *   TODAY'S SET   the closing action, with log-it + share
+ *   COACH'S TAKE     the take (intro paragraphs), with its clip
+ *   MOVE 01…         each bullet, with the clip that backs it right underneath
+ *   YOUR NEXT QUEST  the closing action, with quest-complete + share + print
  *
  * The persona already answers as "take → ≤3 bullets → one concrete action",
  * so this is a layout over that shape, not a new format. Anything that
@@ -35,7 +36,7 @@ interface GymPlanProps {
   selectedCitationId?: string;
   interaction?: AnswerInteraction;
   shareUrl?: string;
-  /** Printable training-plan sheet for this conversation */
+  /** Printable strategy guide for this conversation */
   printUrl?: string;
 }
 
@@ -113,7 +114,7 @@ export function GymPlan({
           <span className="flex items-center gap-2.5 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
             <span className="flex -space-x-2">
               {coaches.slice(0, 3).map((c) => (
-                <Image key={c.slug} src={`/gym/coaches/${c.slug}.webp`} alt="" width={32} height={32} className="h-8 w-8" />
+                <Image key={c.slug} src={`/gym/game/coaches/${c.slug}.webp`} alt="" width={32} height={32} className="h-8 w-8" />
               ))}
             </span>
             <span className="text-sm text-muted-foreground">
@@ -159,7 +160,7 @@ export function GymPlan({
         })}
       </div>
 
-      {/* Drills: an open, numbered timeline (no boxes) */}
+      {/* Moves: an open, numbered timeline (no boxes) */}
       {drills.length > 0 && (
         <ol className="mt-12 relative">
           {drills.map((d, i) => {
@@ -171,7 +172,7 @@ export function GymPlan({
                 key={i}
                 className="relative grid grid-cols-[48px_1fr] md:grid-cols-[64px_1fr] gap-x-3 md:gap-x-4 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
               >
-                {/* Number + the rail connecting drills */}
+                {/* Number + the rail connecting moves */}
                 <div className="flex flex-col items-center">
                   <span className="font-display text-[26px] md:text-[32px] leading-none text-transparent [-webkit-text-stroke:1.5px_var(--gym-cyan)]">
                     {String(i + 1).padStart(2, "0")}
@@ -179,7 +180,7 @@ export function GymPlan({
                   {!last && <span className="mt-3 w-px flex-1 bg-[var(--gym-line)]" />}
                 </div>
                 <div className={cn("min-w-0", last ? "pb-2" : "pb-11")}>
-                  <p className="font-osd text-[16px] leading-none text-muted-foreground/80 mb-2 pt-1.5">DRILL</p>
+                  <p className="font-osd text-[16px] leading-none text-muted-foreground/80 mb-2 pt-1.5">MOVE</p>
                   <div className={cn(PROSE_CLASS, "prose-p:my-0 max-w-[60ch] prose-p:text-[18px] prose-p:leading-[1.7] prose-p:text-foreground/90", growing && "chat-stream-cursor")}>
                     <MarkdownSection content={d} {...section} />
                   </div>
@@ -224,7 +225,7 @@ export function GymPlan({
         </div>
       )}
 
-      {/* YOUR WORKOUT: the one loud element in the answer */}
+      {/* YOUR NEXT QUEST: the one loud element in the answer */}
       {set && (
         <div className="mt-12">
         <GymSet
@@ -286,7 +287,11 @@ function GymClip({
   return (
     <button
       type="button"
-      onClick={() => interaction && setOpen(new SourceOpen(citation.videoId, interaction))}
+      onClick={() => {
+        if (!interaction) return;
+        setOpen(new SourceOpen(citation.videoId, interaction));
+        unlock("replay");
+      }}
       className={cn(
         "group w-full max-w-[560px] text-left grid grid-cols-[132px_1fr] sm:grid-cols-[168px_1fr] gap-3.5 sm:gap-4 items-center",
         "rounded-xl p-2 -m-2 cursor-pointer hover:bg-white/[0.03] transition-colors",
@@ -318,7 +323,7 @@ function GymClip({
           {coach && (
             <>
               <span aria-hidden>·</span>
-              <Image src={`/gym/coaches/${coach.slug}.webp`} alt="" width={18} height={18} className="h-[18px] w-[18px]" />
+              <Image src={`/gym/game/coaches/${coach.slug}.webp`} alt="" width={18} height={18} className="h-[18px] w-[18px]" />
               <span>{coachLabel(coach)}</span>
             </>
           )}
@@ -339,7 +344,7 @@ function GymClip({
   );
 }
 
-/** The closing action as this week's workout. Do it, share it, print it. */
+/** The closing action as your next quest. Complete it, share it, print it. */
 function GymSet({
   children,
   streaming,
@@ -355,16 +360,32 @@ function GymSet({
 }) {
   const [done, setDone] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [burst, setBurst] = useState(0);
+
+  const complete = () => {
+    if (done) {
+      setDone(false);
+      return;
+    }
+    setDone(true);
+    setBurst((n) => n + 1);
+    sfx("quest");
+    addXp(100, "QUEST");
+    unlock("quest");
+  };
 
   const share = async () => {
     const url = shareUrl || window.location.href;
     try {
       if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
-        await navigator.share({ url, title: "My workout from The GTM Gym" });
+        await navigator.share({ url, title: "My run in The GTM Game" });
+        unlock("player-2");
         return;
       }
       await navigator.clipboard.writeText(url);
       setCopied(true);
+      sfx("coin");
+      unlock("player-2");
       setTimeout(() => setCopied(false), 2200);
     } catch {
       /* dismissed */
@@ -379,13 +400,13 @@ function GymSet({
       <div className="rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] p-4 md:p-5">
         <div className="flex items-center gap-2.5 mb-2">
           <Image
-            src={coach ? `/gym/coaches/${coach.slug}.webp` : "/gym/coach.webp"}
+            src={coach ? `/gym/game/coaches/${coach.slug}.webp` : "/gym/game/master.webp"}
             alt=""
             width={32}
             height={32}
             className="h-8 w-8"
           />
-          <span className="font-display text-[13px] uppercase gym-sunset-text">This week&apos;s workout</span>
+          <span className="font-display text-[13px] uppercase gym-sunset-text">Your next quest</span>
           {coach && (
             <span className="ml-auto font-osd text-[16px] leading-none text-muted-foreground">
               — {coachLabel(coach).toUpperCase()}
@@ -399,16 +420,19 @@ function GymSet({
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setDone((v) => !v)}
+              onClick={complete}
+              aria-pressed={done}
               className={cn(
                 button,
+                "relative",
                 done
                   ? "bg-[var(--gym-cyan)] text-[#06121a]"
                   : "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)]"
               )}
             >
               <Check className="h-4 w-4" strokeWidth={3} />
-              {done ? "Done. Now hydrate." : "I did it"}
+              {done ? "Quest complete! +100 XP" : "I did it"}
+              {burst > 0 && done && <CoinBurst key={burst} />}
             </button>
             <button
               type="button"
@@ -416,22 +440,41 @@ function GymSet({
               className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)]")}
             >
               <Share2 className="h-4 w-4" />
-              {copied ? "Link copied. Recruit a spotter." : "Share"}
+              {copied ? "Link copied. Challenge a friend." : "Share your run"}
             </button>
             {printUrl && (
               <a
                 href={printUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => unlock("guide")}
                 className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]")}
               >
                 <Printer className="h-4 w-4" />
-                Print the plan
+                Strategy guide
               </a>
             )}
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+/** Eight pixel coins popping out of the quest button. */
+function CoinBurst() {
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0">
+      {Array.from({ length: 8 }, (_, i) => {
+        const a = (Math.PI * 2 * i) / 8 - Math.PI / 2;
+        return (
+          <span
+            key={i}
+            className="gym-coin"
+            style={{ "--dx": `${Math.round(Math.cos(a) * 46)}px`, "--dy": `${Math.round(Math.sin(a) * 30 - 10)}px` } as React.CSSProperties}
+          />
+        );
+      })}
+    </span>
   );
 }

@@ -28,6 +28,7 @@ import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 import { PoweredByBold } from "@/components/powered-by-bold";
 import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
+import { addXp, unlock } from "@/lib/gym-arcade";
 
 type PageState =
   | { status: "idle" }
@@ -201,6 +202,19 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   }, [conversationId, routeConversationId]);
 
 
+
+  // Every level you play scores. The first unlocks PRESS START, the third
+  // COMBO. Loaded games don't stream, so reading a shared link scores nothing.
+  const wasStreamingRef = useRef(false);
+  useEffect(() => {
+    if (isStreaming && !wasStreamingRef.current) {
+      const levels = messages.filter((m) => m.role === "user").length;
+      addXp(50, `LEVEL ${String(Math.max(1, levels)).padStart(2, "0")}`);
+      unlock("press-start");
+      if (levels >= 3) unlock("combo");
+    }
+    wasStreamingRef.current = isStreaming;
+  }, [isStreaming, messages]);
 
   // Drop in-flight image selections if the multimodal capability flips off mid-session
   useEffect(() => {
@@ -440,7 +454,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             <div className="space-y-7">
               <div>
                 <span className="inline-block -rotate-2 mb-3 rounded-md bg-[var(--gym-pink)] px-2.5 py-1 font-display text-[13px] uppercase leading-none text-[#1a0616] shadow-[3px_3px_0_var(--gym-yellow)]">
-                  Rep 01
+                  Level 01
                 </span>
                 <h2 className="font-bold text-[26px] md:text-[34px] tracking-[-0.02em] leading-[1.12] text-foreground text-balance">
                   {pendingQuery}
@@ -449,7 +463,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
               <GymLoading />
             </div>
           ) : (
-            <GymLoading status="Rewinding the tape…" />
+            <GymLoading status="Loading saved game…" />
           )}
         </div>
       </div>
@@ -478,8 +492,8 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           <div className="w-full max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
             {/* Thread head */}
             <div className="flex items-center justify-between mb-10">
-              {/* Whose set this is. The coaches themselves are named on each
-                  answer ("Coach Drew's take"), since they change per rep. */}
+              {/* Whose game this is. The coaches themselves are named on each
+                  answer ("Coach Drew's take"), since they change per level. */}
               <SetHead reps={qaPairs.length} isOwner={canContinue} />
               <div className="flex items-center gap-4">
                 {isStreaming && (
@@ -522,10 +536,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   {pair.userMessage.attachments && pair.userMessage.attachments.length > 0 && (
                     <AttachmentThumbnails attachments={pair.userMessage.attachments} />
                   )}
-                  {/* The rep: stamp + your question */}
+                  {/* The level: stamp + your question */}
                   <div>
                     <span className="gym-slam inline-block -rotate-2 mb-3 rounded-md bg-[var(--gym-pink)] px-2.5 py-1 font-display text-[13px] uppercase leading-none text-[#1a0616] shadow-[3px_3px_0_var(--gym-yellow)]">
-                      Rep {repLabel}
+                      Level {repLabel}
                     </span>
                     <h2 className="font-bold text-[26px] md:text-[34px] tracking-[-0.02em] leading-[1.12] text-foreground text-balance">
                       {pair.userMessage.content}
@@ -538,8 +552,9 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
                   {pair.assistantMessage?.type === "error" && (
                     <div className="rounded-xl border border-[var(--destructive)]/40 bg-[var(--destructive)]/10 px-4 py-3 text-sm text-foreground/90">
-                      <span className="font-display uppercase text-[var(--destructive)] mr-2">Dropped the bar.</span>
+                      <span className="font-display uppercase text-[var(--destructive)] mr-2">Game over.</span>
                       {pair.assistantMessage.content}
+                      <span className="block mt-1.5 font-osd text-[17px] text-muted-foreground">INSERT COIN TO TRY AGAIN: ASK IT ONE MORE TIME BELOW.</span>
                     </div>
                   )}
 
@@ -616,11 +631,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 />
               ) : (
                 <>
-                  {/* Someone else's shared set: read it, then start your own.
+                  {/* Someone else's shared game: read it, then start your own.
                       The server refuses follow-ups without the owner token. */}
                   <p className="mb-2.5 px-1 text-center text-sm text-foreground/85">
-                    <span className="font-display text-[12px] uppercase text-[var(--gym-yellow)] mr-2">Someone else&apos;s set</span>
-                    Your turn. What&apos;s your go-to-market problem?
+                    <span className="font-display text-[12px] uppercase text-[var(--gym-yellow)] mr-2">Someone else&apos;s game</span>
+                    Your turn: press start. What&apos;s your go-to-market problem?
                   </p>
                   <GymFollowUp
                     value={query}
@@ -681,25 +696,25 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   );
 }
 
-/** "Your set · 2 reps", or "Marcel's set · coached for Acme" when signed in. */
+/** "Your game · 2 levels", or "Marcel's game · playing for Acme" when signed in. */
 function SetHead({ reps, isOwner }: { reps: number; isOwner: boolean }) {
   const { user, member } = useGymMember();
   const first = (user?.name || "").split(" ")[0];
   const company = member?.profile?.business_name;
-  const whose = !isOwner ? "Someone's set" : first ? `${first}'s set` : "Your set";
+  const whose = !isOwner ? "Someone's game" : first ? `${first}'s game` : "Your game";
 
   return (
     <div className="flex items-center gap-3">
       {isOwner && user?.image ? (
         <img src={user.image} alt="" referrerPolicy="no-referrer" className="h-10 w-10 rounded-full ring-2 ring-[var(--gym-pink)]" />
       ) : (
-        <Image src="/gym/logo.webp" alt="" width={40} height={40} className="h-10 w-10" />
+        <Image src="/gym/game/logo.webp" alt="" width={40} height={40} className="h-10 w-10" />
       )}
       <div className="flex flex-col leading-none">
         <span className="font-display text-base uppercase text-foreground">{whose}</span>
         <span className="mt-1 font-osd text-[17px] text-muted-foreground">
-          {reps} {reps === 1 ? "REP" : "REPS"}
-          {isOwner && company ? ` · COACHED FOR ${company.toUpperCase()}` : ""}
+          {reps} {reps === 1 ? "LEVEL" : "LEVELS"}
+          {isOwner && company ? ` · PLAYING FOR ${company.toUpperCase()}` : ""}
         </span>
       </div>
     </div>

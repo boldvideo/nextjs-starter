@@ -3,9 +3,9 @@ import { ImageResponse } from "next/og";
 import { getTenantContext } from "@/lib/get-tenant-context";
 
 /**
- * GTM Gym social cards (fork-owned; replaces the tenant-branded card).
+ * The GTM Game social cards (fork-owned; replaces the tenant-branded card).
  *
- *   /og?q=<question>        a shared answer: REP stamp + the question
+ *   /og?q=<question>        a shared answer: LEVEL stamp + the question
  *   /og?v=<videoId>[&t=s]   a session: frame at t, title, PLAY timecode
  *   /og                     → the static homepage card (/gym/og-home.jpg),
  *                             rendered from real CSS — satori can't do the
@@ -100,12 +100,36 @@ function Brand({ logo }: { logo: string | null }) {
       {logo && <img src={logo} width={64} height={64} alt="" />}
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ fontFamily: "Bungee", fontSize: 26, color: COLORS.orange, lineHeight: 1 }}>
-          THE GTM GYM
+          THE GTM GAME
         </div>
         <div style={{ display: "flex", marginTop: 6, fontSize: 18, color: COLORS.haze }}>
           by&nbsp;<span style={{ color: COLORS.chalk }}>FounderWell</span>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Top-right cabinet HUD: 1UP over a blinking-in-spirit INSERT COIN. */
+function Hud() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 38,
+        right: 48,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        fontFamily: "VT323",
+        fontSize: 30,
+        lineHeight: 1,
+        color: "#ffffff",
+        textShadow: "0 0 10px rgba(34,230,255,0.7)",
+      }}
+    >
+      <div style={{ display: "flex", color: COLORS.pink }}>1UP</div>
+      <div style={{ display: "flex", marginTop: 6 }}>INSERT COIN</div>
     </div>
   );
 }
@@ -138,12 +162,12 @@ export async function GET(request: Request) {
       ? `https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=1120&height=630&fit_mode=smartcrop${t ? `&time=${t}` : ""}`
       : null;
 
-    const text = `THE GTM GYMby FounderWellON TAPE${title}PLAY ▶ ${timecode}WATCH THE CLIP ▶ GYM.BOLD.VIDEO`;
+    const text = `THE GTM GAMEby FounderWellINSTANT REPLAY${title}PLAY ▶ ${timecode}1UPINSERT COINWATCH THE CLIP ▶ ARCADE.BOLD.VIDEO`;
     const [bungee, grotesk, osd, logo, bg, frameSrc] = await Promise.all([
       loadGoogleFont("Bungee", text),
       loadGoogleFont("Space Grotesk", text, 700),
       loadGoogleFont("VT323", text),
-      loadImage(`${origin}/gym/logo-og.png`),
+      loadImage(`${origin}/gym/game/logo-og.png`),
       loadImage(`${origin}/gym/og-bg.jpg`),
       frame ? loadImage(frame) : Promise.resolve(null),
     ]);
@@ -246,7 +270,7 @@ export async function GET(request: Request) {
                 marginBottom: 24,
               }}
             >
-              ON TAPE
+              INSTANT REPLAY
             </div>
             <div
               style={{
@@ -272,8 +296,9 @@ export async function GET(request: Request) {
               color: COLORS.cyan,
             }}
           >
-            WATCH THE CLIP ▶ GYM.BOLD.VIDEO
+            WATCH THE CLIP ▶ ARCADE.BOLD.VIDEO
           </div>
+          <Hud />
         </div>
       ),
       {
@@ -291,14 +316,14 @@ export async function GET(request: Request) {
   // ── Question card ──────────────────────────────────────────────────────
   const q = clamp(question!, 140);
   const size = q.length <= 38 ? 72 : q.length <= 70 ? 60 : q.length <= 105 ? 50 : 44;
-  const text = `THE GTM GYMby FounderWellREP 01“${q}”COACH'S TAKE + THE PROOF ▶ GYM.BOLD.VIDEO`;
+  const text = `THE GTM GAMEby FounderWellLEVEL 01“${q}”GAME PLAN + THE PROOF ▶ ARCADE.BOLD.VIDEO1UPINSERT COIN`;
   const [bungee, grotesk, grotesk500, osd, logo, coach, bg] = await Promise.all([
     loadGoogleFont("Bungee", text),
     loadGoogleFont("Space Grotesk", text, 700),
     loadGoogleFont("Space Grotesk", text, 500),
     loadGoogleFont("VT323", text),
-    loadImage(`${origin}/gym/logo-og.png`),
-    loadImage(`${origin}/gym/coach-og.png`),
+    loadImage(`${origin}/gym/game/logo-og.png`),
+    loadImage(`${origin}/gym/game/master-og.png`),
     loadImage(`${origin}/gym/og-bg.jpg`),
   ]);
 
@@ -356,7 +381,7 @@ export async function GET(request: Request) {
               marginBottom: 26,
             }}
           >
-            REP 01
+            LEVEL 01
           </div>
           <div
             style={{
@@ -381,8 +406,9 @@ export async function GET(request: Request) {
             color: COLORS.cyan,
           }}
         >
-          COACH&apos;S TAKE + THE PROOF ▶ GYM.BOLD.VIDEO
+          GAME PLAN + THE PROOF ▶ ARCADE.BOLD.VIDEO
         </div>
+        <Hud />
       </div>
     ),
     {

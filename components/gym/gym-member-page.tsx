@@ -7,6 +7,8 @@ import { ArrowRight, Check, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signInWithGoogle, signOut } from "@/lib/auth-client";
 import { useGymMember, type GymProfile } from "./use-gym-member";
+import { GymTrophies } from "./gym-trophies";
+import { unlock } from "@/lib/gym-arcade";
 
 function domainOf(website: string): string | null {
   const raw = website.trim();
@@ -27,22 +29,26 @@ function domainOf(website: string): string | null {
 export function GymMemberPage() {
   const { isPending, signedIn, user, member, refresh } = useGymMember();
 
+  useEffect(() => {
+    if (signedIn) unlock("player-card");
+  }, [signedIn]);
+
   if (isPending) return <div className="flex-1" />;
 
   if (!signedIn) {
     return (
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[560px] mx-auto px-4 py-16 md:py-24 text-center">
-          <Image src="/gym/logo.webp" alt="" width={120} height={120} className="mx-auto h-28 w-28" />
+          <Image src="/gym/game/logo.webp" alt="" width={120} height={120} className="mx-auto h-28 w-28" />
           <h1 className="mt-6 font-display uppercase text-[34px] md:text-[44px] leading-[0.95] gym-chrome">
-            Get your membership card
+            Get your player card
           </h1>
           <p className="mt-5 text-lg text-foreground/80 leading-relaxed">
-            Sign in, tell the coach about your business once, and every answer after that is built for you, not for some imaginary average startup.
+            Press start to join. Tell the game master about your business once, and every answer after that is built for you, not for some imaginary average startup.
           </p>
           <button
             type="button"
-            onClick={() => signInWithGoogle("/member")}
+            onClick={() => signInWithGoogle("/player")}
             className="gym-button mt-8 h-14 px-7 rounded-xl text-lg uppercase inline-flex items-center gap-3 cursor-pointer"
           >
             <GoogleMark />
@@ -50,17 +56,18 @@ export function GymMemberPage() {
           </button>
           <p className="mt-4 text-xs text-muted-foreground/70">We only use your name, email and photo.</p>
         </div>
+        <GymTrophies />
       </div>
     );
   }
 
-  const first = (user?.name || "").split(" ")[0] || "Member";
+  const first = (user?.name || "").split(" ")[0] || "Player";
 
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-[1080px] mx-auto px-4 md:px-6 py-10 md:py-16 grid gap-10 lg:gap-14 lg:grid-cols-[420px_1fr] items-start">
         <div className="lg:sticky lg:top-6">
-          <p className="font-osd text-[20px] text-[var(--gym-cyan)]">WELCOME TO THE GYM, {first.toUpperCase()}</p>
+          <p className="font-osd text-[20px] text-[var(--gym-cyan)]">PLAYER 1 READY: {first.toUpperCase()}</p>
           <MembershipCard
             name={user?.name || first}
             image={user?.image}
@@ -84,6 +91,7 @@ export function GymMemberPage() {
           <div className="h-80 rounded-2xl bg-white/[0.03] animate-pulse" />
         )}
       </div>
+      <GymTrophies />
     </div>
   );
 }
@@ -114,10 +122,10 @@ function MembershipCard({
 
       <div className="relative h-full flex flex-col">
         <div className="flex items-center gap-2.5">
-          <Image src="/gym/logo.webp" alt="" width={40} height={40} className="h-10 w-10" />
+          <Image src="/gym/game/logo.webp" alt="" width={40} height={40} className="h-10 w-10" />
           <div className="leading-none">
-            <p className="font-display text-[15px] gym-sunset-text">THE GTM GYM</p>
-            <p className="mt-1 font-osd text-[14px] text-white/60">ALL-ACCESS · 24/7</p>
+            <p className="font-display text-[15px] gym-sunset-text">THE GTM GAME</p>
+            <p className="mt-1 font-osd text-[14px] text-white/60">PLAYER CARD · FREE PLAY</p>
           </div>
         </div>
 
@@ -132,9 +140,9 @@ function MembershipCard({
           )}
           <div className="min-w-0 flex-1">
             <p className="font-display text-[20px] leading-tight text-white truncate">{name.toUpperCase()}</p>
-            <p className="text-sm text-white/70 truncate">{company || "Company: tell the coach →"}</p>
+            <p className="text-sm text-white/70 truncate">{company || "Company: tell the game master →"}</p>
             <p className="mt-2 font-osd text-[15px] leading-none text-white/55">
-              MEMBER No. {memberNo || "······"} · SINCE {since}
+              PLAYER No. {memberNo || "······"} · SINCE {since}
             </p>
           </div>
         </div>
@@ -186,10 +194,10 @@ function ProfileForm({ initial, onSaved }: { initial: GymProfile; onSaved: () =>
     <form onSubmit={save} className="space-y-7">
       <div>
         <h1 className="font-display uppercase text-[28px] md:text-[36px] leading-none text-foreground">
-          Tell the coach about your business
+          Tell the game master about your business
         </h1>
         <p className="mt-3 text-foreground/75 leading-relaxed max-w-[58ch]">
-          The coach reads this before every answer. The more you tell it, the less generic the advice gets.
+          The game master reads this before every answer. The more you tell it, the less generic the advice gets.
         </p>
       </div>
 
@@ -236,11 +244,11 @@ function ProfileForm({ initial, onSaved }: { initial: GymProfile; onSaved: () =>
           disabled={state === "saving"}
           className="gym-button h-12 px-6 rounded-xl text-base uppercase inline-flex items-center gap-2 cursor-pointer"
         >
-          {state === "saving" ? "Saving…" : state === "saved" ? <><Check className="h-5 w-5" strokeWidth={3} /> Locked in</> : "Lock it in"}
+          {state === "saving" ? "Saving…" : state === "saved" ? <><Check className="h-5 w-5" strokeWidth={3} /> Game saved</> : "Save game"}
         </button>
         {state === "saved" && (
           <Link href="/" className="inline-flex items-center gap-1.5 font-semibold text-[var(--gym-cyan)] hover:underline">
-            The coach knows you now. Ask something <ArrowRight className="h-4 w-4" />
+            The game master knows you now. Press start <ArrowRight className="h-4 w-4" />
           </Link>
         )}
         {state === "error" && <p className="text-sm text-[var(--destructive)]">{error}</p>}

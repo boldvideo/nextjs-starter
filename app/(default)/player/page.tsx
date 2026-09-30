@@ -4,13 +4,13 @@ import { gymMeta } from "@/lib/gym-meta";
 
 export const metadata: Metadata = {
   ...gymMeta({
-    title: "Your membership card",
-    description: "Sign in to The GTM Gym, tell the coach about your business, and get answers built for you.",
-    path: "/member",
+    title: "Your player card",
+    description: "Press start to join The GTM Game: tell the game master about your business once, and every answer after that is built for you.",
+    path: "/player",
   }),
   robots: { index: false },
 };
 
-export default function MemberPage() {
+export default function PlayerPage() {
   return <GymMemberPage />;
 }

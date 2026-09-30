@@ -12,18 +12,18 @@ interface GymFollowUpProps {
   placeholder?: string;
 }
 
-/** The follow-up bar under a thread: same neon frame as the homepage. */
+/** The follow-up bar under a game: same neon frame as the homepage. */
 export function GymFollowUp({
   value,
   onChange,
   onSubmit,
   onStop,
   isStreaming,
-  placeholder = "Next rep: ask a follow-up…",
+  placeholder = "Next level: ask a follow-up…",
 }: GymFollowUpProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Back in the bar as soon as the coach finishes talking
+  // Back in the input as soon as the game master finishes
   useEffect(() => {
     if (!isStreaming && window.matchMedia("(hover: hover)").matches) {
       inputRef.current?.focus({ preventScroll: true });
@@ -67,7 +67,7 @@ export function GymFollowUp({
             type="submit"
             className="gym-button shrink-0 h-11 px-4 md:px-5 rounded-xl text-sm md:text-base uppercase inline-flex items-center gap-2 cursor-pointer"
           >
-            Coach me
+            Play
             <ArrowRight className="h-4 w-4" strokeWidth={3} />
           </button>
         )}

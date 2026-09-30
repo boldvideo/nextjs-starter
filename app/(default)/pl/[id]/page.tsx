@@ -33,7 +33,7 @@ export async function generateMetadata({
       title: playlist.title,
       description: playlist.description || undefined,
       path: `/pl/${resolvedParams.id}`,
-      ...(first ? { image: `/og?v=${encodeURIComponent(first.id)}`, imageAlt: `The GTM Gym: ${playlist.title}` } : {}),
+      ...(first ? { image: `/og?v=${encodeURIComponent(first.id)}`, imageAlt: `The GTM Game: ${playlist.title}` } : {}),
     });
   } catch {
     return {};

@@ -2,35 +2,56 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signInWithGoogle } from "@/lib/auth-client";
 import { useGymMember } from "./use-gym-member";
+import { sfx, toggleSound, unlock, useArcade } from "@/lib/gym-arcade";
 
 /**
- * The gym's one piece of chrome: logo lockup left, "open 24/7" OSD and a
- * new-set button right. Fixed at --header-height (64px) — main pads by it.
+ * The game's one piece of chrome: logo lockup left; sound, new game and the
+ * player card right. Fixed at --header-height (64px) — main pads by it.
+ * Click the logo five times fast and the machine tilts.
  */
 export function GymBar() {
   const pathname = usePathname();
   const onHome = pathname === "/";
+  const { sound } = useArcade();
+  const [tilt, setTilt] = useState(0);
+  const clicks = useRef<number[]>([]);
+
+  const onLogo = () => {
+    const now = Date.now();
+    clicks.current = [...clicks.current.filter((t) => now - t < 1500), now];
+    if (clicks.current.length >= 5) {
+      clicks.current = [];
+      setTilt((n) => n + 1);
+      sfx("hit");
+      unlock("tilt");
+    }
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 h-[var(--header-height)] bg-[var(--gym-night)]">
       <div className="h-full max-w-[1440px] mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-3 min-w-0 group" aria-label="The GTM Gym — home">
+        <Link href="/" onClick={onLogo} className="flex items-center gap-3 min-w-0 group" aria-label="The GTM Game — home">
           <Image
-            src="/gym/logo.webp"
+            src="/gym/game/logo.webp"
             alt=""
             width={44}
             height={44}
             priority
-            className="h-11 w-11 shrink-0 transition-transform duration-200 ease-out group-hover:-rotate-6 group-hover:scale-105"
+            key={tilt}
+            className={cn(
+              "h-11 w-11 shrink-0 transition-transform duration-200 ease-out group-hover:-rotate-6 group-hover:scale-105",
+              tilt > 0 && "gym-tilt"
+            )}
           />
           <span className="flex flex-col leading-none min-w-0">
             <span className="font-display text-[17px] md:text-[19px] gym-sunset-text whitespace-nowrap">
-              The GTM Gym
+              The GTM Game
             </span>
             <span className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground whitespace-nowrap">
               by
@@ -49,8 +70,24 @@ export function GymBar() {
         <div className="flex items-center gap-3 md:gap-5">
           <span className="hidden lg:flex items-center gap-2 font-osd text-[19px] text-muted-foreground">
             <span className="gym-rec inline-block h-2 w-2 rounded-full bg-[var(--gym-pink)] shadow-[0_0_8px_var(--gym-pink)]" />
-            OPEN 24/7
+            FREE PLAY
           </span>
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-pressed={sound}
+            aria-label={sound ? "Mute sound" : "Turn sound on"}
+            title={sound ? "Sound on" : "Sound off"}
+            className={cn(
+              "h-10 w-10 place-items-center rounded-xl border transition-colors cursor-pointer",
+              onHome ? "grid" : "hidden sm:grid",
+              sound
+                ? "border-[var(--gym-cyan)] text-[var(--gym-cyan)] shadow-[0_0_16px_-6px_var(--gym-cyan)]"
+                : "border-[var(--gym-line)] text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {sound ? <Volume2 className="h-[18px] w-[18px]" /> : <VolumeX className="h-[18px] w-[18px]" />}
+          </button>
           {!onHome && (
             <Link
               href="/"
@@ -63,7 +100,8 @@ export function GymBar() {
               )}
             >
               <Plus className="h-[18px] w-[18px]" strokeWidth={3} />
-              New set
+              <span className="hidden sm:inline">New game</span>
+              <span className="sm:hidden">New</span>
             </Link>
           )}
           <MemberButton />
@@ -75,7 +113,7 @@ export function GymBar() {
   );
 }
 
-/** Sign in (Google) when signed out; the member's face → their card when in. */
+/** Sign in (Google) when signed out; the player's face → their card when in. */
 function MemberButton() {
   const { isPending, signedIn, user } = useGymMember();
   if (isPending) return <span className="h-10 w-10" aria-hidden />;
@@ -84,11 +122,11 @@ function MemberButton() {
     return (
       <button
         type="button"
-        onClick={() => signInWithGoogle("/member")}
+        onClick={() => signInWithGoogle("/player")}
         className="inline-flex items-center gap-2 h-10 px-3 md:px-4 rounded-xl text-sm font-semibold text-foreground/90 border border-[var(--gym-line)] hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)] transition-colors cursor-pointer"
       >
-        <span className="hidden sm:inline">Get your card</span>
-        <span className="sm:hidden">Sign in</span>
+        <span className="hidden sm:inline">Player card</span>
+        <span className="sm:hidden">Join</span>
       </button>
     );
   }
@@ -96,9 +134,9 @@ function MemberButton() {
   const first = (user?.name || user?.email || "").split(/[ @]/)[0];
   return (
     <Link
-      href="/member"
+      href="/player"
       className="group inline-flex items-center gap-2 h-10 pl-1 pr-1 md:pr-3 rounded-full border border-[var(--gym-line)] hover:border-[var(--gym-cyan)] transition-colors"
-      aria-label="Your membership card"
+      aria-label="Your player card"
     >
       {user?.image ? (
         // Google avatar: tiny, remote, not worth next/image config
