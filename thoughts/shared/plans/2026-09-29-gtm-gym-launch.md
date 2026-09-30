@@ -8,6 +8,8 @@ live: https://gym.bold.video
 # The GTM Gym: launch tracker
 
 > **2026-09-30: rebrand to "The GTM Game" (80s arcade) decided.** Start from the handoff: `thoughts/shared/handoffs/2026-09-30-gtm-game-rebrand.md`.
+>
+> **2026-09-30: rebrand shipped in code** (vocabulary, copy, assets, arcade layer, strategy guide, OG, `/player`, arcade.bold.video). Persona v2 below is ready to paste. See "Rebrand log" at the end.
 
 **The play:** FounderWell has the content, Bold has the tech. The GTM Gym is a joint lead
 magnet. Founders get GTM questions answered with receipts from FounderWell sessions, get
@@ -104,7 +106,38 @@ is a separate brand; confirm how FounderWell relates before naming it on the pag
 - Alternative: real clip assets (`mux://assets/{id}` with start/end), frame-accurate with
   their own playback ID, but billed as new assets and not instant
 
-### Persona v2 draft (paste into Mission Control → AI settings for account 110)
+### Persona v3: The GTM Game (paste into Mission Control → AI settings for account 110)
+Replaces the gym persona below. The UI lays answers out as "take → MOVE 01… → YOUR NEXT QUEST",
+so the shape is the same as v2; only the voice changes.
+
+> **ai_name:** Game Master
+>
+> **greeting:** Player one, ready? Ask me anything about going to market. I'll answer from
+> FounderWell's sessions and show you the exact minute that backs it up.
+>
+> **conversation starters:** How do I know if my positioning is too vague? · What should my
+> first cold email actually say? · How do I stop feature-dumping in sales demos? · A prospect
+> says "send me some info." What do I do?
+>
+> **persona_voice:** You are the Game Master of The GTM Game, a friendly 80s arcade host who
+> has watched every FounderWell session. Every answer is a mini game plan:
+> (1) one or two sentences with your take, grounded in the sessions;
+> (2) two or three moves as bullets, each concrete, doable this week, and citing the moment
+> that teaches it;
+> (3) a final line starting "Your next quest:" with one countable action (e.g. "Send 20
+> emails to one segment, change only the offer, count the replies").
+> Stay under 150 words. Humor is nostalgic and kind, never at the founder's expense, and
+> never tough-guy: no grinding, no "no pain no gain", no "bro". Only claim what the sessions
+> say, and say so when they don't cover it.
+> Game metaphors you can use, always tied to the GTM point: small levels before the boss
+> fight (test on 20 prospects before 2,000); save points (write down what worked); power-ups
+> (offers and assets); the boss (the objection); extra lives (runway, so don't waste them on
+> guesses); the tutorial (positioning, which everyone skips); pause is a button (let the data
+> land before changing the campaign).
+> Never impersonate or name real podcast hosts. Never mention real video game characters,
+> companies or titles.
+
+### Persona v2 draft (superseded by v3; kept for reference)
 Current persona (scripts/gtm_gym_demo_persona.exs) asks for ≤120 words and ≤3 bullets, but
 answers run ~300 words with 4+ bullets. The plan layout is "take → drills → today's set",
 so this version asks for exactly that shape.
@@ -137,3 +170,13 @@ Gym words only where they explain themselves; plain words where jargon would los
 | Submit | Coach me |
 | Stop streaming | Stop |
 Dropped: Spot me, Receipts, Rack it, Today's set (clashed with "set"), The play.
+
+## Rebrand log (2026-09-30)
+- Vocabulary everywhere: Level 01 stamps, Moves, Your next quest (+100 XP), Share your run, Strategy guide, Game over, Someone else's game, Player card (`/member` → 308 `/player`)
+- HUD replaces VCR OSD: 1UP (XP), HI-SCORE 250000, clickable INSERT COIN; sound toggle (original WebAudio blips, muted by default)
+- Arcade layer (`lib/gym-arcade.ts`, `components/gym/gym-arcade.tsx`): XP + 13 achievements in localStorage, toasts, Konami code (keys or swipes + 2 taps) → secret mode (CRT, turbo floor, hue-cycling sun, LIVES ×30, hidden Game Master in coach select) + **Objection Dodger** secret level (`gym-dodger.tsx`, canvas, high-score initials). Logo ×5 clicks = TILT. Tab away = "⏸ PAUSED". Console note. Night owl. 404 = GAME OVER with CONTINUE? countdown
+- Coach select with stat bars + specials; trophy case on `/player`
+- Assets regenerated with Codex (sources in `design/gtm-gym/game/`): logo (joystick + chart), Game Master avatar, five portraits (Drew redone once: first pass looked like a specific console pad). Served from `public/gym/game/` (new paths so image caches miss)
+- Pixel joystick favicon (`public/gym/icon.svg`), static home OG card re-rendered (`?v=3`), `/og` cards: LEVEL 01 / INSTANT REPLAY / 1UP HUD
+- Strategy guide print: level map, moves with tries boxes, save points, HIGH SCORE stamp, cheat codes
+- Founder note: PSST sticker, copy reframed for the game (still a draft for Vanessa)
