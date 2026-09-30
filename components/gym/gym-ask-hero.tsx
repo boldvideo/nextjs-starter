@@ -144,7 +144,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
       <div className="relative z-10 flex items-end gap-3 mb-4 md:mb-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
         <div className="relative shrink-0">
           <Image
-            src="/gym/game/game-master.webp"
+            src="/gym/game/game-master-bot.webp"
             alt="The GTM Game master"
             width={76}
             height={76}

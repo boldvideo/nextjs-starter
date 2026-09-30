@@ -277,7 +277,7 @@ export default async function PlanPage({
           </div>
           <div className="flex items-center gap-3">
             <Image
-              src={coach ? `/gym/game/cast/${coach.slug}.webp` : "/gym/game/game-master.webp"}
+              src={coach ? `/gym/game/cast/${coach.slug}.webp` : "/gym/game/game-master-bot.webp"}
               alt=""
               width={56}
               height={56}

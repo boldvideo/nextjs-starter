@@ -400,7 +400,7 @@ function GymSet({
       <div className="rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] p-4 md:p-5">
         <div className="flex items-center gap-2.5 mb-2">
           <Image
-            src={coach ? `/gym/game/cast/${coach.slug}.webp` : "/gym/game/game-master.webp"}
+            src={coach ? `/gym/game/cast/${coach.slug}.webp` : "/gym/game/game-master-bot.webp"}
             alt=""
             width={32}
             height={32}
