@@ -14,9 +14,9 @@ export const GYM_PUBLIC_HOST = "play.founderwell.com";
 export const GYM_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || `https://${GYM_PUBLIC_HOST}`;
 export const GYM_DEFAULT_TITLE = "The GTM Game — by FounderWell";
 export const GYM_DEFAULT_DESCRIPTION =
-  "What's your next move? Ask the game master anything about going to market — positioning, outbound, demos, pricing — and get a game plan with proof: the exact minute of FounderWell training that backs it up.";
+  "Answers from real GTM coaches, not generic AI. Ask anything about going to market — positioning, outbound, demos, pricing — and get a game plan with the exact minute of a FounderWell coaching session that backs it up. Free.";
 // Bump ?v= when the card changes; crawlers cache by URL
-export const GYM_HOME_IMAGE = "/gym/og-home.jpg?v=4";
+export const GYM_HOME_IMAGE = "/gym/og-home.jpg?v=5";
 
 interface GymMetaInput {
   /** Page title (the layout template appends " · The GTM Game") */
@@ -37,7 +37,7 @@ export function gymMeta({
   description = GYM_DEFAULT_DESCRIPTION,
   path,
   image = GYM_HOME_IMAGE,
-  imageAlt = "The GTM Game — What's your next move? Press start, see the proof.",
+  imageAlt = "The GTM Game by FounderWell: answers from real GTM coaches, not generic AI, with the exact minute of video that backs them up.",
   type = "website",
 }: GymMetaInput = {}): Metadata {
   const ogTitle = shareTitle || title || GYM_DEFAULT_TITLE;

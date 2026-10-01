@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!--
+  The homepage share card (1200×630). It has to explain the product in two
+  seconds to someone who has never heard of it: ask a GTM question → get the
+  answer + the exact clip from a real FounderWell session. Real coaches,
+  real frame, plain headline; the arcade look is seasoning.
+  Render: python3 -m http.server 8741 from the repo root, open
+  /design/gtm-gym/og/home-card.html at 1200×630, screenshot → public/gym/og-home.jpg
+-->
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@500;600;700&family=VT323&display=block" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: #0b0618; }
+  .card { position: relative; width: 1200px; height: 630px; overflow: hidden;
+    background: radial-gradient(900px 500px at 85% 115%, #3a0d5c 0%, transparent 60%), linear-gradient(180deg,#0b0618 0%,#140a30 55%,#1c0838 100%);
+    font-family: "Space Grotesk", sans-serif; color: #f6f0ff; }
+  .stars { position: absolute; inset: 0; opacity: .55;
+    background:
+      radial-gradient(1.5px 1.5px at 8% 12%,#fff,transparent), radial-gradient(1.5px 1.5px at 31% 6%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 47% 22%,#fff,transparent), radial-gradient(2px 2px at 63% 9%,#fff,transparent),
+      radial-gradient(1.5px 1.5px at 91% 7%,#fff,transparent), radial-gradient(1.5px 1.5px at 22% 48%,#fff,transparent); }
+  .sun { position: absolute; right: -40px; bottom: 150px; width: 560px; aspect-ratio: 1; border-radius: 50%; opacity: .55;
+    background: linear-gradient(180deg,#ffe45c 0%,#ffb03a 35%,#ff5a8a 65%,#ff2ea6 100%);
+    -webkit-mask-image: linear-gradient(180deg,#000 0%,#000 46%,transparent 46%,transparent 50%,#000 50%,#000 58%,transparent 58%,transparent 63%,#000 63%,#000 70%,transparent 70%,transparent 76%,#000 76%,#000 82%,transparent 82%,transparent 89%,#000 89%,#000 93%,transparent 93%);
+    filter: blur(.3px); }
+  .floor { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; overflow: hidden; }
+  .grid { position: absolute; left: -50%; right: -50%; top: 0; height: 300%;
+    transform-origin: 50% 0; transform: perspective(260px) rotateX(64deg);
+    background-image: linear-gradient(to right, rgba(255,46,166,.45) 2px, transparent 2px), linear-gradient(to bottom, rgba(34,230,255,.4) 2px, transparent 2px);
+    background-size: 64px 64px; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 25%); }
+  .horizon { position: absolute; left: 0; right: 0; bottom: 150px; height: 2px; background: #ff2ea6; box-shadow: 0 0 24px 4px rgba(255,46,166,.6); }
+  .scan { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay;
+    background: repeating-linear-gradient(180deg, rgba(255,255,255,.04) 0 1px, transparent 1px 3px); }
+
+  .left { position: absolute; left: 56px; top: 44px; width: 600px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { width: 52px; height: 52px; }
+  .brand .name { font-family: Bungee; font-size: 22px; line-height: 1;
+    background: linear-gradient(90deg,#ffd23f,#ff8a1f 38%,#ff2ea6); -webkit-background-clip: text; color: transparent; }
+  .brand .by { margin-top: 5px; font-size: 16px; font-weight: 500; color: #a99bcc; display: flex; align-items: center; gap: 6px; }
+  .generic { margin-top: 34px; display: flex; align-items: center; gap: 12px; }
+  .generic .label { font-family: VT323; font-size: 22px; line-height: 1; color: #8b7bb5; letter-spacing: .04em; white-space: nowrap; }
+  .generic .said { position: relative; padding: 9px 14px; border-radius: 14px 14px 14px 4px; background: rgba(255,255,255,.07);
+    color: #8b7bb5; font-size: 17px; line-height: 1.3; }
+  .generic .said::after { content: ""; position: absolute; left: 8px; right: 8px; top: 50%; height: 3px; background: #ff2ea6;
+    transform: rotate(-2deg); box-shadow: 0 0 10px rgba(255,46,166,.8); border-radius: 2px; }
+  h1 { margin-top: 24px; font-size: 52px; line-height: 1.04; font-weight: 700; letter-spacing: -.025em; }
+  h1 .hot { display: block; margin-top: 6px;
+    background: linear-gradient(90deg,#ffd23f,#ff8a1f 40%,#ff2ea6); -webkit-background-clip: text; color: transparent; }
+  .sub { margin-top: 18px; font-size: 21px; max-width: 520px; line-height: 1.4; color: #cfc4ec; max-width: 540px; }
+  .sub b { color: #fff; font-weight: 600; }
+  .coaches { position: absolute; left: 56px; bottom: 58px; display: flex; align-items: center; gap: 16px; }
+  .faces { display: flex; }
+  .faces img { width: 62px; height: 62px; margin-right: -14px; }
+  .coaches .who { margin-left: 14px; font-size: 18px; line-height: 1.3; color: #cfc4ec; }
+  .coaches .who b { color: #fff; font-weight: 600; }
+
+  /* The product, working */
+  .shot { position: absolute; right: 52px; top: 58px; width: 470px; transform: rotate(1.5deg);
+    padding: 3px; border-radius: 22px; background: linear-gradient(135deg,#22e6ff,#7b2cff 45%,#ff2ea6);
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,.8), 0 0 70px -20px rgba(255,46,166,.7); }
+  .shot .in { border-radius: 19px; background: #120a26; padding: 22px 22px 20px; }
+  .stamp { display: inline-block; transform: rotate(-2deg); font-family: Bungee; font-size: 14px; line-height: 1; color: #1a0616;
+    background: #ff2ea6; padding: 6px 9px; border-radius: 6px; box-shadow: 3px 3px 0 #ffd23f; }
+  .q { margin-top: 12px; font-size: 25px; line-height: 1.15; font-weight: 700; letter-spacing: -.015em; }
+  .take-by { margin-top: 14px; display: flex; align-items: center; gap: 8px; font-size: 15px; color: #a99bcc; }
+  .take-by img { width: 26px; height: 26px; }
+  .take-by b { color: #fff; font-weight: 600; }
+  .take { margin-top: 8px; font-size: 17px; line-height: 1.45; color: #e9e2ff; font-weight: 500; }
+  .clip { margin-top: 14px; position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9;
+    border: 2px solid #22e6ff; box-shadow: 0 0 30px -6px rgba(34,230,255,.7); }
+  .clip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .clip .shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(11,6,24,.92)); }
+  .clip .play { position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%); width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(90deg,#ffd23f,#ff8a1f 38%,#ff2ea6); display: grid; place-items: center; box-shadow: 0 0 30px rgba(255,46,166,.7); }
+  .clip .play::after { content: ""; margin-left: 5px; border-left: 18px solid #1a0616; border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+  .clip .meta { position: absolute; left: 12px; right: 12px; bottom: 9px; display: flex; justify-content: space-between; align-items: baseline; }
+  .clip .tc { font-family: VT323; font-size: 26px; color: #fff; text-shadow: 0 0 8px rgba(34,230,255,.9); }
+  .clip .title { font-size: 13px; font-weight: 600; color: #e9e2ff; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .proof { position: absolute; right: 22px; top: -14px; transform: rotate(4deg); font-family: Bungee; font-size: 13px; color: #06121a;
+    background: #22e6ff; padding: 6px 10px; border-radius: 6px; box-shadow: 3px 3px 0 #ff2ea6; }
+
+  .url { position: absolute; right: 56px; bottom: 50px; display: flex; align-items: center; gap: 12px; }
+  .url .free { font-family: Bungee; font-size: 15px; color: #1a0616; padding: 9px 13px; border-radius: 9px;
+    background: linear-gradient(90deg,#ffd23f,#ff8a1f 38%,#ff2ea6); box-shadow: 0 6px 24px -6px rgba(255,46,166,.7); }
+  .url .host { font-family: VT323; font-size: 34px; color: #fff; letter-spacing: .03em; text-shadow: 0 0 10px rgba(34,230,255,.7); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="stars"></div>
+  <div class="sun"></div>
+  <div class="horizon"></div>
+  <div class="floor"><div class="grid"></div></div>
+
+  <div class="left">
+    <div class="brand">
+      <img src="/public/gym/game/logo.webp" alt="">
+      <div>
+        <div class="name">THE GTM GAME</div>
+        <div class="by">by <img src="/public/gym/founderwell-mark-teal.svg" style="width:15px;height:15px"> <span style="color:#f6f0ff">FounderWell</span></div>
+      </div>
+    </div>
+    <div class="generic">
+      <span class="label">GENERIC AI</span>
+      <span class="said">&ldquo;Great question! Here are 10 tips&hellip;&rdquo;</span>
+    </div>
+    <h1>Answers from real GTM coaches.<span class="hot">Not generic AI.</span></h1>
+    <p class="sub">Every answer comes with <b>the exact minute</b> of a real FounderWell coaching session that backs it up.</p>
+  </div>
+
+  <div class="coaches">
+    <div class="faces">
+      <img src="/public/gym/game/cast/cameron.webp" alt="">
+      <img src="/public/gym/game/cast/drew.webp" alt="">
+      <img src="/public/gym/game/cast/joel.webp" alt="">
+      <img src="/public/gym/game/cast/vanessa.webp" alt="">
+    </div>
+    <div class="who">With <b>Cameron, Drew, Joel</b><br>and the FounderWell team</div>
+  </div>
+
+  <div class="shot">
+    <div class="in">
+      <span class="stamp">LEVEL 01</span>
+      <div class="q">How do I stop feature-dumping in sales demos?</div>
+      <div class="take-by"><img src="/public/gym/game/cast/drew.webp" alt=""> <span><b>Coach Drew</b>&rsquo;s take</span></div>
+      <div class="take">Stop treating the demo like a product tour. Treat it like proof you can solve their most urgent problem.</div>
+      <div class="clip">
+        <img src="https://image.mux.com/XJ3iy22C2hEQPTAQVMFQT02He01lHEcXVZ/thumbnail.jpg?time=2393&width=900" alt="">
+        <div class="shade"></div>
+        <div class="play"></div>
+        <div class="meta"><span class="tc">PLAY ▶ 39:53</span><span class="title">Demo Less, Close More</span></div>
+      </div>
+    </div>
+    <span class="proof">THE PROOF</span>
+  </div>
+
+  <div class="url"><span class="free">FREE PLAY</span><span class="host">play.founderwell.com</span></div>
+</div>
+<div class="scan" style="position:fixed"></div>
+</body>
+</html>
