@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { getTenantContext } from "@/lib/get-tenant-context";
-import { gymMeta, GYM_BASE_URL } from "@/lib/gym-meta";
+import { gymMeta, GYM_BASE_URL, GYM_PUBLIC_HOST } from "@/lib/gym-meta";
 import { plainText, refsIn, splitPlan } from "@/lib/gym-plan-parse";
 import { coachForVideo, coachLabel, COACHES, type Coach } from "@/components/gym/gym-coaches-data";
 import { PrintButton } from "./print-button";
@@ -227,7 +227,7 @@ export default async function PlanPage({
             <Image src="/gym/game/logo.webp" alt="" width={64} height={64} className="h-16 w-16" />
             <div>
               <p className="font-display text-[22px] leading-none">THE GTM GAME</p>
-              <p className="mt-1 text-[12px] text-[var(--ink-soft)]">by FounderWell · arcade.bold.video</p>
+              <p className="mt-1 text-[12px] text-[var(--ink-soft)]">by FounderWell · {GYM_PUBLIC_HOST}</p>
             </div>
           </div>
           <div className="text-right">
@@ -395,7 +395,7 @@ export default async function PlanPage({
               ))}
             </ul>
             <p className="mt-4 font-osd text-[16px] leading-tight text-[var(--ink-soft)]">
-              SCAN ANY CODE FOR AN INSTANT REPLAY · MORE LEVELS AT ARCADE.BOLD.VIDEO
+              SCAN ANY CODE FOR AN INSTANT REPLAY · MORE LEVELS AT {GYM_PUBLIC_HOST.toUpperCase()}
             </p>
           </div>
           <div className="md:text-right md:self-end">

@@ -8,7 +8,10 @@ import type { Metadata } from "next";
  */
 
 export const GYM_SITE_NAME = "The GTM Game";
-export const GYM_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://arcade.bold.video";
+/** The public host printed on share cards and the strategy guide (not the
+ *  request host, so previews and localhost never leak onto a card). */
+export const GYM_PUBLIC_HOST = "arcade.bold.video";
+export const GYM_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || `https://${GYM_PUBLIC_HOST}`;
 export const GYM_DEFAULT_TITLE = "The GTM Game — by FounderWell";
 export const GYM_DEFAULT_DESCRIPTION =
   "What's your next move? Ask the game master anything about going to market — positioning, outbound, demos, pricing — and get a game plan with proof: the exact minute of FounderWell training that backs it up.";

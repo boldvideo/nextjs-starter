@@ -20,6 +20,14 @@ related: thoughts/shared/plans/2026-09-29-gtm-gym-launch.md (living tracker), BO
 >    fork already uses `public/gym/game/*` and the pixel `public/gym/icon.svg`).
 > 4. Approvals: Vanessa (founder note v2), coaches (new portraits in `design/gtm-gym/game/`).
 >
+> **play.founderwell.com (2026-10-01):** attached to the Vercel project and verified. Waiting on
+> FounderWell's DNS (NameBright): `CNAME play → 3a9eaefb71874411.vercel-dns-016.com`. Once it resolves:
+> (1) `GYM_PUBLIC_HOST` in `lib/gym-meta.ts` → `play.founderwell.com`, update the footer line in
+> `design/gtm-gym/og/card.html`, re-render `og-home.jpg`, bump `?v=`; (2) Vercel env
+> `NEXT_PUBLIC_BASE_URL` + `BETTER_AUTH_URL` → `https://play.founderwell.com`; (3) Google OAuth redirect
+> URI `https://play.founderwell.com/api/auth/callback/google`; (4) project domains: arcade.bold.video and
+> gym.bold.video both 308 → play.founderwell.com (no chain); (5) push.
+>
 > Asset paths moved to `public/gym/game/` (logo, master, coaches/*, *-og.png) so the image
 > optimizer and CDN caches miss; the old `public/gym/{logo,coach}.webp` and `coaches/` are gone.
 

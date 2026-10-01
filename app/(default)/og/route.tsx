@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { GYM_PUBLIC_HOST } from "@/lib/gym-meta";
 
 /**
  * The GTM Game social cards (fork-owned; replaces the tenant-branded card).
@@ -26,6 +27,8 @@ const COLORS = {
   orange: "#ff8a1f",
   yellow: "#ffd23f",
 };
+
+const HOST = GYM_PUBLIC_HOST.toUpperCase();
 
 const CACHE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
 
@@ -162,7 +165,7 @@ export async function GET(request: Request) {
       ? `https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=1120&height=630&fit_mode=smartcrop${t ? `&time=${t}` : ""}`
       : null;
 
-    const text = `THE GTM GAMEby FounderWellINSTANT REPLAY${title}PLAY ▶ ${timecode}1UPINSERT COINWATCH THE CLIP ▶ ARCADE.BOLD.VIDEO`;
+    const text = `THE GTM GAMEby FounderWellINSTANT REPLAY${title}PLAY ▶ ${timecode}1UPINSERT COINWATCH THE CLIP ▶ ${HOST}`;
     const [bungee, grotesk, osd, logo, bg, frameSrc] = await Promise.all([
       loadGoogleFont("Bungee", text),
       loadGoogleFont("Space Grotesk", text, 700),
@@ -296,7 +299,7 @@ export async function GET(request: Request) {
               color: COLORS.cyan,
             }}
           >
-            WATCH THE CLIP ▶ ARCADE.BOLD.VIDEO
+            {`WATCH THE CLIP ▶ ${HOST}`}
           </div>
           <Hud />
         </div>
@@ -316,7 +319,7 @@ export async function GET(request: Request) {
   // ── Question card ──────────────────────────────────────────────────────
   const q = clamp(question!, 140);
   const size = q.length <= 38 ? 72 : q.length <= 70 ? 60 : q.length <= 105 ? 50 : 44;
-  const text = `THE GTM GAMEby FounderWellLEVEL 01“${q}”GAME PLAN + THE PROOF ▶ ARCADE.BOLD.VIDEO1UPINSERT COIN`;
+  const text = `THE GTM GAMEby FounderWellLEVEL 01“${q}”GAME PLAN + THE PROOF ▶ ${HOST}1UPINSERT COIN`;
   const [bungee, grotesk, grotesk500, osd, logo, coach, bg] = await Promise.all([
     loadGoogleFont("Bungee", text),
     loadGoogleFont("Space Grotesk", text, 700),
@@ -406,7 +409,7 @@ export async function GET(request: Request) {
             color: COLORS.cyan,
           }}
         >
-          GAME PLAN + THE PROOF ▶ ARCADE.BOLD.VIDEO
+          {`GAME PLAN + THE PROOF ▶ ${HOST}`}
         </div>
         <Hud />
       </div>
