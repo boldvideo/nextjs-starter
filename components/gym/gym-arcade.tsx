@@ -10,6 +10,7 @@ import {
   useArcade,
   type Achievement,
 } from "@/lib/gym-arcade";
+import { track } from "@/lib/gym-track";
 
 /**
  * The machine's global layer, mounted once in the layout:
@@ -114,6 +115,7 @@ export function GymArcade() {
     sfx("powerup");
     setSecret(true);
     unlock("konami");
+    track("Konami");
     setDodger(true);
   });
 

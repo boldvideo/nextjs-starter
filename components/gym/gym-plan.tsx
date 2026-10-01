@@ -14,6 +14,7 @@ import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
 import { refsIn, splitPlan } from "@/lib/gym-plan-parse";
 import { addXp, sfx, unlock } from "@/lib/gym-arcade";
+import { track } from "@/lib/gym-track";
 
 /**
  * An answer, laid out as a game plan:
@@ -291,6 +292,7 @@ function GymClip({
         if (!interaction) return;
         setOpen(new SourceOpen(citation.videoId, interaction));
         unlock("replay");
+        track("Clip played", { video: citation.videoTitle.slice(0, 120) });
       }}
       className={cn(
         "group w-full max-w-[560px] text-left grid grid-cols-[132px_1fr] sm:grid-cols-[168px_1fr] gap-3.5 sm:gap-4 items-center",
@@ -370,6 +372,7 @@ function GymSet({
     setDone(true);
     setBurst((n) => n + 1);
     sfx("quest");
+    track("Quest complete");
     addXp(100, "QUEST");
     unlock("quest");
   };
@@ -379,12 +382,14 @@ function GymSet({
     try {
       if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
         await navigator.share({ url, title: "My run in The GTM Game" });
+        track("Share", { via: "native" });
         unlock("player-2");
         return;
       }
       await navigator.clipboard.writeText(url);
       setCopied(true);
       sfx("coin");
+      track("Share", { via: "copy" });
       unlock("player-2");
       setTimeout(() => setCopied(false), 2200);
     } catch {
@@ -447,7 +452,10 @@ function GymSet({
                 href={printUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => unlock("guide")}
+                onClick={() => {
+                  unlock("guide");
+                  track("Strategy guide");
+                }}
                 className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]")}
               >
                 <Printer className="h-4 w-4" />

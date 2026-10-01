@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { setStage, useArcade } from "@/lib/gym-arcade";
 import { STAGES } from "@/lib/gym-lead";
+import { track } from "@/lib/gym-track";
 
 /**
  * "Select difficulty", asked at the one moment it costs nothing: while the
@@ -33,6 +34,7 @@ export function GymStagePrompt() {
           onClick={() => {
             setStage(s);
             setPicked(s);
+            track("Stage picked", { stage: s });
           }}
           className="h-8 px-3 rounded-full text-[13px] font-semibold border border-[var(--gym-line)] text-foreground/85 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)] cursor-pointer"
         >

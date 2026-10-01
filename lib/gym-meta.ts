@@ -8,6 +8,8 @@ import type { Metadata } from "next";
  */
 
 export const GYM_SITE_NAME = "The GTM Game";
+/** Plausible site script id (play.founderwell.com); public by design. */
+export const GYM_PLAUSIBLE_ID = "pa-eZ8gix9WZD7NHu7WqWIfa";
 /** The public host printed on share cards and the strategy guide (not the
  *  request host, so previews and localhost never leak onto a card). */
 export const GYM_PUBLIC_HOST = "play.founderwell.com";

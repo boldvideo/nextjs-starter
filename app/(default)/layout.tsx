@@ -16,6 +16,7 @@ import {
   gymMeta,
   GYM_BASE_URL,
   GYM_DEFAULT_TITLE,
+  GYM_PLAUSIBLE_ID,
   GYM_SITE_NAME,
 } from "@/lib/gym-meta";
 
@@ -125,7 +126,8 @@ export default async function RootLayout({
         className="bg-background flex flex-col h-[100dvh] overflow-hidden lg:overflow-auto"
         suppressHydrationWarning
       >
-        <Analytics config={config.analytics} />
+        {/* Fork: the game's own Plausible site, whatever the tenant has set */}
+        <Analytics config={{ provider: "plausible", id: GYM_PLAUSIBLE_ID }} />
         <BoldProvider
           token={tenantToken}
           baseURL={process.env.BACKEND_URL || "https://app.boldvideo.io/api/v1"}

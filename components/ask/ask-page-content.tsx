@@ -31,6 +31,7 @@ import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
 import { addXp, markCoin, needsCoin, recordPlay, unlock } from "@/lib/gym-arcade";
 import { GymCoinGate } from "@/components/gym/gym-coin-gate";
 import { GymStagePrompt } from "@/components/gym/gym-stage-prompt";
+import { track } from "@/lib/gym-track";
 
 type PageState =
   | { status: "idle" }
@@ -233,6 +234,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       const asked = messages.filter((m) => m.role === "user");
       const levels = asked.length;
       recordPlay(asked[asked.length - 1]?.content ?? "");
+      track("Level asked", { level: levels });
       addXp(50, `LEVEL ${String(Math.max(1, levels)).padStart(2, "0")}`);
       unlock("press-start");
       if (levels >= 3) unlock("combo");

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { signInWithGoogle } from "@/lib/auth-client";
 import { addXp, FREE_PLAYS, markCoin, setStage, sfx, useArcade } from "@/lib/gym-arcade";
 import { CONSENT_TEXT, FOUNDERWELL_PRIVACY_URL, STAGES } from "@/lib/gym-lead";
+import { track } from "@/lib/gym-track";
 
 /**
  * INSERT COIN: after the free levels, the next one costs an email. The
@@ -23,6 +24,7 @@ export function GymCoinGate({ onInserted, onLeave }: { onInserted: () => void; o
 
   useEffect(() => {
     sfx("gameover");
+    track("Coin gate shown");
     inputRef.current?.focus();
   }, []);
 
@@ -40,6 +42,7 @@ export function GymCoinGate({ onInserted, onLeave }: { onInserted: () => void; o
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || "The machine jammed. Try again.");
       sfx("coin");
+      track("Coin inserted", stage ? { stage } : undefined);
       markCoin();
       addXp(100, "COIN");
       onInserted();

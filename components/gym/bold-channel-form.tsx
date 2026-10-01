@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BOLD_CONSENT_TEXT, BOLD_PRIVACY_URL } from "@/lib/bold-lead";
+import { track } from "@/lib/gym-track";
 
 /** Bold's one ask on /built-by-bold. Its own form and consent, never FounderWell's coin. */
 export function BoldChannelForm() {
@@ -27,6 +28,7 @@ export function BoldChannelForm() {
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error || "Something broke. Try again.");
       setState("sent");
+      track("Channel submitted");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something broke. Try again.");
       setState("error");
