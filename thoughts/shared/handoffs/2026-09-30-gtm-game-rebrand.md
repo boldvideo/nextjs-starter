@@ -1,7 +1,7 @@
 ---
 date: 2026-09-30
 branch: gtmgym
-live: https://arcade.bold.video (gym.bold.video 308s to it)
+live: https://play.founderwell.com (the only domain; arcade/gym 308 to it)
 status: rebrand shipped 2026-09-30 (commit beedfe0); the backlog below is next
 next: Google OAuth redirect URI for arcade, paste persona v3, tenant logo upload, approvals
 related: thoughts/shared/plans/2026-09-29-gtm-gym-launch.md (living tracker), BOLD-1994, BOLD-1995
@@ -9,6 +9,21 @@ related: thoughts/shared/plans/2026-09-29-gtm-gym-launch.md (living tracker), BO
 
 # Handoff: The GTM Gym → The GTM Game
 
+> **Update 2026-10-01: live on play.founderwell.com, lead capture shipped.**
+> - Capture: 3 free levels → INSERT COIN (`gym-coin-gate.tsx`): email + optional stage, consent names
+>   FounderWell only (`lib/gym-lead.ts`). `POST /api/gym/player` upserts a Bold viewer (traits: stage,
+>   lead_source, founderwell_consent_at, first_questions), sets a signed `gym_player` cookie, and pushes
+>   `{event: "lead"}` to `FOUNDERWELL_LEAD_WEBHOOK_URL`; every later question pushes `{event: "question"}`
+>   and is asked as that viewer. **The webhook env is not set yet** (needs FounderWell's CRM / Zapier URL).
+>   Gate is client-side (localStorage); real content protection is BOLD-1994 (clip-only playback).
+> - "Select difficulty" (stage) on the hero → `viewerProfile: {stage}` on every ask.
+> - Bold lane: "built by BOLD" in the header, footer pitch → `/built-by-bold` (one ask: mailto
+>   support@boldvideo.com; swap for a real form/booking link). "With our partners at FounderWell" wording:
+>   confirm the disclosure Marcel wants.
+> - Homepage share card redesigned for timeline size (`design/gtm-gym/og/home-card.html`, `?v=6`).
+> - Tenant settings still say "The GTM Gym" (name, AI greeting, assistant headline): rename in Mission
+>   Control with persona v3. Fictional demo data (viewers/analytics) still in the tenant (BOLD-1991).
+>
 > **Update 2026-09-30, shipped.** Name "The GTM Game", domain **arcade.bold.video** (Marcel's pick
 > over game.bold.video), gym.bold.video is a project-domain 308 to it (paths + queries kept).
 > What landed is logged at the end of the tracker ("Rebrand log"). Still open:
