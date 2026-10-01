@@ -8,8 +8,6 @@ export interface GymWorkout {
   label: string;
   /** GTM topic, shown as the category */
   topic: string;
-  /** One-line level intro */
-  bark: string;
   question: string;
   tone: "pink" | "cyan" | "orange" | "yellow";
 }
@@ -18,28 +16,24 @@ export const GYM_WORKOUTS: GymWorkout[] = [
   {
     label: "World 1-1",
     topic: "Positioning",
-    bark: "The tutorial everyone skips. Don't.",
     question: "How do I know if my positioning is too vague?",
     tone: "pink",
   },
   {
     label: "World 1-2",
     topic: "Outbound",
-    bark: "More sends, without becoming spam.",
     question: "What should my first cold email actually say?",
     tone: "cyan",
   },
   {
     label: "World 1-3",
     topic: "Demos",
-    bark: "Show the one thing they need.",
     question: "How do I stop feature-dumping in sales demos?",
     tone: "orange",
   },
   {
     label: "World 1-4",
     topic: "Objections",
-    bark: "Boss fight: “send me some info.”",
     question: "A prospect says 'send me some info.' What do I do?",
     tone: "yellow",
   },

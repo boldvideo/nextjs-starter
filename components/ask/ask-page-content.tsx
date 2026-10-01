@@ -30,6 +30,7 @@ import { PoweredByBold } from "@/components/powered-by-bold";
 import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
 import { addXp, markCoin, needsCoin, recordPlay, unlock } from "@/lib/gym-arcade";
 import { GymCoinGate } from "@/components/gym/gym-coin-gate";
+import { GymStagePrompt } from "@/components/gym/gym-stage-prompt";
 
 type PageState =
   | { status: "idle" }
@@ -486,6 +487,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 </h2>
               </div>
               <GymLoading />
+              <GymStagePrompt />
             </div>
           ) : (
             <GymLoading status="Loading saved game…" />
@@ -589,6 +591,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     <h2 className="font-bold text-[26px] md:text-[34px] tracking-[-0.02em] leading-[1.12] text-foreground text-balance">
                       {pair.userMessage.content}
                     </h2>
+                    {isCurrentlyStreaming && (
+                      <div className="mt-4">
+                        <GymStagePrompt />
+                      </div>
+                    )}
                   </div>
 
                   {pair.assistantMessage?.type === "loading" && (

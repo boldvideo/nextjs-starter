@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * The arcade's machine state, per browser: the 1UP score (XP), credits,
+ * The arcade's machine state, per browser: the 1UP score (XP),
  * achievements, sound, secret mode and the Objection Dodger high scores.
  * localStorage-backed (a nice-to-have: everything works without it) and
  * read through useSyncExternalStore so every HUD stays in sync.
@@ -18,7 +18,6 @@ export interface HighScore {
 
 export interface ArcadeState {
   xp: number;
-  credits: number;
   sound: boolean;
   secret: boolean;
   achievements: Record<string, number>;
@@ -49,7 +48,6 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "player-2", title: "Player 2 has entered", detail: "Shared your run.", xp: 150 },
   { id: "random", title: "Feeling lucky", detail: "Rolled a random level.", xp: 25 },
   { id: "konami", title: "You know the code", detail: "↑↑↓↓←→←→BA. Respect.", xp: 1000 },
-  { id: "big-spender", title: "Big spender", detail: "25 coins in a free-play machine. That's $6.25.", xp: 250 },
   { id: "night-owl", title: "Night owl", detail: "The arcade never closes. You should, though.", xp: 100 },
   { id: "tilt", title: "Tilt!", detail: "Stop shaking the machine.", xp: 50 },
   { id: "boss", title: "Boss slayer", detail: "Scored 5,000 in Objection Dodger.", xp: 500 },
@@ -64,14 +62,10 @@ const HOUSE_SCORES: HighScore[] = [
   { initials: "MRC", score: 9000, house: true },
 ];
 
-/** The HI-SCORE in the HUD. Vanessa owns the building and the record. */
-export const HOUSE_HI_SCORE = 250000;
-
 const KEY = "gtm-game:v1";
 
 const INITIAL: ArcadeState = {
   xp: 0,
-  credits: 0,
   sound: false,
   secret: false,
   achievements: {},
@@ -165,13 +159,6 @@ export function unlock(id: string): boolean {
   emit({ type: "achievement", achievement });
   sfx("achievement");
   return true;
-}
-
-export function insertCoin() {
-  const credits = getSnapshot().credits + 1;
-  set({ credits });
-  sfx("coin");
-  if (credits >= 25) unlock("big-spender");
 }
 
 export function toggleSound() {

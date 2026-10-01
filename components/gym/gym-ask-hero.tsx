@@ -8,8 +8,7 @@ import { cn } from "@/lib/utils";
 import { GymHorizon } from "./gym-backdrop";
 import { useGymMember } from "./use-gym-member";
 import { GymNoteSticker } from "./gym-founder-note";
-import { setStage, sfx, unlock, useArcade } from "@/lib/gym-arcade";
-import { STAGES } from "@/lib/gym-lead";
+import { sfx, unlock } from "@/lib/gym-arcade";
 import {
   GYM_PLACEHOLDERS,
   GYM_RANDOM_REPS,
@@ -92,12 +91,11 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
   const [nudge, setNudge] = useState(0);
   const placeholder = useTypewriter(GYM_PLACEHOLDERS, query.length === 0);
   const { user, member } = useGymMember();
-  const { stage } = useArcade();
   const first = (user?.name || "").split(" ")[0];
   const company = member?.profile?.business_name;
   const greeting = first
-    ? `Welcome back, ${first}. Ready for the next level${company ? ` at ${company}` : ""}?`
-    : "Player one, ready? What do you want to know about going to market?";
+    ? `Welcome back, ${first}. What's your next move${company ? ` at ${company}` : ""}?`
+    : "Player one, ready? What's your next move?";
 
   const ask = useCallback(
     (question: string) => {
@@ -141,7 +139,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
   }, []);
 
   return (
-    <div className="relative w-full max-w-[880px] mx-auto flex flex-col items-center text-center">
+    <div className="relative w-full max-w-[960px] mx-auto flex flex-col items-center text-center">
       {/* The game master waves you over */}
       <div className="relative z-10 flex items-end gap-3 mb-4 md:mb-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
         <div className="relative shrink-0">
@@ -162,9 +160,10 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
       <div className="relative w-full">
         <GymHorizon />
         {/* "Psst." What this is and who FounderWell is. Opens Vanessa's note. */}
-        <GymNoteSticker className="absolute z-20 -bottom-14 right-1 h-[68px] w-[68px] md:bottom-auto md:-top-16 md:-right-12 lg:-right-20 md:h-[96px] md:w-[96px] rotate-6" />
-        <h1 className="relative font-display gym-chrome uppercase leading-[0.9] text-[clamp(44px,8.6vw,108px)] tracking-[-0.02em] pb-[0.28em]">
-          What&apos;s your next move?
+        <GymNoteSticker className="absolute z-20 -bottom-14 right-1 h-[68px] w-[68px] md:bottom-auto md:-top-14 md:-right-10 lg:-right-16 md:h-[80px] md:w-[80px] rotate-6" />
+        <h1 className="relative font-display gym-chrome uppercase leading-[0.92] text-[44px] sm:text-[clamp(34px,5.6vw,68px)] tracking-[-0.02em] pb-[0.3em]">
+          <span className="block sm:whitespace-nowrap text-balance">Real GTM coaches.</span>
+          <span className="block sm:whitespace-nowrap text-balance">Receipts included.</span>
         </h1>
         {/* Sticker riding the horizon line */}
         <div className="absolute left-1/2 bottom-[18%] -translate-x-1/2 translate-y-[125%] z-10">
@@ -185,10 +184,10 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
       </div>
 
       <p className="relative z-10 mt-12 md:mt-14 max-w-[640px] text-base md:text-lg leading-relaxed text-foreground/80 text-pretty">
-        <strong className="text-foreground">Answers from real GTM coaches, not generic AI.</strong>{" "}
-        Ask anything about going to market. Every answer comes from
-        {hours ? <> {hours} hours of</> : ""} FounderWell coaching sessions, with{" "}
-        <span className="text-[var(--gym-cyan)] font-semibold">the exact minute of video</span> that backs it up.
+        Ask anything about going to market. FounderWell&apos;s coaches answer
+        {hours ? <> from {hours} hours of sessions</> : ""}, with{" "}
+        <span className="text-[var(--gym-cyan)] font-semibold">the exact minute they said it</span>.{" "}
+        <span className="text-muted-foreground">(Not 10 tips from a chatbot that skimmed a blog post.)</span>
       </p>
 
       {/* The input */}
@@ -233,26 +232,18 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
         </div>
       </form>
 
-      {/* Select difficulty: the founder's stage, one optional tap */}
-      <div className="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2" role="radiogroup" aria-label="Your stage">
-        <span className="font-osd text-[17px] text-muted-foreground uppercase mr-1">Difficulty</span>
-        {STAGES.map((s) => (
-          <button
-            key={s}
-            type="button"
-            role="radio"
-            aria-checked={stage === s}
-            onClick={() => setStage(stage === s ? null : s)}
-            className={cn(
-              "h-8 px-3 rounded-full text-[13px] font-semibold border transition-colors cursor-pointer",
-              stage === s
-                ? "border-[var(--gym-yellow)] bg-[var(--gym-yellow)] text-[#1a0616]"
-                : "border-[var(--gym-line)] text-foreground/80 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]"
-            )}
-          >
-            {s}
-          </button>
-        ))}
+      {/* Proof before anything else: the actual humans behind the answers */}
+      <div className="relative z-10 mt-5 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
+        <span className="flex -space-x-2.5">
+          {["cameron", "drew", "joel", "vanessa"].map((slug) => (
+            <Image key={slug} src={`/gym/game/cast/${slug}.webp`} alt="" width={44} height={44} className="h-10 w-10 md:h-11 md:w-11" />
+          ))}
+        </span>
+        <span className="text-center sm:text-left text-[13.5px] md:text-sm leading-snug text-muted-foreground">
+          <span className="font-semibold text-foreground">Cameron, Drew, Joel</span> &amp; the FounderWell crew.
+          <br />
+          Actual humans. We checked.
+        </span>
       </div>
 
       {/* World 1 */}
@@ -289,10 +280,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
                   {w.topic}
                 </span>
               </div>
-              <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground line-clamp-2">
-                {w.bark}
-              </p>
-              <p className="mt-2.5 text-sm font-semibold leading-snug text-foreground/95 line-clamp-2 group-hover:text-foreground">
+              <p className="mt-2 text-sm font-semibold leading-snug text-foreground/95 line-clamp-2 group-hover:text-foreground">
                 {w.question}
               </p>
             </button>
