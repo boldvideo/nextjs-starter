@@ -5,6 +5,7 @@ import { createHash, createHmac, timingSafeEqual } from "crypto";
 import type { Viewer } from "@boldvideo/bold-js";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { CONSENT_TEXT, isStage, LEAD_TAG, STAGES, type Stage } from "@/lib/gym-lead";
+import { hubspotEnabled, hubspotLead, hubspotQuestion } from "@/lib/gym-hubspot";
 
 export { CONSENT_TEXT, isStage, LEAD_TAG, STAGES, type Stage };
 
@@ -111,13 +112,26 @@ export type LeadEvent =
   | { event: "question"; email: string; question: string; conversationId?: string };
 
 /**
- * Push to FounderWell's CRM. CRM-agnostic: FOUNDERWELL_LEAD_WEBHOOK_URL can
- * be a Zapier/Make hook or a CRM's inbound webhook. Unset = skipped (logged).
+ * Push to FounderWell's CRM: HubSpot when HUBSPOT_TOKEN is set (see
+ * lib/gym-hubspot.ts), and/or a generic FOUNDERWELL_LEAD_WEBHOOK_URL
+ * (Zapier/Make). Neither = skipped (logged). Never throws.
  */
 export async function pushLead(payload: LeadEvent & { viewerId?: string }): Promise<void> {
+  if (hubspotEnabled()) {
+    try {
+      if (payload.event === "lead") {
+        await hubspotLead({ email: payload.email, stage: payload.stage, questions: payload.questions, consentedAt: payload.consent.at });
+      } else {
+        await hubspotQuestion(payload.email, payload.question);
+      }
+    } catch (error) {
+      console.error(`[gym] hubspot ${payload.event} failed`, error);
+    }
+  }
+
   const url = process.env.FOUNDERWELL_LEAD_WEBHOOK_URL;
   if (!url) {
-    console.info(`[gym] lead webhook not configured; skipped ${payload.event}`);
+    if (!hubspotEnabled()) console.info(`[gym] no CRM configured; skipped ${payload.event}`);
     return;
   }
   try {
