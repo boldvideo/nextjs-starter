@@ -94,11 +94,35 @@ export async function upsertPlayerViewer(input: {
   traits.founderwell_consent_at = input.consentedAt;
   if (input.stage) traits.stage = input.stage;
   if (input.questions.length) {
-    const before = typeof traits.first_questions === "string" ? traits.first_questions : "";
-    traits.first_questions = [before, ...input.questions].filter(Boolean).join("\n").slice(0, 4000);
+    const day = input.consentedAt.slice(0, 10);
+    traits.questions = appendLines(traits.questions, input.questions.map((q) => `${day}: ${q}`));
   }
   const { data } = await viewers.update(viewer.id, { name: viewer.name || email, traits });
   return data;
+}
+
+/** Dated question lines, newest last, capped from the front. */
+function appendLines(before: unknown, lines: string[]): string {
+  const text = [typeof before === "string" ? before : "", ...lines].filter(Boolean).join("\n");
+  return text.length > 8000 ? text.slice(text.length - 8000) : text;
+}
+
+/**
+ * Bold keeps every question a player asks (traits.questions), so the CRM
+ * can always be rebuilt from the viewer (scripts/gtm-game-hubspot-backfill.ts).
+ */
+export async function recordPlayerQuestion(viewerId: string, question: string) {
+  const context = await getTenantContext();
+  if (!context) return;
+  const { viewers } = context.client;
+  try {
+    const { data: viewer } = await viewers.get(viewerId);
+    const traits: Record<string, unknown> = { ...(viewer.traits ?? {}) };
+    traits.questions = appendLines(traits.questions, [`${new Date().toISOString().slice(0, 10)}: ${question}`]);
+    await viewers.update(viewerId, { name: viewer.name, traits });
+  } catch (error) {
+    console.error("[gym] recording question on viewer failed", error);
+  }
 }
 
 export type LeadEvent =

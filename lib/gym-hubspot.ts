@@ -1,5 +1,3 @@
-import "server-only";
-
 import { CONSENT_TEXT, STAGES, type Stage } from "@/lib/gym-lead";
 
 /**
@@ -17,6 +15,8 @@ import { CONSENT_TEXT, STAGES, type Stage } from "@/lib/gym-lead";
  * "marketing"). Needs a private app token (HUBSPOT_TOKEN) with contacts
  * read/write, contact schemas read/write and communication_preferences.
  * We never touch lifecycle stage or owner: that's FounderWell's call.
+ * (No "server-only" guard: the backfill script imports this outside Next.
+ * The token is a server env var and never reaches a client bundle.)
  */
 
 const API = "https://api.hubapi.com";
@@ -173,4 +173,41 @@ export async function hubspotQuestion(email: string, question: string) {
   await ensureProperties();
   const before = await current(email);
   await upsert(email, { gtm_game_questions: join(before.questions, [dated(question)]) });
+}
+
+/**
+ * Bring a contact in line with the player's Bold viewer (the source of
+ * truth): adds any question lines HubSpot doesn't have yet, so re-running
+ * never duplicates. Used by scripts/gtm-game-hubspot-backfill.ts.
+ */
+export async function hubspotSync(input: {
+  email: string;
+  stage?: Stage;
+  questionLines: string[];
+  consentedAt?: string;
+  subscribe: boolean;
+}): Promise<{ added: number }> {
+  await ensureProperties();
+  const before = await current(input.email);
+  const have = new Set(before.questions.split("\n").filter(Boolean));
+  const missing = input.questionLines.filter((l) => !have.has(l));
+  await upsert(input.email, {
+    gtm_game_player: "true",
+    ...(input.stage ? { gtm_game_stage: input.stage } : {}),
+    ...(missing.length ? { gtm_game_questions: join(before.questions, missing) } : {}),
+    ...(input.consentedAt ? { gtm_game_consent: `${input.consentedAt}: ${CONSENT_TEXT}` } : {}),
+    ...(before.firstPlayed || !input.consentedAt ? {} : { gtm_game_first_played: String(Date.parse(input.consentedAt)) }),
+  });
+  if (input.subscribe) await subscribe(input.email);
+  return { added: missing.length };
+}
+
+/** The scopes the token actually has (to tell "missing scope" from "broken"). */
+export async function hubspotScopes(): Promise<string[]> {
+  const res = await fetch(`${API}/oauth/v2/private-apps/get/access-token-info`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tokenKey: token() }),
+  });
+  return res.ok ? ((await res.json()).scopes ?? []) : [];
 }

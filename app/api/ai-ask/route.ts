@@ -4,7 +4,7 @@ import type { AIEvent, Segment } from "@boldvideo/bold-js";
 import { getMember, isOwner, memberCookie, notOwnerResponse, ownerToken } from "@/lib/gym-ownership";
 import { after } from "next/server";
 import { getMemberViewerId } from "@/lib/gym-viewer";
-import { getPlayer, isStage, pushLead, type Stage } from "@/lib/gym-player";
+import { getPlayer, isStage, pushLead, recordPlayerQuestion, type Stage } from "@/lib/gym-player";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -282,7 +282,10 @@ export async function POST(request: Request) {
   const viewer = (await getMemberViewerId()) ?? player?.viewerId ?? null;
   if (player) {
     const question = prompt.slice(0, 500);
-    after(() => pushLead({ event: "question", email: player.email, question, conversationId, viewerId: player.viewerId }));
+    after(async () => {
+      await recordPlayerQuestion(player.viewerId, question);
+      await pushLead({ event: "question", email: player.email, question, conversationId, viewerId: player.viewerId });
+    });
   }
 
   try {
