@@ -80,7 +80,19 @@ export default async function RootLayout({
   // The settings payload rides to the client in every page's RSC stream.
   // featuredPlaylists carries full video objects (transcripts, subtitles,
   // chapters) — ~290KB nothing client-side in this skin reads.
-  const clientSettings = settings ? { ...settings, featuredPlaylists: [] } : null;
+  // Fork: the tenant's copy (description, disclaimer, AI name) still
+  // describes the old fictional-demo data and the gym; none of it renders
+  // in this skin, so it doesn't ship either.
+  const clientSettings = settings
+    ? {
+        ...settings,
+        featuredPlaylists: [],
+        description: "",
+        chatDisclaimer: undefined,
+        metaData: settings.metaData ? { ...settings.metaData, description: "" } : settings.metaData,
+        aiName: "Game Master",
+      }
+    : null;
 
   return (
     <html lang="en" suppressHydrationWarning className={gymFontVariables}>
