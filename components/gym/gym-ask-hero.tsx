@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 import { GymHorizon } from "./gym-backdrop";
 import { useGymMember } from "./use-gym-member";
 import { GymNoteSticker } from "./gym-founder-note";
-import { sfx, unlock } from "@/lib/gym-arcade";
+import { setStage, sfx, unlock, useArcade } from "@/lib/gym-arcade";
+import { STAGES } from "@/lib/gym-lead";
 import {
   GYM_PLACEHOLDERS,
   GYM_RANDOM_REPS,
@@ -91,6 +92,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
   const [nudge, setNudge] = useState(0);
   const placeholder = useTypewriter(GYM_PLACEHOLDERS, query.length === 0);
   const { user, member } = useGymMember();
+  const { stage } = useArcade();
   const first = (user?.name || "").split(" ")[0];
   const company = member?.profile?.business_name;
   const greeting = first
@@ -183,10 +185,10 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
       </div>
 
       <p className="relative z-10 mt-12 md:mt-14 max-w-[640px] text-base md:text-lg leading-relaxed text-foreground/80 text-pretty">
-        Bring a messy go-to-market problem. The game master has watched
-        {hours ? <> <strong className="text-foreground">{hours} hours</strong> of</> : " every hour of"} FounderWell
-        sessions and backs every answer with <span className="text-[var(--gym-cyan)] font-semibold">proof</span>:
-        {" "}the exact minute of video that says so.
+        <strong className="text-foreground">Answers from real GTM coaches, not generic AI.</strong>{" "}
+        Ask anything about going to market. Every answer comes from
+        {hours ? <> {hours} hours of</> : ""} FounderWell coaching sessions, with{" "}
+        <span className="text-[var(--gym-cyan)] font-semibold">the exact minute of video</span> that backs it up.
       </p>
 
       {/* The input */}
@@ -230,6 +232,28 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
           </button>
         </div>
       </form>
+
+      {/* Select difficulty: the founder's stage, one optional tap */}
+      <div className="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2" role="radiogroup" aria-label="Your stage">
+        <span className="font-osd text-[17px] text-muted-foreground uppercase mr-1">Difficulty</span>
+        {STAGES.map((s) => (
+          <button
+            key={s}
+            type="button"
+            role="radio"
+            aria-checked={stage === s}
+            onClick={() => setStage(stage === s ? null : s)}
+            className={cn(
+              "h-8 px-3 rounded-full text-[13px] font-semibold border transition-colors cursor-pointer",
+              stage === s
+                ? "border-[var(--gym-yellow)] bg-[var(--gym-yellow)] text-[#1a0616]"
+                : "border-[var(--gym-line)] text-foreground/80 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]"
+            )}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
 
       {/* World 1 */}
       <div className="relative z-10 mt-6 md:mt-7 w-full">

@@ -10,13 +10,14 @@ interface PoweredByBoldProps {
   variant?: "quiet" | "pitch";
 }
 
+// Fork: the pitch goes to the "how we built this" page on the game's own domain
+const PITCH_HREF = "/built-by-bold";
+
 export function PoweredByBold({ className, variant = "quiet" }: PoweredByBoldProps) {
   if (variant === "pitch") {
     return (
       <a
-        href="https://boldvideo.com?utm_source=portal&utm_medium=portal&utm_campaign=ask"
-        target="_blank"
-        rel="noopener noreferrer"
+        href={PITCH_HREF}
         className={cn(
           "group inline-flex items-center gap-1.5 text-xs",
           "text-muted-foreground/60 hover:text-muted-foreground transition-colors",

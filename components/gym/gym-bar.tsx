@@ -63,6 +63,8 @@ export function GymBar() {
                 className="h-3 w-3 opacity-80 invert"
               />
               <span className="text-foreground/80">FounderWell</span>
+              <span className="hidden sm:inline text-muted-foreground/70">· built by</span>
+              <span className="hidden sm:inline font-mono font-semibold tracking-[0.08em] text-foreground/80">BOLD</span>
             </span>
           </span>
         </Link>

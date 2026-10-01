@@ -2,7 +2,9 @@ import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
 import { getMember, isOwner, memberCookie, notOwnerResponse, ownerToken } from "@/lib/gym-ownership";
+import { after } from "next/server";
 import { getMemberViewerId } from "@/lib/gym-viewer";
+import { getPlayer, isStage, pushLead, type Stage } from "@/lib/gym-player";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +16,8 @@ interface AskRequestBody {
   conversationId?: string;
   collectionId?: string;
   ownerToken?: string;
+  /** "Select difficulty": the founder's stage, sharpens the answer */
+  stage?: string;
 }
 
 interface StreamState {
@@ -217,6 +221,7 @@ export async function POST(request: Request) {
   let conversationId: string | undefined;
   let collectionId: string | undefined;
   let ownerTokenValue: string | undefined;
+  let stage: Stage | undefined;
   let images: File[] = [];
 
   if (contentType.startsWith("multipart/form-data")) {
@@ -230,6 +235,8 @@ export async function POST(request: Request) {
       ownerTokenValue = typeof tok === "string" ? tok : undefined;
       const colId = form.get("collectionId");
       collectionId = typeof colId === "string" ? colId : undefined;
+      const st = form.get("stage");
+      stage = isStage(st) ? st : undefined;
       images = form.getAll("image").filter((v): v is File => v instanceof File);
     } catch {
       return new Response(
@@ -251,6 +258,7 @@ export async function POST(request: Request) {
     conversationId = body.conversationId;
     collectionId = body.collectionId;
     ownerTokenValue = body.ownerToken;
+    stage = isStage(body.stage) ? body.stage : undefined;
   }
 
   if (!prompt || typeof prompt !== "string") {
@@ -268,7 +276,14 @@ export async function POST(request: Request) {
 
   // Signed-in members ask as their Bold viewer: their profile traits
   // personalize the answer (and memory, when the account has it on).
-  const viewer = await getMemberViewerId();
+  // Players who inserted a coin ask as theirs, and each question goes to
+  // FounderWell's CRM with the lead.
+  const player = await getPlayer();
+  const viewer = (await getMemberViewerId()) ?? player?.viewerId ?? null;
+  if (player) {
+    const question = prompt.slice(0, 500);
+    after(() => pushLead({ event: "question", email: player.email, question, conversationId, viewerId: player.viewerId }));
+  }
 
   try {
     const stream = await context.client.ai.ask({
@@ -278,6 +293,7 @@ export async function POST(request: Request) {
       conversationId,
       collectionId,
       ...(viewer ? { viewer } : {}),
+      ...(stage ? { viewerProfile: { stage } } : {}),
       // BOLD-1449: pass images per the published SDK shape (cast until SDK types catch up)
       ...(images.length > 0 ? { images } : {}),
     } as Parameters<typeof context.client.ai.ask>[0]);

@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
 import { AnswerInteraction } from "@/lib/source-engagement";
+import { getStage } from "@/lib/gym-arcade";
 
 export interface ChatAttachment {
   id: string;
@@ -220,6 +221,8 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
               body: (() => {
                 const fd = new FormData();
                 fd.append("prompt", query);
+                const stage = getStage();
+                if (stage) fd.append("stage", stage);
                 if (conversationId) fd.append("conversationId", conversationId);
                 if (conversationId && ownerTokenRef.current) fd.append("ownerToken", ownerTokenRef.current);
                 for (const f of images) fd.append("image", f, f.name);
@@ -236,6 +239,8 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
               body: JSON.stringify({
                 prompt: query,
                 conversationId,
+                // Fork: "Select difficulty" sharpens the answer
+                ...(getStage() ? { stage: getStage() } : {}),
                 ...(conversationId && ownerTokenRef.current ? { ownerToken: ownerTokenRef.current } : {}),
               }),
               signal: abortControllerRef.current.signal,

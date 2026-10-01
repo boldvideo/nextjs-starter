@@ -23,6 +23,14 @@ export interface ArcadeState {
   secret: boolean;
   achievements: Record<string, number>;
   scores: HighScore[];
+  /** "Select difficulty": the founder's stage, sent with every question */
+  stage: string | null;
+  /** Levels started in this browser (the coin gate counts these) */
+  plays: number;
+  /** The questions behind those levels, handed to FounderWell with the coin */
+  questions: string[];
+  /** An email went in the slot (or they signed in): no more gate */
+  coin: boolean;
 }
 
 export interface Achievement {
@@ -68,7 +76,14 @@ const INITIAL: ArcadeState = {
   secret: false,
   achievements: {},
   scores: HOUSE_SCORES,
+  stage: null,
+  plays: 0,
+  questions: [],
+  coin: false,
 };
+
+/** Free levels before the coin. */
+export const FREE_PLAYS = 3;
 
 let state: ArcadeState = INITIAL;
 let loaded = false;
@@ -168,6 +183,30 @@ export function toggleSound() {
 export function setSecret(on: boolean) {
   set({ secret: on });
   emit({ type: "secret", on });
+}
+
+export function setStage(stage: string | null) {
+  set({ stage });
+  sfx("select");
+}
+
+export function getStage(): string | null {
+  return getSnapshot().stage;
+}
+
+export function recordPlay(question: string) {
+  const current = getSnapshot();
+  set({ plays: current.plays + 1, questions: [...current.questions, question.slice(0, 500)].slice(-10) });
+}
+
+export function markCoin() {
+  set({ coin: true });
+}
+
+/** True when the next level needs a coin first. */
+export function needsCoin(): boolean {
+  const { plays, coin } = getSnapshot();
+  return !coin && plays >= FREE_PLAYS;
 }
 
 export function openDodger() {

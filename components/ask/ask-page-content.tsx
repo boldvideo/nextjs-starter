@@ -28,7 +28,8 @@ import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 import { PoweredByBold } from "@/components/powered-by-bold";
 import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
-import { addXp, unlock } from "@/lib/gym-arcade";
+import { addXp, markCoin, needsCoin, recordPlay, unlock } from "@/lib/gym-arcade";
+import { GymCoinGate } from "@/components/gym/gym-coin-gate";
 
 type PageState =
   | { status: "idle" }
@@ -54,7 +55,9 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const settings = useSettings();
   const config = getPortalConfig(settings);
   const multimodal = config.ai.multimodal;
-  const chatDisclaimer = config.ai.chatDisclaimer;
+  // Fork: our own line; the tenant's disclaimer still describes the old
+  // fictional-demo data
+  const chatDisclaimer = "AI can be wrong. The clip is the source.";
   
   const [pageState, setPageState] = useState<PageState>(
     routeConversationId ? { status: "loading" } : { status: "idle" }
@@ -62,6 +65,24 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   const { messages, isStreaming, statusMessage, conversationId, canContinue, streamQuestion, stop, reset, loadConversation } =
     useAIAskStream();
+
+  // INSERT COIN: after the free levels, the next one waits for an email.
+  // Signed-in players already gave theirs.
+  const { signedIn } = useGymMember();
+  const [coinPending, setCoinPending] = useState<(() => void) | null>(null);
+  useEffect(() => {
+    if (signedIn) markCoin();
+  }, [signedIn]);
+  const gated = useCallback(
+    (run: () => void) => {
+      if (!signedIn && needsCoin()) {
+        setCoinPending(() => run);
+        return;
+      }
+      run();
+    },
+    [signedIn]
+  );
 
   // Generate stable streaming message ID for scroll behavior
   const streamingMessageId = useMemo(() => {
@@ -185,7 +206,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     const initialQuery = searchParams?.get("q");
     if (initialQuery && !hasInitializedRef.current && messages.length === 0) {
       hasInitializedRef.current = true;
-      streamQuestion(initialQuery);
+      gated(() => streamQuestion(initialQuery));
     }
     setPageState({ status: "ready" });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Intentionally minimal deps: runs once per route change
@@ -208,7 +229,9 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const wasStreamingRef = useRef(false);
   useEffect(() => {
     if (isStreaming && !wasStreamingRef.current) {
-      const levels = messages.filter((m) => m.role === "user").length;
+      const asked = messages.filter((m) => m.role === "user");
+      const levels = asked.length;
+      recordPlay(asked[asked.length - 1]?.content ?? "");
       addXp(50, `LEVEL ${String(Math.max(1, levels)).padStart(2, "0")}`);
       unlock("press-start");
       if (levels >= 3) unlock("combo");
@@ -229,12 +252,14 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       const trimmedQuery = query.trim();
       if ((!trimmedQuery && images.length === 0) || isStreaming) return;
 
-      setQuery("");
-      const submittedImages = images;
-      setImages([]);
-      await streamQuestion(trimmedQuery, submittedImages);
+      gated(() => {
+        setQuery("");
+        const submittedImages = images;
+        setImages([]);
+        streamQuestion(trimmedQuery, submittedImages);
+      });
     },
-    [query, images, isStreaming, streamQuestion]
+    [query, images, isStreaming, streamQuestion, gated]
   );
 
   const handleStop = useCallback(() => {
@@ -466,6 +491,16 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             <GymLoading status="Loading saved game…" />
           )}
         </div>
+      {coinPending && (
+        <GymCoinGate
+          onInserted={() => {
+            const run = coinPending;
+            setCoinPending(null);
+            run();
+          }}
+          onLeave={() => setCoinPending(null)}
+        />
+      )}
       </div>
     );
   }
@@ -476,9 +511,19 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         <div className="relative min-h-full flex flex-col overflow-hidden">
           <GymBackdrop />
           <section className="relative z-10 flex-1 flex items-center px-4 py-14">
-            <GymAskHero onAsk={(q) => streamQuestion(q)} />
+            <GymAskHero onAsk={(q) => gated(() => streamQuestion(q))} />
           </section>
         </div>
+      {coinPending && (
+        <GymCoinGate
+          onInserted={() => {
+            const run = coinPending;
+            setCoinPending(null);
+            run();
+          }}
+          onLeave={() => setCoinPending(null)}
+        />
+      )}
       </div>
     );
   }
@@ -643,11 +688,13 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     onSubmit={() => {
                       const q = query.trim();
                       if (!q) return;
-                      setQuery("");
-                      setSelectedCitation(null);
-                      setIsPanelOpen(false);
-                      reset();
-                      streamQuestion(q, [], { fresh: true });
+                      gated(() => {
+                        setQuery("");
+                        setSelectedCitation(null);
+                        setIsPanelOpen(false);
+                        reset();
+                        streamQuestion(q, [], { fresh: true });
+                      });
                     }}
                     onStop={handleStop}
                     isStreaming={isStreaming}
@@ -690,6 +737,16 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
           engagement={sourceOpen}
           isOpen={isPanelOpen}
           onClose={handleClosePanel}
+        />
+      )}
+      {coinPending && (
+        <GymCoinGate
+          onInserted={() => {
+            const run = coinPending;
+            setCoinPending(null);
+            run();
+          }}
+          onLeave={() => setCoinPending(null)}
         />
       )}
     </div>

@@ -8,14 +8,13 @@ import { PoweredByBold } from "@/components/powered-by-bold";
 
 interface GymHomepageProps {
   videos: Video[];
-  disclaimer?: string;
 }
 
 /**
  * The whole homepage is the cabinet screen: HUD on top, the game master up
  * front, the sessions scrolling along the floor, then coach select.
  */
-export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
+export function GymHomepage({ videos }: GymHomepageProps) {
   const sessions = videos.length;
   const totalSeconds = videos.reduce((sum, v) => sum + (v.duration || 0), 0);
   const hours = totalSeconds > 0 ? Math.round(totalSeconds / 3600) : undefined;
@@ -68,8 +67,7 @@ export function GymHomepage({ videos, disclaimer }: GymHomepageProps) {
 
         <footer className="relative z-10 px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 max-w-[1440px] w-full mx-auto text-xs text-muted-foreground/70">
           <p className="text-center md:text-left">
-            {disclaimer ||
-              "A demo game. Training videos licensed from FounderWell."}
+            Real FounderWell coaching sessions. AI can be wrong; the clip is the source.
           </p>
           <div className="flex items-center gap-4">
             <a href="#note" className="font-semibold text-foreground/80 hover:text-[var(--gym-yellow)] underline-offset-4 hover:underline">

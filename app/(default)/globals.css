@@ -392,15 +392,15 @@
 /* ── The GTM Game: arcade layer ─────────────────────────────────────── */
 
 /* 8-bit border with notched corners. Set --c for the color. */
+/* (No default --c here: unlayered CSS would beat the [--c:…] utility.) */
 .gym-pixel-box {
-  --c: var(--gym-pink);
   --px: 3px;
   box-shadow:
-    0 calc(var(--px) * -1) 0 0 var(--c),
-    0 var(--px) 0 0 var(--c),
-    calc(var(--px) * -1) 0 0 0 var(--c),
-    var(--px) 0 0 0 var(--c),
-    0 0 28px -6px var(--c);
+    0 calc(var(--px) * -1) 0 0 var(--c, var(--gym-pink)),
+    0 var(--px) 0 0 var(--c, var(--gym-pink)),
+    calc(var(--px) * -1) 0 0 0 var(--c, var(--gym-pink)),
+    var(--px) 0 0 0 var(--c, var(--gym-pink)),
+    0 0 28px -6px var(--c, var(--gym-pink));
 }
 
 /* INSERT COIN / PRESS START blink (hard on/off, like the machine) */

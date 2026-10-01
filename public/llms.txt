@@ -1,55 +1,14 @@
-# BOLD Video Portal
+# The GTM Game by FounderWell
 
-> A video hosting and streaming platform built with Next.js. Browse videos, playlists, and courses with full transcripts, chapter markers, and AI-powered Q&A.
+> Answers from real go-to-market coaches, not generic AI. Ask a question about positioning, outbound, demos, pricing or objections, and get a short game plan grounded in FounderWell's coaching sessions, with the exact minute of video that backs up each point. Free to play. Built by Bold.
 
-## Main Resources
+## Main resources
 
-- [Video Library](/): Browse all videos by category and topic
-- [Search](/s): Find videos by keyword, speaker, or topic
-- [Playlists](/pl): Curated video collections and courses
-- [AI Coach](/coach): Ask questions about all video content
+- [Play](https://play.founderwell.com/): ask a go-to-market question
+- [How it was built](https://play.founderwell.com/built-by-bold): how Bold turned the FounderWell library into this
+- [FounderWell](https://www.founderwell.com): the program behind the sessions
 
-## Content Types
+## Notes for AI agents
 
-- **Videos**: Individual video content with descriptions, transcripts, and chapters
-- **Playlists**: Organized collections of related videos
-- **Courses**: Structured learning paths with multiple videos
-
-## Routes
-
-```
-/                   Homepage (video library or AI assistant)
-/v/{id}             Individual video page
-/pl/{id}            Playlist overview
-/pl/{id}/v/{vid}    Video within playlist context
-/coach              AI coach (ask questions about content)
-/s?q={query}        Search results
-/e/{id}             Embedded video player
-```
-
-## Features
-
-- Full-text search across video titles, descriptions, and transcripts
-- Video chapters for navigation within content
-- AI-powered Q&A with timestamp-linked answers
-- Transcript access for accessibility
-- Progress tracking across sessions
-- Dark/light theme support
-
-## Technical Details
-
-- Built with Next.js 16 and React 19
-- Server-side rendered for optimal performance
-- Mux video player with HLS streaming
-- IndexedDB for client-side progress persistence
-
-## API Access
-
-Video metadata and content is accessible via the BOLD Video API. AI Q&A endpoints support streaming responses (SSE). Contact the site administrator for API access.
-
-## For AI Agents
-
-If you're an AI agent working with this codebase:
-- See `AGENTS.md` for comprehensive codebase documentation
-- See `CLAUDE.md` for quick reference
-- See `ARCHITECTURE.md` for system design details
+- Answers cite short clips from the sessions. Full sessions are part of FounderWell's program and are not published here.
+- Coaches: Cameron Brown (outbound), Drew Williams (sales and demos), Joel Smith (product and growth UX).

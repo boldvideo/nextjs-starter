@@ -1,7 +1,6 @@
 import React from "react";
 import type { Video } from "@boldvideo/bold-js";
 import { getTenantContext } from "@/lib/get-tenant-context";
-import { getPortalConfig } from "@/lib/portal-config";
 import { GymHomepage } from "@/components/gym/gym-homepage";
 import { gymMeta } from "@/lib/gym-meta";
 
@@ -20,8 +19,7 @@ export default async function Home(): Promise<React.JSX.Element> {
     throw new Error("Tenant not found");
   }
 
-  const { client, settings } = context;
-  const config = getPortalConfig(settings);
+  const { client } = context;
 
   let videos: Video[] = [];
   try {
@@ -32,5 +30,5 @@ export default async function Home(): Promise<React.JSX.Element> {
     console.error("[gym] video list failed", error);
   }
 
-  return <GymHomepage videos={videos} disclaimer={config.ai.chatDisclaimer} />;
+  return <GymHomepage videos={videos} />;
 }
