@@ -87,6 +87,39 @@
   .url .free { font-family: Bungee; font-size: 15px; color: #1a0616; padding: 9px 13px; border-radius: 9px;
     background: linear-gradient(90deg,#ffd23f,#ff8a1f 38%,#ff2ea6); box-shadow: 0 6px 24px -6px rgba(255,46,166,.7); }
   .url .host { font-family: VT323; font-size: 34px; color: #fff; letter-spacing: .03em; text-shadow: 0 0 10px rgba(34,230,255,.7); }
+
+  /* v2: readable at timeline size (≈1/3 scale): nothing under ~30px */
+  .left { left: 60px; top: 50px; width: 640px; }
+  .brand img { width: 72px; height: 72px; }
+  .brand .name { font-size: 30px; }
+  .brand .by { font-size: 22px; margin-top: 6px; }
+  .generic { margin-top: 40px; }
+  .generic .said { font-size: 30px; padding: 10px 18px; border-radius: 18px 18px 18px 6px; color: #9a8cc4; }
+  .generic .said::after { height: 5px; left: 10px; right: 10px; }
+  h1 { margin-top: 26px; font-size: 76px; line-height: 1.0; letter-spacing: -.03em; }
+  h1 .hot { margin-top: 4px; }
+  .sub { margin-top: 22px; font-size: 32px; line-height: 1.25; color: #e3dbff; max-width: 600px; }
+  .shot { right: 50px; top: 70px; width: 440px; transform: rotate(2deg); }
+  .shot .in { padding: 20px; }
+  .take-by { margin-top: 0; font-size: 30px; gap: 12px; color: #e9e2ff; }
+  .take-by img { width: 54px; height: 54px; }
+  .clip { margin-top: 16px; border-width: 3px; }
+  .clip .play { width: 84px; height: 84px; }
+  .clip .play::after { border-left-width: 26px; border-top-width: 16px; border-bottom-width: 16px; margin-left: 8px; }
+  .clip .tc { font-size: 46px; }
+  .clip .meta { left: 16px; bottom: 6px; }
+  .proof { font-size: 20px; padding: 8px 12px; top: -18px; right: 18px; }
+  .url { right: 54px; bottom: 44px; gap: 14px; }
+  .url .host { font-size: 46px; }
+  .url .free { font-size: 22px; padding: 10px 14px; }
+  .left { width: 700px; }
+  h1 { font-size: 70px; white-space: nowrap; }
+  .shot { width: 410px; right: 44px; }
+  .clip img { filter: brightness(1.35) contrast(1.05); object-position: 40% 30%; }
+  .clip .play { left: auto; right: 14px; top: auto; bottom: 12px; transform: none; width: 64px; height: 64px; }
+  .clip .play::after { border-left-width: 20px; border-top-width: 12px; border-bottom-width: 12px; margin-left: 6px; }
+  .clip .shade { background: linear-gradient(180deg, transparent 55%, rgba(11,6,24,.85)); }
+  .take-by { font-size: 27px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -101,44 +134,28 @@
       <img src="/public/gym/game/logo.webp" alt="">
       <div>
         <div class="name">THE GTM GAME</div>
-        <div class="by">by <img src="/public/gym/founderwell-mark-teal.svg" style="width:15px;height:15px"> <span style="color:#f6f0ff">FounderWell</span></div>
+        <div class="by">by <img src="/public/gym/founderwell-mark-teal.svg" style="width:18px;height:18px"> <span style="color:#f6f0ff">FounderWell</span></div>
       </div>
     </div>
-    <div class="generic">
-      <span class="label">GENERIC AI</span>
-      <span class="said">&ldquo;Great question! Here are 10 tips&hellip;&rdquo;</span>
-    </div>
-    <h1>Answers from real GTM coaches.<span class="hot">Not generic AI.</span></h1>
-    <p class="sub">Every answer comes with <b>the exact minute</b> of a real FounderWell coaching session that backs it up.</p>
-  </div>
-
-  <div class="coaches">
-    <div class="faces">
-      <img src="/public/gym/game/cast/cameron.webp" alt="">
-      <img src="/public/gym/game/cast/drew.webp" alt="">
-      <img src="/public/gym/game/cast/joel.webp" alt="">
-      <img src="/public/gym/game/cast/vanessa.webp" alt="">
-    </div>
-    <div class="who">With <b>Cameron, Drew, Joel</b><br>and the FounderWell team</div>
+    <div class="generic"><span class="said">&ldquo;Great question! Here are 10 tips&hellip;&rdquo;</span></div>
+    <h1>Real GTM coaches.<span class="hot">Not generic AI.</span></h1>
+    <p class="sub">Every answer shows you the exact minute of video.</p>
   </div>
 
   <div class="shot">
     <div class="in">
-      <span class="stamp">LEVEL 01</span>
-      <div class="q">How do I stop feature-dumping in sales demos?</div>
-      <div class="take-by"><img src="/public/gym/game/cast/drew.webp" alt=""> <span><b>Coach Drew</b>&rsquo;s take</span></div>
-      <div class="take">Stop treating the demo like a product tour. Treat it like proof you can solve their most urgent problem.</div>
+      <div class="take-by"><img src="/public/gym/game/cast/drew.webp" alt=""> <span><b>Coach Drew</b> on demos</span></div>
       <div class="clip">
         <img src="https://image.mux.com/XJ3iy22C2hEQPTAQVMFQT02He01lHEcXVZ/thumbnail.jpg?time=2393&width=900" alt="">
         <div class="shade"></div>
         <div class="play"></div>
-        <div class="meta"><span class="tc">PLAY ▶ 39:53</span><span class="title">Demo Less, Close More</span></div>
+        <div class="meta"><span class="tc">▶ 39:53</span></div>
       </div>
     </div>
     <span class="proof">THE PROOF</span>
   </div>
 
-  <div class="url"><span class="free">FREE PLAY</span><span class="host">play.founderwell.com</span></div>
+  <div class="url"><span class="host">play.founderwell.com</span><span class="free">FREE</span></div>
 </div>
 <div class="scan" style="position:fixed"></div>
 </body>
