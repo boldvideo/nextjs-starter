@@ -9,6 +9,13 @@ related: thoughts/shared/plans/2026-09-29-gtm-gym-launch.md (living tracker), BO
 
 # Handoff: The GTM Gym → The GTM Game
 
+> **Update 2026-10-01 (pm): CRMs live.** HubSpot (FounderWell) verified end to end in prod: coin → contact
+> with the "The GTM Game" property group, later questions appended. Players are NOT subscribed to any
+> subscription type yet: "Marketing Information" is inactive; Vanessa picks one (likely "Growth Sessions
+> Updates & FW NewsLetter", id 603571917) → set `HUBSPOT_SUBSCRIPTION_ID`. Loops (Bold) live on
+> /built-by-bold: contact (source gtm-game, channelUrl) + `channel_submitted` event; needs a Loops workflow.
+> Test records: Bold viewer + Loops contact `qa+gtm-game-test@boldvideo.com` (HubSpot one deleted).
+>
 > **Update 2026-10-01: live on play.founderwell.com, lead capture shipped.**
 > - Capture: 3 free levels → INSERT COIN (`gym-coin-gate.tsx`): email + optional stage, consent names
 >   FounderWell only (`lib/gym-lead.ts`). `POST /api/gym/player` upserts a Bold viewer (traits: stage,
