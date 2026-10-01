@@ -1,169 +1,361 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { Play, Share2, Volume2, VolumeX, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { track } from "@/lib/gym-track";
 import {
   addHighScore,
   addXp,
+  getStage,
   qualifies,
+  recordDaily,
   sfx,
+  toggleSound,
   unlock,
   useArcade,
 } from "@/lib/gym-arcade";
+import {
+  H,
+  W,
+  createGame,
+  dailyNumber,
+  seedFor,
+  seeded,
+  setPool,
+  shareGrid,
+  tap,
+  today,
+  typeKey,
+  unlockTarget,
+  update,
+  type Game,
+  type Mode,
+} from "./dodger/engine";
+import { HOUSE, type BossDef, type Clip, type Objection } from "./dodger/objections";
+import { money, render } from "./dodger/render";
+import { createCrt } from "./dodger/crt";
+import { Music } from "./dodger/music";
 
 /**
- * The secret level. You're a launch (a little rocket, our own art) at the
- * bottom of the screen; objections rain down. Dodge them, grab power-ups,
- * keep your runway. Pipeline grows the longer you survive.
+ * The secret level. You're a launch at the bottom of the screen; objections
+ * rain down. Type the counter under one to blast it (or tap it), brush past
+ * for near misses, beat a boss every fourth level and win a real coach's
+ * tape. With a business on file (or typed in), the coach scouts the
+ * objections your own buyers throw, and those are what fall.
  *
- *   ★ CASE STUDY  +500      ♥ REFERRAL  +1 runway      ⚡ URGENCY  slow-mo
+ *   ARCADE   your objections, high scores on this machine
+ *   DAILY    the same run for everyone today, global top 10, a share grid
  *
- * Arrows / A-D to move (hold a side of the screen on touch). Everything is
- * drawn at 320×240 and scaled up with crisp pixels.
+ * Drawn at 320×240, shown through a WebGL CRT (flat canvas without WebGL).
  */
 
-const W = 320;
-const H = 240;
-const GROUND = H - 10;
-const LEVEL_SECONDS = 15;
+const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
-const OBJECTIONS = [
-  "SEND ME SOME INFO",
-  "NO BUDGET",
-  "CIRCLE BACK IN Q3",
-  "NOT A PRIORITY",
-  "WE BUILD IN-HOUSE",
-  "TOO EXPENSIVE",
-  "LOOP IN LEGAL",
-  "JUST BROWSING",
-  "PER MY LAST EMAIL",
-  "WE USE A SPREADSHEET",
-  "UNSUBSCRIBE",
-  "WHO ARE YOU?",
-  "BAD TIMING",
-  "ASK MY BOSS",
-];
+type Phase = "attract" | "play" | "boss" | "initials" | "over";
+type Intel =
+  | { status: "house" }
+  | { status: "loading"; label: string | null }
+  | { status: "ready"; label: string | null; objections: Objection[] };
 
-const POWERUPS = [
-  { kind: "star", glyph: "★", label: "CASE STUDY +500", color: "#ffd23f" },
-  { kind: "heart", glyph: "♥", label: "REFERRAL +1 RUNWAY", color: "#ff2ea6" },
-  { kind: "bolt", glyph: "⚡", label: "URGENCY! SLOW-MO", color: "#22e6ff" },
-] as const;
-
-type Kind = (typeof POWERUPS)[number]["kind"];
-
-interface Falling {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  vy: number;
-  text: string;
-  power?: Kind;
-}
-
-interface Game {
-  x: number;
-  lives: number;
+interface Result {
+  mode: Mode;
   score: number;
+  kos: number;
+  grazes: number;
+  combo: number;
   time: number;
-  spawn: number;
-  items: Falling[];
-  hurt: number;
-  slow: number;
-  banner: { text: string; color: string; t: number } | null;
-  stars: { x: number; y: number; s: number }[];
+  grid: string;
+  killer: Objection | null;
 }
 
-// 9×11 rocket, drawn row by row
-const ROCKET = [
-  "....P....",
-  "...PPP...",
-  "...PWP...",
-  "..PPCPP..",
-  "..PPPPP..",
-  "..PPPPP..",
-  ".OPPPPPO.",
-  "OOPPPPPOO",
-  "OO.PPP.OO",
-  "...Y.Y...",
-  "..Y...Y..",
-];
-const ROCKET_COLORS: Record<string, string> = {
-  P: "#f6f0ff",
-  W: "#22e6ff",
-  C: "#ff2ea6",
-  O: "#ff2ea6",
-  Y: "#ffd23f",
-};
-
-function level(time: number) {
-  const n = Math.floor(time / LEVEL_SECONDS);
-  return { n, label: `${Math.floor(n / 4) + 1}-${(n % 4) + 1}` };
+interface Board {
+  enabled: boolean;
+  scores: { initials: string; score: number }[];
+  rank?: number;
 }
 
-function money(n: number) {
-  return `$${Math.floor(n).toLocaleString("en-US")}`;
+const INTEL_KEY = "gtm-game:intel";
+const INTEL_TTL = 3 * 86400000;
+
+function readIntel(): { business: string; label: string | null; objections: Objection[]; at: number } | null {
+  try {
+    const raw = window.localStorage.getItem(INTEL_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    return Array.isArray(v.objections) && Date.now() - v.at < INTEL_TTL ? v : null;
+  } catch {
+    return null;
+  }
 }
 
-function fresh(): Game {
-  return {
-    x: W / 2,
-    lives: 3,
-    score: 0,
-    time: 0,
-    spawn: 0.6,
-    items: [],
-    hurt: 0,
-    slow: 0,
-    banner: { text: "LEVEL 1-1", color: "#ffd23f", t: 1.6 },
-    stars: Array.from({ length: 40 }, () => ({ x: Math.random() * W, y: Math.random() * 120, s: Math.random() })),
-  };
+interface Scouted {
+  label: string | null;
+  objections: Objection[];
 }
 
-type Phase = "attract" | "play" | "initials" | "over";
+/** Ask the coach to scout the player's buyers. Null: play the house set. */
+async function requestIntel(business: string): Promise<Scouted | null> {
+  try {
+    const res = await fetch("/api/gym/dodger/objections", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ business, stage: getStage() }),
+    });
+    const data = await res.json();
+    return data.personalized && Array.isArray(data.objections) ? { label: data.label ?? null, objections: data.objections } : null;
+  } catch {
+    return null;
+  }
+}
 
-export function GymDodger({ onClose }: { onClose: () => void }) {
+function writeIntel(business: string, label: string | null, objections: Objection[]) {
+  try {
+    window.localStorage.setItem(INTEL_KEY, JSON.stringify({ business, label, objections, at: Date.now() }));
+  } catch {
+    /* private mode */
+  }
+}
+
+export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => void; initialMode?: "arcade" | "daily" }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const game = useRef<Game>(fresh());
+  const game = useRef<Game>(createGame("demo", HOUSE));
   const input = useRef({ left: false, right: false });
   const [phase, setPhase] = useState<Phase>("attract");
-  const [final, setFinal] = useState(0);
-  const [countdown, setCountdown] = useState(9);
-  const { scores } = useArcade();
+  const phaseRef = useRef<Phase>("attract");
+  const [mode, setMode] = useState<"arcade" | "daily">(initialMode);
+  // Mounted client-only (dynamic, ssr: false), so storage is readable here
+  const [intel, setIntel] = useState<Intel>(() => {
+    const cached = readIntel();
+    return cached ? { status: "ready", label: cached.label, objections: cached.objections } : { status: "house" };
+  });
+  const intelRef = useRef<Intel>(intel);
+  const [business, setBusiness] = useState(() => readIntel()?.business ?? "");
+  const [result, setResult] = useState<Result | null>(null);
+  const [boss, setBoss] = useState<BossDef | null>(null);
+  const [tape, setTape] = useState<{ clip: Clip | null; loading: boolean }>({ clip: null, loading: false });
+  const [board, setBoard] = useState<Board | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [crtOn, setCrtOn] = useState(true);
+  const [touch] = useState(() => window.matchMedia("(pointer: coarse)").matches);
+  const { scores, sound } = useArcade();
+  const day = today();
+
+  const go = useCallback((next: Phase) => {
+    phaseRef.current = next;
+    setPhase(next);
+  }, []);
+
+  useEffect(() => {
+    intelRef.current = intel;
+  }, [intel]);
+
+  // ── Scouting: the player's own objections ────────────────────────────────
+
+  const applyIntel = useCallback((biz: string, found: Scouted) => {
+    writeIntel(biz, found.label, found.objections);
+    track("Dodger scouted", { source: biz ? "typed" : "profile" });
+    setIntel({ status: "ready", label: found.label, objections: found.objections });
+    // Mid-run: their buyers join the game
+    const g = game.current;
+    if (phaseRef.current === "play" && g.mode === "arcade") {
+      setPool(g, found.objections);
+      g.banner = { text: "INTEL IN", sub: "YOUR BUYERS JOINED THE GAME", color: "#7dffb0", t: 2.4 };
+      unlock("intel");
+    }
+  }, []);
+
+  const scout = useCallback(
+    (biz: string) => {
+      setIntel({ status: "loading", label: biz });
+      void requestIntel(biz).then((found) => (found ? applyIntel(biz, found) : setIntel({ status: "house" })));
+    },
+    [applyIntel]
+  );
+
+  // Signed-in members with a profile get scouted without asking
+  useEffect(() => {
+    if (readIntel()) return;
+    void requestIntel("").then((found) => found && applyIntel("", found));
+  }, [applyIntel]);
+
+  // ── Daily leaderboard ────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (mode !== "daily") return;
+    let live = true;
+    fetch(`/api/gym/dodger/scores?day=${day}`)
+      .then((r) => r.json())
+      .then((b: Board) => live && setBoard(b))
+      .catch(() => live && setBoard({ enabled: false, scores: [] }));
+    return () => {
+      live = false;
+    };
+  }, [mode, day]);
+
+  // ── Runs ─────────────────────────────────────────────────────────────────
 
   const start = useCallback(() => {
-    game.current = fresh();
+    const current = intelRef.current;
+    if (mode === "daily") {
+      game.current = createGame("daily", HOUSE, seeded(seedFor(day)));
+      unlock("daily");
+    } else {
+      const pool = current.status === "ready" ? current.objections : HOUSE;
+      game.current = createGame("arcade", pool);
+      if (current.status === "ready") unlock("intel");
+    }
+    input.current = { left: false, right: false };
+    track("Dodger run", { mode, intel: current.status === "ready" && mode === "arcade" ? "yes" : "no" });
+    setResult(null);
+    setBoss(null);
+    setTape({ clip: null, loading: false });
+    setCountdown(null);
     sfx("start");
-    setPhase("play");
+    go("play");
+  }, [mode, day, go]);
+
+  const loadTape = useCallback(async (query: string, known?: Clip | null) => {
+    if (known) return setTape({ clip: known, loading: false });
+    setTape({ clip: null, loading: true });
+    try {
+      const res = await fetch(`/api/gym/dodger/clip?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setTape({ clip: data.clip ?? null, loading: false });
+    } catch {
+      setTape({ clip: null, loading: false });
+    }
   }, []);
 
-  const end = useCallback(() => {
-    const score = Math.floor(game.current.score);
-    sfx("gameover");
-    setFinal(score);
+  const finish = useCallback(() => {
+    const g = game.current;
+    const score = Math.floor(g.score);
+    const r: Result = {
+      mode: g.mode,
+      score,
+      kos: g.kos,
+      grazes: g.grazes,
+      combo: g.bestCombo,
+      time: g.time,
+      grid: shareGrid(g),
+      killer: g.killer,
+    };
+    setResult(r);
+    track("Dodger over", { mode: g.mode, score, bosses: g.bossesBeaten });
     if (score >= 5000) unlock("boss");
+    if (g.kos >= 25) unlock("closer");
+    if (g.grazes >= 10) unlock("near-miss");
+    if (g.bestCombo >= 35) unlock("combo-king");
     if (score >= 50) addXp(Math.floor(score / 50), "DODGER");
-    setCountdown(9);
-    setPhase(qualifies(score) ? "initials" : "over");
-  }, []);
+    if (r.killer) void loadTape(`buyer objection: ${r.killer.text.toLowerCase()}`, r.killer.clip);
+    if (g.mode === "daily") {
+      recordDaily(day, score);
+      go(score > 0 && board?.enabled ? "initials" : "over");
+    } else {
+      go(qualifies(score) ? "initials" : "over");
+    }
+    setCountdown(15);
+  }, [day, board, go, loadTape]);
 
-  // Keys: move, start, close. Arrows never scroll the page behind the game.
+  const finishRef = useRef(finish);
+  useEffect(() => {
+    finishRef.current = finish;
+  }, [finish]);
+
+  const bossDown = useCallback(
+    (def: BossDef) => {
+      unlock(def.achievement);
+      track("Dodger boss", { boss: def.id });
+      setBoss(def);
+      input.current = { left: false, right: false };
+      go("boss");
+      void loadTape(def.clipQuery);
+    },
+    [go, loadTape]
+  );
+  const bossRef = useRef(bossDown);
+  useEffect(() => {
+    bossRef.current = bossDown;
+  }, [bossDown]);
+
+  const resume = useCallback(() => {
+    setBoss(null);
+    setTape({ clip: null, loading: false });
+    sfx("start");
+    go("play");
+  }, [go]);
+
+  const submitInitials = useCallback(
+    async (initials: string) => {
+      if (!result) return;
+      sfx("coin");
+      if (result.mode === "daily") {
+        try {
+          const res = await fetch("/api/gym/dodger/scores", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ day, initials, score: result.score, time: result.time }),
+          });
+          const data = await res.json();
+          if (data.scores) setBoard({ enabled: true, scores: data.scores, rank: data.rank });
+        } catch {
+          /* the run still counts locally */
+        }
+      } else {
+        addHighScore(initials, result.score);
+      }
+      go("over");
+    },
+    [result, day, go]
+  );
+
+  // CONTINUE? counts down until someone touches something
+  useEffect(() => {
+    if (phase !== "over" || countdown === null) return;
+    const id = setTimeout(() => {
+      if (countdown <= 1) {
+        setCountdown(null);
+        setTape({ clip: null, loading: false });
+        game.current = createGame("demo", intelRef.current.status === "ready" ? intelRef.current.objections : HOUSE);
+        go("attract");
+      } else setCountdown(countdown - 1);
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [phase, countdown, go]);
+
+  // ── Keys ─────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
       if (e.key === "Escape") {
         onClose();
         return;
       }
-      if (phase === "initials") return;
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(e.key)) e.preventDefault();
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") input.current.left = true;
-      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") input.current.right = true;
-      if ((e.key === "Enter" || e.key === " ") && phase !== "play") start();
+      if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+      const p = phaseRef.current;
+      if (p === "initials") return;
+      if (p === "play") {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        if (e.key === "ArrowLeft") input.current.left = true;
+        else if (e.key === "ArrowRight") input.current.right = true;
+        else if (e.key === "Backspace") unlockTarget(game.current);
+        else if (!typeKey(game.current, e.key) && !["ArrowUp", "ArrowDown", " "].includes(e.key)) return;
+        e.preventDefault();
+        return;
+      }
+      if (e.key === "Enter" || e.key === " ") {
+        if (target?.tagName === "BUTTON" || target?.tagName === "A") return;
+        e.preventDefault();
+        if (p === "boss") resume();
+        else start();
+      }
     };
     const onUp = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") input.current.left = false;
-      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") input.current.right = false;
+      if (e.key === "ArrowLeft") input.current.left = false;
+      if (e.key === "ArrowRight") input.current.right = false;
     };
     window.addEventListener("keydown", onDown);
     window.addEventListener("keyup", onUp);
@@ -171,296 +363,363 @@ export function GymDodger({ onClose }: { onClose: () => void }) {
       window.removeEventListener("keydown", onDown);
       window.removeEventListener("keyup", onUp);
     };
-  }, [phase, start, onClose]);
+  }, [start, resume, onClose]);
 
-  // CONTINUE? 9…8…7…
-  useEffect(() => {
-    if (phase !== "over") return;
-    const id = setTimeout(() => {
-      if (countdown <= 1) setPhase("attract");
-      else setCountdown(countdown - 1);
-    }, 1000);
-    return () => clearTimeout(id);
-  }, [phase, countdown]);
+  // ── The loop: runs in every phase, so the attract demo stays alive ───────
 
-  // The loop: runs in every phase so the attract screen stays alive
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const font = getComputedStyle(document.documentElement).getPropertyValue("--font-vt323").trim() || "monospace";
 
+    const screen = document.createElement("canvas");
+    screen.width = W;
+    screen.height = H;
+    const ctx = screen.getContext("2d");
+    if (!ctx) return;
+    const crt = createCrt(canvas, reducedMotion);
+    const flat = crt ? null : canvas.getContext("2d");
+    if (flat) flat.imageSmoothingEnabled = false;
+    setCrtOn(Boolean(crt));
+
+    const widths = new Map<string, number>();
+    const measure = (s: string, size: number) => {
+      const key = `${size}:${s}`;
+      let w = widths.get(key);
+      if (w === undefined) {
+        ctx.font = `${size}px ${font}`;
+        w = ctx.measureText(s).width;
+        widths.set(key, w);
+      }
+      return w;
+    };
+
+    const music = new Music();
+    // QA handle in development: window.__dodger.current is the live game
+    if (process.env.NODE_ENV !== "production") (window as unknown as { __dodger?: typeof game }).__dodger = game;
     let raf = 0;
     let last = performance.now();
-    let floor = 0;
-
-    const text = (s: string, x: number, y: number, color: string, size = 16, align: CanvasTextAlign = "left") => {
-      ctx.font = `${size}px ${font}`;
-      ctx.textAlign = align;
-      ctx.fillStyle = color;
-      ctx.fillText(s, Math.round(x), Math.round(y));
-    };
+    const born = last;
 
     const frame = (now: number) => {
       const real = Math.min(0.05, (now - last) / 1000);
       last = now;
+      const p = phaseRef.current;
       const g = game.current;
-      const playing = phase === "play";
-      const dt = playing && g.slow > 0 ? real * 0.45 : real;
 
-      // ── Update ────────────────────────────────────────────────────────
-      floor = (floor + real * (playing ? 40 + level(g.time).n * 6 : 18)) % 16;
-      for (const s of g.stars) {
-        s.x -= real * (4 + s.s * 8);
-        if (s.x < 0) s.x += W;
+      // Paused for a boss tape or initials: the frame holds; a finished run keeps exploding
+      const running = p === "play" || (p === "attract" && g.mode === "demo") || g.over;
+      update(g, running ? real : 0, input.current, measure);
+
+      // Demo pilot crashed: next demo
+      if (p === "attract" && g.over && g.particles.length === 0) {
+        const intelNow = intelRef.current;
+        game.current = createGame("demo", intelNow.status === "ready" ? intelNow.objections : HOUSE);
       }
 
-      if (playing) {
-        const lvl = level(g.time);
-        g.time += dt;
-        const next = level(g.time);
-        if (next.n !== lvl.n) {
-          g.banner = { text: `LEVEL ${next.label}`, color: "#ffd23f", t: 1.6 };
-          sfx("quest");
-        }
-        g.score += dt * 60 * (1 + next.n * 0.5);
-        g.hurt = Math.max(0, g.hurt - real);
-        g.slow = Math.max(0, g.slow - real);
-        if (g.banner) g.banner.t -= real;
-        if (g.banner && g.banner.t <= 0) g.banner = null;
-
-        const dir = (input.current.right ? 1 : 0) - (input.current.left ? 1 : 0);
-        g.x = Math.max(10, Math.min(W - 10, g.x + dir * 160 * real));
-
-        g.spawn -= dt;
-        if (g.spawn <= 0) {
-          const speed = 42 + next.n * 9 + Math.random() * 30;
-          if (Math.random() < 0.12) {
-            const p = POWERUPS[Math.floor(Math.random() * POWERUPS.length)];
-            g.items.push({ x: 10 + Math.random() * (W - 30), y: -14, w: 14, h: 14, vy: speed * 0.8, text: p.glyph, power: p.kind });
-          } else {
-            const t = OBJECTIONS[Math.floor(Math.random() * OBJECTIONS.length)];
-            ctx.font = `14px ${font}`;
-            const w = Math.ceil(ctx.measureText(t).width) + 8;
-            g.items.push({ x: Math.random() * (W - w), y: -14, w, h: 13, vy: speed, text: t });
-          }
-          g.spawn = Math.max(0.28, 1.05 - next.n * 0.08) * (0.7 + Math.random() * 0.6);
-        }
-
-        // Rocket hitbox (drawn at 2×), a little forgiving at the edges
-        const px = g.x - 9;
-        const py = GROUND - 22;
-        g.items = g.items.filter((it) => {
-          it.y += it.vy * dt;
-          const hit = it.x < px + 16 && it.x + it.w > px + 2 && it.y < py + 18 && it.y + it.h > py + 3;
-          if (hit && it.power) {
-            sfx("powerup");
-            const p = POWERUPS.find((q) => q.kind === it.power)!;
-            if (it.power === "star") g.score += 500;
-            if (it.power === "heart") g.lives = Math.min(5, g.lives + 1);
-            if (it.power === "bolt") g.slow = 5;
-            g.banner = { text: p.label, color: p.color, t: 1.2 };
-            return false;
-          }
-          if (hit && g.hurt <= 0) {
-            sfx("hit");
-            g.lives -= 1;
-            g.hurt = 1.2;
-            g.banner = { text: it.text + "!", color: "#ff2ea6", t: 1 };
-            return false;
-          }
-          if (it.y > H) {
-            if (!it.power) g.score += 50;
-            return false;
-          }
-          return true;
-        });
-
-        if (g.lives <= 0) end();
+      for (const event of g.events.splice(0)) {
+        if (event.type === "over") finishRef.current();
+        if (event.type === "boss-down") bossRef.current(event.boss);
       }
 
-      // ── Draw ──────────────────────────────────────────────────────────
-      const sky = ctx.createLinearGradient(0, 0, 0, GROUND);
-      sky.addColorStop(0, "#0b0618");
-      sky.addColorStop(0.6, "#2a0b4a");
-      sky.addColorStop(1, "#1c0838");
-      ctx.fillStyle = sky;
-      ctx.fillRect(0, 0, W, H);
-
-      for (const s of g.stars) {
-        ctx.fillStyle = s.s > 0.7 ? "#ffffff" : "#8b7bb5";
-        ctx.fillRect(Math.round(s.x), Math.round(s.y), 1, 1);
+      // Music follows the action
+      const want = p === "play" && !g.over ? (g.boss ? "boss" : "run") : null;
+      if (want !== music.playing) {
+        if (want) music.start(want);
+        else music.stop();
       }
+      music.setSpeed(Math.min(g.stage, 12) * 2);
 
-      // Striped sun sitting on the horizon
-      const horizon = 150;
-      const sunR = 46;
-      for (let y = -sunR; y < 0; y++) {
-        const band = (y + sunR) / sunR;
-        if (band > 0.45 && Math.floor((y + sunR) / 3) % 2 === 1) continue;
-        const half = Math.sqrt(sunR * sunR - y * y);
-        ctx.fillStyle = band < 0.35 ? "#ffe45c" : band < 0.6 ? "#ffb03a" : band < 0.8 ? "#ff5a8a" : "#ff2ea6";
-        ctx.fillRect(Math.round(W / 2 - half), horizon + y, Math.round(half * 2), 1);
-      }
-
-      // Floor grid rolling toward you
-      ctx.fillStyle = "#1c0838";
-      ctx.fillRect(0, horizon, W, H - horizon);
-      ctx.fillStyle = "rgba(255,46,166,0.55)";
-      for (let i = -12; i <= 12; i++) {
-        const x0 = W / 2 + i * 8;
-        const x1 = W / 2 + i * 60;
-        for (let t = 0; t < 1; t += 0.02) {
-          ctx.fillRect(Math.round(x0 + (x1 - x0) * t), Math.round(horizon + (H - horizon) * t), 1, 1);
-        }
-      }
-      ctx.fillStyle = "rgba(34,230,255,0.5)";
-      for (let k = 0; k < 7; k++) {
-        const d = ((k * 16 + floor) / 112) ** 2;
-        ctx.fillRect(0, Math.round(horizon + d * (H - horizon)), W, 1);
-      }
-      ctx.fillStyle = "#ff2ea6";
-      ctx.fillRect(0, horizon, W, 1);
-
-      if (phase === "play" || phase === "over" || phase === "initials") {
-        // Falling things
-        for (const it of g.items) {
-          if (it.power) {
-            const p = POWERUPS.find((q) => q.kind === it.power)!;
-            ctx.fillStyle = "#0b0618";
-            ctx.fillRect(Math.round(it.x), Math.round(it.y), it.w, it.h);
-            ctx.strokeStyle = p.color;
-            ctx.strokeRect(Math.round(it.x) + 0.5, Math.round(it.y) + 0.5, it.w - 1, it.h - 1);
-            text(p.glyph, it.x + it.w / 2, it.y + 11, p.color, 14, "center");
-          } else {
-            ctx.fillStyle = "#12071f";
-            ctx.fillRect(Math.round(it.x), Math.round(it.y), it.w, it.h);
-            ctx.fillStyle = "#ff2ea6";
-            ctx.fillRect(Math.round(it.x), Math.round(it.y), it.w, 1);
-            ctx.fillRect(Math.round(it.x), Math.round(it.y + it.h - 1), it.w, 1);
-            text(it.text, it.x + 4, it.y + 10, "#ffd1ec", 14);
-          }
-        }
-
-        // The launch (blinks while hurt)
-        if (g.hurt <= 0 || Math.floor(g.hurt * 12) % 2 === 0) {
-          const ox = Math.round(g.x - 9);
-          const oy = GROUND - 22;
-          ROCKET.forEach((row, y) =>
-            row.split("").forEach((c, x) => {
-              if (c === "." || (c === "Y" && Math.random() < 0.35)) return;
-              ctx.fillStyle = ROCKET_COLORS[c];
-              ctx.fillRect(ox + x * 2, oy + y * 2, 2, 2);
-            })
-          );
-        }
-
-        // HUD
-        text("PIPELINE", 6, 12, "#ff2ea6", 14);
-        text(money(g.score), 6, 24, "#f6f0ff", 16);
-        text(`LEVEL ${level(g.time).label}`, W / 2, 12, "#ffd23f", 14, "center");
-        if (g.slow > 0) text("SLOW-MO", W / 2, 24, "#22e6ff", 14, "center");
-        text("RUNWAY", W - 6, 12, "#22e6ff", 14, "right");
-        text("♥".repeat(Math.max(0, g.lives)), W - 6, 24, "#ff2ea6", 14, "right");
-
-        if (g.banner && phase === "play") {
-          text(g.banner.text, W / 2, 90, g.banner.color, 22, "center");
-        }
-      }
+      render(ctx, g, p === "play" || p === "boss", { font, flashInFrame: !crt, reducedMotion, clock: (now - born) / 1000 });
+      if (crt) crt.draw(screen, { split: g.shake * 0.35 + g.flash * 2, flash: g.flash });
+      else if (flat) flat.drawImage(screen, 0, 0, canvas.width, canvas.height);
 
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(raf);
-  }, [phase, end]);
+    return () => {
+      cancelAnimationFrame(raf);
+      music.stop();
+      crt?.dispose();
+    };
+  }, []);
+
+  // Muting mid-run kills the music on the next frame; unmuting needs a run
+  useEffect(() => {
+    if (sound) sfx("select");
+  }, [sound]);
 
   const hold = (side: "left" | "right" | null) => {
     input.current.left = side === "left";
     input.current.right = side === "right";
   };
 
+  const [copied, setCopied] = useState(false);
+  const share = async () => {
+    if (!result) return;
+    const url = `${window.location.origin}/?play=daily`;
+    const text = [
+      `THE GTM GAME · DAILY #${dailyNumber(day)}`,
+      result.grid,
+      `${money(result.score)} pipeline · ${result.kos} KOs · ${result.combo} combo`,
+      result.killer ? `Taken out by: "${result.killer.text}"` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+    try {
+      if (navigator.share) await navigator.share({ text, url });
+      else {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+      unlock("player-2");
+      track("Dodger share");
+    } catch {
+      /* dismissed */
+    }
+  };
+
+  const askHref = result?.killer
+    ? `/ask?q=${encodeURIComponent(`My buyers keep saying "${result.killer.text.toLowerCase()}". How do I handle it?`)}`
+    : "/ask";
+
   return (
     <div
-      className="fixed inset-0 z-[80] grid place-items-center bg-[rgba(6,3,14,0.9)] backdrop-blur-sm p-3 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
+      className="fixed inset-0 z-[80] overflow-y-auto bg-[rgba(6,3,14,0.92)] backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
       role="dialog"
       aria-modal="true"
       aria-label="Secret level: Objection Dodger"
     >
-      <div className="relative w-full max-w-[760px]">
+      <div className="relative mx-auto w-full max-w-[820px] px-3 py-4 md:py-8">
         <div className="flex items-end justify-between mb-2 px-1">
           <div>
             <p className="font-osd text-[18px] leading-none text-[var(--gym-cyan)]">SECRET LEVEL UNLOCKED</p>
             <p className="mt-1 font-display text-[22px] md:text-[28px] leading-none gym-sunset-text">Objection Dodger</p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close the secret level"
-            className="h-10 w-10 grid place-items-center rounded-lg border border-[var(--gym-line)] text-foreground/80 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)] cursor-pointer"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSound}
+              aria-label={sound ? "Turn sound off" : "Turn sound on"}
+              aria-pressed={sound}
+              className={cn(
+                "h-10 px-3 grid grid-flow-col place-items-center gap-2 rounded-lg border font-osd text-[17px] leading-none cursor-pointer",
+                sound ? "border-[var(--gym-cyan)] text-[var(--gym-cyan)]" : "border-[var(--gym-line)] text-foreground/70 hover:text-foreground"
+              )}
+            >
+              {sound ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              <span className="hidden sm:inline">{sound ? "SOUND ON" : "SOUND OFF"}</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close the secret level"
+              className="h-10 w-10 grid place-items-center rounded-lg border border-[var(--gym-line)] text-foreground/80 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)] cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* The cabinet screen */}
-        <div className="gym-pixel-box [--c:var(--gym-pink)] relative bg-black">
+        <div className="gym-pixel-box [--c:var(--gym-pink)] relative bg-black overflow-hidden">
           <canvas
             ref={canvasRef}
-            width={W}
-            height={H}
+            width={W * 3}
+            height={H * 3}
             className="block w-full aspect-[4/3] [image-rendering:pixelated] touch-none select-none"
             onPointerDown={(e) => {
-              if (phase !== "play") return;
+              if (phaseRef.current !== "play") return;
               const r = e.currentTarget.getBoundingClientRect();
-              hold(e.clientX - r.left < r.width / 2 ? "left" : "right");
+              const x = ((e.clientX - r.left) / r.width) * W;
+              const y = ((e.clientY - r.top) / r.height) * H;
+              if (e.pointerType !== "mouse" && tap(game.current, x, y)) return;
+              hold(x < W / 2 ? "left" : "right");
             }}
             onPointerUp={() => hold(null)}
             onPointerLeave={() => hold(null)}
             onPointerCancel={() => hold(null)}
           />
-          <div className="pointer-events-none absolute inset-0 gym-scanlines opacity-80" />
+          {!crtOn && <div className="pointer-events-none absolute inset-0 gym-scanlines opacity-80" />}
 
           {phase === "attract" && (
-            <Screen>
-              <p className="font-display text-[20px] md:text-[30px] leading-none gym-chrome">OBJECTION DODGER</p>
-              <p className="mt-3 max-w-[40ch] text-[13px] md:text-[15px] text-foreground/85 leading-snug">
-                Dodge the objections. Grab <span className="text-[var(--gym-yellow)]">★ case studies</span>,{" "}
-                <span className="text-[var(--gym-pink)]">♥ referrals</span> and <span className="text-[var(--gym-cyan)]">⚡ urgency</span>. Don&apos;t run out of runway.
+            <Screen dim>
+              <p className="font-display text-[22px] md:text-[34px] leading-none gym-sunset-text [text-shadow:none]">OBJECTION DODGER</p>
+              <p className="mt-2 font-osd text-[16px] md:text-[20px] text-[var(--gym-cyan)] leading-none">
+                {mode === "daily" ? `DAILY RUN #${dailyNumber(day)}` : intel.status === "ready" ? "STARRING YOUR BUYERS" : "ARCADE"}
               </p>
-              <HighScores scores={scores} />
-              <button type="button" onClick={start} className="pointer-events-auto mt-4 font-osd text-[24px] md:text-[28px] leading-none text-[var(--gym-yellow)] gym-blink cursor-pointer">
+              <button type="button" onClick={start} className="pointer-events-auto mt-4 md:mt-6 font-osd text-[26px] md:text-[34px] leading-none text-[var(--gym-yellow)] gym-blink cursor-pointer">
                 PRESS START
               </button>
-              <p className="mt-2 font-osd text-[15px] text-muted-foreground">← → TO MOVE · HOLD A SIDE ON TOUCH · ESC TO LEAVE</p>
-            </Screen>
-          )}
-
-          {phase === "initials" && (
-            <Screen>
-              <p className="font-osd text-[22px] text-[var(--gym-cyan)] leading-none">NEW HIGH SCORE</p>
-              <p className="mt-1 font-display text-[26px] md:text-[34px] leading-none gym-sunset-text">{money(final)}</p>
-              <p className="mt-3 font-osd text-[18px] text-foreground/80">ENTER YOUR INITIALS</p>
-              <Initials
-                onDone={(initials) => {
-                  addHighScore(initials, final);
-                  sfx("coin");
-                  setPhase("over");
-                }}
-              />
-            </Screen>
-          )}
-
-          {phase === "over" && (
-            <Screen>
-              <p className="font-display text-[30px] md:text-[44px] leading-none text-[var(--gym-pink)] [text-shadow:0_0_24px_var(--gym-pink)]">GAME OVER</p>
-              <p className="mt-3 text-[13px] md:text-[15px] text-foreground/85">The objections won this round. Pipeline: {money(final)}</p>
-              <p className="mt-1 text-[12px] md:text-[13px] text-muted-foreground">
-                Real ones are easier with a playbook. Ask the coach how to handle the one that got you.
+              <p className="mt-3 font-osd text-[14px] md:text-[17px] text-foreground/85 leading-tight">
+                {touch ? "TAP AN OBJECTION TO BLAST IT · HOLD A SIDE TO MOVE" : "TYPE THE WORD UNDER AN OBJECTION TO BLAST IT · ← → TO MOVE"}
               </p>
-              <button type="button" onClick={start} className="pointer-events-auto mt-4 font-osd text-[24px] md:text-[30px] leading-none text-[var(--gym-yellow)] cursor-pointer">
-                CONTINUE? <span className="tabular-nums">{countdown}</span>
+            </Screen>
+          )}
+
+          {phase === "boss" && boss && (
+            <Screen>
+              <p className="font-osd text-[18px] md:text-[22px] leading-none" style={{ color: boss.color }}>{boss.name}</p>
+              <p className="mt-1 font-display text-[28px] md:text-[42px] leading-none gym-sunset-text [text-shadow:none]">DEFEATED</p>
+              <p className="mt-3 max-w-[36ch] text-[13px] md:text-[15px] text-foreground/85 leading-snug">
+                Your reward: a tape from the coaches. {boss.lesson}
+              </p>
+              <button type="button" onClick={resume} className="pointer-events-auto mt-4 font-osd text-[22px] md:text-[28px] leading-none text-[var(--gym-yellow)] gym-blink cursor-pointer">
+                CONTINUE ▶
               </button>
             </Screen>
+          )}
+
+          {phase === "initials" && result && (
+            <Screen>
+              <p className="font-osd text-[20px] md:text-[22px] text-[var(--gym-cyan)] leading-none">
+                {result.mode === "daily" ? "POST TO TODAY'S BOARD" : "NEW HIGH SCORE"}
+              </p>
+              <p className="mt-1 font-display text-[24px] md:text-[34px] leading-none gym-sunset-text [text-shadow:none]">{money(result.score)}</p>
+              <p className="mt-2 font-osd text-[16px] md:text-[18px] text-foreground/80">ENTER YOUR INITIALS</p>
+              <Initials onDone={submitInitials} />
+            </Screen>
+          )}
+
+          {phase === "over" && result && (
+            <Screen>
+              <p className="font-display text-[30px] md:text-[44px] leading-none text-[var(--gym-pink)] [text-shadow:0_0_24px_var(--gym-pink)]">GAME OVER</p>
+              <p className="mt-2 font-osd text-[18px] md:text-[22px] text-foreground leading-none">PIPELINE {money(result.score)}</p>
+              <p className="mt-1 font-osd text-[15px] md:text-[17px] text-muted-foreground leading-none">
+                {result.kos} KOS · {result.grazes} NEAR MISSES · BEST COMBO {result.combo}
+              </p>
+              {result.mode === "daily" && <p className="mt-2 text-[18px] md:text-[22px] leading-none tracking-[2px]">{result.grid}</p>}
+              <button type="button" onClick={start} className="pointer-events-auto mt-3 md:mt-4 font-osd text-[22px] md:text-[30px] leading-none text-[var(--gym-yellow)] cursor-pointer">
+                {countdown !== null ? <>CONTINUE? <span className="tabular-nums">{countdown}</span></> : "PLAY AGAIN"}
+              </button>
+            </Screen>
+          )}
+        </div>
+
+        {/* Under the screen: the control deck */}
+        <div className="mt-3" onPointerDown={() => setCountdown(null)}>
+          {phase === "attract" && (
+            <div className="grid gap-3 md:grid-cols-[1.25fr_1fr]">
+              <div className="gym-pixel-box [--c:var(--gym-line)] bg-[var(--gym-night-2)] p-3.5">
+                <p className="font-osd text-[16px] leading-none text-muted-foreground">SELECT MODE</p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <ModeButton active={mode === "arcade"} onClick={() => setMode("arcade")} title="ARCADE" detail="Your buyers' objections" />
+                  <ModeButton active={mode === "daily"} onClick={() => setMode("daily")} title={`DAILY #${dailyNumber(day)}`} detail="Same run for everyone" />
+                </div>
+                {mode === "arcade" ? (
+                  <form
+                    className="mt-3"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (business.trim()) void scout(business.trim());
+                    }}
+                  >
+                    <label htmlFor="dodger-business" className="font-osd text-[16px] leading-none text-[var(--gym-cyan)]">
+                      WHAT DO YOU SELL, AND TO WHOM?
+                    </label>
+                    <div className="mt-1.5 flex gap-2">
+                      <input
+                        id="dodger-business"
+                        value={business}
+                        onChange={(e) => setBusiness(e.target.value)}
+                        maxLength={400}
+                        placeholder="Payroll software for 20-person agencies"
+                        className="min-w-0 flex-1 h-10 rounded-md bg-black/40 border border-[var(--gym-line)] px-3 text-[14px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:border-[var(--gym-cyan)]"
+                      />
+                      <button
+                        type="submit"
+                        disabled={intel.status === "loading" || !business.trim()}
+                        className="h-10 px-3 rounded-md gym-button text-[13px] cursor-pointer disabled:opacity-50 disabled:cursor-default"
+                      >
+                        Scout
+                      </button>
+                    </div>
+                    <IntelStatus intel={intel} />
+                  </form>
+                ) : (
+                  <p className="mt-3 text-[13px] text-muted-foreground leading-snug">
+                    Everyone gets the same objections in the same order today, until the first boss falls. One shot at the board, a grid to brag with.
+                  </p>
+                )}
+              </div>
+              <div className="gym-pixel-box [--c:var(--gym-line)] bg-[var(--gym-night-2)] p-3.5">
+                {mode === "daily" ? (
+                  <>
+                    <p className="font-osd text-[16px] leading-none text-muted-foreground">
+                      {board?.enabled ? "TODAY'S TOP 10 · WORLDWIDE" : "TODAY ON THIS MACHINE"}
+                    </p>
+                    {board?.enabled ? (
+                      board.scores.length ? (
+                        <HighScores scores={board.scores} limit={10} />
+                      ) : (
+                        <p className="mt-3 font-osd text-[18px] text-[var(--gym-yellow)]">BOARD&apos;S EMPTY. CLAIM #1.</p>
+                      )
+                    ) : (
+                      <DailyBest day={day} />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className="font-osd text-[16px] leading-none text-muted-foreground">HIGH SCORES · THIS MACHINE</p>
+                    <HighScores scores={scores} limit={5} />
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {phase === "play" && (
+            <p className="text-center font-osd text-[15px] md:text-[17px] text-muted-foreground">
+              {touch
+                ? "TAP OBJECTIONS · HOLD LEFT OR RIGHT TO MOVE · ★ CASE STUDY ♥ REFERRAL ⚡ URGENCY ▶ RECEIPTS"
+                : "TYPE THE COUNTER · ← → MOVE · BACKSPACE DROPS TARGET · ★ CASE STUDY ♥ REFERRAL ⚡ URGENCY ▶ RECEIPTS"}
+            </p>
+          )}
+
+          {phase === "boss" && boss && (
+            <Tape heading="BOSS REWARD · A TAPE FROM THE COACHES" tape={tape}>
+              <button type="button" onClick={resume} className="h-10 px-4 rounded-md gym-button text-[13px] cursor-pointer">
+                Back to the run ▶
+              </button>
+            </Tape>
+          )}
+
+          {(phase === "over" || phase === "initials") && result && (
+            <div className="grid gap-3">
+              {result.killer && (
+                <div className="gym-pixel-box [--c:var(--gym-pink)] bg-[var(--gym-night-2)] p-3.5">
+                  <p className="font-osd text-[16px] leading-none text-muted-foreground">THE ONE THAT GOT YOU</p>
+                  <p className="mt-1.5 font-display text-[18px] md:text-[24px] leading-tight text-[var(--gym-pink)]">
+                    &ldquo;{result.killer.text}&rdquo;
+                  </p>
+                  <p className="mt-2 text-[14px] md:text-[15px] text-foreground/90 leading-snug">
+                    <span className="font-osd text-[17px] text-[var(--gym-cyan)]">COUNTER: {result.killer.counter} · </span>
+                    {result.killer.move}
+                  </p>
+                </div>
+              )}
+              <Tape heading="THE COACH'S TAPE" tape={tape}>
+                <Link href={askHref} onClick={onClose} className="h-10 px-4 inline-flex items-center rounded-md gym-button text-[13px]">
+                  Ask the coach how to handle it →
+                </Link>
+                {result.mode === "daily" && (
+                  <button type="button" onClick={share} className="h-10 px-4 inline-flex items-center gap-2 rounded-md border border-[var(--gym-cyan)] text-[13px] font-semibold text-[var(--gym-cyan)] cursor-pointer hover:bg-[var(--gym-cyan)]/10">
+                    <Share2 className="h-4 w-4" />
+                    {copied ? "Copied!" : "Share your run"}
+                  </button>
+                )}
+              </Tape>
+              {result.mode === "daily" && board?.enabled && board.scores.length > 0 && (
+                <div className="gym-pixel-box [--c:var(--gym-line)] bg-[var(--gym-night-2)] p-3.5">
+                  <p className="font-osd text-[16px] leading-none text-muted-foreground">
+                    TODAY&apos;S TOP 10{board.rank ? ` · YOU'RE #${board.rank}` : ""}
+                  </p>
+                  <HighScores scores={board.scores} limit={10} />
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -468,18 +727,151 @@ export function GymDodger({ onClose }: { onClose: () => void }) {
   );
 }
 
-function Screen({ children }: { children: React.ReactNode }) {
+function Screen({ children, dim = false }: { children: React.ReactNode; dim?: boolean }) {
   return (
-    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-4 bg-[rgba(11,6,24,0.72)]">
+    <div
+      className={cn(
+        "pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center px-4 [text-shadow:0_2px_0_rgba(0,0,0,0.8)]",
+        dim ? "bg-[rgba(11,6,24,0.45)]" : "bg-[rgba(11,6,24,0.72)]"
+      )}
+    >
       {children}
     </div>
   );
 }
 
-function HighScores({ scores }: { scores: { initials: string; score: number; house?: boolean }[] }) {
+function ModeButton({ active, onClick, title, detail }: { active: boolean; onClick: () => void; title: string; detail: string }) {
   return (
-    <ol className="mt-4 w-full max-w-[260px] font-osd text-[16px] md:text-[19px] leading-[1.15]">
-      {scores.slice(0, 5).map((s, i) => (
+    <button
+      type="button"
+      onClick={() => {
+        sfx("select");
+        onClick();
+      }}
+      aria-pressed={active}
+      className={cn(
+        "rounded-md border px-3 py-2 text-left cursor-pointer transition-colors",
+        active ? "border-[var(--gym-yellow)] bg-[var(--gym-yellow)]/10" : "border-[var(--gym-line)] hover:border-foreground/40"
+      )}
+    >
+      <span className={cn("block font-osd text-[19px] leading-none", active ? "text-[var(--gym-yellow)]" : "text-foreground")}>{title}</span>
+      <span className="mt-1 block text-[12px] text-muted-foreground leading-tight">{detail}</span>
+    </button>
+  );
+}
+
+function IntelStatus({ intel }: { intel: Intel }) {
+  if (intel.status === "loading") {
+    return (
+      <p className="mt-2 font-osd text-[16px] leading-tight text-[var(--gym-yellow)] gym-blink">
+        SCOUTING YOUR BUYERS… THE COACH IS READING YOUR MARKET. START NOW, THEY&apos;LL JOIN MID-RUN.
+      </p>
+    );
+  }
+  if (intel.status === "ready") {
+    return (
+      <div className="mt-2">
+        <p className="font-osd text-[16px] leading-tight text-[#7dffb0]">
+          SCOUTED{intel.label ? `: ${intel.label.toUpperCase()}` : ""} · {intel.objections.length} OBJECTIONS LOADED
+        </p>
+        <ul className="mt-1.5 flex flex-wrap gap-1.5">
+          {intel.objections.slice(0, 4).map((o) => (
+            <li key={o.text} className="rounded border border-[var(--gym-line)] px-1.5 py-0.5 font-osd text-[14px] leading-none">
+              <span className="text-[#ffd1ec]">{o.text}</span> <span className="text-[var(--gym-cyan)]">→ {o.counter}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  return (
+    <p className="mt-2 text-[12px] text-muted-foreground leading-snug">
+      Tell the coach and your buyers&apos; real objections fall instead of the house set. Signed in with a profile? It already knows.
+    </p>
+  );
+}
+
+/** A coach moment: thumbnail until pressed, then the real player at that second. */
+function Tape({ heading, tape, children }: { heading: string; tape: { clip: Clip | null; loading: boolean }; children?: React.ReactNode }) {
+  const clip = tape.clip;
+  const [playingKey, setPlayingKey] = useState<string | null>(null);
+  const playing = clip !== null && playingKey === `${clip.playbackId}@${clip.start}`;
+
+  return (
+    <div className="gym-pixel-box [--c:var(--gym-cyan)] bg-[var(--gym-night-2)] p-3.5">
+      <p className="font-osd text-[16px] leading-none text-[var(--gym-cyan)]">{clip || tape.loading ? heading : "YOUR MOVE"}</p>
+      {tape.loading && <p className="mt-2 font-osd text-[17px] text-foreground/80 gym-blink">FINDING THE TAPE…</p>}
+      {clip && (
+        <div className="mt-2.5 grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_1fr] items-start">
+          <div className="relative aspect-video overflow-hidden rounded-md border border-[var(--gym-line)] bg-black">
+            {playing ? (
+              <MuxPlayer
+                playbackId={clip.playbackId}
+                startTime={clip.start}
+                autoPlay
+                accentColor="#ff2ea6"
+                metadata={{ video_title: clip.title }}
+                style={{ width: "100%", height: "100%" }}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setPlayingKey(`${clip.playbackId}@${clip.start}`);
+                  unlock("replay");
+                  track("Clip played", { video: clip.title.slice(0, 120), source: "dodger" });
+                }}
+                className="group absolute inset-0 cursor-pointer"
+                aria-label={`Play: ${clip.title}`}
+              >
+                <img
+                  src={`https://image.mux.com/${clip.playbackId}/thumbnail.webp?time=${clip.start + 4}&width=640`}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover opacity-85 group-hover:opacity-100 transition-opacity"
+                />
+                <span className="absolute inset-0 grid place-items-center">
+                  <span className="grid h-14 w-14 place-items-center rounded-full bg-[var(--gym-pink)] shadow-[0_0_30px_var(--gym-pink)] group-hover:scale-105 transition-transform">
+                    <Play className="h-6 w-6 fill-white text-white translate-x-0.5" />
+                  </span>
+                </span>
+              </button>
+            )}
+          </div>
+          <div className="min-w-0">
+            {clip.coach && <p className="font-osd text-[18px] leading-none text-[var(--gym-yellow)]">{clip.coach.toUpperCase()}</p>}
+            <p className="mt-1 text-[14px] font-semibold leading-snug text-foreground/90 line-clamp-3">{clip.title}</p>
+            <p className="mt-1 font-osd text-[16px] text-muted-foreground">▶ FROM {fmt(clip.start)}</p>
+            <div className="mt-3 flex flex-wrap gap-2">{children}</div>
+          </div>
+        </div>
+      )}
+      {!clip && !tape.loading && <div className="mt-3 flex flex-wrap gap-2">{children}</div>}
+    </div>
+  );
+}
+
+function fmt(seconds: number) {
+  const s = Math.floor(seconds);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return h ? `${h}:${pad(m)}:${pad(s % 60)}` : `${m}:${pad(s % 60)}`;
+}
+
+function DailyBest({ day }: { day: string }) {
+  const { dailyBest } = useArcade();
+  const best = dailyBest[day];
+  return best ? (
+    <p className="mt-3 font-osd text-[20px] text-[var(--gym-yellow)]">YOUR BEST TODAY: {money(best)}</p>
+  ) : (
+    <p className="mt-3 font-osd text-[18px] text-foreground/80">NO RUN YET TODAY.</p>
+  );
+}
+
+function HighScores({ scores, limit }: { scores: { initials: string; score: number; house?: boolean }[]; limit: number }) {
+  return (
+    <ol className="mt-2.5 font-osd text-[17px] md:text-[19px] leading-[1.2]">
+      {scores.slice(0, limit).map((s, i) => (
         <li key={`${s.initials}-${i}`} className={s.house ? "flex justify-between text-foreground/70" : "flex justify-between text-[var(--gym-yellow)]"}>
           <span>{i + 1}. {s.initials}</span>
           <span className="tabular-nums">{money(s.score)}</span>
@@ -501,9 +893,9 @@ function Initials({ onDone }: { onDone: (initials: string) => void }) {
     setChars((c) => c.map((v, i) => (i === slot ? (v + d + LETTERS.length) % LETTERS.length : v)));
   }, [slot]);
 
-  const advance = useCallback(() => {
+  const advance = useCallback((next?: number[]) => {
     sfx("select");
-    if (slot === 2) onDone(chars.map((i) => LETTERS[i]).join(""));
+    if (slot === 2) onDone((next ?? chars).map((i) => LETTERS[i]).join(""));
     else setSlot(slot + 1);
   }, [slot, chars, onDone]);
 
@@ -515,14 +907,15 @@ function Initials({ onDone }: { onDone: (initials: string) => void }) {
       else if (e.key === "ArrowRight" || e.key === "Enter") advance();
       else if (/^[a-z0-9]$/i.test(e.key)) {
         const idx = LETTERS.indexOf(e.key.toUpperCase());
-        setChars((c) => c.map((v, i) => (i === slot ? idx : v)));
-        advance();
+        const next = chars.map((v, i) => (i === slot ? idx : v));
+        setChars(next);
+        advance(next);
       } else return;
       e.preventDefault();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [bump, advance, slot]);
+  }, [bump, advance, slot, chars]);
 
   return (
     <div className="pointer-events-auto mt-3 flex items-center gap-3">
@@ -541,7 +934,7 @@ function Initials({ onDone }: { onDone: (initials: string) => void }) {
           <button type="button" aria-label="Previous letter" onClick={() => { setSlot(i); bump(-1); }} className="font-osd text-[18px] text-muted-foreground hover:text-foreground cursor-pointer px-2">▼</button>
         </div>
       ))}
-      <button type="button" onClick={advance} className="ml-2 h-10 px-3 rounded-md gym-button text-[13px] cursor-pointer">
+      <button type="button" onClick={() => advance()} className="ml-2 h-10 px-3 rounded-md gym-button text-[13px] cursor-pointer">
         {slot === 2 ? "Done" : "Next"}
       </button>
     </div>

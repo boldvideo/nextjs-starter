@@ -30,6 +30,8 @@ export interface ArcadeState {
   questions: string[];
   /** An email went in the slot (or they signed in): no more gate */
   coin: boolean;
+  /** Best daily-run score per day (YYYY-MM-DD) */
+  dailyBest: Record<string, number>;
 }
 
 export interface Achievement {
@@ -52,6 +54,15 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "tilt", title: "Tilt!", detail: "Stop shaking the machine.", xp: 50 },
   { id: "boss", title: "Boss slayer", detail: "Scored 5,000 in Objection Dodger.", xp: 500 },
   { id: "player-card", title: "Player card", detail: "Signed in. The coach knows your name now.", xp: 200 },
+  { id: "boss-gatekeeper", title: "Past the front desk", detail: "Beat the Gatekeeper.", xp: 300 },
+  { id: "boss-procurement", title: "Form 27-B, filed", detail: "Beat Procurement.", xp: 400 },
+  { id: "boss-ghosted", title: "Unghosted", detail: "Beat Ghosted.", xp: 500 },
+  { id: "boss-cfo", title: "CFO approved", detail: "Beat the CFO. The money said yes.", xp: 1000 },
+  { id: "closer", title: "Closer", detail: "Blasted 25 objections in one run.", xp: 300 },
+  { id: "near-miss", title: "Living dangerously", detail: "10 near misses in one run.", xp: 200 },
+  { id: "combo-king", title: "Combo x8", detail: "Maxed the multiplier.", xp: 400 },
+  { id: "intel", title: "They know you", detail: "Dodged your own buyers' objections.", xp: 250 },
+  { id: "daily", title: "Daily grind", detail: "Played the daily run.", xp: 100 },
 ];
 
 const HOUSE_SCORES: HighScore[] = [
@@ -74,6 +85,7 @@ const INITIAL: ArcadeState = {
   plays: 0,
   questions: [],
   coin: false,
+  dailyBest: {},
 };
 
 /** Free levels before the coin. */
@@ -205,6 +217,14 @@ export function qualifies(score: number): boolean {
   return score > 0 && (scores.length < 8 || score > scores[scores.length - 1].score);
 }
 
+export function recordDaily(day: string, score: number) {
+  const dailyBest = getSnapshot().dailyBest;
+  if ((dailyBest[day] ?? 0) >= score) return;
+  // Keep a week of days
+  const kept = Object.entries(dailyBest).sort(([a], [b]) => b.localeCompare(a)).slice(0, 6);
+  set({ dailyBest: { ...Object.fromEntries(kept), [day]: score } });
+}
+
 export function addHighScore(initials: string, score: number) {
   const scores = [...getSnapshot().scores, { initials, score }]
     .sort((a, b) => b.score - a.score)
@@ -214,9 +234,36 @@ export function addHighScore(initials: string, score: number) {
 
 // ── Sound: original square-wave blips, synthesized, muted by default ─────
 
-export type Sfx = "coin" | "start" | "select" | "quest" | "achievement" | "hit" | "powerup" | "gameover";
+export type Sfx =
+  | "coin"
+  | "start"
+  | "select"
+  | "quest"
+  | "achievement"
+  | "hit"
+  | "powerup"
+  | "gameover"
+  | "zap"
+  | "kill"
+  | "graze"
+  | "miss"
+  | "boss"
+  | "bossHit"
+  | "bossDown";
 
 let ctx: AudioContext | null = null;
+
+/** The shared audio context, or null while the machine is muted. */
+export function audio(): AudioContext | null {
+  if (typeof window === "undefined" || !getSnapshot().sound) return null;
+  try {
+    ctx ??= new AudioContext();
+    if (ctx.state === "suspended") void ctx.resume();
+    return ctx;
+  } catch {
+    return null;
+  }
+}
 
 const NOTES: Record<Sfx, { f: number; d: number; type?: OscillatorType }[]> = {
   coin: [{ f: 988, d: 0.07 }, { f: 1319, d: 0.22 }],
@@ -227,12 +274,19 @@ const NOTES: Record<Sfx, { f: number; d: number; type?: OscillatorType }[]> = {
   hit: [{ f: 196, d: 0.06, type: "sawtooth" }, { f: 131, d: 0.14, type: "sawtooth" }],
   powerup: [{ f: 392, d: 0.05 }, { f: 523, d: 0.05 }, { f: 659, d: 0.05 }, { f: 784, d: 0.05 }, { f: 1047, d: 0.05 }, { f: 1319, d: 0.12 }],
   gameover: [{ f: 494, d: 0.18 }, { f: 440, d: 0.18 }, { f: 392, d: 0.18 }, { f: 294, d: 0.5, type: "triangle" }],
+  zap: [{ f: 1760, d: 0.025 }],
+  kill: [{ f: 1047, d: 0.04 }, { f: 1568, d: 0.04 }, { f: 2093, d: 0.08 }],
+  graze: [{ f: 2637, d: 0.03, type: "triangle" }, { f: 3136, d: 0.05, type: "triangle" }],
+  miss: [{ f: 110, d: 0.06, type: "sawtooth" }],
+  boss: [{ f: 147, d: 0.22, type: "sawtooth" }, { f: 139, d: 0.22, type: "sawtooth" }, { f: 147, d: 0.22, type: "sawtooth" }, { f: 98, d: 0.5, type: "sawtooth" }],
+  bossHit: [{ f: 220, d: 0.05, type: "sawtooth" }, { f: 880, d: 0.06 }],
+  bossDown: [{ f: 523, d: 0.08 }, { f: 659, d: 0.08 }, { f: 784, d: 0.08 }, { f: 1047, d: 0.08 }, { f: 784, d: 0.08 }, { f: 1047, d: 0.08 }, { f: 1319, d: 0.08 }, { f: 1568, d: 0.4 }],
 };
 
 export function sfx(name: Sfx) {
-  if (typeof window === "undefined" || !getSnapshot().sound) return;
+  const ctx = audio();
+  if (!ctx) return;
   try {
-    ctx ??= new AudioContext();
     let t = ctx.currentTime + 0.01;
     for (const note of NOTES[name]) {
       const osc = ctx.createOscillator();

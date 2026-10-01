@@ -14,7 +14,12 @@ export type GymEvent =
   | "Clip played"
   | "Stage picked"
   | "Channel submitted"
-  | "Konami";
+  | "Konami"
+  | "Dodger run"
+  | "Dodger over"
+  | "Dodger boss"
+  | "Dodger scouted"
+  | "Dodger share";
 
 type Plausible = (event: string, options?: { props?: Record<string, string | number> }) => void;
 

@@ -17,7 +17,7 @@ import { track } from "@/lib/gym-track";
  *
  *   ↑↑↓↓←→←→BA     secret mode (CRT, turbo floor, the hidden coach) and the
  *                  Objection Dodger secret level. On touch: swipe the arrows,
- *                  then tap twice.
+ *                  then tap twice. ?play=daily opens today's daily run.
  *   toasts         achievements and XP
  *   tab title      "PAUSED" while you're away
  *   console        a note for anyone reading the source
@@ -103,7 +103,7 @@ function useKonami(onUnlock: () => void) {
 export function GymArcade() {
   const { secret } = useArcade();
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [dodger, setDodger] = useState(false);
+  const [dodger, setDodger] = useState<false | "arcade" | "daily">(false);
   const nextId = useRef(0);
 
   // Secret mode lives on <html> so CSS anywhere can react to it
@@ -116,14 +116,14 @@ export function GymArcade() {
     setSecret(true);
     unlock("konami");
     track("Konami");
-    setDodger(true);
+    setDodger("arcade");
   });
 
   useEffect(
     () =>
       onArcadeEvent((event) => {
         if (event.type === "dodger") {
-          setDodger(true);
+          setDodger("arcade");
           return;
         }
         if (event.type === "secret") return;
@@ -140,6 +140,21 @@ export function GymArcade() {
       }),
     []
   );
+
+  // A shared daily run (?play=daily) drops you straight into it
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("play") !== "daily") return;
+    // After hydration settles, like a key press would
+    const id = setTimeout(() => {
+      params.delete("play");
+      const rest = params.toString();
+      window.history.replaceState(window.history.state, "", `${window.location.pathname}${rest ? `?${rest}` : ""}${window.location.hash}`);
+      setSecret(true);
+      setDodger("daily");
+    }, 400);
+    return () => clearTimeout(id);
+  }, []);
 
   // Once per visit: the note in the console, the night-owl check
   useEffect(() => {
@@ -201,7 +216,7 @@ export function GymArcade() {
           )
         )}
       </div>
-      {dodger && <Dodger onClose={() => setDodger(false)} />}
+      {dodger && <Dodger initialMode={dodger} onClose={() => setDodger(false)} />}
     </>
   );
 }
