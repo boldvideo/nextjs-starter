@@ -15,7 +15,6 @@ interface GymHomepageProps {
  * front, the sessions scrolling along the floor, then coach select.
  */
 export function GymHomepage({ videos }: GymHomepageProps) {
-  const sessions = videos.length;
 
   // Long-form sessions make the best marquee; shuffle-free for ISR stability
   const tape = videos.filter((v) => (v.duration || 0) > 600).slice(0, 18);
@@ -28,7 +27,7 @@ export function GymHomepage({ videos }: GymHomepageProps) {
         <GymOsd />
 
         <section className="relative z-10 flex-1 flex items-center px-4 pt-16 pb-8 md:pt-20 md:pb-10">
-          <GymAskHero sessions={sessions} />
+          <GymAskHero />
         </section>
 
         {tape.length > 0 && (

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Dices } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -77,12 +78,11 @@ function useTypewriter(lines: string[], enabled: boolean): string {
 }
 
 interface GymAskHeroProps {
-  sessions?: number;
   /** Optional submit override (the /ask page streams in place) */
   onAsk?: (question: string) => void;
 }
 
-export function GymAskHero({ sessions, onAsk }: GymAskHeroProps) {
+export function GymAskHero({ onAsk }: GymAskHeroProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -93,7 +93,9 @@ export function GymAskHero({ sessions, onAsk }: GymAskHeroProps) {
   const first = (user?.name || "").split(" ")[0];
   const company = member?.profile?.business_name;
   const greeting = first
-    ? `Welcome back, ${first}. What's your next move${company ? ` at ${company}` : ""}?`
+    ? company
+      ? `Welcome back, ${first}. Every answer's tuned to ${company}.`
+      : `Welcome back, ${first}. Tell me about your business and I'll tune every answer to it.`
     : "Player one, ready? What's your next move?";
 
   const ask = useCallback(
@@ -159,7 +161,7 @@ export function GymAskHero({ sessions, onAsk }: GymAskHeroProps) {
       <div className="relative w-full">
         <GymHorizon />
         {/* "Psst." What this is and who FounderWell is. Opens Vanessa's note. */}
-        <GymNoteSticker className="absolute z-20 -bottom-14 right-1 h-[68px] w-[68px] md:bottom-auto md:-top-16 md:-right-12 lg:-right-20 md:h-[96px] md:w-[96px] rotate-6" />
+        <GymNoteSticker className="absolute z-20 top-0 left-0 h-[64px] w-[64px] -rotate-6 md:left-auto md:-top-16 md:-right-12 lg:-right-20 md:h-[96px] md:w-[96px] md:rotate-6" />
         <h1 className="relative font-display gym-chrome uppercase leading-[0.92] text-[48px] sm:text-[clamp(40px,7vw,96px)] tracking-[-0.02em] pb-[0.3em]">
           <span className="block sm:whitespace-nowrap text-balance">Stuck on GTM?</span>
           <span className="block sm:whitespace-nowrap text-balance">Ask the coaches.</span>
@@ -183,7 +185,7 @@ export function GymAskHero({ sessions, onAsk }: GymAskHeroProps) {
       </div>
 
 
-      {/* The input */}
+      {/* The input. Signed in, it wears a "playing as" tab: it knows you. */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -192,6 +194,7 @@ export function GymAskHero({ sessions, onAsk }: GymAskHeroProps) {
         key={nudge}
         className={cn("relative z-10 mt-14 md:mt-16 w-full gym-neon-frame", nudge > 0 && "gym-nudge")}
       >
+        {first && <PlayerTab name={first} image={user?.image} company={company} website={member?.profile?.website} />}
         <div className="flex items-center gap-2 rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] pl-4 md:pl-6 pr-1.5 md:pr-2 py-1.5 md:py-2">
           <label htmlFor="gym-ask" className="sr-only">
             Ask the game master
@@ -225,66 +228,92 @@ export function GymAskHero({ sessions, onAsk }: GymAskHeroProps) {
         </div>
       </form>
 
-      {/* Proof before anything else: the actual humans behind the answers */}
-      <div className="relative z-10 mt-5 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
-        <span className="flex -space-x-2.5">
-          {["cameron", "drew", "joel", "vanessa"].map((slug) => (
-            <Image key={slug} src={`/gym/game/cast/${slug}.webp`} alt="" width={44} height={44} className="h-10 w-10 md:h-11 md:w-11" />
-          ))}
-        </span>
-        <span className="text-center sm:text-left text-[13.5px] md:text-sm leading-snug text-muted-foreground">
-          <span className="font-semibold text-foreground">Cameron, Drew, Joel</span> &amp; the FounderWell crew.
-          <br />
-          Actual humans. We checked.
-        </span>
-      </div>
-
-      {/* World 1 */}
+      {/* Starters: real questions, each with the coach who teaches it */}
       <div className="relative z-10 mt-6 md:mt-7 w-full">
-        <div className="flex items-center justify-center gap-3 mb-3">
-          <span className="h-px w-10 bg-[var(--gym-line)]" />
-          <span className="font-osd text-[19px] text-muted-foreground uppercase">
-            Choose your level
-          </span>
-          <span className="h-px w-10 bg-[var(--gym-line)]" />
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-3">
+        <p className="mb-3 text-sm text-muted-foreground">or try one</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {GYM_WORKOUTS.map((w, i) => (
             <button
-              key={w.label}
+              key={w.question}
               type="button"
               onClick={() => ask(w.question)}
               onMouseEnter={() => sfx("select")}
+              title={`${w.topic}: ask ${w.coach}`}
               style={{ animationDelay: `${120 + i * 70}ms` }}
               className={cn(
-                "group relative text-left rounded-xl p-3.5 md:p-4 cursor-pointer",
-                "bg-[color-mix(in_srgb,var(--gym-panel)_90%,transparent)]",
-                "border border-[var(--gym-line)]",
+                "group flex items-center gap-3 text-left rounded-full pl-1.5 pr-4 py-1.5 cursor-pointer",
+                "bg-[color-mix(in_srgb,var(--gym-panel)_90%,transparent)] border border-[var(--gym-line)]",
                 "transition-[border-color,box-shadow,transform] duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0",
                 "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500 motion-safe:fill-mode-both",
                 TONE[w.tone].hover
               )}
             >
-              <div className="flex flex-col-reverse items-start gap-0.5 lg:flex-row lg:items-baseline lg:justify-between lg:gap-2">
-                <span className={cn("font-display text-[15px] md:text-base uppercase whitespace-nowrap", TONE[w.tone].text)}>
-                  {w.label}
-                </span>
-                <span className="font-osd text-[15px] leading-none text-muted-foreground/80 uppercase">
-                  {w.topic}
-                </span>
-              </div>
-              <p className="mt-2 text-sm font-semibold leading-snug text-foreground/95 line-clamp-2 group-hover:text-foreground">
+              <Image src={`/gym/game/cast/${w.coach}.webp`} alt="" width={40} height={40} className="h-9 w-9 shrink-0" />
+              <span className="min-w-0 text-[14.5px] font-medium leading-snug text-foreground/90 group-hover:text-foreground">
                 {w.question}
-              </p>
+              </span>
             </button>
           ))}
         </div>
-        {sessions ? (
-          <p className="mt-4 font-osd text-[17px] text-muted-foreground/70">
-            {sessions} sessions loaded · press <kbd className="px-1 rounded border border-[var(--gym-line)] text-foreground/80">/</kbd> to play
-          </p>
-        ) : null}
       </div>
+    </div>
+  );
+}
+
+function domainOf(website?: string): string | null {
+  if (!website) return null;
+  try {
+    const url = new URL(website.includes("://") ? website : `https://${website}`);
+    return url.hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/** "PLAYING AS MARCEL · BOLD VIDEO": the answers below are for you. */
+function PlayerTab({
+  name,
+  image,
+  company,
+  website,
+}: {
+  name: string;
+  image?: string | null;
+  company?: string;
+  website?: string;
+}) {
+  const domain = domainOf(website);
+  return (
+    <div className="absolute -top-[42px] left-3 md:left-5 flex items-center gap-2 h-[42px] pl-1.5 pr-3.5 rounded-t-xl bg-[var(--gym-night-2)] border-2 border-b-0 border-[var(--gym-cyan)] motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1">
+      {image ? (
+        // Google avatar
+        <img src={image} alt="" referrerPolicy="no-referrer" className="h-7 w-7 rounded-full ring-2 ring-[var(--gym-pink)]" />
+      ) : (
+        <span className="h-7 w-7 rounded-full grid place-items-center gym-sunset-bg font-display text-[12px] text-[#1a0616]">
+          {name.slice(0, 1).toUpperCase()}
+        </span>
+      )}
+      <span className="hidden sm:inline font-osd text-[17px] leading-none text-muted-foreground">PLAYING AS</span>
+      <span className="font-display text-[13px] uppercase leading-none text-foreground">{name}</span>
+      {company ? (
+        <>
+          <span className="text-muted-foreground" aria-hidden>
+            ·
+          </span>
+          {domain && (
+            <img
+              src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`}
+              alt=""
+              className="h-4 w-4 rounded-sm"
+            />
+          )}
+          <span className="font-display text-[13px] uppercase leading-none text-[var(--gym-cyan)] max-w-[160px] truncate">{company}</span>
+        </>
+      ) : (
+        <Link href="/player" className="ml-1 text-[12.5px] font-semibold text-[var(--gym-cyan)] hover:underline">
+          Add your company →
+        </Link>
+      )}
     </div>
   );
 }
