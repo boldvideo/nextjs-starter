@@ -78,12 +78,11 @@ function useTypewriter(lines: string[], enabled: boolean): string {
 
 interface GymAskHeroProps {
   sessions?: number;
-  hours?: number;
   /** Optional submit override (the /ask page streams in place) */
   onAsk?: (question: string) => void;
 }
 
-export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
+export function GymAskHero({ sessions, onAsk }: GymAskHeroProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -160,10 +159,10 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
       <div className="relative w-full">
         <GymHorizon />
         {/* "Psst." What this is and who FounderWell is. Opens Vanessa's note. */}
-        <GymNoteSticker className="absolute z-20 -bottom-14 right-1 h-[68px] w-[68px] md:bottom-auto md:-top-14 md:-right-10 lg:-right-16 md:h-[80px] md:w-[80px] rotate-6" />
-        <h1 className="relative font-display gym-chrome uppercase leading-[0.92] text-[44px] sm:text-[clamp(34px,5.6vw,68px)] tracking-[-0.02em] pb-[0.3em]">
-          <span className="block sm:whitespace-nowrap text-balance">Real GTM coaches.</span>
-          <span className="block sm:whitespace-nowrap text-balance">Receipts included.</span>
+        <GymNoteSticker className="absolute z-20 -bottom-14 right-1 h-[68px] w-[68px] md:bottom-auto md:-top-16 md:-right-12 lg:-right-20 md:h-[96px] md:w-[96px] rotate-6" />
+        <h1 className="relative font-display gym-chrome uppercase leading-[0.92] text-[48px] sm:text-[clamp(40px,7vw,96px)] tracking-[-0.02em] pb-[0.3em]">
+          <span className="block sm:whitespace-nowrap text-balance">Stuck on GTM?</span>
+          <span className="block sm:whitespace-nowrap text-balance">Ask the coaches.</span>
         </h1>
         {/* Sticker riding the horizon line */}
         <div className="absolute left-1/2 bottom-[18%] -translate-x-1/2 translate-y-[125%] z-10">
@@ -183,12 +182,6 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
         </div>
       </div>
 
-      <p className="relative z-10 mt-12 md:mt-14 max-w-[640px] text-base md:text-lg leading-relaxed text-foreground/80 text-pretty">
-        Ask anything about going to market. FounderWell&apos;s coaches answer
-        {hours ? <> from {hours} hours of sessions</> : ""}, with{" "}
-        <span className="text-[var(--gym-cyan)] font-semibold">the exact minute they said it</span>.{" "}
-        <span className="text-muted-foreground">(Not 10 tips from a chatbot that skimmed a blog post.)</span>
-      </p>
 
       {/* The input */}
       <form
@@ -197,7 +190,7 @@ export function GymAskHero({ sessions, hours, onAsk }: GymAskHeroProps) {
           ask(query);
         }}
         key={nudge}
-        className={cn("relative z-10 mt-6 md:mt-7 w-full gym-neon-frame", nudge > 0 && "gym-nudge")}
+        className={cn("relative z-10 mt-14 md:mt-16 w-full gym-neon-frame", nudge > 0 && "gym-nudge")}
       >
         <div className="flex items-center gap-2 rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] pl-4 md:pl-6 pr-1.5 md:pr-2 py-1.5 md:py-2">
           <label htmlFor="gym-ask" className="sr-only">
