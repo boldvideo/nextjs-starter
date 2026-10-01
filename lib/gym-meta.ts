@@ -10,13 +10,13 @@ import type { Metadata } from "next";
 export const GYM_SITE_NAME = "The GTM Game";
 /** The public host printed on share cards and the strategy guide (not the
  *  request host, so previews and localhost never leak onto a card). */
-export const GYM_PUBLIC_HOST = "arcade.bold.video";
+export const GYM_PUBLIC_HOST = "play.founderwell.com";
 export const GYM_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || `https://${GYM_PUBLIC_HOST}`;
 export const GYM_DEFAULT_TITLE = "The GTM Game — by FounderWell";
 export const GYM_DEFAULT_DESCRIPTION =
   "What's your next move? Ask the game master anything about going to market — positioning, outbound, demos, pricing — and get a game plan with proof: the exact minute of FounderWell training that backs it up.";
 // Bump ?v= when the card changes; crawlers cache by URL
-export const GYM_HOME_IMAGE = "/gym/og-home.jpg?v=3";
+export const GYM_HOME_IMAGE = "/gym/og-home.jpg?v=4";
 
 interface GymMetaInput {
   /** Page title (the layout template appends " · The GTM Game") */
