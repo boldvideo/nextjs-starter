@@ -9,6 +9,12 @@ related: thoughts/shared/plans/2026-09-29-gtm-gym-launch.md (living tracker), BO
 
 # Handoff: The GTM Gym → The GTM Game
 
+> **Update 2026-10-01 (eve): HubSpot pipeline.** Deal pipeline "The GTM Game" (id 941045557: New player →
+> Engaged (auto at 4 questions) → Conversation booked → Joined FounderWell / Not now) and active list
+> "The GTM Game: players" (id 150, gtm_game_player = true), created by `scripts/gtm-game-hubspot-setup.ts`.
+> Each coin opens one deal (questions in the description), lead status NEW when empty. Verified in prod.
+> Plausible live (`GYM_PLAUSIBLE_ID`); custom-event goals still to add in Plausible.
+>
 > **Update 2026-10-01 (pm): CRMs live.** HubSpot (FounderWell) verified end to end in prod: coin → contact
 > with the "The GTM Game" property group, later questions appended. Players are NOT subscribed to any
 > subscription type yet: "Marketing Information" is inactive; Vanessa picks one (likely "Growth Sessions
