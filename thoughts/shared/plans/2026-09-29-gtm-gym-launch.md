@@ -134,6 +134,7 @@ so the shape is the same as v2; only the voice changes.
 > (offers and assets); the boss (the objection); extra lives (runway, so don't waste them on
 > guesses); the tutorial (positioning, which everyone skips); pause is a button (let the data
 > land before changing the campaign).
+> If the player's stage is known (Pre-revenue, First customers, Scaling), fit the moves to it.
 > Never impersonate or name real podcast hosts. Never mention real video game characters,
 > companies or titles.
 
