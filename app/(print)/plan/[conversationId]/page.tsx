@@ -9,6 +9,7 @@ import { parseDetour, parseMove, plainText, proofQuote, refsIn, splitPlan, stepT
 import { coachForVideo, coachLabel, type Coach } from "@/components/gym/gym-coaches-data";
 import { PrintButton } from "./print-button";
 import { CopyButton } from "./copy-button";
+import { ShareButton } from "./share-button";
 import { cn } from "@/lib/utils";
 import { resolveClip } from "@/lib/gym-clip";
 import { clipLabel } from "@/lib/gym-clip-window";
@@ -242,7 +243,11 @@ export async function generateMetadata({
     description:
       "A printable playbook from The GTM Game: the moves, the exact words to use, and a QR code to the minute of FounderWell coaching behind each one.",
     path: `/plan/${conversationId}`,
-    image: question ? `/og?q=${encodeURIComponent(question)}` : undefined,
+    // The manual-cover card: the question plus the coaches behind it
+    image: question
+      ? `/plan/${conversationId}/og?q=${encodeURIComponent(question)}${book?.coaches.length ? `&c=${book.coaches.slice(0, 2).map((c) => c.slug).join(",")}` : ""}`
+      : undefined,
+    imageAlt: question ? `Playbook: ${question}. The GTM Game by FounderWell, play.founderwell.com` : undefined,
     type: "article",
   });
 }
@@ -267,12 +272,13 @@ export default async function PlaybookPage({
         <Link href={`/ask/${conversationId}`} className="text-sm font-semibold text-[#f6f0ff]/80 hover:text-white">
           ← Back to the game
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <CopyButton
             text={playbookText(plays, askUrl)}
             label="Copy as text"
             className="border-[#f6f0ff]/40 bg-transparent text-[#f6f0ff] hover:bg-[#f6f0ff] hover:text-[#0b0618]"
           />
+          <ShareButton title={plays[0]?.question ? `Playbook: ${plays[0].question}` : "A GTM Game playbook"} />
           <PrintButton />
         </div>
       </div>
