@@ -11,11 +11,14 @@ export type GymEvent =
   | "Quest complete"
   | "Share"
   | "Playbook"
+  | "Playbook shared"
   | "Words copied"
   | "Clip ended"
   | "Full session"
   | "Detour question"
   | "Bold card"
+  | "Quest check-in"
+  | "Line shared"
   | "Clip played"
   | "Stage picked"
   | "Channel submitted"
@@ -24,7 +27,8 @@ export type GymEvent =
   | "Dodger over"
   | "Dodger boss"
   | "Dodger scouted"
-  | "Dodger share";
+  | "Dodger share"
+  | "Dodger challenge";
 
 type Plausible = (event: string, options?: { props?: Record<string, string | number> }) => void;
 

@@ -15,7 +15,16 @@ import { track } from "@/lib/gym-track";
  * questions asked so far go with it. No countdown, no fake urgency: the
  * other way out is simply back to start.
  */
-export function GymCoinGate({ onInserted, onLeave }: { onInserted: () => void; onLeave: () => void }) {
+export function GymCoinGate({
+  onInserted,
+  onLeave,
+  reason,
+}: {
+  onInserted: () => void;
+  onLeave: () => void;
+  /** "checkin": the player asked for the 7-day quest check-in */
+  reason?: "checkin";
+}) {
   const { stage, questions } = useArcade();
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "error">("idle");
@@ -61,13 +70,15 @@ export function GymCoinGate({ onInserted, onLeave }: { onInserted: () => void; o
     >
       <div className="gym-pixel-box [--c:var(--gym-yellow)] relative w-full max-w-[520px] bg-[var(--gym-night-2)] px-6 py-7 md:px-9 md:py-9 text-center">
         <p className="font-osd text-[20px] leading-none text-muted-foreground">
-          {FREE_PLAYS} FREE LEVELS PLAYED
+          {reason === "checkin" ? "QUEST CHECK-IN" : `${FREE_PLAYS} FREE LEVELS PLAYED`}
         </p>
         <h2 id="coin-title" className="mt-3 font-display text-[40px] md:text-[52px] leading-[0.95] gym-chrome">
           Insert coin
         </h2>
         <p className="mt-4 text-[16px] leading-relaxed text-foreground/85">
-          Your coin is your email. Keep playing for free, and FounderWell sends you the occasional note on going to market.
+          {reason === "checkin"
+            ? "Insert coin and we'll check in in 7 days. Your coin is your email; FounderWell also sends the occasional note on going to market."
+            : "Your coin is your email. Keep playing for free, and FounderWell sends you the occasional note on going to market."}
         </p>
 
         <form onSubmit={submit} className="mt-6 text-left">

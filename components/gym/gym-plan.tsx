@@ -13,9 +13,10 @@ import { clipLabel, useGymClip } from "@/lib/use-gym-clip";
 import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
 import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
-import { parseDetour, parseMove, proofQuote, refsIn, splitPlan, stripDetourMarker, stripStepLabel, type Detour } from "@/lib/gym-plan-parse";
+import { parseDetour, parseMove, plainText, proofQuote, refsIn, splitPlan, stepTarget, stripDetourMarker, stripStepLabel, type Detour } from "@/lib/gym-plan-parse";
 import { addXp, sfx, unlock } from "@/lib/gym-arcade";
 import { track } from "@/lib/gym-track";
+import { lineParams, shareLineText } from "@/lib/gym-line";
 
 /**
  * An answer, laid out as a game plan:
@@ -42,6 +43,8 @@ interface GymPlanProps {
   printUrl?: string;
   /** Ask one of the suggested questions (wrong-cabinet and thin answers) */
   onAsk?: (question: string) => void;
+  /** Show the coin gate, then run (the quest check-in needs an email) */
+  onNeedCoin?: (run: () => void) => void;
 }
 
 export function GymPlan({
@@ -55,6 +58,7 @@ export function GymPlan({
   shareUrl,
   printUrl,
   onAsk,
+  onNeedCoin,
 }: GymPlanProps) {
   const coachOf = useCoachOf();
   const streaming = !!isStreaming;
@@ -225,7 +229,13 @@ export function GymPlan({
                   {!last && <span className="mt-3 w-px flex-1 bg-[var(--gym-line)]" />}
                 </div>
                 <div className={cn("min-w-0", last ? "pb-2" : "pb-11")}>
-                  <GymMove text={d} growing={growing} section={section} />
+                  <GymMove
+                    text={d}
+                    growing={growing}
+                    section={section}
+                    coachSlug={coachOf(clip)?.slug ?? lead?.slug ?? null}
+                    conversationId={shareUrl?.match(/\/ask\/([\w-]+)/)?.[1] ?? null}
+                  />
                   {clip && !growing && (
                     <GymClip
                       citation={clip}
@@ -277,6 +287,8 @@ export function GymPlan({
           shareUrl={shareUrl}
           printUrl={printUrl}
           coach={coaches[0] ?? null}
+          step={plainText(stripStepLabel(set))}
+          onNeedCoin={onNeedCoin}
         >
           <MarkdownSection content={stripStepLabel(set)} {...section} />
         </GymSet>
@@ -361,19 +373,47 @@ function GymDetour({
 
 /**
  * One move: its name, the coaching, and (for how-to answers) the exact words
- * to use, with a copy button. Moves from older answers are just the body.
+ * to use, with copy and share (a /line card for LinkedIn and X). Moves from
+ * older answers are just the body.
  */
 function GymMove({
   text,
   growing,
   section,
+  coachSlug,
+  conversationId,
 }: {
   text: string;
   growing: boolean;
   section: Omit<React.ComponentProps<typeof MarkdownSection>, "content">;
+  coachSlug?: string | null;
+  conversationId?: string | null;
 }) {
   const { name, body, say } = useMemo(() => parseMove(text), [text]);
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  const shareLine = async () => {
+    const line = shareLineText(say);
+    if (!line) return;
+    const url = `${window.location.origin}/line?${lineParams({ line, coach: coachSlug, conversationId })}`;
+    try {
+      if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+        await navigator.share({ url, title: `“${line}”` });
+        track("Line shared", { via: "native" });
+        unlock("player-2");
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShared(true);
+      sfx("coin");
+      track("Line shared", { via: "copy" });
+      unlock("player-2");
+      setTimeout(() => setShared(false), 2200);
+    } catch {
+      /* dismissed */
+    }
+  };
 
   const copy = async () => {
     try {
@@ -397,21 +437,32 @@ function GymMove({
         </div>
       )}
       {say.length > 0 && (
-        <figure className="group/say relative mt-4 max-w-[60ch] rounded-r-lg border-l-[3px] border-[var(--gym-pink)] bg-white/[0.035] py-3 pl-4 pr-12">
+        <figure className="group/say relative mt-4 max-w-[60ch] rounded-r-lg border-l-[3px] border-[var(--gym-pink)] bg-white/[0.035] py-3 pl-4 pr-4">
           <figcaption className="mb-1.5 text-[12px] font-semibold text-[var(--gym-pink)]">Say it like this</figcaption>
           <div className={cn("space-y-1 text-[17px] leading-[1.6] text-foreground", growing && "chat-stream-cursor")}>
             {say.map((line, i) => (line.trim() ? <p key={i}>{line}</p> : <div key={i} className="h-2" />))}
           </div>
           {!growing && (
-            <button
-              type="button"
-              onClick={copy}
-              aria-label="Copy these words"
-              className="absolute right-2 top-2 inline-flex h-8 items-center gap-1 rounded-md px-2 text-[12px] font-semibold text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground cursor-pointer"
-            >
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-              {copied ? "Copied" : "Copy"}
-            </button>
+            <div className="mt-2 -ml-2 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={copy}
+                aria-label="Copy these words"
+                className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[12px] font-semibold text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground cursor-pointer"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? "Copied" : "Copy"}
+              </button>
+              <button
+                type="button"
+                onClick={shareLine}
+                aria-label="Share this line"
+                className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[12px] font-semibold text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-[var(--gym-pink)] cursor-pointer"
+              >
+                {shared ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+                {shared ? "Link copied" : "Share this line"}
+              </button>
+            </div>
           )}
         </figure>
       )}
@@ -534,20 +585,31 @@ function GymSet({
   shareUrl,
   printUrl,
   coach,
+  step,
+  onNeedCoin,
 }: {
   children: React.ReactNode;
   streaming: boolean;
   shareUrl?: string;
   printUrl?: string;
   coach: Coach | null;
+  /** The quest as plain text (for the check-in) */
+  step: string;
+  onNeedCoin?: (run: () => void) => void;
 }) {
   const [done, setDone] = useState(false);
   const [copied, setCopied] = useState(false);
   const [burst, setBurst] = useState(0);
+  // "I did it" → optional score → FounderWell checks in in 7 days
+  const [checkin, setCheckin] = useState<"closed" | "open" | "sending" | "booked">("closed");
+  const [score, setScore] = useState("");
+  const target = useMemo(() => stepTarget(step), [step]);
+  const [checkinDay, setCheckinDay] = useState("");
 
   const complete = () => {
     if (done) {
       setDone(false);
+      if (checkin === "open") setCheckin("closed");
       return;
     }
     setDone(true);
@@ -556,6 +618,49 @@ function GymSet({
     track("Quest complete");
     addXp(100, "QUEST");
     unlock("quest");
+    if (checkin === "closed") setCheckin("open");
+  };
+
+  const requestCheckin = async () => {
+    if (checkin === "sending") return;
+    setCheckin("sending");
+    const n = score.trim() === "" ? null : Number(score);
+    const post = () =>
+      fetch("/api/gym/checkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quest: step,
+          score: n !== null && Number.isFinite(n) ? n : undefined,
+          target: target ?? undefined,
+          conversationId: shareUrl?.match(/\/ask\/([\w-]+)/)?.[1],
+        }),
+      });
+    const booked = () => {
+      setCheckinDay(
+        new Date(Date.now() + 7 * 86400000).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+      );
+      setCheckin("booked");
+      sfx("coin");
+      track("Quest check-in", n !== null ? { score: n } : undefined);
+    };
+    try {
+      const res = await post();
+      if (res.status === 401 && onNeedCoin) {
+        // No email yet: the coin is the check-in's address
+        setCheckin("open");
+        onNeedCoin(() => {
+          setCheckin("sending");
+          post()
+            .catch(() => null)
+            .finally(booked);
+        });
+        return;
+      }
+    } catch {
+      /* the CRM is our problem, not the player's */
+    }
+    booked();
   };
 
   const share = async () => {
@@ -644,6 +749,51 @@ function GymSet({
               </a>
             )}
           </div>
+        )}
+        {!streaming && (checkin === "open" || checkin === "sending") && (
+          <div className="mt-4 rounded-lg border border-[var(--gym-line)] bg-white/[0.03] p-3.5 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
+            {target && (
+              <label className="flex flex-wrap items-center gap-2 text-[15px] text-foreground/90">
+                How many of the {target}?
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  max={target}
+                  value={score}
+                  onChange={(e) => setScore(e.target.value)}
+                  className="w-16 h-9 rounded-md border border-[var(--gym-line)] bg-transparent px-2 text-center font-osd text-[20px] text-foreground focus:border-[var(--gym-cyan)] focus:outline-none"
+                  aria-label={`Score out of ${target}`}
+                />
+                <span className="font-osd text-[20px] text-muted-foreground">/ {target}</span>
+              </label>
+            )}
+            <p className={cn("text-[15px] text-foreground/85", target && "mt-2.5")}>
+              We&apos;ll check in in 7 days: how did it go?
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={requestCheckin}
+                disabled={checkin === "sending"}
+                className={cn(button, "bg-[var(--gym-pink)] text-white hover:brightness-110 disabled:opacity-60")}
+              >
+                {checkin === "sending" ? "Saving…" : "Check in with me"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCheckin("closed")}
+                className="h-9 px-2 text-[13px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                No thanks
+              </button>
+            </div>
+          </div>
+        )}
+        {!streaming && checkin === "booked" && (
+          <p className="mt-4 font-osd text-[18px] leading-snug text-[var(--gym-cyan)]">
+            SAVE POINT. FOUNDERWELL CHECKS IN {checkinDay.toUpperCase()}: HOW DID IT GO?
+          </p>
         )}
       </div>
     </div>

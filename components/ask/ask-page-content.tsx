@@ -73,6 +73,8 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   // Signed-in players already gave theirs.
   const { signedIn } = useGymMember();
   const [coinPending, setCoinPending] = useState<(() => void) | null>(null);
+  // Why the gate is up when it isn't the free levels running out
+  const [coinReason, setCoinReason] = useState<"checkin" | null>(null);
   useEffect(() => {
     if (signedIn) markCoin();
   }, [signedIn]);
@@ -646,6 +648,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                         shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}` : undefined}
                         printUrl={conversationId && !isCurrentlyStreaming ? `/plan/${conversationId}` : undefined}
                         onAsk={askSuggested}
+                        onNeedCoin={(run) => {
+                          setCoinReason("checkin");
+                          setCoinPending(() => run);
+                        }}
                       />
                     </div>
                   )}
@@ -780,12 +786,17 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
       )}
       {coinPending && (
         <GymCoinGate
+          reason={coinReason ?? undefined}
           onInserted={() => {
             const run = coinPending;
             setCoinPending(null);
+            setCoinReason(null);
             run();
           }}
-          onLeave={() => setCoinPending(null)}
+          onLeave={() => {
+            setCoinPending(null);
+            setCoinReason(null);
+          }}
         />
       )}
     </div>

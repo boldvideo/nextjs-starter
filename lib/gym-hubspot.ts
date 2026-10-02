@@ -9,6 +9,8 @@ import { CONSENT_TEXT, STAGES, type Stage } from "@/lib/gym-lead";
  *   gtm_game_questions     every question, dated, newest last
  *   gtm_game_consent       the exact consent text + timestamp
  *   gtm_game_first_played  when the coin went in
+ *   gtm_game_quest*        the last quest a player said they did (text,
+ *                          score / target) and its check-in date
  *
  * Consenting players are also subscribed to the portal's marketing
  * subscription type (HUBSPOT_SUBSCRIPTION_ID, else the first one named
@@ -61,6 +63,10 @@ const PROPERTIES = [
   { name: "gtm_game_consent", label: "GTM Game consent", type: "string", fieldType: "textarea" },
   { name: "gtm_game_first_played", label: "GTM Game first played", type: "datetime", fieldType: "date" },
   { name: "gtm_game_deal_id", label: "GTM Game deal", type: "string", fieldType: "text" },
+  { name: "gtm_game_quest", label: "GTM Game quest", type: "string", fieldType: "textarea" },
+  { name: "gtm_game_quest_score", label: "GTM Game quest score", type: "number", fieldType: "number" },
+  { name: "gtm_game_quest_target", label: "GTM Game quest target", type: "number", fieldType: "number" },
+  { name: "gtm_game_checkin_date", label: "GTM Game check-in date", type: "date", fieldType: "date" },
 ];
 
 // Once per warm instance; HubSpot answers 409 for anything that exists
@@ -323,4 +329,84 @@ export async function hubspotScopes(): Promise<string[]> {
     body: JSON.stringify({ tokenKey: token() }),
   });
   return res.ok ? ((await res.json()).scopes ?? []) : [];
+}
+
+// ── Quest check-in: "I did it" → a task for FounderWell in 7 days ─────────
+
+const CHECKIN_DAYS = 7;
+
+async function ownerOf(path: string): Promise<string | null> {
+  const res = await hubspot(`${path}?properties=hubspot_owner_id`);
+  if (!res.ok) return null;
+  return (await res.json())?.properties?.hubspot_owner_id || null;
+}
+
+/**
+ * The player finished a quest and asked for a check-in. Records the quest on
+ * the contact and creates a HubSpot task due in 7 days, associated to the
+ * contact (and the GTM Game deal), owned by whoever owns the deal or contact.
+ * No email goes out: a person checks in. Returns the task id.
+ */
+export async function hubspotCheckin(input: {
+  email: string;
+  quest: string;
+  score?: number | null;
+  target?: number | null;
+  link?: string | null;
+}): Promise<string> {
+  await ensureProperties();
+  const before = await current(input.email);
+  const due = new Date(Date.now() + CHECKIN_DAYS * 86400000);
+  const dueDate = Date.UTC(due.getUTCFullYear(), due.getUTCMonth(), due.getUTCDate());
+  const hasScore = typeof input.score === "number" && Number.isFinite(input.score);
+  const hasTarget = typeof input.target === "number" && Number.isFinite(input.target);
+  const contactId = await upsert(input.email, {
+    gtm_game_quest: input.quest.slice(0, 5000),
+    ...(hasScore ? { gtm_game_quest_score: String(input.score) } : {}),
+    ...(hasTarget ? { gtm_game_quest_target: String(input.target) } : {}),
+    gtm_game_checkin_date: String(dueDate),
+  });
+  if (!contactId) throw new Error("HubSpot check-in: no contact id");
+
+  const owner =
+    (before.dealId ? await ownerOf(`/crm/v3/objects/deals/${before.dealId}`) : null) ??
+    (await ownerOf(`/crm/v3/objects/contacts/${contactId}`));
+
+  const score = hasScore ? `${input.score}${hasTarget ? ` / ${input.target}` : ""}` : "not given";
+  const body = [
+    `${input.email} finished a quest in The GTM Game and asked for a check-in.`,
+    ``,
+    `Quest: ${input.quest}`,
+    `Their score: ${score}`,
+    input.link ? `The game: ${input.link}` : "",
+    ``,
+    `Ask how it went and what got in the way.`,
+  ]
+    .filter((l, i, all) => l || all[i - 1])
+    .join("\n");
+
+  const associations = [
+    // 204 = task → contact, 216 = task → deal
+    { to: { id: contactId }, types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 204 }] },
+    ...(before.dealId
+      ? [{ to: { id: before.dealId }, types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: 216 }] }]
+      : []),
+  ];
+  const res = await hubspot("/crm/v3/objects/tasks", {
+    method: "POST",
+    body: JSON.stringify({
+      properties: {
+        hs_timestamp: due.toISOString(),
+        hs_task_subject: `GTM Game check-in: ${input.email}`,
+        hs_task_body: body,
+        hs_task_status: "NOT_STARTED",
+        hs_task_priority: "MEDIUM",
+        hs_task_type: "EMAIL",
+        ...(owner ? { hubspot_owner_id: owner } : {}),
+      },
+      associations,
+    }),
+  });
+  if (!res.ok) throw new Error(`HubSpot task ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  return String((await res.json()).id);
 }
