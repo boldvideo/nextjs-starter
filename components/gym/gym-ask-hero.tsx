@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Dices } from "lucide-react";
+import { ArrowRight, Dices, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GymHorizon } from "./gym-backdrop";
 import { useGymMember } from "./use-gym-member";
@@ -255,6 +255,22 @@ export function GymAskHero({ onAsk }: GymAskHeroProps) {
             </button>
           ))}
         </div>
+
+        {/* The other cabinet: paste a pitch, get a score */}
+        <Link
+          href="/roast"
+          onMouseEnter={() => sfx("select")}
+          className="group mt-4 flex items-center gap-3 rounded-2xl border border-dashed border-[var(--gym-pink)]/60 px-4 py-3 transition-colors hover:border-solid hover:border-[var(--gym-pink)] hover:bg-[var(--gym-pink)]/[0.06]"
+        >
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--gym-pink)] text-[#1a0616]">
+            <Flame className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 text-left">
+            <span className="block font-display text-[15px] uppercase leading-tight text-foreground">Roast my pitch</span>
+            <span className="block text-[13.5px] text-muted-foreground">Paste your cold email. Get a score out of 100, the coach clips, and a fixed version.</span>
+          </span>
+          <span className="ml-auto font-osd text-[18px] text-[var(--gym-pink)] transition-transform group-hover:translate-x-0.5">▶</span>
+        </Link>
       </div>
     </div>
   );

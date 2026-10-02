@@ -28,7 +28,9 @@ export type GymEvent =
   | "Dodger boss"
   | "Dodger scouted"
   | "Dodger share"
-  | "Dodger challenge";
+  | "Dodger challenge"
+  | "Roast"
+  | "Roast shared";
 
 type Plausible = (event: string, options?: { props?: Record<string, string | number> }) => void;
 
