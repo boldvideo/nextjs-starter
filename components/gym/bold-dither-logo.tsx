@@ -3,20 +3,24 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Bold's wordmark as a CRT pixel field: the logo is sampled into a grid of
- * cells and drawn through a 4x4 Bayer dither. At rest it's a sparse, dithered
- * teal; near the pointer the cells fill in to solid and turn hot. Without a
- * mouse (touch, idle) a light sweeps across on its own. Reduced motion gets
- * the static dither. Only animates while on screen.
+ * Bold's wordmark that comes apart under the cursor. At rest it's the clean
+ * vector logo. Near the pointer it breaks into pixels: the cells thin out
+ * through a 4x4 Bayer dither, get pushed away from the pointer, and pick up
+ * a pink/cyan CRT split. When the pointer leaves they spring home and the
+ * logo snaps solid again. Touch works by dragging across it. Reduced motion
+ * gets the plain logo. The loop only runs while something is moving.
  */
 
 const SRC = "/bold-logo.svg";
 const RATIO = 267 / 975;
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
-const REST = 0.34; // dither density away from the pointer
-const RADIUS = 220; // px of influence around the pointer
-const TEAL = [65, 198, 166];
-const HOT = [214, 255, 244];
+const RADIUS = 150; // px of influence around the pointer
+const PUSH = 2.2; // repel strength
+const SPRING = 0.07; // pull back home
+const DAMP = 0.82;
+const TEAL: [number, number, number] = [65, 198, 166];
+const PINK: [number, number, number] = [255, 46, 166];
+const CYAN: [number, number, number] = [34, 230, 255];
 
 export function BoldDitherLogo({ href, className }: { href: string; className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,17 +31,23 @@ export function BoldDitherLogo({ href, className }: { href: string; className?: 
     if (!canvas || !ctx) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let mask: Uint8Array = new Uint8Array();
-    let cols = 0;
-    let rows = 0;
-    let cell = 6;
+    const img = new Image();
     let width = 0;
     let height = 0;
+    let cell = 4;
+    let cols = 0;
+    let rows = 0;
+    // Only the cells inside the logo: home position + offset + velocity
+    let hx = new Float32Array();
+    let hy = new Float32Array();
+    let ox = new Float32Array();
+    let oy = new Float32Array();
+    let vx = new Float32Array();
+    let vy = new Float32Array();
+    let bayer = new Float32Array();
     let pointer: { x: number; y: number } | null = null;
-    let lastMove = 0;
-    let visible = false;
     let raf = 0;
-    const img = new Image();
+    let running = false;
 
     const layout = () => {
       const rect = canvas.getBoundingClientRect();
@@ -47,11 +57,11 @@ export function BoldDitherLogo({ href, className }: { href: string; className?: 
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cell = width < 640 ? 4 : width < 1000 ? 5 : 6;
-      cols = Math.floor(width / cell);
-      rows = Math.floor(height / cell);
+      cell = width < 640 ? 3 : 4;
+      cols = Math.ceil(width / cell);
+      rows = Math.ceil(height / cell);
       if (!img.complete || !cols || !rows) return;
-      // Sample the logo once per size: one byte per cell, inside or not
+
       const off = document.createElement("canvas");
       off.width = cols;
       off.height = rows;
@@ -59,81 +69,127 @@ export function BoldDitherLogo({ href, className }: { href: string; className?: 
       if (!octx) return;
       octx.drawImage(img, 0, 0, cols, rows);
       const data = octx.getImageData(0, 0, cols, rows).data;
-      mask = new Uint8Array(cols * rows);
-      for (let i = 0; i < mask.length; i++) mask[i] = data[i * 4 + 3] > 110 ? 1 : 0;
-    };
-
-    const draw = (t: number) => {
-      ctx.clearRect(0, 0, width, height);
-      // The light: the pointer, or a slow sweep when there isn't one
-      let lx: number | null = null;
-      let ly = height * 0.5;
-      if (pointer && t - lastMove < 2500) {
-        lx = pointer.x;
-        ly = pointer.y;
-      } else if (!reduced) {
-        lx = width * (0.5 + 0.55 * Math.sin(t / 2600));
-      }
-      const gap = cell > 4 ? 1 : 0.5;
+      const xs: number[] = [];
+      const ys: number[] = [];
+      const bs: number[] = [];
       for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
-          if (!mask[y * cols + x]) continue;
-          const cx = x * cell + cell / 2;
-          const cy = y * cell + cell / 2;
-          let heat = 0;
-          if (lx !== null) {
-            const d = Math.hypot(cx - lx, (cy - ly) * 1.15);
-            heat = Math.max(0, 1 - d / RADIUS);
-            heat = heat * heat * (3 - 2 * heat);
-          }
-          const level = REST + (1 - REST) * heat;
-          if (level < BAYER[(y % 4) * 4 + (x % 4)]) continue;
-          const k = heat * 0.85;
-          ctx.fillStyle = `rgb(${TEAL[0] + (HOT[0] - TEAL[0]) * k},${TEAL[1] + (HOT[1] - TEAL[1]) * k},${TEAL[2] + (HOT[2] - TEAL[2]) * k})`;
-          ctx.fillRect(x * cell, y * cell, cell - gap, cell - gap);
+          if (data[(y * cols + x) * 4 + 3] < 110) continue;
+          xs.push(x * cell);
+          ys.push(y * cell);
+          bs.push(BAYER[(y % 4) * 4 + (x % 4)]);
         }
       }
+      hx = Float32Array.from(xs);
+      hy = Float32Array.from(ys);
+      bayer = Float32Array.from(bs);
+      ox = new Float32Array(xs.length);
+      oy = new Float32Array(xs.length);
+      vx = new Float32Array(xs.length);
+      vy = new Float32Array(xs.length);
     };
 
-    const loop = (t: number) => {
-      draw(t);
-      if (visible && !reduced) raf = requestAnimationFrame(loop);
+    const paint = () => {
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
     };
-    const start = () => {
-      cancelAnimationFrame(raf);
+
+    // One frame: physics, then punch the disturbed cells out of the clean
+    // logo and redraw them as loose, dithered, tinted pixels
+    const frame = () => {
+      paint();
+      let moving = false;
+      const px = pointer?.x ?? -1e4;
+      const py = pointer?.y ?? -1e4;
+      const loose: number[] = [];
+      const heats: number[] = [];
+
+      for (let i = 0; i < hx.length; i++) {
+        const cx = hx[i] + cell / 2;
+        const cy = hy[i] + cell / 2;
+        const dx = cx - px;
+        const dy = cy - py;
+        const d = Math.hypot(dx, dy);
+        let heat = 0;
+        if (d < RADIUS) {
+          heat = 1 - d / RADIUS;
+          heat *= heat;
+          const f = (PUSH * heat) / Math.max(d, 1);
+          vx[i] += dx * f;
+          vy[i] += dy * f;
+        }
+        vx[i] = (vx[i] - ox[i] * SPRING) * DAMP;
+        vy[i] = (vy[i] - oy[i] * SPRING) * DAMP;
+        ox[i] += vx[i];
+        oy[i] += vy[i];
+        const disp = Math.abs(ox[i]) + Math.abs(oy[i]);
+        if (heat > 0.001 || disp > 0.15) {
+          moving = true;
+          loose.push(i);
+          heats.push(Math.max(heat, Math.min(1, disp / 30)));
+        } else {
+          ox[i] = oy[i] = vx[i] = vy[i] = 0;
+        }
+      }
+
+      for (const i of loose) ctx.clearRect(hx[i], hy[i], cell, cell);
+      for (let k = 0; k < loose.length; k++) {
+        const i = loose[k];
+        const heat = heats[k];
+        // Thin out toward the pointer
+        if (1 - heat * 0.9 < bayer[i]) continue;
+        const tint = bayer[i] < 0.5 ? PINK : CYAN;
+        const m = Math.min(1, heat * 1.4);
+        ctx.fillStyle = `rgb(${TEAL[0] + (tint[0] - TEAL[0]) * m},${TEAL[1] + (tint[1] - TEAL[1]) * m},${TEAL[2] + (tint[2] - TEAL[2]) * m})`;
+        const size = heat > 0.05 ? cell - 1 : cell;
+        ctx.fillRect(hx[i] + ox[i], hy[i] + oy[i], size, size);
+      }
+      return moving;
+    };
+
+    const loop = () => {
+      running = frame() || pointer !== null;
+      if (running) raf = requestAnimationFrame(loop);
+    };
+    const wake = () => {
+      if (reduced || running) return;
+      running = true;
       raf = requestAnimationFrame(loop);
     };
 
-    const onMove = (e: PointerEvent) => {
-      if (e.pointerType === "touch") return;
+    const toLocal = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
-      pointer = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-      lastMove = performance.now();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const near = x > -RADIUS && y > -RADIUS && x < rect.width + RADIUS && y < rect.height + RADIUS;
+      pointer = near ? { x, y } : null;
+      if (near) wake();
+    };
+    const onLeave = () => {
+      pointer = null;
     };
 
     img.onload = () => {
       layout();
-      start();
+      paint();
     };
     img.src = SRC;
 
     const ro = new ResizeObserver(() => {
       layout();
-      start();
+      if (img.complete) paint();
     });
     ro.observe(canvas);
-    const io = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      if (visible) start();
-    });
-    io.observe(canvas);
-    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointermove", toLocal, { passive: true });
+    canvas.addEventListener("pointerleave", onLeave);
+    document.addEventListener("pointerleave", onLeave);
 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      io.disconnect();
-      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointermove", toLocal);
+      canvas.removeEventListener("pointerleave", onLeave);
+      document.removeEventListener("pointerleave", onLeave);
     };
   }, []);
 
@@ -149,7 +205,7 @@ export function BoldDitherLogo({ href, className }: { href: string; className?: 
       <canvas
         ref={canvasRef}
         aria-hidden
-        className="block w-full aspect-[975/267] drop-shadow-[0_0_36px_rgba(65,198,166,0.35)]"
+        className="block w-full aspect-[975/267] touch-pan-y drop-shadow-[0_0_40px_rgba(65,198,166,0.4)]"
       />
     </a>
   );
