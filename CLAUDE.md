@@ -64,6 +64,8 @@ import { cn } from "@/lib/utils";
 - `ARCHITECTURE.md` - System architecture
 - `STATE_MANAGEMENT.md` - State patterns
 - `AUTH.md` - Auth setup
+- `docs/solutions/` - documented solutions to past problems (architecture/design patterns, developer workflows), YAML frontmatter (module, tags, problem_type); relevant when working in documented areas
+- `CONCEPTS.md` - shared domain vocabulary (Session, Citation, Clip, Coach, Level, Move, Detour, Mode)
 - `thoughts/` - Research/planning
 
 ## Communication

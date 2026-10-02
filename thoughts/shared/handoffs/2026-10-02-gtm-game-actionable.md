@@ -8,6 +8,12 @@ previous: thoughts/shared/handoffs/2026-09-30-gtm-game-rebrand.md (system map, d
 
 # Handoff: make The GTM Game actionable
 
+> **Update 2026-10-02 (later):** Marcel: leave the artifact block and "Make it for me" chips out, Bold is building
+> artifacts platform-side. **Shipped:** prompt v2 + Game Master persona for account 110 (details and rollback in
+> `thoughts/shared/plans/2026-10-02-gtm-game-prompt-v2/README.md`), answer moves with "Say it like this" + copy
+> (commit 9c329ea), and the Playbook replacing the strategy guide (e9383eb). Still open: point 4 (memory drift
+> platform fix; v2 only adds a prompt rule), Plausible events exist ("Playbook", "Words copied").
+
 ## TL;DR
 
 User testing says the answers are great but **stop at advice**. Turn every answer into something the
