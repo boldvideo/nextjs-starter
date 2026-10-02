@@ -46,7 +46,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "quest", title: "Quest complete", detail: "Did the thing. Most people just read it.", xp: 0 },
   { id: "combo", title: "Combo x3", detail: "Three levels in one game.", xp: 300 },
   { id: "replay", title: "Instant replay", detail: "Watched the proof.", xp: 50 },
-  { id: "guide", title: "Strategy guide", detail: "Printed the cheat sheet. Old school.", xp: 150 },
+  { id: "guide", title: "Playbook", detail: "Opened your playbook. Old school.", xp: 150 },
   { id: "player-2", title: "Player 2 has entered", detail: "Shared your run.", xp: 150 },
   { id: "random", title: "Feeling lucky", detail: "Rolled a random level.", xp: 25 },
   { id: "konami", title: "You know the code", detail: "↑↑↓↓←→←→BA. Respect.", xp: 1000 },

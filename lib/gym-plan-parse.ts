@@ -91,6 +91,53 @@ export function splitPlan(markdown: string, streaming = false): PlanParts {
   };
 }
 
+/**
+ * One move, as prompt v2 writes it: "**Name.** what to do [c_x]", optionally
+ * followed by the exact words to use as "> " lines (a line to say, or an
+ * email/message line; an empty "> " line is a paragraph break). Moves from
+ * older answers have no name and no words, just the body.
+ */
+export interface Move {
+  name: string | null;
+  body: string;
+  say: string[];
+}
+
+const NAME_RE = /^\*\*(.+?)\*\*[ \t]*/;
+
+export function parseMove(text: string): Move {
+  const body: string[] = [];
+  const say: string[] = [];
+  for (const line of text.split("\n")) {
+    const quote = line.match(/^\s*>\s?(.*)$/);
+    if (quote) say.push(quote[1].replace(REF_RE, "").replace(/\s+$/, ""));
+    else if (line.trim()) body.push(line.trim());
+  }
+  let rest = body.join(" ");
+  let name: string | null = null;
+  const m = rest.match(NAME_RE);
+  if (m) {
+    name = m[1].trim().replace(/[.:]$/, "");
+    rest = rest.slice(m[0].length);
+  }
+  // Drop leading/trailing paragraph breaks in the words
+  while (say.length && !say[0].trim()) say.shift();
+  while (say.length && !say[say.length - 1].trim()) say.pop();
+  return { name, body: rest.trim(), say };
+}
+
+/** The closing action without its "Next step:" label (the UI supplies one). */
+export function stripStepLabel(text: string): string {
+  return text.replace(/^\s*\**\s*(?:next step|your next quest)\s*:\s*\**\s*/i, "");
+}
+
+/** The count a next step asks for ("your next 5 demos" → 5), if any. */
+export function stepTarget(text: string): number | null {
+  const m = text.match(/\b(?:next|to|on|for|send|call|book|run)\s+(\d{1,3})\b/i) ?? text.match(/\b(\d{1,3})\b/);
+  const n = m ? parseInt(m[1], 10) : NaN;
+  return n >= 2 && n <= 200 ? n : null;
+}
+
 /** Plain text for print: no citation refs, no markdown emphasis markers. */
 export function plainText(markdown: string): string {
   return markdown

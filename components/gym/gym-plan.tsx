@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { Check, Play, Printer, Share2 } from "lucide-react";
+import { BookOpen, Check, Copy, Play, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AskCitation } from "@/lib/ask";
 import { PROSE_CLASS } from "@/lib/prose";
@@ -12,7 +12,7 @@ import { MuxPlayerComponent } from "@/components/players/player-mux";
 import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
 import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
-import { refsIn, splitPlan } from "@/lib/gym-plan-parse";
+import { parseMove, refsIn, splitPlan, stripStepLabel } from "@/lib/gym-plan-parse";
 import { addXp, sfx, unlock } from "@/lib/gym-arcade";
 import { track } from "@/lib/gym-track";
 
@@ -23,7 +23,7 @@ import { track } from "@/lib/gym-track";
  *   MOVE 01…         each bullet, with the clip that backs it right underneath
  *   YOUR NEXT QUEST  the closing action, with quest-complete + share + print
  *
- * The persona already answers as "take → ≤3 bullets → one concrete action",
+ * Prompt v2 answers as "take → named moves (with the words to use) → Next step:",
  * so this is a layout over that shape, not a new format. Anything that
  * doesn't fit (no bullets, headings, code) degrades to plain paragraphs.
  */
@@ -37,7 +37,7 @@ interface GymPlanProps {
   selectedCitationId?: string;
   interaction?: AnswerInteraction;
   shareUrl?: string;
-  /** Printable strategy guide for this conversation */
+  /** The printable Playbook for this conversation */
   printUrl?: string;
 }
 
@@ -181,10 +181,7 @@ export function GymPlan({
                   {!last && <span className="mt-3 w-px flex-1 bg-[var(--gym-line)]" />}
                 </div>
                 <div className={cn("min-w-0", last ? "pb-2" : "pb-11")}>
-                  <p className="font-osd text-[16px] leading-none text-muted-foreground/80 mb-2 pt-1.5">MOVE</p>
-                  <div className={cn(PROSE_CLASS, "prose-p:my-0 max-w-[60ch] prose-p:text-[18px] prose-p:leading-[1.7] prose-p:text-foreground/90", growing && "chat-stream-cursor")}>
-                    <MarkdownSection content={d} {...section} />
-                  </div>
+                  <GymMove text={d} growing={growing} section={section} />
                   {clip && !growing && (
                     <GymClip
                       citation={clip}
@@ -235,9 +232,69 @@ export function GymPlan({
           printUrl={printUrl}
           coach={coaches[0] ?? null}
         >
-          <MarkdownSection content={set} {...section} />
+          <MarkdownSection content={stripStepLabel(set)} {...section} />
         </GymSet>
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * One move: its name, the coaching, and (for how-to answers) the exact words
+ * to use, with a copy button. Moves from older answers are just the body.
+ */
+function GymMove({
+  text,
+  growing,
+  section,
+}: {
+  text: string;
+  growing: boolean;
+  section: Omit<React.ComponentProps<typeof MarkdownSection>, "content">;
+}) {
+  const { name, body, say } = useMemo(() => parseMove(text), [text]);
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(say.join("\n"));
+      setCopied(true);
+      sfx("coin");
+      track("Words copied", { from: "answer" });
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* clipboard blocked */
+    }
+  };
+
+  return (
+    <div className={cn(growing && !say.length && "chat-stream-cursor")}>
+      <p className="font-osd text-[16px] leading-none text-muted-foreground/80 mb-2 pt-1.5">MOVE</p>
+      {name && <p className="mb-1.5 text-[19px] font-semibold leading-snug text-foreground">{name}</p>}
+      {body && (
+        <div className={cn(PROSE_CLASS, "prose-p:my-0 max-w-[60ch] prose-p:text-[18px] prose-p:leading-[1.7] prose-p:text-foreground/90")}>
+          <MarkdownSection content={body} {...section} />
+        </div>
+      )}
+      {say.length > 0 && (
+        <figure className="group/say relative mt-4 max-w-[60ch] rounded-r-lg border-l-[3px] border-[var(--gym-pink)] bg-white/[0.035] py-3 pl-4 pr-12">
+          <figcaption className="mb-1.5 text-[12px] font-semibold text-[var(--gym-pink)]">Say it like this</figcaption>
+          <div className={cn("space-y-1 text-[17px] leading-[1.6] text-foreground", growing && "chat-stream-cursor")}>
+            {say.map((line, i) => (line.trim() ? <p key={i}>{line}</p> : <div key={i} className="h-2" />))}
+          </div>
+          {!growing && (
+            <button
+              type="button"
+              onClick={copy}
+              aria-label="Copy these words"
+              className="absolute right-2 top-2 inline-flex h-8 items-center gap-1 rounded-md px-2 text-[12px] font-semibold text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground cursor-pointer"
+            >
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          )}
+        </figure>
       )}
     </div>
   );
@@ -454,12 +511,12 @@ function GymSet({
                 rel="noopener noreferrer"
                 onClick={() => {
                   unlock("guide");
-                  track("Strategy guide");
+                  track("Playbook");
                 }}
                 className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]")}
               >
-                <Printer className="h-4 w-4" />
-                Strategy guide
+                <BookOpen className="h-4 w-4" />
+                Playbook
               </a>
             )}
           </div>
