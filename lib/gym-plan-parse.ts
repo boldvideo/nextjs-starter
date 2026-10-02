@@ -131,9 +131,14 @@ export function stripStepLabel(text: string): string {
   return text.replace(/^\s*\**\s*(?:next step|your next quest)\s*:\s*\**\s*/i, "");
 }
 
+/** Numbers that aren't the count: time spans ("next 10 days"), percentages, 1:1. */
+const NOT_A_COUNT =
+  /\b\d{1,3}(?:\s*(?:-|to)\s*\d{1,3})?\s*(?:seconds?|secs?|minutes?|mins?|hours?|hrs?|days?|weeks?|months?|quarters?|years?)\b|\b\d{1,3}\s*%|\b\d{1,3}:\d{1,3}\b/gi;
+
 /** The count a next step asks for ("your next 5 demos" → 5), if any. */
 export function stepTarget(text: string): number | null {
-  const m = text.match(/\b(?:next|to|on|for|send|call|book|run)\s+(\d{1,3})\b/i) ?? text.match(/\b(\d{1,3})\b/);
+  const t = text.replace(NOT_A_COUNT, " ");
+  const m = t.match(/\b(?:next|to|on|for|send|call|book|run)\s+(\d{1,3})\b/i) ?? t.match(/\b(\d{1,3})\b/);
   const n = m ? parseInt(m[1], 10) : NaN;
   return n >= 2 && n <= 200 ? n : null;
 }
