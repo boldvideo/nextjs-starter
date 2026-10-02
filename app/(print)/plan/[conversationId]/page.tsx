@@ -5,17 +5,23 @@ import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { gymMeta, GYM_BASE_URL, GYM_PUBLIC_HOST } from "@/lib/gym-meta";
-import { plainText, refsIn, splitPlan } from "@/lib/gym-plan-parse";
-import { coachForVideo, coachLabel, COACHES, type Coach } from "@/components/gym/gym-coaches-data";
+import { parseMove, plainText, refsIn, splitPlan, stepTarget, stripStepLabel } from "@/lib/gym-plan-parse";
+import { coachForVideo, coachLabel, type Coach } from "@/components/gym/gym-coaches-data";
 import { PrintButton } from "./print-button";
+import { CopyButton } from "./copy-button";
 import { cn } from "@/lib/utils";
 
 /**
- * A conversation, printed like the strategy guide that came folded in the
- * cartridge box: a level map, then per level the mission, the game plan,
- * moves with tally boxes for tries and a QR code to the exact clip, your
- * next quest with a save point per day, cheat codes, and the coach's
- * signature. Read-only and shareable like the game itself.
+ * A conversation as a Playbook: the thing a founder keeps next to the
+ * keyboard on the call. Per question ("play"):
+ *   the take        what the coaches say, in one or two sentences
+ *   on the call     the moves in order with the exact words to use (copyable)
+ *   why it works    the coaching per move, the coach's own words, and a QR
+ *                   code to that minute of the session
+ *   this week       the next step, a score line from its count, and a QR
+ *                   back to the conversation to report how it went
+ * Older answers (no move names, no words) still print: the card falls back
+ * to each move's first sentence. Read-only and shareable like the game.
  */
 
 interface StoredSource {
@@ -25,6 +31,7 @@ interface StoredSource {
   muxPlaybackId?: string;
   title?: string;
   videoTitle?: string;
+  text?: string;
   timestamp?: number;
   timestampSeconds?: number;
 }
@@ -38,34 +45,28 @@ interface StoredMessage {
 
 interface Clip {
   id: string;
-  videoId: string;
   title: string;
   seconds: number;
+  quote: string;
   coach: Coach | null;
+  url: string;
   qr: string;
 }
 
-interface Level {
-  question: string;
-  intro: string[];
-  introClip: Clip | null;
-  drills: { text: string; clip: Clip | null }[];
-  notes: string[];
-  set: string | null;
+interface PlayMove {
+  name: string;
+  body: string;
+  say: string[];
+  clip: Clip | null;
 }
 
-// [button combo, the cheat, what it actually means]
-const CHEAT_CODES = [
-  ["↑ ↑ ↓ ↓", "Small levels first.", "Twenty small experiments beat one big launch."],
-  ["← → ← →", "Don't skip the tutorial.", "Fix the positioning before you scale the spend."],
-  ["B A B A", "Clear 1-1 before the boss.", "Test the message on 20 prospects before 2,000."],
-  ["↑ A ↑ A", "Level up slowly.", "Raise the volume a little every week."],
-  ["↓ ↓ B", "Play your own game.", "Seed stage doesn't need an enterprise playbook."],
-  ["START", "Pause is a button.", "Let the data land before you change the campaign."],
-  ["A A A", "Hit the save point.", "Write down what worked, or you'll never repeat it."],
-  ["→ → B", "Extra lives are runway.", "Spend them on tests, not guesses."],
-  ["↑ B ↓ A", "Power-ups are offers.", "A better offer beats a louder message."],
-];
+interface Play {
+  question: string;
+  take: string[];
+  moves: PlayMove[];
+  step: string | null;
+  target: number | null;
+}
 
 function formatTime(total: number): string {
   const h = Math.floor(total / 3600);
@@ -74,13 +75,22 @@ function formatTime(total: number): string {
   return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
 }
 
-function hash(s: string): number {
-  let h = 0;
-  for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return h;
+function firstSentence(text: string): string {
+  return text.split(/(?<=[.!?])\s+/)[0] ?? text;
 }
 
-async function loadPlan(conversationId: string) {
+// Medium error correction + a 2-module quiet zone on white: survives a laser
+// printer and a phone camera at arm's length
+function qrSvg(url: string): Promise<string> {
+  return QRCode.toString(url, {
+    type: "svg",
+    errorCorrectionLevel: "M",
+    margin: 2,
+    color: { dark: "#17121f", light: "#ffffff" },
+  });
+}
+
+async function loadPlaybook(conversationId: string) {
   const context = await getTenantContext();
   if (!context) return null;
 
@@ -113,7 +123,7 @@ async function loadPlan(conversationId: string) {
       if (coach) coachByVideo.set(internalId, coach);
     }
   } catch {
-    /* plan still prints without coach faces */
+    /* the playbook still prints without coach faces */
   }
 
   const toClip = async (s: StoredSource): Promise<Clip> => {
@@ -121,22 +131,16 @@ async function loadPlan(conversationId: string) {
     const url = `${GYM_BASE_URL}/v/${shortIdByVideo.get(s.videoId) ?? s.videoId}?t=${seconds}`;
     return {
       id: s.id,
-      videoId: s.videoId,
       title: s.videoTitle || s.title || "Session",
       seconds,
+      quote: (s.text ?? "").trim(),
       coach: coachByVideo.get(s.videoId) ?? null,
-      // Medium error correction + a 2-module quiet zone on white: survives a
-      // laser printer and a phone camera at arm's length
-      qr: await QRCode.toString(url, {
-        type: "svg",
-        errorCorrectionLevel: "M",
-        margin: 2,
-        color: { dark: "#17121f", light: "#ffffff" },
-      }),
+      url,
+      qr: await qrSvg(url),
     };
   };
 
-  const reps: Level[] = [];
+  const plays: Play[] = [];
   let pendingQuestion = conversation?.metadata?.originalQuery ?? "";
   for (const m of messages) {
     if (m.role === "user") {
@@ -152,27 +156,62 @@ async function loadPlan(conversationId: string) {
       shown.add(s.id);
       return toClip(s);
     };
-    reps.push({
+    // The take's clip goes to the moves first: every move should carry proof
+    const moves = await Promise.all(
+      parts.drills.map(async (d) => {
+        const move = parseMove(d);
+        const body = plainText(move.body);
+        return {
+          name: move.name ? plainText(move.name) : firstSentence(body),
+          body: move.name ? body : body.slice(firstSentence(body).length).trim(),
+          say: move.say.map((l) => l.replace(/\*\*(.+?)\*\*/g, "$1")),
+          clip: await pick(d),
+        };
+      })
+    );
+    const step = parts.set ? plainText(stripStepLabel(parts.set)) : null;
+    plays.push({
       question: pendingQuestion,
-      intro: parts.intro.map(plainText).filter(Boolean),
-      introClip: await pick(parts.intro.join("\n\n")),
-      drills: await Promise.all(parts.drills.map(async (d) => ({ text: plainText(d), clip: await pick(d) }))),
-      notes: parts.notes.map(plainText).filter(Boolean),
-      set: parts.set ? plainText(parts.set) : null,
+      take: [...parts.intro, ...parts.notes].map(plainText).filter(Boolean),
+      moves,
+      step,
+      target: step ? stepTarget(step) : null,
     });
     pendingQuestion = "";
   }
 
-  // The lead coach signs the sheet: whoever's tape backs the most clips
+  // The coaches whose sessions back this playbook, most-cited first
   const counts = new Map<Coach, number>();
-  for (const rep of reps) {
-    for (const c of [rep.introClip, ...rep.drills.map((d) => d.clip)]) {
-      if (c?.coach) counts.set(c.coach, (counts.get(c.coach) ?? 0) + 1);
+  for (const play of plays) {
+    for (const mv of play.moves) {
+      if (mv.clip?.coach) counts.set(mv.clip.coach, (counts.get(mv.clip.coach) ?? 0) + 1);
     }
   }
-  const lead = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  const coaches = Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([c]) => c);
 
-  return { reps, lead };
+  const askUrl = `${GYM_BASE_URL}/ask/${conversationId}`;
+  return { plays, coaches, askUrl, askQr: await qrSvg(askUrl) };
+}
+
+/** The whole playbook as plain text, for pasting into a doc or CRM. */
+function playbookText(plays: Play[], askUrl: string): string {
+  const out: string[] = [];
+  for (const play of plays) {
+    if (play.question) out.push(play.question.toUpperCase(), "");
+    out.push(...play.take, "");
+    play.moves.forEach((mv, i) => {
+      out.push(`${i + 1}. ${mv.name}`);
+      if (mv.say.length) out.push(...mv.say.map((l) => (l ? `   ${l}` : "")));
+      if (mv.body) out.push(`   Why: ${mv.body}`);
+      if (mv.clip) out.push(`   Watch: ${mv.clip.url}`);
+      out.push("");
+    });
+    if (play.step) out.push(`This week: ${play.step}`, "");
+  }
+  out.push(`Made with The GTM Game by FounderWell. Continue: ${askUrl}`);
+  return out.join("\n");
 }
 
 export async function generateMetadata({
@@ -181,250 +220,268 @@ export async function generateMetadata({
   params: Promise<{ conversationId: string }>;
 }): Promise<Metadata> {
   const { conversationId } = await params;
-  const plan = await loadPlan(conversationId);
-  const question = plan?.reps[0]?.question;
+  const book = await loadPlaybook(conversationId);
+  const question = book?.plays[0]?.question;
   return gymMeta({
-    title: question ? `Strategy guide: ${question}` : "Strategy guide",
-    shareTitle: question ? `Strategy guide: “${question}”` : "A GTM Game strategy guide",
-    description: "A printable strategy guide from The GTM Game, with a QR code to the exact minute of FounderWell training behind every move.",
+    title: question ? `Playbook: ${question}` : "Playbook",
+    shareTitle: question ? `Playbook: “${question}”` : "A GTM Game playbook",
+    description:
+      "A printable playbook from The GTM Game: the moves, the exact words to use, and a QR code to the minute of FounderWell coaching behind each one.",
     path: `/plan/${conversationId}`,
     image: question ? `/og?q=${encodeURIComponent(question)}` : undefined,
     type: "article",
   });
 }
 
-export default async function PlanPage({
+export default async function PlaybookPage({
   params,
 }: {
   params: Promise<{ conversationId: string }>;
 }) {
   const { conversationId } = await params;
-  const plan = await loadPlan(conversationId);
-  if (!plan) notFound();
+  const book = await loadPlaybook(conversationId);
+  if (!book) notFound();
 
-  const { reps, lead } = plan;
-  const planNo = conversationId.slice(0, 6).toUpperCase();
+  const { plays, coaches, askUrl, askQr } = book;
   const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  const cheats = [0, 1, 2].map((i) => CHEAT_CODES[(hash(conversationId) + i * 3) % CHEAT_CODES.length]);
-  const coach = lead ?? null;
+  const lead = coaches[0] ?? null;
 
   return (
-    <main className="min-h-screen px-3 py-6 md:py-10">
+    <main className="min-h-screen px-3 py-6 md:py-10 print:p-0 print:min-h-0">
       {/* Screen-only controls */}
-      <div className="no-print mx-auto max-w-[860px] mb-4 flex items-center justify-between gap-3">
+      <div className="no-print mx-auto max-w-[820px] mb-4 flex flex-wrap items-center justify-between gap-3">
         <Link href={`/ask/${conversationId}`} className="text-sm font-semibold text-[#f6f0ff]/80 hover:text-white">
           ← Back to the game
         </Link>
-        <PrintButton />
+        <div className="flex items-center gap-2">
+          <CopyButton
+            text={playbookText(plays, askUrl)}
+            label="Copy as text"
+            className="border-[#f6f0ff]/40 bg-transparent text-[#f6f0ff] hover:bg-[#f6f0ff] hover:text-[#0b0618]"
+          />
+          <PrintButton />
+        </div>
       </div>
 
-      <article className="sheet relative mx-auto max-w-[860px] rounded-lg bg-[var(--paper)] shadow-[0_30px_80px_-20px_rgba(255,46,166,0.45)] overflow-hidden">
+      <article className="sheet relative mx-auto max-w-[820px] rounded-lg bg-[var(--paper)] shadow-[0_30px_80px_-20px_rgba(255,46,166,0.45)] overflow-hidden">
         <div className="sunset-bar h-2.5" />
 
-        {/* Letterhead */}
-        <header className="px-6 md:px-10 pt-6 pb-5 flex items-start justify-between gap-6 border-b-2 border-[var(--ink)]">
-          <div className="flex items-center gap-3">
-            <Image src="/gym/game/logo.webp" alt="" width={64} height={64} className="h-16 w-16" />
-            <div>
-              <p className="font-display text-[22px] leading-none">THE GTM GAME</p>
-              <p className="mt-1 text-[12px] text-[var(--ink-soft)]">by FounderWell · {GYM_PUBLIC_HOST}</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="font-display text-[26px] md:text-[30px] leading-none text-[var(--pink)]">STRATEGY GUIDE</p>
-            <p className="mt-1.5 font-osd text-[18px] leading-none text-[var(--ink-soft)]">
-              No. {planNo} · {today.toUpperCase()}
+        {/* Masthead */}
+        <header className="px-5 sm:px-10 md:px-12 print:px-8 pt-6 print:pt-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <Image src="/gym/game/logo.webp" alt="" width={40} height={40} className="h-10 w-10" />
+            <p className="leading-tight">
+              <span className="font-display text-[15px]">The GTM Game</span>
+              <span className="block text-[12.5px] text-[var(--ink-soft)]">Playbook by FounderWell</span>
             </p>
           </div>
+          <p className="font-osd text-[18px] leading-none text-[var(--ink-soft)]">{today}</p>
         </header>
 
-        {/* Level map: start → every level → the quest */}
-        <section className="avoid-break px-6 md:px-10 py-4 border-b border-[var(--rule)]">
-          <p className="font-display text-[11px] tracking-wider text-[var(--ink-soft)]">LEVEL MAP</p>
-          <ol className="mt-3 flex items-start">
-            {[
-              { id: "start", label: "START", sub: "" },
-              ...reps.map((rep, r) => ({ id: `l${r}`, label: `1-${r + 1}`, sub: rep.question })),
-              { id: "boss", label: "QUEST", sub: "Do it this week" },
-            ].map((node, i, all) => (
-              <li key={node.id} className="flex-1 min-w-0 flex flex-col items-center text-center relative">
-                {i < all.length - 1 && (
-                  <span className="absolute top-[13px] left-1/2 w-full border-t-2 border-dashed border-[var(--ink-soft)]" aria-hidden />
-                )}
-                <span
-                  className={cn(
-                    "relative z-10 h-7 min-w-7 px-1.5 grid place-items-center font-display text-[11px] border-[3px] border-[var(--ink)] bg-[var(--paper)]",
-                    node.id === "boss" && "bg-[var(--yellow)]",
-                    node.id === "start" && "bg-[var(--cyan)] text-white"
-                  )}
-                >
-                  {node.id === "boss" ? "★" : node.id === "start" ? "▶" : node.label}
-                </span>
-                <span className="mt-1.5 font-osd text-[14px] leading-none text-[var(--ink-soft)]">{node.label}</span>
-                {node.sub && (
-                  <span className="mt-1 px-1 text-[10.5px] leading-tight text-[var(--ink)]/80 line-clamp-2 max-w-[18ch]">{node.sub}</span>
-                )}
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* Player / coach */}
-        <section className="px-6 md:px-10 py-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-[var(--rule)]">
-          <div>
-            <p className="font-display text-[11px] tracking-wider text-[var(--ink-soft)]">PLAYER 1</p>
-            <div className="mt-3 border-b-2 border-dotted border-[var(--ink-soft)] h-7" />
-          </div>
-          <div className="flex items-center gap-3">
-            <Image
-              src={coach ? `/gym/game/cast/${coach.slug}.webp` : "/gym/game/game-master-bot.webp"}
-              alt=""
-              width={56}
-              height={56}
-              className="h-14 w-14"
-            />
-            <div>
-              <p className="font-display text-[11px] tracking-wider text-[var(--ink-soft)]">YOUR COACH</p>
-              <p className="font-display text-[17px] leading-tight">{coach ? coach.name : "The Game Master"}</p>
-              <p className="text-[12px] text-[var(--ink-soft)]">{coach ? `${coach.title} · ${coach.role}` : "Always on. Free play."}</p>
-            </div>
-          </div>
-        </section>
-
-        {reps.map((rep, r) => (
-          <section key={r} className="px-6 md:px-10 pt-6 pb-2">
-            {/* Mission */}
-            <div className="avoid-break">
-              <p className="font-display text-[12px] tracking-wider text-[var(--cyan)]">
-                LEVEL {String(r + 1).padStart(2, "0")} · THE MISSION
-              </p>
-              <p className="font-hand text-[34px] md:text-[40px] leading-[1.05] mt-1 text-[var(--ink)]">
-                {rep.question || "Get better at go-to-market"}
-              </p>
-            </div>
-
-            {/* Game plan */}
-            {rep.intro.length > 0 && (
-              <div className="avoid-break mt-5 grid grid-cols-[1fr_auto] gap-5 items-start">
-                <div>
-                  <p className="font-display text-[12px] tracking-wider text-[var(--pink)]">GAME PLAN</p>
-                  {rep.intro.map((p, i) => (
-                    <p key={i} className={i === 0 ? "mt-1.5 text-[16px] font-semibold leading-snug" : "mt-2 text-[14px] leading-relaxed text-[var(--ink)]/85"}>
-                      {p}
-                    </p>
-                  ))}
-                </div>
-                {rep.introClip && <ProofCode clip={rep.introClip} />}
-              </div>
-            )}
-
-            {/* Moves */}
-            {rep.drills.length > 0 && (
-              <div className="mt-6">
-                <div className="grid grid-cols-[44px_1fr_110px_100px_36px] gap-3 pb-1.5 border-b-2 border-[var(--ink)] font-display text-[10.5px] tracking-wider text-[var(--ink-soft)]">
-                  <span>#</span>
-                  <span>MOVE</span>
-                  <span className="text-center">TRIES</span>
-                  <span className="text-center">REPLAY</span>
-                  <span className="text-center">✓</span>
-                </div>
-                {rep.drills.map((d, i) => (
-                  <div
-                    key={i}
-                    className="avoid-break grid grid-cols-[44px_1fr_110px_100px_36px] gap-3 py-3 border-b border-[var(--rule)] items-center"
-                  >
-                    <span className="font-display text-[22px] text-[var(--cyan)] leading-none">{String(i + 1).padStart(2, "0")}</span>
-                    <div>
-                      <p className="text-[14.5px] leading-snug">{d.text}</p>
-                      {d.clip?.coach && (
-                        <p className="mt-1 font-osd text-[15px] leading-none text-[var(--ink-soft)]">
-                          WITH {coachLabel(d.clip.coach).toUpperCase()}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-center gap-1">
-                      {[0, 1, 2, 3, 4].map((t) => (
-                        <span key={t} className="h-[15px] w-[15px] border-2 border-[var(--ink-soft)]" />
-                      ))}
-                    </div>
-                    <div className="flex justify-center">{d.clip ? <ProofCode clip={d.clip} small /> : <span className="text-[var(--rule)]">—</span>}</div>
-                    <div className="flex justify-center">
-                      <span className="h-6 w-6 rounded-md border-2 border-[var(--ink)]" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {rep.notes.map((n, i) => (
-              <p key={i} className="avoid-break mt-4 text-[14px] leading-relaxed">{n}</p>
-            ))}
-
-            {/* Your next quest */}
-            {rep.set && (
-              <div className="avoid-break mt-6 mb-4 rounded-xl border-[3px] border-[var(--ink)] p-4 md:p-5 relative">
-                <p className="font-display text-[13px] tracking-wider text-[var(--pink)]">YOUR NEXT QUEST</p>
-                <p className="mt-1.5 text-[15.5px] font-semibold leading-snug">{rep.set}</p>
-                <p className="mt-4 font-display text-[10px] tracking-wider text-[var(--ink-soft)]">SAVE POINTS</p>
-                <div className="mt-1.5 flex flex-wrap gap-2">
-                  {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                    <span key={i} className="flex flex-col items-center gap-1">
-                      <span className="font-display text-[10px] text-[var(--ink-soft)]">{d}</span>
-                      <span className="h-7 w-7 rounded-md border-2 border-[var(--ink)]" />
-                    </span>
-                  ))}
-                </div>
-                <span className="absolute -top-4 right-4 rotate-[-6deg] rounded-md border-[3px] border-[var(--pink)] bg-[var(--paper)] px-2.5 py-1 font-display text-[13px] text-[var(--pink)]">
-                  HIGH SCORE
-                </span>
-              </div>
-            )}
-          </section>
+        {plays.map((play, p) => (
+          <PlaySection
+            key={p}
+            play={play}
+            index={p}
+            total={plays.length}
+            coaches={p === 0 ? coaches : []}
+            askUrl={askUrl}
+            askQr={askQr}
+          />
         ))}
 
-        {/* Cheat codes + signature */}
-        <footer className="avoid-break px-6 md:px-10 pt-4 pb-7 mt-2 border-t-2 border-[var(--ink)] grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6">
-          <div>
-            <p className="font-display text-[12px] tracking-wider text-[var(--orange)]">CHEAT CODES</p>
-            <ul className="mt-2 space-y-1.5">
-              {cheats.map(([combo, cheat, why]) => (
-                <li key={cheat} className="text-[13.5px] leading-snug">
-                  <span className="inline-block min-w-[76px] font-osd text-[16px] text-[var(--pink)]">{combo}</span>
-                  <span className="font-bold">{cheat}</span> <span className="text-[var(--ink-soft)]">{why}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 font-osd text-[16px] leading-tight text-[var(--ink-soft)]">
-              SCAN ANY CODE FOR AN INSTANT REPLAY · MORE LEVELS AT {GYM_PUBLIC_HOST.toUpperCase()}
+        {/* Credits */}
+        <footer className="avoid-break mx-5 sm:mx-10 md:mx-12 print:mx-8 mt-4 print:mt-1 mb-8 print:mb-4 pt-5 print:pt-3 border-t border-[var(--rule)] grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 print:gap-3 items-end">
+          <div className="text-[13px] print:text-[11.5px] leading-relaxed print:leading-snug text-[var(--ink-soft)] max-w-[52ch] print:max-w-none">
+            <p>
+              Every move comes from a FounderWell coaching session. Scan a code to watch the coach make the point; the
+              full sessions live in the FounderWell program.
             </p>
+            <p className="mt-2 print:mt-1 font-semibold text-[var(--ink)]">Make your own playbook at {GYM_PUBLIC_HOST}</p>
           </div>
-          <div className="md:text-right md:self-end">
-            <p className="font-hand text-[38px] leading-none text-[var(--ink)]">
-              {coach ? `— ${coachLabel(coach)}` : "— Coach"}
-            </p>
-            <div className="mt-1 md:ml-auto w-48 border-t border-[var(--ink-soft)]" />
-            <p className="mt-1 font-display text-[10px] tracking-wider text-[var(--ink-soft)]">COACH&apos;S SIGNATURE</p>
-          </div>
+          {lead && (
+            <div className="flex items-center gap-2.5 sm:justify-end">
+              <Image src={`/gym/game/cast/${lead.slug}.webp`} alt="" width={44} height={44} className="h-11 w-11 print:h-8 print:w-8" />
+              <p className="font-hand text-[30px] print:text-[24px] leading-none">{coachLabel(lead)}</p>
+            </div>
+          )}
         </footer>
         <div className="sunset-bar h-2.5" />
       </article>
-
-      <p className="no-print mx-auto max-w-[860px] mt-4 text-center text-[12px] text-[#f6f0ff]/50">
-        Powered by FounderWell training and Bold. {COACHES.length} coaches on staff.
-      </p>
     </main>
   );
 }
 
-function ProofCode({ clip, small }: { clip: Clip; small?: boolean }) {
+function PlaySection({
+  play,
+  index,
+  total,
+  coaches,
+  askUrl,
+  askQr,
+}: {
+  play: Play;
+  index: number;
+  total: number;
+  coaches: Coach[];
+  askUrl: string;
+  askQr: string;
+}) {
+  const hasWords = play.moves.some((m) => m.say.length > 0);
+  const callWords = play.moves
+    .filter((m) => m.say.length)
+    .map((m) => m.say.join("\n"))
+    .join("\n\n");
+  const proof = play.moves.filter((m) => m.body || m.clip);
+
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div
-        className={cn("rounded-sm [&>svg]:h-full [&>svg]:w-full", small ? "h-[84px] w-[84px]" : "h-[96px] w-[96px]")}
-        // qrcode renders a self-contained SVG string
-        dangerouslySetInnerHTML={{ __html: clip.qr }}
-      />
-      <span className="font-osd text-[14px] leading-none text-[var(--ink-soft)]">▶ {formatTime(clip.seconds)}</span>
-    </div>
+    <section className={cn("px-5 sm:px-10 md:px-12 print:px-8", index > 0 && "mt-6 pt-8 border-t-[3px] border-[var(--ink)] break-before-page")}>
+      {/* The question, printed like a cartridge-manual headline */}
+      <div className="avoid-break pt-7 print:pt-5">
+        {total > 1 && <p className="font-osd text-[20px] leading-none text-[var(--pink)] mb-2">Play {index + 1} of {total}</p>}
+        <h1
+          className={cn(
+            "playbook-title font-display leading-[1.02] text-[var(--ink)] max-w-[18ch]",
+            index === 0 ? "text-[34px] sm:text-[46px] md:text-[54px] print:text-[38px]" : "text-[30px] sm:text-[38px] print:text-[32px]"
+          )}
+        >
+          {play.question || "Your next go-to-market move"}
+        </h1>
+        {play.take.map((t, i) => (
+          <p
+            key={i}
+            className={cn(
+              "max-w-[60ch]",
+              i === 0 ? "mt-6 print:mt-4 text-[19px] sm:text-[21px] print:text-[17px] font-medium leading-[1.45]" : "mt-3 print:mt-2 text-[16px] print:text-[14px] leading-relaxed text-[var(--ink)]/80"
+            )}
+          >
+            {t}
+          </p>
+        ))}
+        {coaches.length > 0 && (
+          <div className="mt-5 print:mt-3 flex items-center gap-3">
+            <span className="flex -space-x-2">
+              {coaches.slice(0, 3).map((c) => (
+                <Image key={c.slug} src={`/gym/game/cast/${c.slug}.webp`} alt="" width={36} height={36} className="h-9 w-9" />
+              ))}
+            </span>
+            <p className="text-[13.5px] text-[var(--ink-soft)]">
+              From the sessions of{" "}
+              <span className="font-semibold text-[var(--ink)]">{coaches.slice(0, 3).map((c) => c.name).join(" & ")}</span>
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* On the call: the card you keep next to the keyboard */}
+      {play.moves.length > 0 && (
+        <div className="avoid-break relative mt-9 print:mt-7 rounded-2xl border-2 border-dashed border-[var(--ink)]/70 p-5 sm:p-7 print:p-5">
+          {/* Scissors ride the card, so they never strand at a page bottom */}
+          <span aria-hidden className="absolute -top-[13px] left-6 bg-[var(--paper)] px-1.5 text-[18px] leading-none text-[var(--ink)]/70">
+            ✂
+          </span>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-[20px] font-bold leading-tight">On the call</h2>
+              <p className="mt-0.5 text-[13.5px] text-[var(--ink-soft)]">
+                {hasWords ? "The moves in order, with the words to use. Keep it next to your keyboard." : "The moves in order. Keep it next to your keyboard."}
+              </p>
+            </div>
+            {hasWords && <CopyButton text={callWords} label="Copy the words" />}
+          </div>
+          <ol className="mt-5 print:mt-4 space-y-5 print:space-y-3.5">
+            {play.moves.map((mv, i) => (
+              <li key={i} className="grid grid-cols-[38px_1fr] gap-x-3">
+                <span className="font-display text-[24px] leading-none text-[var(--cyan)] pt-0.5">{i + 1}</span>
+                <div className="min-w-0">
+                  <p className="text-[17px] font-bold leading-snug">{mv.name}</p>
+                  {mv.say.length > 0 && (
+                    <div className="mt-2 print:mt-1.5 border-l-[3px] border-[var(--pink)] pl-3.5 space-y-1 text-[16px] print:text-[14.5px] leading-[1.55] print:leading-[1.45]">
+                      {mv.say.map((line, j) => (line.trim() ? <p key={j}>{line}</p> : <div key={j} className="h-1.5" />))}
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Why it works: the coaching, the coach's words, the minute to watch */}
+      {proof.length > 0 && (
+        <div className="mt-10 print:mt-6">
+          <div>
+            {play.moves.map((mv, i) =>
+              mv.body || mv.clip ? (
+                <div
+                  key={i}
+                  className="avoid-break grid grid-cols-[38px_1fr] sm:grid-cols-[38px_1fr_auto] gap-x-3 gap-y-3 py-5 print:py-3 border-b border-[var(--rule)] last:border-b-0"
+                >
+                  {/* The heading rides the first row so print never strands it */}
+                  {mv === proof[0] && (
+                    <h2 className="col-span-full -mb-1 text-[20px] print:text-[18px] font-bold leading-tight">Why each move works</h2>
+                  )}
+                  <span className="font-display text-[18px] leading-none text-[var(--ink)]/35 pt-1">{i + 1}</span>
+                  <div className="min-w-0 max-w-[58ch]">
+                    <p className="text-[15.5px] font-bold leading-snug">{mv.name}</p>
+                    {mv.body && <p className="mt-1.5 text-[15px] print:text-[13.5px] leading-relaxed print:leading-normal text-[var(--ink)]/85">{mv.body}</p>}
+                    {mv.clip?.quote && (
+                      <blockquote className="mt-3 print:mt-2 text-[14.5px] print:text-[13px] leading-snug">
+                        <p className="italic text-[var(--ink)]">&ldquo;{mv.clip.quote}&rdquo;</p>
+                        <footer className="mt-1 text-[12.5px] text-[var(--ink-soft)]">
+                          {mv.clip.coach ? `${coachLabel(mv.clip.coach)} in ` : "From "}
+                          &ldquo;{mv.clip.title.split(/:\s/)[0]}&rdquo;
+                        </footer>
+                      </blockquote>
+                    )}
+                  </div>
+                  {mv.clip && (
+                    <a
+                      href={mv.clip.url}
+                      className="col-start-2 sm:col-start-3 flex sm:flex-col items-center gap-2.5 sm:gap-1 self-start rounded-md focus-visible:outline-2 focus-visible:outline-[var(--cyan)]"
+                    >
+                      <span
+                        className="block h-[84px] w-[84px] [&>svg]:h-full [&>svg]:w-full"
+                        // qrcode renders a self-contained SVG string
+                        dangerouslySetInnerHTML={{ __html: mv.clip.qr }}
+                      />
+                      <span className="font-osd text-[16px] leading-none text-[var(--cyan)]">▶ Watch {formatTime(mv.clip.seconds)}</span>
+                    </a>
+                  )}
+                </div>
+              ) : null
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* This week */}
+      {play.step && (
+        <div className="avoid-break mt-8 print:mt-5 mb-6 print:mb-4 rounded-2xl bg-[var(--ink)] text-[var(--paper)] p-5 sm:p-7 print:p-5 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-6">
+          <div className="min-w-0">
+            <h2 className="font-display text-[15px] text-[var(--yellow)]">This week</h2>
+            <p className="mt-2 text-[19px] sm:text-[21px] print:text-[17px] font-semibold leading-snug max-w-[44ch] print:max-w-[52ch]">{play.step}</p>
+            {play.target && (
+              <p className="mt-5 print:mt-3 flex items-end gap-2 text-[15px]">
+                <span className="text-[var(--paper)]/70">Your score</span>
+                <span className="inline-block w-16 border-b-2 border-[var(--paper)]/60 translate-y-[-3px]" />
+                <span className="font-display text-[22px] leading-none">/ {play.target}</span>
+              </p>
+            )}
+          </div>
+          {index === total - 1 && (
+            <a href={askUrl} className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2 self-end">
+              <span
+                className="block h-[88px] w-[88px] shrink-0 rounded-md overflow-hidden [&>svg]:h-full [&>svg]:w-full"
+                dangerouslySetInnerHTML={{ __html: askQr }}
+              />
+              <span className="text-[13px] leading-snug text-[var(--paper)]/80 sm:text-right max-w-[22ch]">
+                Done? Tell the Game Master how it went.
+              </span>
+            </a>
+          )}
+        </div>
+      )}
+    </section>
   );
 }

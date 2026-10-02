@@ -32,6 +32,15 @@ body {
   background: linear-gradient(90deg, var(--yellow), var(--orange) 38%, var(--pink));
 }
 
+/* The question, screen-printed slightly off register: cyan and pink plates
+   a few points off the ink, like an 80s cartridge manual */
+.playbook-title {
+  text-shadow:
+    0.06em 0.045em 0 rgba(10, 143, 176, 0.55),
+    -0.035em -0.025em 0 rgba(214, 24, 127, 0.4);
+  text-wrap: balance;
+}
+
 @page {
   size: auto;
   margin: 12mm;
