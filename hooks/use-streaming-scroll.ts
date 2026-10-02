@@ -67,7 +67,9 @@ export function useStreamingScroll({
 
     const message = el.querySelector(messageSelector);
     if (message) {
-      const messageTop = (message as HTMLElement).offsetTop;
+      // Measured against the scroll container: offsetTop is relative to the
+      // nearest positioned ancestor, which isn't always the container
+      const messageTop = el.scrollTop + message.getBoundingClientRect().top - el.getBoundingClientRect().top;
       el.scrollTo({
         top: Math.max(0, messageTop - 16), // 16px padding from top
         behavior: "smooth",

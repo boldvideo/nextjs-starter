@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, RotateCcw } from "lucide-react";
 import { MuxPlayerComponent } from "@/components/players/player-mux";
 import type { SourceOpen } from "@/lib/source-engagement";
@@ -34,6 +34,23 @@ export function GymClipPlayer({
   const clip = useGymClip(moment);
   const [ended, setEnded] = useState(false);
   const [take, setTake] = useState(0);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  // Scrolled away: stop talking. Resuming is the player's own play button.
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!box || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.intersectionRatio >= 0.25) return;
+        const player = box.querySelector("mux-player") as (HTMLElement & { paused?: boolean; pause?: () => void }) | null;
+        if (player && !player.paused) player.pause?.();
+      },
+      { threshold: [0, 0.25] }
+    );
+    io.observe(box);
+    return () => io.disconnect();
+  }, [clip]);
 
   if (clip === undefined) {
     return (
@@ -44,7 +61,7 @@ export function GymClipPlayer({
   }
 
   return (
-    <div className={cn("relative bg-black", className)}>
+    <div ref={boxRef} className={cn("relative bg-black", className)}>
       <MuxPlayerComponent
         key={take}
         video={{ id: moment.videoId, playbackId: clip?.playbackId ?? playbackId, title }}

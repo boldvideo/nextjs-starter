@@ -10,6 +10,7 @@ import { ClipLength, GymClipPlayer } from "@/components/gym/gym-clip-player";
 import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
 import { track } from "@/lib/gym-track";
 import { GymReceiptCard } from "@/components/gym/gym-receipt-card";
+import { proofQuote } from "@/lib/gym-plan-parse";
 
 interface FramePreview {
   citation: AskCitation;
@@ -271,7 +272,7 @@ function VideoSourcePanel({
         <p className="font-semibold text-lg leading-snug mb-3">
           {citation.videoTitle}
         </p>
-        {citation.text && (
+        {proofQuote(citation.text) && (
           <blockquote className="border-l-2 border-[var(--gym-cyan)] pl-3.5 py-1 text-base leading-relaxed text-foreground/80 mb-5">
             &ldquo;{citation.text.trim()}&rdquo;
           </blockquote>

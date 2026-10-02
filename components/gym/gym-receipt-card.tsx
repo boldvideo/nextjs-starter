@@ -4,6 +4,7 @@ import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AskCitation } from "@/lib/ask";
 import { ClipLength } from "./gym-clip-player";
+import { proofQuote } from "@/lib/gym-plan-parse";
 
 interface GymReceiptCardProps {
   citation: AskCitation;
@@ -82,7 +83,7 @@ export function GymReceiptCard({
       <p className="mt-2 text-[13.5px] font-semibold leading-snug text-foreground/95 line-clamp-2">
         {citation.videoTitle}
       </p>
-      {citation.text && (
+      {proofQuote(citation.text) && (
         <p className="mt-1 text-[12.5px] leading-snug text-muted-foreground line-clamp-2">
           &ldquo;{citation.text.trim()}&rdquo;
         </p>

@@ -12,6 +12,8 @@ const caveat = Caveat({ subsets: ["latin"], weight: ["500", "700"], variable: "-
 
 export const metadata: Metadata = {
   metadataBase: new URL(GYM_BASE_URL),
+  // Same tab icon as the game (this root layout doesn't inherit (default)'s)
+  icons: { icon: "/gym/icon.svg", apple: "/gym/apple-icon.png" },
 };
 
 export default function PrintLayout({ children }: { children: React.ReactNode }) {
