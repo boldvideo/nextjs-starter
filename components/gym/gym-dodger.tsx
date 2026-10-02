@@ -39,6 +39,7 @@ import { money, render } from "./dodger/render";
 import { createCrt } from "./dodger/crt";
 import { Music } from "./dodger/music";
 import { clipLabel } from "@/lib/gym-clip-window";
+import { DODGER_OPEN_ATTR, NOTE_OPEN_EVENT } from "./gym-founder-note";
 
 /**
  * The secret level. You're a launch at the bottom of the screen; objections
@@ -55,7 +56,7 @@ import { clipLabel } from "@/lib/gym-clip-window";
 
 const MuxPlayer = dynamic(() => import("@mux/mux-player-react"), { ssr: false });
 
-type Phase = "attract" | "play" | "boss" | "initials" | "over";
+type Phase = "attract" | "play" | "pause" | "boss" | "initials" | "over";
 type Intel =
   | { status: "house" }
   | { status: "loading"; label: string | null }
@@ -124,6 +125,7 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const game = useRef<Game>(createGame("demo", HOUSE));
   const input = useRef({ left: false, right: false });
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>("attract");
   const phaseRef = useRef<Phase>("attract");
   const [mode, setMode] = useState<"arcade" | "daily">(initialMode);
@@ -288,6 +290,32 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
     go("play");
   }, [go]);
 
+  // A run never keeps going behind your back: leaving the tab, the window or
+  // opening anything else pauses it, and only the player resumes it
+  const pause = useCallback(() => {
+    if (phaseRef.current !== "play" || game.current.over) return;
+    input.current = { left: false, right: false };
+    go("pause");
+  }, [go]);
+
+  const unpause = useCallback(() => {
+    if (phaseRef.current !== "pause") return;
+    sfx("start");
+    go("play");
+  }, [go]);
+
+  useEffect(() => {
+    const onVisibility = () => document.hidden && pause();
+    window.addEventListener("blur", pause);
+    window.addEventListener(NOTE_OPEN_EVENT, pause);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("blur", pause);
+      window.removeEventListener(NOTE_OPEN_EVENT, pause);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [pause]);
+
   const submitInitials = useCallback(
     async (initials: string) => {
       if (!result) return;
@@ -328,13 +356,26 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
 
   // ── Keys ─────────────────────────────────────────────────────────────────
 
+  // Esc quits from anywhere, first: capture phase, so nothing inside the
+  // dialog (a player, a field) can swallow it
+  useEffect(() => {
+    const onEscape = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      e.stopPropagation();
+      onClose();
+    };
+    window.addEventListener("keydown", onEscape, true);
+    return () => window.removeEventListener("keydown", onEscape, true);
+  }, [onClose]);
+
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
+      // Keys never reach the page behind the cabinet (Enter on a stray
+      // focused button used to open things underneath a running game)
+      const outside = !!target && !!dialogRef.current && !dialogRef.current.contains(target);
+      if (outside && (e.key === "Enter" || e.key === " ")) e.preventDefault();
       if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
       const p = phaseRef.current;
       if (p === "initials") return;
@@ -343,14 +384,15 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
         if (e.key === "ArrowLeft") input.current.left = true;
         else if (e.key === "ArrowRight") input.current.right = true;
         else if (e.key === "Backspace") unlockTarget(game.current);
-        else if (!typeKey(game.current, e.key) && !["ArrowUp", "ArrowDown", " "].includes(e.key)) return;
+        else if (!typeKey(game.current, e.key) && !["ArrowUp", "ArrowDown", " ", "Enter"].includes(e.key)) return;
         e.preventDefault();
         return;
       }
       if (e.key === "Enter" || e.key === " ") {
-        if (target?.tagName === "BUTTON" || target?.tagName === "A") return;
+        if (!outside && (target?.tagName === "BUTTON" || target?.tagName === "A")) return;
         e.preventDefault();
-        if (p === "boss") resume();
+        if (p === "pause") unpause();
+        else if (p === "boss") resume();
         else start();
       }
     };
@@ -364,7 +406,24 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
       window.removeEventListener("keydown", onDown);
       window.removeEventListener("keyup", onUp);
     };
-  }, [start, resume, onClose]);
+  }, [start, resume, unpause]);
+
+  // Focus lives in the cabinet while it's open, and goes back after
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus({ preventScroll: true });
+    const onFocusIn = (e: FocusEvent) => {
+      const dialog = dialogRef.current;
+      if (dialog && e.target instanceof Node && !dialog.contains(e.target)) dialog.focus({ preventScroll: true });
+    };
+    document.addEventListener("focusin", onFocusIn);
+    document.documentElement.setAttribute(DODGER_OPEN_ATTR, "");
+    return () => {
+      document.removeEventListener("focusin", onFocusIn);
+      document.documentElement.removeAttribute(DODGER_OPEN_ATTR);
+      previous?.focus?.({ preventScroll: true });
+    };
+  }, []);
 
   // ── The loop: runs in every phase, so the attract demo stays alive ───────
 
@@ -404,7 +463,9 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
     const born = last;
 
     const frame = (now: number) => {
-      const real = Math.min(0.05, (now - last) / 1000);
+      // Clamped so a stalled tab doesn't teleport the game, but loose enough
+      // that slow or throttled frames don't turn it into slow motion
+      const real = Math.min(0.1, (now - last) / 1000);
       last = now;
       const p = phaseRef.current;
       const g = game.current;
@@ -432,7 +493,7 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
       }
       music.setSpeed(Math.min(g.stage, 12) * 2);
 
-      render(ctx, g, p === "play" || p === "boss", { font, flashInFrame: !crt, reducedMotion, clock: (now - born) / 1000 });
+      render(ctx, g, p === "play" || p === "pause" || p === "boss", { font, flashInFrame: !crt, reducedMotion, clock: (now - born) / 1000 });
       if (crt) crt.draw(screen, { split: g.shake * 0.35 + g.flash * 2, flash: g.flash });
       else if (flat) flat.drawImage(screen, 0, 0, canvas.width, canvas.height);
 
@@ -488,7 +549,9 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
 
   return (
     <div
-      className="fixed inset-0 z-[80] overflow-y-auto bg-[rgba(6,3,14,0.92)] backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-[80] overflow-y-auto bg-[rgba(6,3,14,0.92)] backdrop-blur-sm outline-none motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
       role="dialog"
       aria-modal="true"
       aria-label="Secret level: Objection Dodger"
@@ -557,6 +620,16 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
               <p className="mt-3 font-osd text-[14px] md:text-[17px] text-foreground/85 leading-tight">
                 {touch ? "TAP AN OBJECTION TO BLAST IT · HOLD A SIDE TO MOVE" : "TYPE THE WORD UNDER AN OBJECTION TO BLAST IT · ← → TO MOVE"}
               </p>
+            </Screen>
+          )}
+
+          {phase === "pause" && (
+            <Screen>
+              <p className="font-display text-[30px] md:text-[44px] leading-none gym-sunset-text [text-shadow:none]">PAUSED</p>
+              <button type="button" onClick={unpause} className="pointer-events-auto mt-4 md:mt-6 font-osd text-[24px] md:text-[30px] leading-none text-[var(--gym-yellow)] gym-blink cursor-pointer">
+                {touch ? "TAP TO RESUME" : "PRESS START TO RESUME"}
+              </button>
+              {!touch && <p className="mt-3 font-osd text-[14px] md:text-[17px] text-foreground/85 leading-tight">ENTER TO RESUME · ESC TO QUIT</p>}
             </Screen>
           )}
 

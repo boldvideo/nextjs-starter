@@ -17,11 +17,14 @@ import { cn } from "@/lib/utils";
  * before launch.
  */
 
-const OPEN_EVENT = "gym:open-note";
+export const NOTE_OPEN_EVENT = "gym:open-note";
 const HASH = "#note";
 
+/** Set on <html> while the Objection Dodger is open: the note waits */
+export const DODGER_OPEN_ATTR = "data-dodger";
+
 export function openFounderNote() {
-  window.dispatchEvent(new Event(OPEN_EVENT));
+  window.dispatchEvent(new Event(NOTE_OPEN_EVENT));
 }
 
 /** Spinning starburst sticker. Placement is up to the parent. */
@@ -71,15 +74,18 @@ export function GymFounderNote() {
   }, []);
 
   useEffect(() => {
-    const onOpen = () => setOpen(true);
+    // Never under a running game: the cabinet pauses itself on this event,
+    // and the note stays shut until it's closed
+    const gameOpen = () => document.documentElement.hasAttribute(DODGER_OPEN_ATTR);
+    const onOpen = () => !gameOpen() && setOpen(true);
     const fromHash = () => {
-      if (window.location.hash === HASH) setOpen(true);
+      if (window.location.hash === HASH && !gameOpen()) setOpen(true);
     };
-    window.addEventListener(OPEN_EVENT, onOpen);
+    window.addEventListener(NOTE_OPEN_EVENT, onOpen);
     window.addEventListener("hashchange", fromHash);
     fromHash();
     return () => {
-      window.removeEventListener(OPEN_EVENT, onOpen);
+      window.removeEventListener(NOTE_OPEN_EVENT, onOpen);
       window.removeEventListener("hashchange", fromHash);
     };
   }, []);
