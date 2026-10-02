@@ -5,6 +5,7 @@ import { getTenantContext } from "@/lib/get-tenant-context";
 import { gymMeta } from "@/lib/gym-meta";
 import { GymBackdrop } from "@/components/gym/gym-backdrop";
 import { BoldChannelForm } from "@/components/gym/bold-channel-form";
+import { BoldDitherLogo } from "@/components/gym/bold-dither-logo";
 
 export const revalidate = 3600;
 
@@ -48,25 +49,7 @@ export default async function BuiltByBoldPage() {
   return (
     <div className="relative flex-1 min-h-0 overflow-y-auto">
       <GymBackdrop variant="dim" />
-      {/* The marquee: Bold's wordmark standing on the game's horizon */}
-      <header className="relative max-w-[1100px] mx-auto px-4 md:px-6 pt-14 md:pt-24">
-        <a
-          href="https://boldvideo.com?utm_source=gtm-game&utm_medium=built-by-bold"
-          aria-label="Bold"
-          className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--gym-cyan)]"
-        >
-          <Image
-            src="/bold-logo.svg"
-            alt="Bold"
-            width={975}
-            height={267}
-            priority
-            className="w-full h-auto drop-shadow-[0_0_48px_rgba(65,198,166,0.45)] transition-[filter] duration-300 group-hover:drop-shadow-[0_0_72px_rgba(65,198,166,0.7)]"
-          />
-        </a>
-        <div className="h-[3px] gym-sunset-bg shadow-[0_0_24px_rgba(255,46,166,0.6)]" aria-hidden />
-      </header>
-      <article className="relative max-w-[760px] mx-auto px-4 md:px-6 pt-12 md:pt-16 pb-14 md:pb-20">
+      <article className="relative max-w-[760px] mx-auto px-4 md:px-6 py-14 md:py-20">
         <p className="font-osd text-[20px] text-[var(--gym-cyan)] uppercase">Built by Bold</p>
         <h1 className="mt-2 font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em] text-balance">
           How we built The GTM Game
@@ -105,7 +88,15 @@ export default async function BuiltByBoldPage() {
             us, it works for you.
           </p>
         </section>
+      </article>
 
+      {/* The sign-off: Bold's wordmark as a CRT pixel field on the game's horizon */}
+      <div className="relative max-w-[1100px] mx-auto px-4 md:px-6 -mt-2 md:mt-0">
+        <BoldDitherLogo href="https://boldvideo.com?utm_source=gtm-game&utm_medium=built-by-bold" />
+        <div className="h-[3px] gym-sunset-bg shadow-[0_0_24px_rgba(255,46,166,0.6)]" aria-hidden />
+      </div>
+
+      <article className="relative max-w-[760px] mx-auto px-4 md:px-6 pb-14 md:pb-20">
         <div className="mt-10 rounded-2xl border border-[var(--gym-line)] bg-[color-mix(in_srgb,var(--gym-panel)_92%,transparent)] p-6 md:p-8">
           <div className="flex items-center gap-4">
             <Image src="/gym/game/cast/marcel.webp" alt="Marcel Fahle" width={96} height={96} className="h-16 w-16 shrink-0" />
