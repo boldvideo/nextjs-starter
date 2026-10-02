@@ -678,7 +678,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
                   {/* After the second level: Bold's one pitch (once, dismissible) */}
                   {pairIndex === 1 && !isCurrentlyStreaming && pair.assistantMessage?.type !== "loading" && (
-                    <GymBoldCard />
+                    <GymBoldCard
+                      moments={pair.primaryCount}
+                      sessions={new Set(pair.orderedCitations.slice(0, pair.primaryCount).map((c) => c.videoId)).size}
+                    />
                   )}
 
                   {!isLastPair && (

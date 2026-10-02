@@ -8,12 +8,12 @@ import { track } from "@/lib/gym-track";
 const DISMISSED = "gym-bold-card-dismissed";
 
 /**
- * Bold's one pitch inside a game, after the player has seen it work twice:
- * "This answered from 44 hours of FounderWell sessions. Got a library?"
+ * Bold's one pitch inside a game, after the player has seen it work twice.
+ * It counts the work behind the answer above it ("5 moments from 3 sessions,
+ * picked for your question"), which reads well for any library size.
  * Goes to /built-by-bold (Bold's own form and consent). Dismissed for good.
  */
-export function GymBoldCard() {
-  const [stats, setStats] = useState<{ hours: number; sessions: number } | null>(null);
+export function GymBoldCard({ moments, sessions }: { moments: number; sessions: number }) {
   const [hidden, setHidden] = useState(true);
 
   useEffect(() => {
@@ -24,10 +24,6 @@ export function GymBoldCard() {
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reading storage on mount
     setHidden(false);
-    fetch("/api/gym/library")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((s) => s?.hours && setStats(s))
-      .catch(() => {});
   }, []);
 
   if (hidden) return null;
@@ -53,10 +49,12 @@ export function GymBoldCard() {
       </button>
       <p className="font-osd text-[17px] leading-none text-[var(--gym-yellow)]">INSERT COIN · PLAYER 2</p>
       <p className="mt-3 pr-8 text-[19px] md:text-[21px] font-semibold leading-snug text-foreground">
-        This answered from {stats ? `${stats.hours} hours` : "hours"} of FounderWell sessions. Got a library?
+        {moments > 0
+          ? `${moments} ${moments === 1 ? "moment" : "moments"} from ${sessions} ${sessions === 1 ? "session" : "sessions"}, picked for your question.`
+          : "Every answer here comes from FounderWell's own sessions, clip included."}
       </p>
       <p className="mt-1.5 text-[15px] leading-relaxed text-foreground/75 max-w-[52ch]">
-        Bold turns your course, coaching calls, or channel into a game like this one, with every answer backed by your own clips.
+        That&apos;s what Bold does with a video library. Got one? Courses, coaching calls, a channel: every answer backed by your own clips.
       </p>
       <Link
         href="/built-by-bold"
