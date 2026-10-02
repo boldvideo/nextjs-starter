@@ -37,6 +37,8 @@ export interface GymClip extends ClipWindow {
   videoId: string;
   playbackId: string;
   title: string;
+  /** Length of the whole session, in seconds */
+  sessionDuration: number;
   /** Extra source params for the player (today: the instant-clip window) */
   params: { asset_start_time: number; asset_end_time: number };
 }
@@ -119,4 +121,18 @@ const round = (n: number) => Math.round(n * 10) / 10;
 export function clipLength(clip: ClipWindow): string {
   const total = Math.max(0, Math.round(clip.end - clip.start));
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+}
+
+/** How long a clip is, the way the cards say it: "58 SEC", "1:12 MIN" */
+export function clipLabel(clip: ClipWindow): string {
+  const total = Math.max(0, Math.round(clip.end - clip.start));
+  return total < 60 ? `${total} SEC` : `${clipLength(clip)} MIN`;
+}
+
+/** "a 58-minute session" */
+export function sessionLabel(seconds: number): string {
+  const min = Math.max(1, Math.round(seconds / 60));
+  // "an 8-", "an 11-", "an 18-", "an 80-something-minute session"
+  const an = [8, 11, 18].includes(min) || (min >= 80 && min <= 89);
+  return `${an ? "an" : "a"} ${min}-minute session`;
 }

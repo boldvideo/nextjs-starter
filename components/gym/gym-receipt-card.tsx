@@ -3,6 +3,7 @@
 import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AskCitation } from "@/lib/ask";
+import { ClipLength } from "./gym-clip-player";
 
 interface GymReceiptCardProps {
   citation: AskCitation;
@@ -14,7 +15,7 @@ interface GymReceiptCardProps {
 
 /**
  * One receipt: the frame at the cited second (Mux serves exact-time
- * thumbnails), a VCR "PLAY 12:43" overlay, the session title, and the line
+ * thumbnails), a VCR "PLAY 58 SEC" overlay (the clip's length), the session title, and the line
  * the coach is leaning on.
  */
 export function GymReceiptCard({
@@ -68,7 +69,7 @@ export function GymReceiptCard({
         )}
 
         <span className="absolute left-2.5 bottom-1.5 font-osd text-[20px] leading-none text-white [text-shadow:0_0_6px_rgba(34,230,255,0.9)]">
-          PLAY ▶ {citation.timestampStart}
+          PLAY ▶ <ClipLength citation={citation} />
         </span>
 
         <span className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">

@@ -38,6 +38,7 @@ import { HOUSE, type BossDef, type Clip, type Objection } from "./dodger/objecti
 import { money, render } from "./dodger/render";
 import { createCrt } from "./dodger/crt";
 import { Music } from "./dodger/music";
+import { clipLabel } from "@/lib/gym-clip-window";
 
 /**
  * The secret level. You're a launch at the bottom of the screen; objections
@@ -841,7 +842,7 @@ function Tape({ heading, tape, children }: { heading: string; tape: { clip: Clip
           <div className="min-w-0">
             {clip.coach && <p className="font-osd text-[18px] leading-none text-[var(--gym-yellow)]">{clip.coach.toUpperCase()}</p>}
             <p className="mt-1 text-[14px] font-semibold leading-snug text-foreground/90 line-clamp-3">{clip.title}</p>
-            <p className="mt-1 font-osd text-[16px] text-muted-foreground">▶ FROM {fmt(clip.start)}</p>
+            <p className="mt-1 font-osd text-[16px] text-muted-foreground">▶ {clipLabel(clip)}</p>
             <div className="mt-3 flex flex-wrap gap-2">{children}</div>
           </div>
         </div>
@@ -849,14 +850,6 @@ function Tape({ heading, tape, children }: { heading: string; tape: { clip: Clip
       {!clip && !tape.loading && <div className="mt-3 flex flex-wrap gap-2">{children}</div>}
     </div>
   );
-}
-
-function fmt(seconds: number) {
-  const s = Math.floor(seconds);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return h ? `${h}:${pad(m)}:${pad(s % 60)}` : `${m}:${pad(s % 60)}`;
 }
 
 function DailyBest({ day }: { day: string }) {

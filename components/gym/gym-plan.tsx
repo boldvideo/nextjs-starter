@@ -9,7 +9,7 @@ import { PROSE_CLASS } from "@/lib/prose";
 import { useSmoothText } from "@/hooks/use-smooth-text";
 import { MarkdownSection, stripTrailingCitationList } from "@/components/ask/ask-message-card";
 import { GymClipPlayer } from "./gym-clip-player";
-import { clipLength, useGymClip } from "@/lib/use-gym-clip";
+import { clipLabel, useGymClip } from "@/lib/use-gym-clip";
 import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
 import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
@@ -342,10 +342,7 @@ function GymClip({
         />
         <div className="flex items-center justify-between gap-3 px-3 py-2 bg-[var(--gym-night-2)]">
           <p className="min-w-0 truncate text-[13px] font-semibold text-foreground/90">{citation.videoTitle}</p>
-          <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">
-            ▶ {citation.timestampStart}
-            {clip && <span className="text-muted-foreground"> · {clipLength(clip)} clip</span>}
-          </span>
+          <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {clip ? clipLabel(clip) : "CLIP"}</span>
         </div>
       </div>
     );
@@ -387,13 +384,7 @@ function GymClip({
           {citation.videoTitle}
         </p>
         <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-muted-foreground">
-          <span className="font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {citation.timestampStart}</span>
-          {clip && (
-            <>
-              <span aria-hidden>·</span>
-              <span>{clipLength(clip)} clip</span>
-            </>
-          )}
+          <span className="font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {clip ? clipLabel(clip) : "CLIP"}</span>
           {coach && (
             <>
               <span aria-hidden>·</span>

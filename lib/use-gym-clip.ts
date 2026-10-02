@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { GymClip } from "@/lib/gym-clip-window";
 
-export { clipLength } from "@/lib/gym-clip-window";
+export { clipLabel, clipLength } from "@/lib/gym-clip-window";
 
 /**
  * The coach clip around a cited moment (see lib/gym-clip.ts). Fetched once

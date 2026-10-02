@@ -6,7 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { gymVideoMeta } from "@/lib/gym-meta";
 import { resolveClip } from "@/lib/gym-clip";
-import { clipLength } from "@/lib/gym-clip-window";
+import { clipLabel } from "@/lib/gym-clip-window";
 import { coachForVideo, coachLabel } from "@/components/gym/gym-coaches-data";
 import { GymClipPlayer } from "@/components/gym/gym-clip-player";
 import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
@@ -21,12 +21,6 @@ import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
 export const revalidate = 3600;
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ t?: string }> };
-
-function formatTime(total: number): string {
-  const m = Math.floor(total / 60);
-  const s = Math.floor(total % 60);
-  return `${m}:${String(s).padStart(2, "0")}`;
-}
 
 async function load(id: string, tParam?: string) {
   const t = Math.max(0, parseInt(tParam ?? "0", 10) || 0);
@@ -57,7 +51,7 @@ export default async function ClipPage({ params, searchParams }: Props) {
   return (
     <main className="mx-auto w-full max-w-[860px] px-4 py-8 md:py-12">
       <p className="font-osd text-[19px] leading-none text-[var(--gym-cyan)]">
-        INSTANT REPLAY ▶ {formatTime(t)} <span className="text-muted-foreground">· {clipLength(clip)} CLIP</span>
+        INSTANT REPLAY ▶ {clipLabel(clip)}
       </p>
 
       <div className="mt-4 rounded-xl overflow-hidden border border-[var(--gym-cyan)] shadow-[0_0_40px_-10px_var(--gym-cyan)]">

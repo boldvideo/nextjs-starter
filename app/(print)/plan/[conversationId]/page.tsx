@@ -10,6 +10,8 @@ import { coachForVideo, coachLabel, type Coach } from "@/components/gym/gym-coac
 import { PrintButton } from "./print-button";
 import { CopyButton } from "./copy-button";
 import { cn } from "@/lib/utils";
+import { resolveClip } from "@/lib/gym-clip";
+import { clipLabel } from "@/lib/gym-clip-window";
 
 /**
  * A conversation as a Playbook: the thing a founder keeps next to the
@@ -34,6 +36,8 @@ interface StoredSource {
   text?: string;
   timestamp?: number;
   timestampSeconds?: number;
+  timestampEnd?: number;
+  timestampEndSeconds?: number;
 }
 
 interface StoredMessage {
@@ -47,6 +51,8 @@ interface Clip {
   id: string;
   title: string;
   seconds: number;
+  /** "58 sec": how long the clip at the QR code runs */
+  length: string | null;
   quote: string;
   coach: Coach | null;
   url: string;
@@ -129,10 +135,13 @@ async function loadPlaybook(conversationId: string) {
   const toClip = async (s: StoredSource): Promise<Clip> => {
     const seconds = Math.floor(s.timestampSeconds ?? s.timestamp ?? 0);
     const url = `${GYM_BASE_URL}/clip/${shortIdByVideo.get(s.videoId) ?? s.videoId}?t=${seconds}`;
+    // Same window the clip page plays (resolveClip caches the transcript)
+    const clip = await resolveClip(s.videoId, seconds, seconds + 5).catch(() => null);
     return {
       id: s.id,
       title: s.videoTitle || s.title || "Session",
       seconds,
+      length: clip ? clipLabel(clip).toLowerCase() : null,
       quote: (s.text ?? "").trim(),
       coach: coachByVideo.get(s.videoId) ?? null,
       url,
@@ -445,7 +454,7 @@ function PlaySection({
                         // qrcode renders a self-contained SVG string
                         dangerouslySetInnerHTML={{ __html: mv.clip.qr }}
                       />
-                      <span className="font-osd text-[16px] leading-none text-[var(--cyan)]">▶ Watch {formatTime(mv.clip.seconds)}</span>
+                      <span className="font-osd text-[16px] leading-none text-[var(--cyan)]">▶ Watch {mv.clip.length ?? formatTime(mv.clip.seconds)}</span>
                     </a>
                   )}
                 </div>

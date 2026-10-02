@@ -7,6 +7,7 @@ import type { SourceOpen } from "@/lib/source-engagement";
 import { useGymClip, type ClipMoment } from "@/lib/use-gym-clip";
 import { track } from "@/lib/gym-track";
 import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
+import { clipLabel, clipLength, sessionLabel } from "@/lib/gym-clip-window";
 import { cn } from "@/lib/utils";
 
 /**
@@ -61,8 +62,10 @@ export function GymClipPlayer({
         <div className="absolute inset-0 z-20 grid place-items-center bg-[#0b0618]/88 backdrop-blur-[2px] p-4 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
           <div>
             <p className="font-display text-[15px] sm:text-[18px] gym-sunset-text">That&apos;s the moment</p>
-            <p className="mt-1.5 text-[13.5px] sm:text-[14.5px] text-foreground/85 max-w-[34ch] mx-auto">
-              The full session lives in FounderWell&apos;s program.
+            <p className="mt-1.5 text-[13.5px] sm:text-[14.5px] text-foreground/85 max-w-[36ch] mx-auto">
+              {clip.sessionDuration > clip.end - clip.start + 60
+                ? `That was ${clipLength(clip)} of ${sessionLabel(clip.sessionDuration)}. The whole thing lives at FounderWell.`
+                : "The full session lives at FounderWell."}
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               <button
@@ -83,7 +86,7 @@ export function GymClipPlayer({
                 onClick={() => track("Full session", { video: title.slice(0, 120) })}
                 className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[var(--gym-pink)] text-[13px] font-semibold text-white hover:brightness-110"
               >
-                Get the full session
+                Watch the full session
                 <ArrowUpRight className="h-4 w-4" />
               </a>
             </div>
@@ -92,4 +95,18 @@ export function GymClipPlayer({
       )}
     </div>
   );
+}
+
+/** "58 SEC" for a cited moment (shared clip cache, so it's free after the first). */
+export function ClipLength({
+  citation,
+  placeholder = "CLIP",
+}: {
+  citation: { videoId: string; startMs: number; endMs?: number; playbackId?: string };
+  placeholder?: string;
+}) {
+  const clip = useGymClip(
+    citation.playbackId === "" ? null : { videoId: citation.videoId, startMs: citation.startMs, endMs: citation.endMs }
+  );
+  return <>{clip ? clipLabel(clip) : placeholder}</>;
 }

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
 import type { SourceOpen } from "@/lib/source-engagement";
-import { GymClipPlayer } from "@/components/gym/gym-clip-player";
+import { ClipLength, GymClipPlayer } from "@/components/gym/gym-clip-player";
 import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
 import { track } from "@/lib/gym-track";
 import { GymReceiptCard } from "@/components/gym/gym-receipt-card";
@@ -53,7 +53,7 @@ function MomentFramePreview({ preview }: { preview: FramePreview }) {
           className="block w-full h-full object-cover"
         />
         <span className="absolute right-1.5 bottom-1.5 text-[10px] font-medium tabular-nums bg-black/80 text-white px-1 py-0.5 rounded">
-          {citation.timestampStart}
+          <ClipLength citation={citation} />
         </span>
       </div>
     </div>
@@ -187,7 +187,7 @@ export function AskSourcesRail({
                 className="flex items-baseline gap-2.5 px-2 py-1.5 -mx-2 rounded-md text-left w-full cursor-pointer hover:bg-white/[0.04] transition-colors"
               >
                 <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">
-                  {c.timestampStart}
+                  <ClipLength citation={c} />
                 </span>
                 <span className="min-w-0 flex-1 truncate text-[12.5px] text-muted-foreground">
                   {c.videoTitle}
@@ -241,7 +241,7 @@ function VideoSourcePanel({
       <div className="flex items-center justify-between px-[18px] py-3.5 border-b border-[var(--gym-line)] shrink-0">
         <div className="flex items-baseline gap-3">
           <h3 className="font-display text-base uppercase gym-sunset-text">Instant replay</h3>
-          <span className="font-osd text-[18px] text-[var(--gym-cyan)]">▶ {citation.timestampStart}</span>
+          <span className="font-osd text-[18px] text-[var(--gym-cyan)]">▶ <ClipLength citation={citation} /></span>
         </div>
         <button
           type="button"
@@ -312,7 +312,7 @@ function VideoSourcePanel({
                       isHit ? "text-[var(--gym-cyan)]" : "text-muted-foreground/70 group-hover:text-foreground"
                     )}
                   >
-                    {c.timestampStart}
+                    <ClipLength citation={c} />
                   </span>
                   <span
                     className={cn(

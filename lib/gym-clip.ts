@@ -81,6 +81,7 @@ export async function resolveClip(videoRef: string, citedStart: number, citedEnd
     title: tape.title,
     start,
     end,
+    sessionDuration: Math.round(tape.duration),
     params: { asset_start_time: start, asset_end_time: end },
   };
 }

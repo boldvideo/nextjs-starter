@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
 import type { SourceOpen } from "@/lib/source-engagement";
-import { GymClipPlayer } from "@/components/gym/gym-clip-player";
+import { ClipLength, GymClipPlayer } from "@/components/gym/gym-clip-player";
 import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
 import { track } from "@/lib/gym-track";
 
@@ -29,13 +29,6 @@ export function AskVideoPanel({ citation, isOpen, onClose, engagement }: AskVide
   }, [isOpen, onClose]);
 
   if (!isOpen || !citation) return null;
-
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
 
   const video: MuxPlayerVideoLike = {
     id: citation.videoId,
@@ -67,7 +60,7 @@ export function AskVideoPanel({ citation, isOpen, onClose, engagement }: AskVide
         <div className="flex items-center justify-between px-4 pt-2 pb-3">
           <div className="flex items-baseline gap-3">
             <h3 className="font-display text-base uppercase gym-sunset-text">Instant replay</h3>
-            <span className="font-osd text-[19px] text-[var(--gym-cyan)]">▶ {formatTime(citation.startMs)}</span>
+            <span className="font-osd text-[19px] text-[var(--gym-cyan)]">▶ <ClipLength citation={citation} /></span>
           </div>
           <button
             onClick={onClose}
