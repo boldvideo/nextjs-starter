@@ -198,6 +198,11 @@ export function recordPlay(question: string) {
   set({ plays: current.plays + 1, questions: [...current.questions, question.slice(0, 500)].slice(-10) });
 }
 
+/** Log out: the next level past the free ones asks for a coin again. */
+export function forgetCoin() {
+  set({ coin: false });
+}
+
 export function markCoin() {
   set({ coin: true });
 }

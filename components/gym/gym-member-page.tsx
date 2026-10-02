@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signInWithGoogle, signOut } from "@/lib/auth-client";
+import { logOut, signInWithGoogle } from "@/lib/auth-client";
 import { useGymMember, type GymProfile } from "./use-gym-member";
 import { GymTrophies } from "./gym-trophies";
 import { unlock } from "@/lib/gym-arcade";
@@ -55,6 +55,7 @@ export function GymMemberPage() {
             Sign in with Google
           </button>
           <p className="mt-4 text-xs text-muted-foreground/70">We only use your name, email and photo.</p>
+          <CoinPlayer />
         </div>
         <GymTrophies />
       </div>
@@ -77,11 +78,11 @@ export function GymMemberPage() {
           />
           <button
             type="button"
-            onClick={() => signOut().then(() => (window.location.href = "/"))}
+            onClick={() => logOut()}
             className="mt-5 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
-            Sign out
+            Log out
           </button>
         </div>
 
@@ -265,5 +266,25 @@ function GoogleMark() {
       <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
       <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
     </svg>
+  );
+}
+
+/** Signed out of Google but holding a coin: say whose game this is, and let them leave. */
+function CoinPlayer() {
+  const [email, setEmail] = useState<string | null>(null);
+  useEffect(() => {
+    fetch("/api/gym/player")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p) => setEmail(p?.email ?? null))
+      .catch(() => {});
+  }, []);
+  if (!email) return null;
+  return (
+    <p className="mt-8 text-sm text-muted-foreground">
+      Playing as <span className="font-semibold text-foreground">{email}</span> ·{" "}
+      <button type="button" onClick={() => logOut()} className="underline underline-offset-4 hover:text-foreground cursor-pointer">
+        Log out
+      </button>
+    </p>
   );
 }

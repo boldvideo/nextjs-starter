@@ -21,6 +21,7 @@ export { CONSENT_TEXT, isStage, LEAD_TAG, STAGES, type Stage };
  */
 
 const PLAYER_COOKIE = "gym_player";
+export const PLAYER_COOKIE_NAME = PLAYER_COOKIE;
 const MAX_AGE = 60 * 60 * 24 * 365;
 
 function key(): Buffer {

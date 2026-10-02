@@ -2,11 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Plus, Volume2, VolumeX } from "lucide-react";
+import { IdCard, LogOut, Plus, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signInWithGoogle } from "@/lib/auth-client";
+import { logOut, signInWithGoogle } from "@/lib/auth-client";
 import { useGymMember } from "./use-gym-member";
 import { openDodger, sfx, toggleSound, unlock, useArcade } from "@/lib/gym-arcade";
 
@@ -147,21 +147,65 @@ function MemberButton() {
   }
 
   const first = (user?.name || user?.email || "").split(/[ @]/)[0];
+  return <MemberMenu first={first} image={user?.image ?? null} />;
+}
+
+/** The player's face opens a tiny menu: their card, or log out. */
+function MemberMenu({ first, image }: { first: string; image: string | null }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: Event) => {
+      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, [open]);
+
+  const item =
+    "flex w-full items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-sm font-semibold text-foreground/90 hover:bg-white/[0.06] hover:text-foreground cursor-pointer";
+
   return (
-    <Link
-      href="/player"
-      className="group inline-flex items-center gap-2 h-10 pl-1 pr-1 md:pr-3 rounded-full border border-[var(--gym-line)] hover:border-[var(--gym-cyan)] transition-colors"
-      aria-label="Your player card"
-    >
-      {user?.image ? (
-        // Google avatar: tiny, remote, not worth next/image config
-        <img src={user.image} alt="" referrerPolicy="no-referrer" className="h-8 w-8 rounded-full ring-2 ring-[var(--gym-pink)]" />
-      ) : (
-        <span className="h-8 w-8 rounded-full grid place-items-center gym-sunset-bg font-display text-[13px] text-[#1a0616]">
-          {first.slice(0, 1).toUpperCase()}
-        </span>
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Your player menu"
+        className="group inline-flex items-center gap-2 h-10 pl-1 pr-1 md:pr-3 rounded-full border border-[var(--gym-line)] hover:border-[var(--gym-cyan)] transition-colors cursor-pointer"
+      >
+        {image ? (
+          // Google avatar: tiny, remote, not worth next/image config
+          <img src={image} alt="" referrerPolicy="no-referrer" className="h-8 w-8 rounded-full ring-2 ring-[var(--gym-pink)]" />
+        ) : (
+          <span className="h-8 w-8 rounded-full grid place-items-center gym-sunset-bg font-display text-[13px] text-[#1a0616]">
+            {first.slice(0, 1).toUpperCase()}
+          </span>
+        )}
+        <span className="hidden md:inline text-sm font-semibold text-foreground/90 group-hover:text-[var(--gym-cyan)]">{first}</span>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-12 z-50 w-48 rounded-xl border border-[var(--gym-line)] bg-[var(--gym-night-2)] p-1.5 shadow-[0_18px_50px_-12px_rgba(0,0,0,0.8)] motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-150"
+        >
+          <Link href="/player" role="menuitem" onClick={() => setOpen(false)} className={item}>
+            <IdCard className="h-4 w-4" />
+            Player card
+          </Link>
+          <button type="button" role="menuitem" onClick={() => logOut()} className={item}>
+            <LogOut className="h-4 w-4" />
+            Log out
+          </button>
+        </div>
       )}
-      <span className="hidden md:inline text-sm font-semibold text-foreground/90 group-hover:text-[var(--gym-cyan)]">{first}</span>
-    </Link>
+    </div>
   );
 }

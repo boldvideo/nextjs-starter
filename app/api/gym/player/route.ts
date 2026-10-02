@@ -5,6 +5,7 @@ import {
   isStage,
   normalizeEmail,
   playerCookie,
+  PLAYER_COOKIE_NAME,
   pushLead,
   upsertPlayerViewer,
 } from "@/lib/gym-player";
@@ -14,7 +15,15 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const player = await getPlayer();
-  return Response.json({ player: Boolean(player) });
+  return Response.json({ player: Boolean(player), email: player?.email ?? null });
+}
+
+// Log out: forget the coin (the email) in this browser
+export async function DELETE() {
+  return new Response(null, {
+    status: 204,
+    headers: { "Set-Cookie": `${PLAYER_COOKIE_NAME}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax` },
+  });
 }
 
 export async function POST(request: Request) {

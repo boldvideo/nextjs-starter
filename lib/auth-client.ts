@@ -13,3 +13,14 @@ export function signInWithGoogle(callbackURL?: string) {
     callbackURL: callbackURL ?? window.location.pathname + window.location.search,
   });
 }
+
+/**
+ * Log out of the game in this browser: the Google session, the coin (the
+ * player's email cookie), and the coin flag. XP and trophies stay.
+ */
+export async function logOut(redirectTo = "/") {
+  await Promise.allSettled([signOut(), fetch("/api/gym/player", { method: "DELETE" })]);
+  const { forgetCoin } = await import("@/lib/gym-arcade");
+  forgetCoin();
+  window.location.href = redirectTo;
+}
