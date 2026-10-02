@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sfx, useArcade } from "@/lib/gym-arcade";
 import type { Tone } from "./gym-coaches-data";
+import { GymCodePad } from "./gym-code-pad";
 
 /** The interactive bits of coach select: hover blips, stat bars, the secret slot. */
 
@@ -37,17 +39,25 @@ export function StatBar({ label, value, tone }: { label: string; value: number; 
   );
 }
 
-/** The hidden character. Locked until ↑↑↓↓←→←→BA. */
+/**
+ * The hidden character. Locked until ↑↑↓↓←→←→BA: typed anywhere, or entered
+ * on the controller that slides up when you tap the locked slot (phones have
+ * no keyboard, and people kept asking how).
+ */
 export function GymSecretCoach() {
   const { secret } = useArcade();
+  const [pad, setPad] = useState(false);
+  const Slot = secret ? "div" : "button";
 
   return (
-    <div
+    <>
+    <Slot
+      {...(secret ? {} : { type: "button" as const, onClick: () => { sfx("select"); setPad(true); }, "aria-label": "Locked character. Enter the code to unlock." })}
       className={cn(
-        "mt-4 rounded-2xl border p-4 md:p-5 flex items-center gap-4 md:gap-6 transition-colors",
+        "mt-4 w-full text-left rounded-2xl border p-4 md:p-5 flex items-center gap-4 md:gap-6 transition-colors",
         secret
           ? "border-[var(--gym-yellow)] bg-[color-mix(in_srgb,var(--gym-panel)_92%,transparent)] shadow-[0_0_40px_-14px_var(--gym-yellow)]"
-          : "border-dashed border-[var(--gym-line)] bg-transparent"
+          : "group border-dashed border-[var(--gym-line)] bg-transparent cursor-pointer hover:border-[var(--gym-pink)] hover:shadow-[0_0_40px_-16px_var(--gym-pink)]"
       )}
     >
       {secret ? (
@@ -79,9 +89,17 @@ export function GymSecretCoach() {
             <p className="mt-1 text-[13.5px] leading-relaxed text-muted-foreground/70">
               There&apos;s one more player on staff. You know the code. Everybody knows the code.
             </p>
+            <span className="sm:hidden mt-2 block font-osd text-[17px] leading-none text-[var(--gym-pink)]">
+              <span className="gym-blink">▶</span> ENTER CODE
+            </span>
           </div>
+          <span className="hidden sm:inline shrink-0 font-osd text-[17px] md:text-[19px] leading-none text-[var(--gym-pink)] group-hover:text-[var(--gym-yellow)]">
+            <span className="gym-blink">▶</span> ENTER CODE
+          </span>
         </>
       )}
-    </div>
+    </Slot>
+    {pad && <GymCodePad onClose={() => setPad(false)} />}
+    </>
   );
 }
