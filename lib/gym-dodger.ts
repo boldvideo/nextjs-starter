@@ -2,6 +2,7 @@ import "server-only";
 
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
 import { getTenantContext } from "@/lib/get-tenant-context";
+import { resolveClip } from "@/lib/gym-clip";
 import { portalClient } from "@/lib/portal-client";
 import { coachForVideo } from "@/components/gym/gym-coaches-data";
 import { cleanCounter, type Clip, type Objection } from "@/components/gym/dodger/objections";
@@ -38,17 +39,15 @@ async function coachNames(): Promise<Map<string, string>> {
   return map;
 }
 
-function toClip(s: Segment, coaches: Map<string, string>): Clip | null {
+async function toClip(s: Segment, coaches: Map<string, string>): Promise<Clip | null> {
   if (!s.playbackId) return null;
-  // Citations can be a sentence long; give the moment room to land
+  const coach = coaches.get(s.videoId) ?? coaches.get(s.playbackId) ?? null;
+  // The whole thought around the cited sentence (lib/gym-clip.ts), played as
+  // an instant clip; a rough window if the transcript isn't available
+  const clip = s.videoId ? await resolveClip(s.videoId, s.timestamp, s.timestampEnd) : null;
+  if (clip) return { playbackId: clip.playbackId, start: clip.start, end: clip.end, title: s.title, coach };
   const start = Math.max(0, Math.floor(s.timestamp) - 4);
-  return {
-    playbackId: s.playbackId,
-    start,
-    end: Math.max(start + 30, Math.ceil(s.timestampEnd)),
-    title: s.title,
-    coach: coaches.get(s.videoId) ?? coaches.get(s.playbackId) ?? null,
-  };
+  return { playbackId: s.playbackId, start, end: Math.max(start + 30, Math.ceil(s.timestampEnd)), title: s.title, coach };
 }
 
 // ── Scouting ───────────────────────────────────────────────────────────────
@@ -103,6 +102,7 @@ export async function scout(input: { business?: string; stage?: string; viewer?:
   const coaches = await coachNames();
   const objections: Objection[] = [];
   const seen = new Set<string>();
+  const citedFor: (Segment | null)[] = [];
   for (const line of content.split("\n")) {
     const m = LINE_RE.exec(line);
     if (!m) continue;
@@ -119,9 +119,16 @@ export async function scout(input: { business?: string; stage?: string; viewer?:
       text,
       counter,
       move: m[3].replace(REF_RE, "").replace(/\s+/g, " ").trim().slice(0, 160),
-      clip: cited ? toClip(cited, coaches) : null,
+      clip: null,
     });
+    citedFor.push(cited ?? null);
   }
+  await Promise.all(
+    objections.map(async (o, i) => {
+      const cited = citedFor[i];
+      if (cited) o.clip = await toClip(cited, coaches);
+    })
+  );
   if (objections.length < 4) {
     console.warn("[dodger] scout returned too few lines", content.slice(0, 300));
     return null;
@@ -141,7 +148,7 @@ export async function findClip(query: string): Promise<Clip | null> {
   } as Parameters<typeof context.client.ai.search>[0] & { stream: false });
   const coaches = await coachNames();
   for (const s of res.sources ?? []) {
-    const clip = toClip(s, coaches);
+    const clip = await toClip(s, coaches);
     if (clip) return clip;
   }
   return null;

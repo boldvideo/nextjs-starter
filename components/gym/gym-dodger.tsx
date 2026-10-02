@@ -807,7 +807,8 @@ function Tape({ heading, tape, children }: { heading: string; tape: { clip: Clip
             {playing ? (
               <MuxPlayer
                 playbackId={clip.playbackId}
-                startTime={clip.start}
+                extraSourceParams={{ asset_start_time: clip.start, asset_end_time: clip.end }}
+                thumbnailTime={clip.start + 4}
                 autoPlay
                 accentColor="#ff2ea6"
                 metadata={{ video_title: clip.title }}

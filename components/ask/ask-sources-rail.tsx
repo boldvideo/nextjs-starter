@@ -2,15 +2,13 @@
 
 import { useCallback, useState } from "react";
 import { X, ArrowUpRight } from "lucide-react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
-import {
-  MuxPlayerComponent,
-  MuxPlayerVideoLike,
-} from "@/components/players/player-mux";
-import { getCanonicalVideoPath } from "@/lib/video-path";
-import { sourceUrl, type SourceOpen } from "@/lib/source-engagement";
+import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
+import type { SourceOpen } from "@/lib/source-engagement";
+import { GymClipPlayer } from "@/components/gym/gym-clip-player";
+import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
+import { track } from "@/lib/gym-track";
 import { GymReceiptCard } from "@/components/gym/gym-receipt-card";
 
 interface FramePreview {
@@ -225,7 +223,6 @@ function VideoSourcePanel({
     playbackId: citation.playbackId,
     title: citation.videoTitle,
   };
-  const startSeconds = Math.floor(citation.startMs / 1000);
 
   // Other cited moments from the same episode, in playback order.
   const nearby = citations
@@ -262,11 +259,11 @@ function VideoSourcePanel({
           key={`${citation.videoId}-${citation.startMs}`}
           className="relative aspect-video rounded-lg overflow-hidden border border-[var(--gym-cyan)] shadow-[0_0_32px_-8px_var(--gym-cyan)] bg-black mb-4"
         >
-          <MuxPlayerComponent
-            video={video}
+          <GymClipPlayer
+            moment={{ videoId: citation.videoId, startMs: citation.startMs, endMs: citation.endMs }}
+            playbackId={video.playbackId}
+            title={video.title}
             engagement={engagement}
-            startTime={startSeconds}
-            autoPlay={true}
             className="w-full h-full"
           />
         </div>
@@ -280,17 +277,20 @@ function VideoSourcePanel({
           </blockquote>
         )}
 
-        <Link
-          href={sourceUrl(`${getCanonicalVideoPath(citation.videoId)}?t=${startSeconds}`, engagement?.interaction.id, undefined, engagement?.interaction.requestId)}
+        <a
+          href={FOUNDERWELL_PROGRAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => track("Full session", { video: citation.videoTitle.slice(0, 120) })}
           className={cn(
             "flex items-center justify-center gap-2 w-full h-[44px] rounded-xl",
             "border border-[var(--gym-line)] bg-white/[0.03] text-sm font-semibold",
             "hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)] transition-colors"
           )}
         >
-          Watch the full session from {citation.timestampStart}
+          The full session lives at FounderWell
           <ArrowUpRight className="h-4 w-4" />
-        </Link>
+        </a>
 
         {nearby.length > 1 && (
           <div className="mt-6 pt-4 border-t border-[var(--gym-line)]">

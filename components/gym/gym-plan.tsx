@@ -8,7 +8,8 @@ import type { AskCitation } from "@/lib/ask";
 import { PROSE_CLASS } from "@/lib/prose";
 import { useSmoothText } from "@/hooks/use-smooth-text";
 import { MarkdownSection, stripTrailingCitationList } from "@/components/ask/ask-message-card";
-import { MuxPlayerComponent } from "@/components/players/player-mux";
+import { GymClipPlayer } from "./gym-clip-player";
+import { clipLength, useGymClip } from "@/lib/use-gym-clip";
 import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
 import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
@@ -318,6 +319,13 @@ function GymClip({
 }) {
   const [open, setOpen] = useState<SourceOpen | null>(null);
   const seconds = Math.floor(citation.startMs / 1000);
+  // Resolve the clip window up front, so the card can say how long it is and
+  // play starts without a wait
+  const moment = useMemo(
+    () => ({ videoId: citation.videoId, startMs: citation.startMs, endMs: citation.endMs }),
+    [citation.videoId, citation.startMs, citation.endMs]
+  );
+  const clip = useGymClip(citation.playbackId ? moment : null);
   const thumb = citation.playbackId
     ? `https://image.mux.com/${citation.playbackId}/thumbnail.webp?time=${seconds}&width=720`
     : null;
@@ -325,18 +333,19 @@ function GymClip({
   if (open && citation.playbackId) {
     return (
       <div className={cn("rounded-xl overflow-hidden border border-[var(--gym-cyan)] shadow-[0_0_32px_-8px_var(--gym-cyan)] bg-black", className)}>
-        <div className="relative aspect-video">
-          <MuxPlayerComponent
-            video={{ id: citation.videoId, playbackId: citation.playbackId, title: citation.videoTitle }}
-            engagement={open}
-            startTime={seconds}
-            autoPlay={true}
-            className="w-full h-full"
-          />
-        </div>
+        <GymClipPlayer
+          moment={moment}
+          playbackId={citation.playbackId}
+          title={citation.videoTitle}
+          engagement={open}
+          className="aspect-video"
+        />
         <div className="flex items-center justify-between gap-3 px-3 py-2 bg-[var(--gym-night-2)]">
           <p className="min-w-0 truncate text-[13px] font-semibold text-foreground/90">{citation.videoTitle}</p>
-          <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {citation.timestampStart}</span>
+          <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">
+            ▶ {citation.timestampStart}
+            {clip && <span className="text-muted-foreground"> · {clipLength(clip)} clip</span>}
+          </span>
         </div>
       </div>
     );
@@ -379,6 +388,12 @@ function GymClip({
         </p>
         <p className="mt-1.5 flex items-center gap-1.5 text-[13px] text-muted-foreground">
           <span className="font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {citation.timestampStart}</span>
+          {clip && (
+            <>
+              <span aria-hidden>·</span>
+              <span>{clipLength(clip)} clip</span>
+            </>
+          )}
           {coach && (
             <>
               <span aria-hidden>·</span>

@@ -12,6 +12,8 @@ export type GymEvent =
   | "Share"
   | "Playbook"
   | "Words copied"
+  | "Clip ended"
+  | "Full session"
   | "Clip played"
   | "Stage picked"
   | "Channel submitted"

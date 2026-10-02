@@ -128,7 +128,7 @@ async function loadPlaybook(conversationId: string) {
 
   const toClip = async (s: StoredSource): Promise<Clip> => {
     const seconds = Math.floor(s.timestampSeconds ?? s.timestamp ?? 0);
-    const url = `${GYM_BASE_URL}/v/${shortIdByVideo.get(s.videoId) ?? s.videoId}?t=${seconds}`;
+    const url = `${GYM_BASE_URL}/clip/${shortIdByVideo.get(s.videoId) ?? s.videoId}?t=${seconds}`;
     return {
       id: s.id,
       title: s.videoTitle || s.title || "Session",

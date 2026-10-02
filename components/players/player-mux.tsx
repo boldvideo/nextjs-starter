@@ -88,6 +88,11 @@ interface MuxPlayerComponentProps {
   isOutOfView?: boolean;
   /** Callback for when the video ends */
   onEnded?: (e: Event) => void;
+  /**
+   * Play only this window of the session (Mux instant clip). The player's
+   * timeline is the clip; analytics still report session time.
+   */
+  clip?: { start: number; end: number; params: Record<string, string | number> } | null;
 }
 
 /**
@@ -103,6 +108,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
     className = "",
     onEnded,
     engagement,
+    clip,
   }: MuxPlayerComponentProps,
   ref
 ) {
@@ -265,7 +271,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
 
   // Handle initial time when the player loads
   useEffect(() => {
-    if (startTime && playerRef.current) {
+    if (startTime && !clip && playerRef.current) {
       const setInitialTime = () => {
         const player = playerRef.current;
         if (player) {
@@ -282,12 +288,22 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
         });
       }
     }
-  }, [startTime]);
+  }, [startTime, clip]);
+
+  // Inside a clip the player's clock starts at 0: report session time
+  const report = (e: Event) => {
+    if (!clip) return bold.trackEvent(video, e);
+    const target = e.target as HTMLVideoElement | null;
+    bold.trackEvent(video, {
+      type: e.type,
+      target: { currentTime: (target?.currentTime ?? 0) + clip.start },
+    } as unknown as Event);
+  };
 
   const handleTimeUpdate = (e: Event) => {
     const target = e.target as HTMLVideoElement;
     bold.trackEvent(video, {
-      target: { currentTime: target.currentTime },
+      target: { currentTime: target.currentTime + (clip?.start ?? 0) },
       type: "timeupdate",
     } as unknown as Event);
     if (onTimeUpdate) onTimeUpdate(e);
@@ -295,7 +311,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
 
   const handleEnded = (e: Event) => {
     engagement?.pause();
-    bold.trackEvent(video, e);
+    report(e);
     if (onEnded) onEnded(e);
   };
 
@@ -330,6 +346,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
             }
           }}
           playbackId={video.playbackId}
+          extraSourceParams={clip?.params}
           metadata={{
             video_id: video.id,
             video_title: video.title,
@@ -338,10 +355,10 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
           title={video.title}
           poster={video.thumbnail}
           autoPlay={autoPlay}
-          thumbnailTime={startTime || 0}
+          thumbnailTime={clip ? clip.start + 2 : startTime || 0}
           className={`w-full h-full relative z-10 ${className}`}
           onTimeUpdate={handleTimeUpdate}
-          onPlay={(e) => bold.trackEvent(video, e)}
+          onPlay={(e) => report(e)}
           onPlaying={() => engagement?.play()}
           onWaiting={() => engagement?.pause()}
           onSeeking={() => engagement?.pause()}
@@ -350,10 +367,10 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
             // Buffered seeks need not emit another playing event.
             if (player && !player.paused && !player.seeking && player.readyState >= 3) engagement?.play();
           }}
-          onPause={(e) => { engagement?.pause(); bold.trackEvent(video, e); }}
+          onPause={(e) => { engagement?.pause(); report(e); }}
           onEnded={handleEnded}
           onLoadedMetadata={(e) => {
-            bold.trackEvent(video, e);
+            report(e);
             console.log("MuxPlayer loadedmetadata event");
 
             // One more attempt to add chapters on metadata loaded

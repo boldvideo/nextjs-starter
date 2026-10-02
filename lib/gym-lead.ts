@@ -16,3 +16,5 @@ export const CONSENT_TEXT =
   "By inserting a coin you agree that FounderWell may email you about The GTM Game and its programs. Unsubscribe anytime.";
 
 export const FOUNDERWELL_PRIVACY_URL = "https://app.founderwell.com/privacy";
+/** Where the full sessions live (clip end cards, replay panels, clip pages) */
+export const FOUNDERWELL_PROGRAM_URL = "https://www.founderwell.com?utm_source=gtm-game&utm_medium=clip";
