@@ -48,7 +48,25 @@ export default async function BuiltByBoldPage() {
   return (
     <div className="relative flex-1 min-h-0 overflow-y-auto">
       <GymBackdrop variant="dim" />
-      <article className="relative max-w-[760px] mx-auto px-4 md:px-6 py-14 md:py-20">
+      {/* The marquee: Bold's wordmark standing on the game's horizon */}
+      <header className="relative max-w-[1100px] mx-auto px-4 md:px-6 pt-14 md:pt-24">
+        <a
+          href="https://boldvideo.com?utm_source=gtm-game&utm_medium=built-by-bold"
+          aria-label="Bold"
+          className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-[var(--gym-cyan)]"
+        >
+          <Image
+            src="/bold-logo.svg"
+            alt="Bold"
+            width={975}
+            height={267}
+            priority
+            className="w-full h-auto drop-shadow-[0_0_48px_rgba(65,198,166,0.45)] transition-[filter] duration-300 group-hover:drop-shadow-[0_0_72px_rgba(65,198,166,0.7)]"
+          />
+        </a>
+        <div className="h-[3px] gym-sunset-bg shadow-[0_0_24px_rgba(255,46,166,0.6)]" aria-hidden />
+      </header>
+      <article className="relative max-w-[760px] mx-auto px-4 md:px-6 pt-12 md:pt-16 pb-14 md:pb-20">
         <p className="font-osd text-[20px] text-[var(--gym-cyan)] uppercase">Built by Bold</p>
         <h1 className="mt-2 font-bold text-[36px] md:text-[52px] leading-[1.05] tracking-[-0.02em] text-balance">
           How we built The GTM Game
