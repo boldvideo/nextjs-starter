@@ -149,3 +149,66 @@ export function plainText(markdown: string): string {
     .replace(/\s+/g, " ")
     .trim();
 }
+
+/** A source line worth quoting as proof: skips filler like "And that was basically it." */
+export function proofQuote(text?: string | null): string | null {
+  const t = text?.trim();
+  return t && t.split(/\s+/).length >= 8 ? t : null;
+}
+
+/**
+ * Prompt detours: questions the library can't answer. The model marks them
+ * with a leading <!-- detour --> comment, then writes one line and three
+ * go-to-market questions to ask instead. The line decides the kind:
+ *   off-the-map  no citation (paella)
+ *   thin         one cited line (term sheets: the sessions only touch it)
+ * Without the marker the shape is still recognized (no next step, short,
+ * question bullets instead of named moves), so a forgotten marker never
+ * becomes a fake quest.
+ */
+export interface Detour {
+  kind: "off-the-map" | "thin";
+  text: string;
+  questions: string[];
+}
+
+const DETOUR_RE = /^\s*<!--\s*(detour|off-the-map|thin)\s*-->\s*/i;
+
+export function parseDetour(markdown: string, streaming = false): Detour | null {
+  const marked = markdown.match(DETOUR_RE);
+  const body = marked ? markdown.slice(marked[0].length) : markdown;
+  const blocks = parseBlocks(body);
+  const questions = blocks
+    .filter((b) => b.kind === "item")
+    .map((b) => b.text.replace(/\*\*/g, "").trim())
+    .filter(Boolean)
+    .slice(0, 3);
+  const text = blocks
+    .filter((b) => b.kind === "para")
+    .map((b) => b.text)
+    .join("\n\n");
+
+  if (marked) {
+    const cited = /\[(?:\d+|c_[^\]]+)\]/.test(text);
+    return { kind: cited ? "thin" : "off-the-map", text, questions };
+  }
+  if (streaming) return null;
+  // Real answers end on "Next step:" with bold-named moves; a detour is a
+  // short line plus question bullets
+  const items = blocks.filter((b) => b.kind === "item").map((b) => b.text.trim());
+  const unmarked =
+    !/next step\s*:/i.test(body) &&
+    items.length >= 2 &&
+    items.length <= 4 &&
+    !items.some((i) => i.startsWith("**")) &&
+    items.filter((i) => i.endsWith("?")).length >= items.length - 1 &&
+    body.split(/\s+/).length <= 130;
+  if (!unmarked) return null;
+  const cited = /\[(?:\d+|c_[^\]]+)\]/.test(text);
+  return { kind: cited ? "thin" : "off-the-map", text, questions };
+}
+
+/** Strip a detour marker anywhere it would otherwise render as text. */
+export function stripDetourMarker(markdown: string): string {
+  return markdown.replace(DETOUR_RE, "");
+}

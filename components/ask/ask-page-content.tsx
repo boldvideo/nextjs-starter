@@ -30,6 +30,7 @@ import { PoweredByBold } from "@/components/powered-by-bold";
 import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
 import { addXp, markCoin, needsCoin, recordPlay, unlock } from "@/lib/gym-arcade";
 import { GymCoinGate } from "@/components/gym/gym-coin-gate";
+import { GymBoldCard } from "@/components/gym/gym-bold-card";
 import { GymStagePrompt } from "@/components/gym/gym-stage-prompt";
 import { track } from "@/lib/gym-track";
 
@@ -268,6 +269,26 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const handleStop = useCallback(() => {
     stop();
   }, [stop]);
+
+  // A suggested question (wrong-cabinet / thin answers): the next level of
+  // your own game, or a fresh game when reading someone else's
+  const askSuggested = useCallback(
+    (question: string) => {
+      if (isStreaming) return;
+      gated(() => {
+        setQuery("");
+        if (canContinue) {
+          streamQuestion(question, []);
+        } else {
+          setSelectedCitation(null);
+          setIsPanelOpen(false);
+          reset();
+          streamQuestion(question, [], { fresh: true });
+        }
+      });
+    },
+    [isStreaming, gated, canContinue, streamQuestion, reset]
+  );
 
   // Header "Ask …" pill starts a new chat even when this page is already
   // mounted with an active conversation.
@@ -564,7 +585,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     )}
                   >
                     <Film className="h-4 w-4" />
-                    {receiptsOpen ? "HIDE PROOF" : `PROOF · ${lastPair?.primaryCount ?? 0} CLIPS`}
+                    {receiptsOpen ? "HIDE PROOF" : `PROOF · ${lastPair?.primaryCount ?? 0} ${lastPair?.primaryCount === 1 ? "CLIP" : "CLIPS"}`}
                   </button>
                 )}
               </div>
@@ -624,6 +645,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                         interaction={pair.assistantMessage.interaction}
                         shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}` : undefined}
                         printUrl={conversationId && !isCurrentlyStreaming ? `/plan/${conversationId}` : undefined}
+                        onAsk={askSuggested}
                       />
                     </div>
                   )}
@@ -652,6 +674,11 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                         ))}
                       </div>
                     </div>
+                  )}
+
+                  {/* After the second level: Bold's one pitch (once, dismissible) */}
+                  {pairIndex === 1 && !isCurrentlyStreaming && pair.assistantMessage?.type !== "loading" && (
+                    <GymBoldCard />
                   )}
 
                   {!isLastPair && (

@@ -13,7 +13,7 @@ import { clipLabel, useGymClip } from "@/lib/use-gym-clip";
 import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
 import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
-import { parseMove, refsIn, splitPlan, stripStepLabel } from "@/lib/gym-plan-parse";
+import { parseDetour, parseMove, proofQuote, refsIn, splitPlan, stripDetourMarker, stripStepLabel, type Detour } from "@/lib/gym-plan-parse";
 import { addXp, sfx, unlock } from "@/lib/gym-arcade";
 import { track } from "@/lib/gym-track";
 
@@ -40,6 +40,8 @@ interface GymPlanProps {
   shareUrl?: string;
   /** The printable Playbook for this conversation */
   printUrl?: string;
+  /** Ask one of the suggested questions (wrong-cabinet and thin answers) */
+  onAsk?: (question: string) => void;
 }
 
 export function GymPlan({
@@ -52,6 +54,7 @@ export function GymPlan({
   interaction,
   shareUrl,
   printUrl,
+  onAsk,
 }: GymPlanProps) {
   const coachOf = useCoachOf();
   const streaming = !!isStreaming;
@@ -62,7 +65,11 @@ export function GymPlan({
     [revealed]
   );
 
-  const { intro, drills, notes, set } = useMemo(() => splitPlan(text, streaming), [text, streaming]);
+  const detour = useMemo(() => parseDetour(text, streaming), [text, streaming]);
+  const { intro, drills, notes, set } = useMemo(
+    () => splitPlan(stripDetourMarker(text), streaming),
+    [text, streaming]
+  );
 
   // Each clip appears once, next to the first beat that cites it
   const clipFor = useMemo(() => {
@@ -107,6 +114,41 @@ export function GymPlan({
     const coach = coachOf(c);
     return coach && coach !== lead ? coach : null;
   };
+  // Guest sessions (no coach on the roster) are labeled, never credited to
+  // the lead coach
+  const shownClips = [...clipFor.intro, ...clipFor.drills, ...clipFor.notes].filter((c): c is AskCitation => !!c);
+  const hasGuest = shownClips.some((c) => !coachOf(c));
+  const guestLabel = (c: AskCitation | null) => (c && !coachOf(c) ? "Guest session" : undefined);
+
+  if (detour) {
+    const clip = refsIn(detour.text, citations)[0] ?? null;
+    return (
+      <GymDetour
+        detour={detour}
+        streaming={streaming}
+        onAsk={onAsk}
+        lead={
+          detour.text && (
+            <div className={cn(PROSE_CLASS, "prose-p:my-0 max-w-[62ch] prose-p:text-[19px] prose-p:leading-[1.6] prose-p:text-foreground", streaming && "chat-stream-cursor")}>
+              <MarkdownSection content={detour.text} {...section} />
+            </div>
+          )
+        }
+        clip={
+          clip && !streaming ? (
+            <GymClip
+              citation={clip}
+              number={citationDisplayNumberById?.get(clip.id)}
+              interaction={interaction}
+              coach={coachOf(clip)}
+              label={coachOf(clip) ? undefined : "Guest session"}
+              className="mt-5"
+            />
+          ) : null
+        }
+      />
+    );
+  }
 
   return (
     <div>
@@ -121,11 +163,11 @@ export function GymPlan({
             </span>
             <span className="text-sm text-muted-foreground">
               <span className="font-semibold text-foreground">{coaches.slice(0, 2).map(coachLabel).join(" & ")}</span>
-              {"'s take"}
+              {hasGuest ? " & a guest's take" : "'s take"}
             </span>
           </span>
         ) : (
-          <span className="text-sm font-semibold text-muted-foreground">Coach&apos;s take</span>
+          <span className="text-sm font-semibold text-muted-foreground">{hasGuest ? "A guest's take" : "Coach's take"}</span>
         )}
       </div>
 
@@ -154,6 +196,7 @@ export function GymPlan({
                   number={citationDisplayNumberById?.get(clip.id)}
                   interaction={interaction}
                   coach={clipCoach(clip)}
+                  label={guestLabel(clip)}
                   className="mt-5"
                 />
               )}
@@ -189,6 +232,7 @@ export function GymPlan({
                       number={citationDisplayNumberById?.get(clip.id)}
                       interaction={interaction}
                       coach={clipCoach(clip)}
+                      label={guestLabel(clip)}
                       className="mt-5"
                     />
                   )}
@@ -215,6 +259,7 @@ export function GymPlan({
                     number={citationDisplayNumberById?.get(clip.id)}
                     interaction={interaction}
                     coach={clipCoach(clip)}
+                    label={guestLabel(clip)}
                     className="mt-5"
                   />
                 )}
@@ -236,6 +281,79 @@ export function GymPlan({
           <MarkdownSection content={stripStepLabel(set)} {...section} />
         </GymSet>
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Questions the library can't answer, as a screen instead of a stretched
+ * answer: the honest line, at most one clip (the closest thing the sessions
+ * say), and three go-to-market questions to play instead.
+ */
+function GymDetour({
+  detour,
+  lead,
+  clip,
+  streaming,
+  onAsk,
+}: {
+  detour: Detour;
+  lead: React.ReactNode;
+  clip: React.ReactNode;
+  streaming: boolean;
+  onAsk?: (question: string) => void;
+}) {
+  return (
+    <div className="gym-pixel-box [--c:var(--gym-pink)] relative overflow-hidden bg-[var(--gym-night-2)] p-5 md:p-7">
+      <div className="gym-scanlines pointer-events-none absolute inset-0 opacity-60" aria-hidden />
+      <div className="relative flex items-start gap-4">
+        <Image src="/gym/game/game-master-bot.webp" alt="" width={72} height={72} className="h-14 w-14 md:h-[72px] md:w-[72px] shrink-0" />
+        <div className="min-w-0">
+          <p className="font-display text-[26px] md:text-[34px] leading-none gym-sunset-text">Wrong cabinet</p>
+          <div className="mt-3">{lead}</div>
+        </div>
+      </div>
+      {clip && <div className="relative">{clip}</div>}
+
+      {detour.questions.length > 0 && !streaming && (
+        <div className="relative mt-7">
+          <p className="font-osd text-[17px] leading-none text-[var(--gym-cyan)] mb-3">INSERT A GTM QUESTION INSTEAD</p>
+          <div className="flex flex-col gap-2.5">
+            {detour.questions.map((q) => {
+              const className =
+                "group flex items-center gap-3 w-full max-w-[560px] rounded-xl border border-[var(--gym-line)] bg-white/[0.03] px-4 py-3 text-left text-[16px] font-semibold text-foreground/90 cursor-pointer transition-colors hover:border-[var(--gym-pink)] hover:text-foreground";
+              const inner = (
+                <>
+                  <span className="font-osd text-[18px] leading-none text-[var(--gym-pink)] transition-transform group-hover:translate-x-0.5">▶</span>
+                  <span className="min-w-0">{q}</span>
+                </>
+              );
+              return onAsk ? (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => {
+                    track("Detour question", { kind: detour.kind });
+                    onAsk(q);
+                  }}
+                  className={className}
+                >
+                  {inner}
+                </button>
+              ) : (
+                <a key={q} href={`/ask?q=${encodeURIComponent(q)}`} className={className}>
+                  {inner}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {!streaming && (
+        <p className="relative mt-6 font-osd text-[16px] leading-none text-muted-foreground">
+          THIS MACHINE ONLY PLAYS GO-TO-MARKET. NO REFUNDS ON PAELLA.
+        </p>
       )}
     </div>
   );
@@ -399,7 +517,7 @@ function GymClip({
             </>
           )}
         </p>
-        {citation.text && (
+        {proofQuote(citation.text) && (
           <p className="mt-1 text-[13px] leading-snug text-muted-foreground/70 line-clamp-1">
             &ldquo;{citation.text.trim()}&rdquo;
           </p>

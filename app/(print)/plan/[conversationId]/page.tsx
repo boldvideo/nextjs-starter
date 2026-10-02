@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { gymMeta, GYM_BASE_URL, GYM_PUBLIC_HOST } from "@/lib/gym-meta";
-import { parseMove, plainText, refsIn, splitPlan, stepTarget, stripStepLabel } from "@/lib/gym-plan-parse";
+import { parseDetour, parseMove, plainText, proofQuote, refsIn, splitPlan, stepTarget, stripStepLabel } from "@/lib/gym-plan-parse";
 import { coachForVideo, coachLabel, type Coach } from "@/components/gym/gym-coaches-data";
 import { PrintButton } from "./print-button";
 import { CopyButton } from "./copy-button";
@@ -113,7 +113,7 @@ async function loadPlaybook(conversationId: string) {
     if (ta !== tb) return ta - tb;
     return a.role === b.role ? 0 : a.role === "user" ? -1 : 1;
   });
-  if (!messages.some((m) => m.role === "assistant")) return null;
+  if (!messages.some((m) => m.role === "assistant" && !parseDetour(m.content))) return null;
 
   // Which coach leads each session, and each session's short id (citations
   // carry the internal UUID; the short id keeps QR codes small and scannable)
@@ -142,7 +142,7 @@ async function loadPlaybook(conversationId: string) {
       title: s.videoTitle || s.title || "Session",
       seconds,
       length: clip ? clipLabel(clip).toLowerCase() : null,
-      quote: (s.text ?? "").trim(),
+      quote: proofQuote(s.text) ?? "",
       coach: coachByVideo.get(s.videoId) ?? null,
       url,
       qr: await qrSvg(url),
@@ -154,6 +154,11 @@ async function loadPlaybook(conversationId: string) {
   for (const m of messages) {
     if (m.role === "user") {
       pendingQuestion = m.content;
+      continue;
+    }
+    // Wrong-cabinet answers have nothing to keep next to the keyboard
+    if (parseDetour(m.content)) {
+      pendingQuestion = "";
       continue;
     }
     const parts = splitPlan(m.content);
@@ -337,6 +342,8 @@ function PlaySection({
   askQr: string;
 }) {
   const hasWords = play.moves.some((m) => m.say.length > 0);
+  // Words to write (an email or message) vs words to say on a call
+  const isEmail = play.moves.some((m) => m.say.some((l) => /^(subject:|hi\b|hey\b|hello\b|dear\b)/i.test(l.trim())));
   const callWords = play.moves
     .filter((m) => m.say.length)
     .map((m) => m.say.join("\n"))
@@ -391,9 +398,13 @@ function PlaySection({
           </span>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-[20px] font-bold leading-tight">On the call</h2>
+              <h2 className="text-[20px] font-bold leading-tight">{isEmail ? "The email" : "On the call"}</h2>
               <p className="mt-0.5 text-[13.5px] text-[var(--ink-soft)]">
-                {hasWords ? "The moves in order, with the words to use. Keep it next to your keyboard." : "The moves in order. Keep it next to your keyboard."}
+                {isEmail
+                  ? "The moves in order, with the words to send. Fill the brackets, then copy it."
+                  : hasWords
+                    ? "The moves in order, with the words to use. Keep it next to your keyboard."
+                    : "The moves in order. Keep it next to your keyboard."}
               </p>
             </div>
             {hasWords && <CopyButton text={callWords} label="Copy the words" />}
