@@ -8,17 +8,18 @@ import { Plus, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signInWithGoogle } from "@/lib/auth-client";
 import { useGymMember } from "./use-gym-member";
-import { sfx, toggleSound, unlock, useArcade } from "@/lib/gym-arcade";
+import { openDodger, sfx, toggleSound, unlock, useArcade } from "@/lib/gym-arcade";
 
 /**
  * The game's one piece of chrome: logo lockup left; sound, new game and the
  * player card right. Fixed at --header-height (64px) — main pads by it.
- * Click the logo five times fast and the machine tilts.
+ * Click the logo five times fast and the machine tilts. Once the Konami code
+ * has been entered, FREE PLAY becomes the way back into the secret level.
  */
 export function GymBar() {
   const pathname = usePathname();
   const onHome = pathname === "/";
-  const { sound } = useArcade();
+  const { sound, secret } = useArcade();
   const [tilt, setTilt] = useState(0);
   const clicks = useRef<number[]>([]);
 
@@ -70,10 +71,22 @@ export function GymBar() {
         </Link>
 
         <div className="flex items-center gap-3 md:gap-5">
-          <span className="hidden lg:flex items-center gap-2 font-osd text-[19px] text-muted-foreground">
-            <span className="gym-rec inline-block h-2 w-2 rounded-full bg-[var(--gym-pink)] shadow-[0_0_8px_var(--gym-pink)]" />
-            FREE PLAY
-          </span>
+          {secret ? (
+            // Found the code once: the secret level stays one click away in this browser
+            <button
+              type="button"
+              onClick={openDodger}
+              className="hidden md:flex items-center gap-2 font-osd text-[19px] text-[var(--gym-yellow)] hover:text-white cursor-pointer"
+            >
+              <span className="gym-blink">▶</span>
+              SECRET LEVEL
+            </button>
+          ) : (
+            <span className="hidden lg:flex items-center gap-2 font-osd text-[19px] text-muted-foreground">
+              <span className="gym-rec inline-block h-2 w-2 rounded-full bg-[var(--gym-pink)] shadow-[0_0_8px_var(--gym-pink)]" />
+              FREE PLAY
+            </span>
+          )}
           <button
             type="button"
             onClick={toggleSound}
