@@ -40,6 +40,7 @@ import { createCrt } from "./dodger/crt";
 import { Music } from "./dodger/music";
 import { clipLabel } from "@/lib/gym-clip-window";
 import { DODGER_OPEN_ATTR, NOTE_OPEN_EVENT } from "./gym-founder-note";
+import { challengePath, cleanInitials, pipeline, type Challenge } from "./dodger/challenge";
 
 /**
  * The secret level. You're a launch at the bottom of the screen; objections
@@ -121,7 +122,16 @@ function writeIntel(business: string, label: string | null, objections: Objectio
   }
 }
 
-export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => void; initialMode?: "arcade" | "daily" }) {
+export function GymDodger({
+  onClose,
+  initialMode = "arcade",
+  challenge = null,
+}: {
+  onClose: () => void;
+  initialMode?: "arcade" | "daily";
+  /** Someone's score to beat on today's daily run (a challenge link) */
+  challenge?: Challenge | null;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const game = useRef<Game>(createGame("demo", HOUSE));
   const input = useRef({ left: false, right: false });
@@ -129,6 +139,8 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
   const [phase, setPhase] = useState<Phase>("attract");
   const phaseRef = useRef<Phase>("attract");
   const [mode, setMode] = useState<"arcade" | "daily">(initialMode);
+  // Initials from today's board, signed onto the challenge link
+  const [myInitials, setMyInitials] = useState<string | null>(null);
   // Mounted client-only (dynamic, ssr: false), so storage is readable here
   const [intel, setIntel] = useState<Intel>(() => {
     const cached = readIntel();
@@ -255,12 +267,13 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
     if (r.killer) void loadTape(`buyer objection: ${r.killer.text.toLowerCase()}`, r.killer.clip);
     if (g.mode === "daily") {
       recordDaily(day, score);
+      if (challenge) track("Dodger challenge", { action: score > challenge.beat ? "won" : "lost", beat: challenge.beat, score });
       go(score > 0 && board?.enabled ? "initials" : "over");
     } else {
       go(qualifies(score) ? "initials" : "over");
     }
     setCountdown(15);
-  }, [day, board, go, loadTape]);
+  }, [day, board, go, loadTape, challenge]);
 
   const finishRef = useRef(finish);
   useEffect(() => {
@@ -319,6 +332,7 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
   const submitInitials = useCallback(
     async (initials: string) => {
       if (!result) return;
+      setMyInitials(cleanInitials(initials));
       sfx("coin");
       if (result.mode === "daily") {
         try {
@@ -518,14 +532,21 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
   };
 
   const [copied, setCopied] = useState(false);
+  const beatChallenge = !!challenge && !!result && result.mode === "daily" && result.score > challenge.beat;
   const share = async () => {
     if (!result) return;
-    const url = `${window.location.origin}/?play=daily`;
+    // A challenge link: opens today's run for them, never the code
+    const url = `${window.location.origin}${challengePath(result.score, myInitials)}`;
     const text = [
       `THE GTM GAME · DAILY #${dailyNumber(day)}`,
       result.grid,
       `${money(result.score)} pipeline · ${result.kos} KOs · ${result.combo} combo`,
-      result.killer ? `Taken out by: "${result.killer.text}"` : "",
+      challenge
+        ? beatChallenge
+          ? `Beat ${challenge.by ? `${challenge.by}'s` : "the"} ${pipeline(challenge.beat)}.`
+          : `${pipeline(challenge.beat)} still stands.`
+        : "",
+      `Beat ${money(result.score)} on the secret level:`,
     ]
       .filter(Boolean)
       .join("\n");
@@ -538,6 +559,7 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
       }
       unlock("player-2");
       track("Dodger share");
+      track("Dodger challenge", { action: "sent", beat: result.score });
     } catch {
       /* dismissed */
     }
@@ -610,6 +632,19 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
 
           {phase === "attract" && (
             <Screen dim>
+              {challenge && mode === "daily" && (
+                <div className="mb-3 md:mb-5">
+                  <p className="font-osd text-[15px] md:text-[19px] leading-none text-foreground/85">
+                    {challenge.by ? `${challenge.by} INVITED YOU TO THE SECRET LEVEL` : "SOMEONE INVITED YOU TO THE SECRET LEVEL"}
+                  </p>
+                  <p className="mt-2 font-display text-[20px] md:text-[30px] leading-none text-[var(--gym-yellow)]">
+                    BEAT {pipeline(challenge.beat)}
+                  </p>
+                  <p className="mt-1.5 font-osd text-[14px] md:text-[17px] leading-none text-muted-foreground">
+                    ON TODAY&apos;S RUN · THE CODE? FIND IT YOURSELF.
+                  </p>
+                </div>
+              )}
               <p className="font-display text-[22px] md:text-[34px] leading-none gym-sunset-text [text-shadow:none]">OBJECTION DODGER</p>
               <p className="mt-2 font-osd text-[16px] md:text-[20px] text-[var(--gym-cyan)] leading-none">
                 {mode === "daily" ? `DAILY RUN #${dailyNumber(day)}` : intel.status === "ready" ? "STARRING YOUR BUYERS" : "ARCADE"}
@@ -665,6 +700,13 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
                 {result.kos} KOS · {result.grazes} NEAR MISSES · BEST COMBO {result.combo}
               </p>
               {result.mode === "daily" && <p className="mt-2 text-[18px] md:text-[22px] leading-none tracking-[2px]">{result.grid}</p>}
+              {result.mode === "daily" && challenge && (
+                <p className={beatChallenge ? "mt-2 font-osd text-[18px] md:text-[22px] leading-none text-[var(--gym-yellow)]" : "mt-2 font-osd text-[18px] md:text-[22px] leading-none text-muted-foreground"}>
+                  {beatChallenge
+                    ? `YOU BEAT ${challenge.by ? `${challenge.by}'S` : "THE"} ${pipeline(challenge.beat)}`
+                    : `${pipeline(challenge.beat)} STILL STANDS`}
+                </p>
+              )}
               <button type="button" onClick={start} className="pointer-events-auto mt-3 md:mt-4 font-osd text-[22px] md:text-[30px] leading-none text-[var(--gym-yellow)] cursor-pointer">
                 {countdown !== null ? <>CONTINUE? <span className="tabular-nums">{countdown}</span></> : "PLAY AGAIN"}
               </button>
@@ -781,7 +823,7 @@ export function GymDodger({ onClose, initialMode = "arcade" }: { onClose: () => 
                 {result.mode === "daily" && (
                   <button type="button" onClick={share} className="h-10 px-4 inline-flex items-center gap-2 rounded-md border border-[var(--gym-cyan)] text-[13px] font-semibold text-[var(--gym-cyan)] cursor-pointer hover:bg-[var(--gym-cyan)]/10">
                     <Share2 className="h-4 w-4" />
-                    {copied ? "Copied!" : "Share your run"}
+                    {copied ? "Link copied!" : challenge ? (beatChallenge ? "Send it back" : "Challenge a friend") : "Challenge a friend"}
                   </button>
                 )}
               </Tape>

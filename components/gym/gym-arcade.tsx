@@ -11,13 +11,15 @@ import {
   type Achievement,
 } from "@/lib/gym-arcade";
 import { track } from "@/lib/gym-track";
+import { readChallenge, type Challenge } from "./dodger/challenge";
 
 /**
  * The machine's global layer, mounted once in the layout:
  *
  *   ↑↑↓↓←→←→BA     secret mode (CRT, turbo floor, the hidden coach) and the
  *                  Objection Dodger secret level. On touch: swipe the arrows,
- *                  then tap twice. ?play=daily opens today's daily run.
+ *                  then tap twice. ?play=daily opens today's daily run;
+ *                  &beat=4200&by=MF adds a challenge (see dodger/challenge.ts).
  *   toasts         achievements and XP
  *   tab title      "PAUSED" while you're away
  *   console        a note for anyone reading the source
@@ -104,6 +106,9 @@ export function GymArcade() {
   const { secret } = useArcade();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [dodger, setDodger] = useState<false | "arcade" | "daily">(false);
+  // A challenge link (/beat/4200?by=MF lands on ?play=daily&beat=…): the run
+  // opens with an invitation instead of the code
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
   const nextId = useRef(0);
 
   // Secret mode lives on <html> so CSS anywhere can react to it
@@ -146,11 +151,16 @@ export function GymArcade() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("play") !== "daily") return;
     // After hydration settles, like a key press would
+    const invite = readChallenge(params);
     const id = setTimeout(() => {
       params.delete("play");
+      params.delete("beat");
+      params.delete("by");
       const rest = params.toString();
       window.history.replaceState(window.history.state, "", `${window.location.pathname}${rest ? `?${rest}` : ""}${window.location.hash}`);
       setSecret(true);
+      setChallenge(invite);
+      if (invite) track("Dodger challenge", { action: "opened", beat: invite.beat });
       setDodger("daily");
     }, 400);
     return () => clearTimeout(id);
@@ -216,7 +226,16 @@ export function GymArcade() {
           )
         )}
       </div>
-      {dodger && <Dodger initialMode={dodger} onClose={() => setDodger(false)} />}
+      {dodger && (
+        <Dodger
+          initialMode={dodger}
+          challenge={challenge}
+          onClose={() => {
+            setDodger(false);
+            setChallenge(null);
+          }}
+        />
+      )}
     </>
   );
 }
