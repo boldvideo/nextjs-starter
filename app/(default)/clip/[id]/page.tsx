@@ -9,13 +9,15 @@ import { resolveClip } from "@/lib/gym-clip";
 import { clipLabel } from "@/lib/gym-clip-window";
 import { coachForVideo, coachLabel } from "@/components/gym/gym-coaches-data";
 import { GymClipPlayer } from "@/components/gym/gym-clip-player";
+import { GymCoachChat } from "@/components/gym/gym-coach-chat";
 import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
 
 /**
  * One coach moment, shareable: /clip/<videoId>?t=<seconds>. Plays the clip
  * window around that second (never the whole session), then points to the
- * full session at FounderWell and back into the game. The Playbook's QR
- * codes land here.
+ * full session at FounderWell and back into the game. Below it, office hours:
+ * chat with the coach about the session (#coach). The Playbook's QR codes
+ * land here.
  */
 
 export const revalidate = 3600;
@@ -91,6 +93,14 @@ export default async function ClipPage({ params, searchParams }: Props) {
           <ArrowUpRight className="h-4 w-4" />
         </a>
       </div>
+
+      <GymCoachChat
+        videoId={video.id}
+        playbackId={clip.playbackId}
+        title={video.title}
+        coachSlug={coach?.slug ?? null}
+        coachName={coach ? coachLabel(coach) : null}
+      />
     </main>
   );
 }

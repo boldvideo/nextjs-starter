@@ -30,7 +30,12 @@ export type GymEvent =
   | "Dodger share"
   | "Dodger challenge"
   | "Roast"
-  | "Roast shared";
+  | "Roast shared"
+  | "Quest saved"
+  | "Quest moved"
+  | "Rank up"
+  | "Coach chat opened"
+  | "Coach chat question";
 
 type Plausible = (event: string, options?: { props?: Record<string, string | number> }) => void;
 

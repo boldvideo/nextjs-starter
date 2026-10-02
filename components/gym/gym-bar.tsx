@@ -4,22 +4,26 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { IdCard, LogOut, Plus, Volume2, VolumeX } from "lucide-react";
+import { IdCard, LogOut, Plus, ScrollText, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logOut, signInWithGoogle } from "@/lib/auth-client";
 import { useGymMember } from "./use-gym-member";
-import { openDodger, sfx, toggleSound, unlock, useArcade } from "@/lib/gym-arcade";
+import { hasDodger, openDodger, sfx, toggleSound, unlock, useArcade } from "@/lib/gym-arcade";
 
 /**
- * The game's one piece of chrome: logo lockup left; sound, new game and the
- * player card right. Fixed at --header-height (64px) — main pads by it.
- * Click the logo five times fast and the machine tilts. Once the Konami code
- * has been entered, FREE PLAY becomes the way back into the secret level.
+ * The game's one piece of chrome: logo lockup left; quests, sound, new game
+ * and the player card right. Fixed at --header-height (64px) — main pads by
+ * it. Click the logo five times fast and the machine tilts. Once the Konami
+ * code has been entered (or the player ranked up to Closer), FREE PLAY
+ * becomes the way back into the secret level.
  */
 export function GymBar() {
   const pathname = usePathname();
   const onHome = pathname === "/";
-  const { sound, secret } = useArcade();
+  const arcade = useArcade();
+  const { sound } = arcade;
+  const dodger = hasDodger(arcade);
+  const openQuests = arcade.quests.filter((q) => q.status !== "done").length;
   const [tilt, setTilt] = useState(0);
   const clicks = useRef<number[]>([]);
 
@@ -71,8 +75,8 @@ export function GymBar() {
         </Link>
 
         <div className="flex items-center gap-3 md:gap-5">
-          {secret ? (
-            // Found the code once: the secret level stays one click away in this browser
+          {dodger ? (
+            // Found the code once (or earned it): the secret level stays one click away in this browser
             <button
               type="button"
               onClick={openDodger}
@@ -87,6 +91,24 @@ export function GymBar() {
               FREE PLAY
             </span>
           )}
+          <Link
+            href="/quests"
+            aria-label={openQuests ? `Your quests (${openQuests} open)` : "Your quests"}
+            title="Your quests"
+            className={cn(
+              "relative h-10 w-10 grid place-items-center rounded-xl border transition-colors",
+              pathname === "/quests"
+                ? "border-[var(--gym-yellow)] text-[var(--gym-yellow)]"
+                : "border-[var(--gym-line)] text-muted-foreground hover:text-[var(--gym-yellow)] hover:border-[var(--gym-yellow)]"
+            )}
+          >
+            <ScrollText className="h-[18px] w-[18px]" />
+            {openQuests > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-5 h-5 px-1 grid place-items-center rounded-full bg-[var(--gym-yellow)] font-display text-[10px] leading-none text-[#1a0616] tabular-nums">
+                {openQuests}
+              </span>
+            )}
+          </Link>
           <button
             type="button"
             onClick={toggleSound}
@@ -106,8 +128,9 @@ export function GymBar() {
           {!onHome && (
             <Link
               href="/"
+              aria-label="New game"
               className={cn(
-                "inline-flex items-center gap-2 h-10 px-4 md:px-5 rounded-xl",
+                "inline-flex items-center justify-center gap-2 h-10 w-10 sm:w-auto sm:px-4 md:px-5 rounded-xl",
                 "font-display text-[14px] md:text-[15px] tracking-wide",
                 "border-2 border-[var(--gym-pink)] text-foreground",
                 "shadow-[0_0_18px_-6px_var(--gym-pink)] hover:bg-[var(--gym-pink)] hover:text-[#1a0616] hover:shadow-[0_0_26px_-4px_var(--gym-pink)]",
@@ -116,7 +139,6 @@ export function GymBar() {
             >
               <Plus className="h-[18px] w-[18px]" strokeWidth={3} />
               <span className="hidden sm:inline">New game</span>
-              <span className="sm:hidden">New</span>
             </Link>
           )}
           <MemberButton />
@@ -199,6 +221,10 @@ function MemberMenu({ first, image }: { first: string; image: string | null }) {
           <Link href="/player" role="menuitem" onClick={() => setOpen(false)} className={item}>
             <IdCard className="h-4 w-4" />
             Player card
+          </Link>
+          <Link href="/quests" role="menuitem" onClick={() => setOpen(false)} className={item}>
+            <ScrollText className="h-4 w-4" />
+            Your quests
           </Link>
           <button type="button" role="menuitem" onClick={() => logOut()} className={item}>
             <LogOut className="h-4 w-4" />

@@ -2,7 +2,8 @@
 
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
-import { BookOpen, Check, Copy, Play, Share2 } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, Bookmark, Check, Copy, MessageCircle, Play, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AskCitation } from "@/lib/ask";
 import { PROSE_CLASS } from "@/lib/prose";
@@ -14,7 +15,7 @@ import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
 import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
 import { parseDetour, parseMove, plainText, proofQuote, refsIn, splitPlan, stepTarget, stripDetourMarker, stripStepLabel, type Detour } from "@/lib/gym-plan-parse";
-import { addXp, sfx, unlock } from "@/lib/gym-arcade";
+import { findQuest, moveQuest, saveQuest, sfx, unlock, useArcade } from "@/lib/gym-arcade";
 import { track } from "@/lib/gym-track";
 import { lineParams, shareLineText } from "@/lib/gym-line";
 
@@ -23,7 +24,7 @@ import { lineParams, shareLineText } from "@/lib/gym-line";
  *
  *   COACH'S TAKE     the take (intro paragraphs), with its clip
  *   MOVE 01…         each bullet, with the clip that backs it right underneath
- *   YOUR NEXT QUEST  the closing action, with quest-complete + share + print
+ *   YOUR NEXT QUEST  the closing action: complete, save to the board, share, print
  *
  * Prompt v2 answers as "take → named moves (with the words to use) → Next step:",
  * so this is a layout over that shape, not a new format. Anything that
@@ -487,6 +488,7 @@ function GymClip({
   className?: string;
 }) {
   const [open, setOpen] = useState<SourceOpen | null>(null);
+  const sessionCoach = useCoachOf()(citation);
   const seconds = Math.floor(citation.startMs / 1000);
   // Resolve the clip window up front, so the card can say how long it is and
   // play starts without a wait
@@ -513,6 +515,16 @@ function GymClip({
           <p className="min-w-0 truncate text-[13px] font-semibold text-foreground/90">{citation.videoTitle}</p>
           <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {clip ? clipLabel(clip) : "CLIP"}</span>
         </div>
+        {/* Dig deeper: chat with the coach about the whole session (still clips only) */}
+        <Link
+          href={`/clip/${citation.videoId}?t=${seconds}#coach`}
+          onClick={() => track("Coach chat opened", { from: "answer" })}
+          className="flex items-center gap-2 px-3 py-2.5 border-t border-[var(--gym-line)] bg-[var(--gym-night-2)] text-[13.5px] font-semibold text-foreground/90 hover:text-[var(--gym-cyan)]"
+        >
+          <MessageCircle className="h-4 w-4" />
+          {sessionCoach ? `Ask ${coachLabel(sessionCoach)} about this session` : "Ask about this session"}
+          <span className="ml-auto" aria-hidden>→</span>
+        </Link>
       </div>
     );
   }
@@ -578,7 +590,7 @@ function GymClip({
   );
 }
 
-/** The closing action as your next quest. Complete it, share it, print it. */
+/** The closing action as your next quest. Complete it, save it, share it, print it. */
 function GymSet({
   children,
   streaming,
@@ -597,7 +609,10 @@ function GymSet({
   step: string;
   onNeedCoin?: (run: () => void) => void;
 }) {
-  const [done, setDone] = useState(false);
+  // The board is the quest's memory: done and saved survive a reload
+  const { quests } = useArcade();
+  const onBoard = useMemo(() => quests.find((q) => q.text.trim().toLowerCase() === step.trim().toLowerCase()), [quests, step]);
+  const done = onBoard?.status === "done";
   const [copied, setCopied] = useState(false);
   const [burst, setBurst] = useState(0);
   // "I did it" → optional score → FounderWell checks in in 7 days
@@ -606,19 +621,31 @@ function GymSet({
   const target = useMemo(() => stepTarget(step), [step]);
   const [checkinDay, setCheckinDay] = useState("");
 
+  const boardQuest = (quiet: boolean) =>
+    findQuest(step) ??
+    saveQuest(
+      { text: step, coach: coach?.slug ?? null, target, link: conversationPath(shareUrl) },
+      { quiet }
+    );
+
   const complete = () => {
-    if (done) {
-      setDone(false);
+    if (done && onBoard) {
+      moveQuest(onBoard.id, "doing");
       if (checkin === "open") setCheckin("closed");
       return;
     }
-    setDone(true);
+    // Pays the quest XP once, however often it's undone and redone
+    moveQuest(boardQuest(true).id, "done");
     setBurst((n) => n + 1);
-    sfx("quest");
     track("Quest complete");
-    addXp(100, "QUEST");
-    unlock("quest");
     if (checkin === "closed") setCheckin("open");
+  };
+
+  const save = () => {
+    if (onBoard) return;
+    boardQuest(false);
+    sfx("coin");
+    track("Quest saved");
   };
 
   const requestCheckin = async () => {
@@ -633,7 +660,7 @@ function GymSet({
           quest: step,
           score: n !== null && Number.isFinite(n) ? n : undefined,
           target: target ?? undefined,
-          conversationId: shareUrl?.match(/\/ask\/([\w-]+)/)?.[1],
+          conversationId: conversationPath(shareUrl)?.slice(5),
         }),
       });
     const booked = () => {
@@ -725,6 +752,25 @@ function GymSet({
               {done ? "Quest complete! +100 XP" : "I did it"}
               {burst > 0 && done && <CoinBurst key={burst} />}
             </button>
+            {!done &&
+              (onBoard ? (
+                <Link
+                  href="/quests"
+                  className={cn(button, "border border-[var(--gym-yellow)] text-[var(--gym-yellow)] hover:bg-[var(--gym-yellow)] hover:text-[#1a0616]")}
+                >
+                  <Bookmark className="h-4 w-4 fill-current" />
+                  Saved · Your quests
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={save}
+                  className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]")}
+                >
+                  <Bookmark className="h-4 w-4" />
+                  Save quest
+                </button>
+              ))}
             <button
               type="button"
               onClick={share}
@@ -798,6 +844,12 @@ function GymSet({
       </div>
     </div>
   );
+}
+
+/** "/ask/<id>" from a share URL, for linking a saved quest back to its answer. */
+function conversationPath(shareUrl?: string): string | null {
+  const id = shareUrl?.match(/\/ask\/([\w-]+)/)?.[1];
+  return id ? `/ask/${id}` : null;
 }
 
 /** Eight pixel coins popping out of the quest button. */

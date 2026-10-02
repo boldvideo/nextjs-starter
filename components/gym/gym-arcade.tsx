@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import {
   onArcadeEvent,
   setSecret,
@@ -11,6 +12,7 @@ import {
   type Achievement,
 } from "@/lib/gym-arcade";
 import { track } from "@/lib/gym-track";
+import { PRIZE_LIVE, RANKS, type Rank } from "@/lib/gym-ranks";
 import { readChallenge, type Challenge } from "./dodger/challenge";
 
 /**
@@ -20,7 +22,7 @@ import { readChallenge, type Challenge } from "./dodger/challenge";
  *                  Objection Dodger secret level. On touch: swipe the arrows,
  *                  then tap twice. ?play=daily opens today's daily run;
  *                  &beat=4200&by=MF adds a challenge (see dodger/challenge.ts).
- *   toasts         achievements and XP
+ *   toasts         achievements, XP and rank-ups
  *   tab title      "PAUSED" while you're away
  *   console        a note for anyone reading the source
  *   night owl      playing between midnight and 5am
@@ -42,6 +44,7 @@ const KEYS: Record<string, string> = {
 
 type Toast =
   | { id: number; kind: "achievement"; achievement: Achievement }
+  | { id: number; kind: "rank"; rank: Rank }
   | { id: number; kind: "xp"; amount: number; label: string };
 
 function useKonami(onUnlock: () => void) {
@@ -136,11 +139,14 @@ export function GymArcade() {
         const toast: Toast =
           event.type === "achievement"
             ? { id, kind: "achievement", achievement: event.achievement }
-            : { id, kind: "xp", amount: event.amount, label: event.label };
+            : event.type === "rank"
+              ? { id, kind: "rank", rank: event.rank }
+              : { id, kind: "xp", amount: event.amount, label: event.label };
+        if (toast.kind === "rank") track("Rank up", { rank: toast.rank.name });
         setToasts((list) => [...list.slice(-3), toast]);
         setTimeout(
           () => setToasts((list) => list.filter((t) => t.id !== id)),
-          toast.kind === "achievement" ? 4200 : 1800
+          toast.kind === "rank" ? 6500 : toast.kind === "achievement" ? 4200 : 1800
         );
       }),
     []
@@ -199,7 +205,9 @@ export function GymArcade() {
         className="pointer-events-none fixed right-3 md:right-5 top-[calc(var(--header-height)+12px)] z-[90] flex flex-col items-end gap-2.5"
       >
         {toasts.map((t) =>
-          t.kind === "achievement" ? (
+          t.kind === "rank" ? (
+            <RankToast key={t.id} rank={t.rank} />
+          ) : t.kind === "achievement" ? (
             <div
               key={t.id}
               className="gym-pixel-box [--c:var(--gym-yellow)] flex items-center gap-3 bg-[var(--gym-night-2)] px-3.5 py-2.5 max-w-[320px] motion-safe:animate-in motion-safe:slide-in-from-right-8 motion-safe:fade-in motion-safe:duration-300"
@@ -237,6 +245,24 @@ export function GymArcade() {
         />
       )}
     </>
+  );
+}
+
+/** RANK UP: the new name and what it just unlocked. */
+function RankToast({ rank }: { rank: Rank }) {
+  const top = rank.index === RANKS.length - 1;
+  return (
+    <Link
+      href="/quests"
+      className="pointer-events-auto gym-pixel-box [--c:var(--gym-pink)] block bg-[var(--gym-night-2)] px-4 py-3 max-w-[340px] motion-safe:animate-in motion-safe:zoom-in-90 motion-safe:fade-in motion-safe:duration-300"
+    >
+      <p className="font-osd text-[16px] leading-none text-[var(--gym-pink)] gym-blink">RANK UP</p>
+      <p className="mt-1.5 font-display text-[20px] uppercase leading-none gym-sunset-text">{rank.name}</p>
+      <p className="mt-2 text-[13px] leading-snug text-foreground/85">
+        <span className="font-semibold text-[var(--gym-cyan)]">Unlocked: {top && PRIZE_LIVE ? "the grand prize" : rank.perk}.</span>{" "}
+        {rank.detail}
+      </p>
+    </Link>
   );
 }
 

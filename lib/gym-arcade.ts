@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { DODGER_RANK, rankOf, type Rank } from "@/lib/gym-ranks";
 
 /**
  * The arcade's machine state, per browser: the 1UP score (XP),
@@ -14,6 +15,27 @@ export interface HighScore {
   score: number;
   /** House scores ship with the machine; players push them down */
   house?: boolean;
+}
+
+export type QuestStatus = "next" | "doing" | "done";
+
+/** A next step saved to the quest board, to come back to. */
+export interface Quest {
+  id: string;
+  /** The quest as plain text */
+  text: string;
+  /** Coach slug, for the face on the card */
+  coach: string | null;
+  /** The count it asks for ("talk to 5 founders" → 5), if any */
+  target: number | null;
+  progress: number;
+  status: QuestStatus;
+  savedAt: number;
+  doneAt?: number;
+  /** The answer it came from (/ask/<id>) */
+  link: string | null;
+  /** Completion XP already paid (undo and redo doesn't farm it) */
+  paid?: boolean;
 }
 
 export interface ArcadeState {
@@ -32,6 +54,8 @@ export interface ArcadeState {
   coin: boolean;
   /** Best daily-run score per day (YYYY-MM-DD) */
   dailyBest: Record<string, number>;
+  /** The quest board, newest first */
+  quests: Quest[];
 }
 
 export interface Achievement {
@@ -63,6 +87,8 @@ export const ACHIEVEMENTS: Achievement[] = [
   { id: "combo-king", title: "Combo x8", detail: "Maxed the multiplier.", xp: 400 },
   { id: "intel", title: "They know you", detail: "Dodged your own buyers' objections.", xp: 250 },
   { id: "daily", title: "Daily grind", detail: "Played the daily run.", xp: 100 },
+  { id: "saved", title: "Save point", detail: "Saved a quest for later. Now come back.", xp: 50 },
+  { id: "office-hours", title: "Office hours", detail: "Asked a coach about their session.", xp: 100 },
 ];
 
 const HOUSE_SCORES: HighScore[] = [
@@ -86,6 +112,7 @@ const INITIAL: ArcadeState = {
   questions: [],
   coin: false,
   dailyBest: {},
+  quests: [],
 };
 
 /** Free levels before the coin. */
@@ -137,6 +164,7 @@ export type ArcadeEvent =
   | { type: "xp"; amount: number; label: string }
   | { type: "achievement"; achievement: Achievement }
   | { type: "secret"; on: boolean }
+  | { type: "rank"; rank: Rank }
   | { type: "dodger" };
 
 const EVENT = "gtm-game:event";
@@ -153,8 +181,22 @@ export function onArcadeEvent(handler: (event: ArcadeEvent) => void): () => void
 
 // ── Actions ────────────────────────────────────────────────────────────────
 
+/** XP changes go through here: crossing a rank threshold is an event. */
+function setXp(xp: number, rest: Partial<ArcadeState> = {}) {
+  const before = rankOf(getSnapshot().xp);
+  set({ ...rest, xp });
+  const after = rankOf(xp);
+  if (after.index > before.index) {
+    // After the XP toast, not on top of it
+    setTimeout(() => {
+      emit({ type: "rank", rank: after });
+      sfx("powerup");
+    }, 700);
+  }
+}
+
 export function addXp(amount: number, label: string) {
-  set({ xp: getSnapshot().xp + amount });
+  setXp(getSnapshot().xp + amount);
   emit({ type: "xp", amount, label });
 }
 
@@ -164,10 +206,7 @@ export function unlock(id: string): boolean {
   if (current.achievements[id]) return false;
   const achievement = ACHIEVEMENTS.find((a) => a.id === id);
   if (!achievement) return false;
-  set({
-    achievements: { ...current.achievements, [id]: Date.now() },
-    xp: current.xp + achievement.xp,
-  });
+  setXp(current.xp + achievement.xp, { achievements: { ...current.achievements, [id]: Date.now() } });
   emit({ type: "achievement", achievement });
   sfx("achievement");
   return true;
@@ -211,6 +250,78 @@ export function markCoin() {
 export function needsCoin(): boolean {
   const { plays, coin } = getSnapshot();
   return !coin && plays >= FREE_PLAYS;
+}
+
+/** The Objection Dodger: found with the code, or earned with rank. */
+export function hasDodger(state: ArcadeState): boolean {
+  return state.secret || rankOf(state.xp).index >= DODGER_RANK;
+}
+
+// ── The quest board ────────────────────────────────────────────────────────
+
+const sameQuest = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+export function findQuest(text: string): Quest | undefined {
+  return getSnapshot().quests.find((q) => sameQuest(q.text, text));
+}
+
+/** Save a quest to the board (once per text). Returns the board's copy. */
+export function saveQuest(
+  input: { text: string; coach: string | null; target: number | null; link: string | null },
+  { quiet = false }: { quiet?: boolean } = {}
+): Quest {
+  const existing = findQuest(input.text);
+  if (existing) return existing;
+  const quest: Quest = {
+    id: `q${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+    text: input.text.slice(0, 600),
+    coach: input.coach,
+    target: input.target,
+    progress: 0,
+    status: "next",
+    savedAt: Date.now(),
+    link: input.link,
+  };
+  // Keep the board a board, not an archive
+  set({ quests: [quest, ...getSnapshot().quests].slice(0, 60) });
+  if (!quiet) unlock("saved");
+  return quest;
+}
+
+function patchQuest(id: string, patch: Partial<Quest>) {
+  set({ quests: getSnapshot().quests.map((q) => (q.id === id ? { ...q, ...patch } : q)) });
+}
+
+/** Move a quest across the board. Done pays the quest XP, once per quest. */
+export function moveQuest(id: string, status: QuestStatus) {
+  const quest = getSnapshot().quests.find((q) => q.id === id);
+  if (!quest || quest.status === status) return;
+  if (status !== "done") {
+    patchQuest(id, { status, doneAt: undefined });
+    return;
+  }
+  patchQuest(id, {
+    status,
+    doneAt: Date.now(),
+    progress: quest.target ? Math.max(quest.progress, quest.target) : quest.progress,
+    paid: true,
+  });
+  sfx("quest");
+  if (!quest.paid) addXp(100, "QUEST");
+  unlock("quest");
+}
+
+/** Count one more (or one less) toward the quest's target. */
+export function stepQuest(id: string, delta: number) {
+  const quest = getSnapshot().quests.find((q) => q.id === id);
+  if (!quest) return;
+  const progress = Math.max(0, Math.min(quest.target ?? 999, quest.progress + delta));
+  patchQuest(id, { progress, status: quest.status === "next" && progress > 0 ? "doing" : quest.status });
+  if (delta > 0) sfx("coin");
+}
+
+export function dropQuest(id: string) {
+  set({ quests: getSnapshot().quests.filter((q) => q.id !== id) });
 }
 
 export function openDodger() {
