@@ -8,8 +8,8 @@ import { GAME_VERSION } from "@/lib/gym-changelog";
  * changelog). Put it last inside a page's scroll area; `mt-auto` pins it to
  * the bottom of short pages when that area is a flex column.
  *
- * Privacy and terms point to Bold's (the platform running the game);
- * founderwell.com has no policy page of its own yet.
+ * Privacy and terms are FounderWell's (they collect the leads; the pages
+ * live on app.founderwell.com); Bold's privacy covers the platform.
  */
 
 const FOUNDERWELL = "https://www.founderwell.com?utm_source=gtm-game&utm_medium=footer";
@@ -85,11 +85,14 @@ export function GymFooter() {
         <div className="mt-10 pt-5 border-t border-[var(--gym-line)] flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-[12.5px] text-muted-foreground/70">
           <p className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <span>© 2026 FounderWell & Bold</span>
-            <a href="https://www.boldvideo.com/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+            <a href="https://app.founderwell.com/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
               Privacy
             </a>
-            <a href="https://www.boldvideo.com/terms" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+            <a href="https://app.founderwell.com/terms" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
               Terms
+            </a>
+            <a href="https://www.boldvideo.com/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+              Bold privacy
             </a>
           </p>
           <Link href="/changelog" className="font-osd text-[16px] leading-none hover:text-[var(--gym-cyan)]">
