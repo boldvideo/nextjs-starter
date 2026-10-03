@@ -472,8 +472,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const lastPair = qaPairs[qaPairs.length - 1];
   // Shared links carry the sharer's first name (?by=Marcel): visitors see who asked
   const sharedBy = sharerName(searchParams?.get("by"));
-  const { user: player } = useGymMember();
-  const playerFirst = sharerName((player?.name || "").split(" ")[0]);
   // Who you're talking to in the follow-up bar: the last level's most-cited coach
   const coachOf = useCoachOf();
   const leadCoach = useMemo(() => {
@@ -629,7 +627,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                         citationDisplayNumberById={pair.citationDisplayNumberById}
                         selectedCitationId={selectedCitation?.id}
                         interaction={pair.assistantMessage.interaction}
-                        shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}${playerFirst ? `?by=${encodeURIComponent(playerFirst)}` : ""}` : undefined}
+                        shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}` : undefined}
                         printUrl={conversationId && !isCurrentlyStreaming ? `/plan/${conversationId}` : undefined}
                         onAsk={askSuggested}
                         isOwner={canContinue}

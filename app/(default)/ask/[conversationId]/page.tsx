@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { sharerName } from "@/lib/gym-share";
+import { leadCoachSlug } from "@/lib/gym-coach-map";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { answerTeaser, gymMeta } from "@/lib/gym-meta";
 
@@ -7,6 +8,7 @@ interface HistoryMessage {
   role: "user" | "assistant";
   content: string;
   insertedAt?: string;
+  sources?: { videoId?: string; muxPlaybackId?: string; playbackId?: string; cited?: boolean }[];
 }
 
 /**
@@ -41,13 +43,16 @@ export async function generateMetadata({
       conversation?.metadata?.originalQuery?.trim();
     if (!question) return gymMeta({ path });
 
-    const answer = messages.find((m) => m.role === "assistant")?.content;
+    const first = messages.find((m) => m.role === "assistant");
+    const answer = first?.content;
+    // The coach who answered goes on the card (a real face, not the robot)
+    const coach = await leadCoachSlug(first?.sources).catch(() => null);
     return gymMeta({
       title: question,
       shareTitle: by ? `${by} asked the coaches: “${question}”` : `“${question}” — The GTM Game`,
       description: answerTeaser(answer) || "Real FounderWell coaches answer, with the clips to prove it.",
       path,
-      image: `/og?q=${encodeURIComponent(question)}${by ? `&by=${encodeURIComponent(by)}` : ""}`,
+      image: `/og?q=${encodeURIComponent(question)}${by ? `&by=${encodeURIComponent(by)}` : ""}${coach ? `&coach=${coach}` : ""}`,
       imageAlt: `The GTM Game: “${question}”`,
       type: "article",
     });

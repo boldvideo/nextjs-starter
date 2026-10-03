@@ -3,11 +3,14 @@ import { ImageResponse } from "next/og";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { GYM_PUBLIC_HOST } from "@/lib/gym-meta";
 import { sharerName } from "@/lib/gym-share";
+import { coachLabel, COACHES } from "@/components/gym/gym-coaches-data";
+
+const COACH_SLUGS = new Set(COACHES.map((c) => c.slug));
 
 /**
  * The GTM Game social cards (fork-owned; replaces the tenant-branded card).
  *
- *   /og?q=<question>&by=    a shared answer: who asked + the question
+ *   /og?q=<question>&by=&coach=  a shared answer: who asked, the question, the coach
  *   /og?v=<videoId>[&t=s]   a session: frame at t, title, PLAY timecode
  *   /og                     → the static homepage card (/gym/og-home.jpg),
  *                             rendered from real CSS — satori can't do the
@@ -59,6 +62,12 @@ async function loadImage(url: string): Promise<string | null> {
     if (!res.ok) return null;
     const type = res.headers.get("content-type") || "image/png";
     const buf = Buffer.from(await res.arrayBuffer());
+    // Satori can't draw webp (the coach portraits): hand it a PNG
+    if (type.includes("webp")) {
+      const { default: sharp } = await import("sharp");
+      const png = await sharp(buf).png().toBuffer();
+      return `data:image/png;base64,${png.toString("base64")}`;
+    }
     return `data:${type};base64,${buf.toString("base64")}`;
   } catch {
     return null;
@@ -323,14 +332,18 @@ export async function GET(request: Request) {
   // Who asked: the sharer's first name when the link carries one
   const stamp = `${(sharerName(searchParams.get("by")) ?? "A founder").toUpperCase()} ASKED THE COACHES`;
   const footer = `ASK YOUR OWN ▶ ${HOST}`;
-  const text = `THE GTM GAMEby FounderWell${stamp}“${q}”${footer}1UPINSERT COIN`;
+  // The coach who answered, when known: a real face on the card
+  const coachSlug = COACH_SLUGS.has(searchParams.get("coach") ?? "") ? searchParams.get("coach") : null;
+  const coachEntry = COACHES.find((c) => c.slug === coachSlug);
+  const coachName = coachEntry ? coachLabel(coachEntry) : null;
+  const text = `THE GTM GAMEby FounderWell${stamp}“${q}”${footer}1UPINSERT COIN${coachName?.toUpperCase() ?? ""}`;
   const [bungee, grotesk, grotesk500, osd, logo, coach, bg] = await Promise.all([
     loadGoogleFont("Bungee", text),
     loadGoogleFont("Space Grotesk", text, 700),
     loadGoogleFont("Space Grotesk", text, 500),
     loadGoogleFont("VT323", text),
     loadImage(`${origin}/gym/game/logo-og.png`),
-    loadImage(`${origin}/gym/game/game-master-bot-og.png`),
+    loadImage(coachSlug ? `${origin}/gym/game/cast/${coachSlug}.webp` : `${origin}/gym/game/game-master-bot-og.png`),
     loadImage(`${origin}/gym/og-bg.jpg`),
   ]);
 
@@ -358,6 +371,23 @@ export async function GET(request: Request) {
             alt=""
             style={{ position: "absolute", left: 836, top: 178 }}
           />
+        )}
+        {coachName && (
+          <div
+            style={{
+              position: "absolute",
+              left: 836,
+              top: 470,
+              width: 230,
+              display: "flex",
+              justifyContent: "center",
+              fontFamily: "Bungee",
+              fontSize: 26,
+              color: COLORS.chalk,
+            }}
+          >
+            {coachName.toUpperCase()}
+          </div>
         )}
         <div style={{ position: "absolute", top: 36, left: 48, display: "flex" }}>
           <Brand logo={logo} />

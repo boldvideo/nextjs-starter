@@ -56,6 +56,8 @@ export interface ArcadeState {
   dailyBest: Record<string, number>;
   /** The quest board, newest first */
   quests: Quest[];
+  /** First name for shared links (asked once on first share, if not signed in) */
+  name: string | null;
 }
 
 export interface Achievement {
@@ -113,6 +115,7 @@ const INITIAL: ArcadeState = {
   coin: false,
   dailyBest: {},
   quests: [],
+  name: null,
 };
 
 /** Free levels before the coin. */
@@ -238,6 +241,10 @@ export function recordPlay(question: string) {
 }
 
 /** Log out: the next level past the free ones asks for a coin again. */
+export function setPlayerName(name: string | null) {
+  set({ name });
+}
+
 export function forgetCoin() {
   set({ coin: false });
 }

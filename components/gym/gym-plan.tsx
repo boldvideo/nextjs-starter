@@ -16,7 +16,9 @@ import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
 import { COACH_CHAT_RANK, rankOf } from "@/lib/gym-ranks";
 import { parseDetour, parseMove, plainText, refsIn, splitPlan, stepTarget, stripDetourMarker, stripStepLabel, type Detour } from "@/lib/gym-plan-parse";
-import { findQuest, moveQuest, saveQuest, sfx, unlock, useArcade } from "@/lib/gym-arcade";
+import { findQuest, moveQuest, saveQuest, setPlayerName, sfx, unlock, useArcade } from "@/lib/gym-arcade";
+import { sharerName } from "@/lib/gym-share";
+import { useGymMember } from "./use-gym-member";
 import { track } from "@/lib/gym-track";
 import { lineParams, shareLineText } from "@/lib/gym-line";
 
@@ -688,11 +690,21 @@ function GymSet({
     booked();
   };
 
-  const share = async () => {
-    const url = shareUrl || window.location.href;
+  // Shared links say who asked (?by=Marcel). Signed in, we know the name;
+  // otherwise ask once (skipping counts as an answer).
+  const { user } = useGymMember();
+  const { name: savedName } = useArcade();
+  const knownName = sharerName((user?.name || "").split(" ")[0]) ?? savedName;
+  const [askName, setAskName] = useState(false);
+  const [nameDraft, setNameDraft] = useState("");
+
+  const sendLink = async (name: string | null) => {
+    const base = shareUrl || window.location.href.split("?")[0];
+    const who = sharerName(name);
+    const url = who ? `${base}?by=${encodeURIComponent(who)}` : base;
     try {
       if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
-        await navigator.share({ url, title: "My run in The GTM Game" });
+        await navigator.share({ url, title: who ? `${who} asked the coaches` : "The GTM Game" });
         track("Share", { via: "native" });
         unlock("player-2");
         return;
@@ -706,6 +718,25 @@ function GymSet({
     } catch {
       /* dismissed */
     }
+  };
+
+  const share = () => {
+    // Someone else's game: pass it on as theirs, never under your name
+    if (!isOwner) {
+      sendLink(new URLSearchParams(window.location.search).get("by"));
+      return;
+    }
+    if (knownName === null) {
+      setAskName(true);
+      return;
+    }
+    sendLink(knownName);
+  };
+
+  const shareAs = (name: string | null) => {
+    setPlayerName(sharerName(name) ?? "");
+    setAskName(false);
+    sendLink(name);
   };
 
   const button =
@@ -780,7 +811,60 @@ function GymSet({
                 Already done
               </button>
             )}
+            {/* The extras: small, on the right */}
+            <div className="ml-auto flex items-center gap-1 text-[13px] font-semibold text-muted-foreground">
+              <button
+                type="button"
+                onClick={share}
+                aria-expanded={askName}
+                className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg hover:bg-white/[0.05] hover:text-[var(--gym-pink)] cursor-pointer"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
+                {copied ? "Link copied" : "Share"}
+              </button>
+              {printUrl && (
+                <a
+                  href={printUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    unlock("guide");
+                    track("Playbook");
+                  }}
+                  className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg hover:bg-white/[0.05] hover:text-[var(--gym-yellow)]"
+                >
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Playbook
+                </a>
+              )}
+            </div>
           </div>
+        )}
+        {/* First share, not signed in: one field, so the link says who sent it */}
+        {!streaming && askName && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              shareAs(nameDraft);
+            }}
+            className="mt-3 flex flex-wrap items-center justify-end gap-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200"
+          >
+            <input
+              autoFocus
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              placeholder="Your first name"
+              aria-label="Your first name, shown on the shared link"
+              maxLength={24}
+              className="h-9 w-44 rounded-lg border border-[var(--gym-line)] bg-transparent px-3 text-[14px] text-foreground placeholder:text-muted-foreground/70 focus:border-[var(--gym-pink)] focus:outline-none"
+            />
+            <button type="submit" className="h-9 px-3.5 rounded-lg bg-[var(--gym-pink)] font-display text-[12px] uppercase text-white hover:brightness-110 cursor-pointer">
+              Copy link
+            </button>
+            <button type="button" onClick={() => shareAs(null)} className="h-9 px-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer">
+              Skip
+            </button>
+          </form>
         )}
         {!streaming && (checkin === "open" || checkin === "sending") && (
           <div className="mt-4 rounded-lg border border-[var(--gym-line)] bg-white/[0.03] p-3.5 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
@@ -829,30 +913,6 @@ function GymSet({
         )}
       </div>
     </div>
-    {/* The extras, kept quiet under the card */}
-    {!streaming && (
-      <div className="mt-3 flex items-center justify-center gap-5 text-[13px] font-semibold text-muted-foreground">
-        <button type="button" onClick={share} className="inline-flex items-center gap-1.5 hover:text-[var(--gym-pink)] cursor-pointer">
-          <Share2 className="h-3.5 w-3.5" />
-          {copied ? "Link copied" : "Share"}
-        </button>
-        {printUrl && (
-          <a
-            href={printUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              unlock("guide");
-              track("Playbook");
-            }}
-            className="inline-flex items-center gap-1.5 hover:text-[var(--gym-yellow)]"
-          >
-            <BookOpen className="h-3.5 w-3.5" />
-            Playbook
-          </a>
-        )}
-      </div>
-    )}
     </div>
   );
 }
