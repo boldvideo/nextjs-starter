@@ -9,6 +9,7 @@ import { clipLabel } from "@/lib/gym-clip-window";
 import { coachForVideo, coachLabel } from "@/components/gym/gym-coaches-data";
 import { GymClipPlayer } from "@/components/gym/gym-clip-player";
 import { GymCoachChat } from "@/components/gym/gym-coach-chat";
+import { GymFooter } from "@/components/gym/gym-footer";
 import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
 
 /**
@@ -50,7 +51,7 @@ export default async function ClipPage({ params, searchParams }: Props) {
 
   return (
     // Its own scroll area, like every other page (the layout is a fixed-height shell)
-    <div className="flex-1 min-h-0 overflow-y-auto">
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
     <main className="mx-auto w-full max-w-[860px] px-4 pt-8 md:pt-12">
       <p className="font-osd text-[19px] leading-none text-[var(--gym-cyan)]">
         INSTANT REPLAY ▶ {clipLabel(clip)}
@@ -98,6 +99,7 @@ export default async function ClipPage({ params, searchParams }: Props) {
         coachName={coach ? coachLabel(coach) : null}
       />
     </main>
+    <GymFooter />
     </div>
   );
 }

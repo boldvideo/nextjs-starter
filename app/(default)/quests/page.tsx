@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GymQuestBoard } from "@/components/gym/gym-quest-board";
+import { GymFooter } from "@/components/gym/gym-footer";
 import { gymMeta } from "@/lib/gym-meta";
 
 export const metadata: Metadata = {
@@ -13,8 +14,9 @@ export const metadata: Metadata = {
 
 export default function QuestsPage() {
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
       <GymQuestBoard />
+      <GymFooter />
     </div>
   );
 }

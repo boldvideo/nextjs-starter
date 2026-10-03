@@ -9,6 +9,7 @@ import { logOut, signInWithGoogle } from "@/lib/auth-client";
 import { useGymMember, type GymProfile } from "./use-gym-member";
 import { GymTrophies } from "./gym-trophies";
 import { unlock } from "@/lib/gym-arcade";
+import { GymFooter } from "./gym-footer";
 
 function domainOf(website: string): string | null {
   const raw = website.trim();
@@ -37,7 +38,7 @@ export function GymMemberPage() {
 
   if (!signedIn) {
     return (
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
         <div className="max-w-[560px] mx-auto px-4 py-16 md:py-24 text-center">
           <Image src="/gym/game/logo.webp" alt="" width={120} height={120} className="mx-auto h-28 w-28" />
           <h1 className="mt-6 font-display uppercase text-[34px] md:text-[44px] leading-[0.95] gym-chrome">
@@ -58,6 +59,7 @@ export function GymMemberPage() {
           <CoinPlayer />
         </div>
         <GymTrophies />
+        <GymFooter />
       </div>
     );
   }
@@ -65,7 +67,7 @@ export function GymMemberPage() {
   const first = (user?.name || "").split(" ")[0] || "Player";
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
       <div className="max-w-[1080px] mx-auto px-4 md:px-6 py-10 md:py-16 grid gap-10 lg:gap-14 lg:grid-cols-[420px_1fr] items-start">
         <div className="lg:sticky lg:top-6">
           <p className="font-osd text-[20px] text-[var(--gym-cyan)]">PLAYER 1 READY: {first.toUpperCase()}</p>
@@ -93,6 +95,7 @@ export function GymMemberPage() {
         )}
       </div>
       <GymTrophies />
+      <GymFooter />
     </div>
   );
 }

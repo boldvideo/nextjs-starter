@@ -4,6 +4,7 @@ import Link from "next/link";
 import { gymMeta } from "@/lib/gym-meta";
 import { cleanLine, lineParams } from "@/lib/gym-line";
 import { COACHES, coachLabel } from "@/components/gym/gym-coaches-data";
+import { GymFooter } from "@/components/gym/gym-footer";
 
 /**
  * A shared line: /line?t=<line>&c=<coach>&a=<conversation id>.
@@ -39,6 +40,7 @@ export default async function LinePage({ searchParams }: Props) {
   const { line, coach, conversationId } = read(await searchParams);
 
   return (
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
     <main className="mx-auto w-full max-w-[820px] px-4 py-10 md:py-16">
       <span className="gym-slam inline-block -rotate-2 rounded-md bg-[var(--gym-pink)] px-2.5 py-1 font-display text-[13px] uppercase leading-none text-[#1a0616] shadow-[3px_3px_0_var(--gym-yellow)]">
         Say it like this
@@ -81,5 +83,7 @@ export default async function LinePage({ searchParams }: Props) {
         The GTM Game answers from FounderWell&apos;s coaching sessions and shows you the clip that backs it up.
       </p>
     </main>
+    <GymFooter />
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { GymBackdrop } from "./gym-backdrop";
 import { GymAskHero } from "./gym-ask-hero";
 import { GymOsd } from "./gym-osd";
 import { GymCoaches } from "./gym-coaches";
-import { PoweredByBold } from "@/components/powered-by-bold";
+import { GymFooter } from "./gym-footer";
 
 interface GymHomepageProps {
   videos: Video[];
@@ -62,17 +62,7 @@ export function GymHomepage({ videos }: GymHomepageProps) {
           <GymCoaches videos={videos} />
         </div>
 
-        <footer className="relative z-10 px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 max-w-[1440px] w-full mx-auto text-xs text-muted-foreground/70">
-          <p className="text-center md:text-left">
-            Real FounderWell coaching sessions. AI can be wrong; the clip is the source.
-          </p>
-          <div className="flex items-center gap-4">
-            <a href="#note" className="font-semibold text-foreground/80 hover:text-[var(--gym-yellow)] underline-offset-4 hover:underline">
-              A note from FounderWell
-            </a>
-            <PoweredByBold variant="pitch" />
-          </div>
-        </footer>
+        <GymFooter />
       </div>
     </div>
   );

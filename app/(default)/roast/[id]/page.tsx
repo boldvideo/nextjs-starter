@@ -4,6 +4,7 @@ import { RoastResult } from "@/components/gym/gym-roast";
 import { gymMeta } from "@/lib/gym-meta";
 import { rankFor } from "@/lib/gym-roast";
 import { loadRoast } from "@/lib/gym-roast-load";
+import { GymFooter } from "@/components/gym/gym-footer";
 
 /**
  * A finished roast, shareable: the score, the verdict, the hits with their
@@ -38,8 +39,9 @@ export default async function RoastResultPage({ params }: Props) {
   const loaded = await loadRoast(id);
   if (!loaded) notFound();
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
       <RoastResult text={loaded.text} sources={loaded.sources} pitch={loaded.pitch} kind={loaded.kind} conversationId={id} />
+      <GymFooter />
     </div>
   );
 }

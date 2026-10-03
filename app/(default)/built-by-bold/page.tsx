@@ -6,6 +6,7 @@ import { gymMeta } from "@/lib/gym-meta";
 import { GymBackdrop } from "@/components/gym/gym-backdrop";
 import { BoldChannelForm } from "@/components/gym/bold-channel-form";
 import { BoldDitherLogo } from "@/components/gym/bold-dither-logo";
+import { GymFooter } from "@/components/gym/gym-footer";
 
 export const revalidate = 3600;
 
@@ -47,7 +48,7 @@ export default async function BuiltByBoldPage() {
   const hours = Math.round(videos.reduce((sum, v) => sum + (v.duration || 0), 0) / 3600);
 
   return (
-    <div className="relative flex-1 min-h-0 overflow-y-auto">
+    <div className="relative flex-1 min-h-0 overflow-y-auto flex flex-col">
       <GymBackdrop variant="dim" />
       <article className="relative max-w-[760px] mx-auto px-4 md:px-6 py-14 md:py-20">
         <p className="font-osd text-[20px] text-[var(--gym-cyan)] uppercase">Built by Bold</p>
@@ -120,6 +121,7 @@ export default async function BuiltByBoldPage() {
           </a>
         </p>
       </article>
+      <GymFooter />
     </div>
   );
 }
