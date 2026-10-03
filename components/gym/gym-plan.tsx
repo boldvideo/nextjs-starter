@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpen, Bookmark, Check, Copy, MessageCircle, Play, Share2 } from "lucide-react";
+import { BookOpen, Bookmark, Check, Copy, MessageCircle, Play, Share2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AskCitation } from "@/lib/ask";
 import { PROSE_CLASS } from "@/lib/prose";
@@ -517,9 +517,17 @@ function GymClip({
           engagement={open}
           className="aspect-video"
         />
-        <div className="flex items-center justify-between gap-3 px-3 py-2 bg-[var(--gym-night-2)]">
+        <div className="flex items-center justify-between gap-3 pl-3 pr-1 py-1 bg-[var(--gym-night-2)]">
           <p className="min-w-0 truncate text-[13px] font-semibold text-foreground/90">{citation.videoTitle}</p>
-          <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {clip ? clipLabel(clip) : "CLIP"}</span>
+          <span className="ml-auto shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {clip ? clipLabel(clip) : "CLIP"}</span>
+          <button
+            type="button"
+            onClick={() => setOpen(null)}
+            aria-label="Close clip"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-white/[0.06] hover:text-foreground cursor-pointer"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
         {/* Dig deeper: chat with the coach about the whole session (still clips only) */}
         {coachChat && (

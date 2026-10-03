@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowUp, Lock, Play } from "lucide-react";
+import { ArrowUp, Lock, Play, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PROSE_CLASS } from "@/lib/prose";
 import { timestampToSeconds } from "@/lib/utils/time";
@@ -38,6 +38,13 @@ const STAMPS = new RegExp(
   `\\[(${STAMP.source}(?:\\s*[-–]\\s*${STAMP.source})?(?:\\s*[,;]\\s*${STAMP.source}(?:\\s*[-–]\\s*${STAMP.source})?)*)\\]`,
   "g"
 );
+
+function secondsToClock(t: number): string {
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = String(Math.floor(t % 60)).padStart(2, "0");
+  return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+}
 
 /** Timestamps → links the renderer turns into replay chips. */
 function withReplays(text: string): string {
@@ -150,7 +157,7 @@ export function GymCoachChat({
       {!ready ? (
         <div className="mt-5 h-40 rounded-xl border border-[var(--gym-line)]" aria-hidden />
       ) : !unlocked ? (
-        <div className="mt-5 rounded-xl border border-dashed border-[var(--gym-line)] p-5">
+        <div className="mt-5 mb-12 rounded-xl border border-dashed border-[var(--gym-line)] p-5">
           <p className="flex items-center gap-2 font-osd text-[19px] leading-none text-[var(--gym-yellow)]">
             <Lock className="h-4 w-4" /> LOCKED · UNLOCKS AT {RANKS[COACH_CHAT_RANK].name.toUpperCase()}
           </p>
@@ -246,6 +253,17 @@ export function GymCoachChat({
                           title={title}
                           className="aspect-video"
                         />
+                        <div className="flex items-center justify-between gap-3 pl-3 pr-1 py-1 bg-[var(--gym-night-2)]">
+                          <span className="font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {secondsToClock(replay.seconds)}</span>
+                          <button
+                            type="button"
+                            onClick={() => setReplay(null)}
+                            aria-label="Close clip"
+                            className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-white/[0.06] hover:text-foreground cursor-pointer"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -256,13 +274,15 @@ export function GymCoachChat({
 
           {error && <p className="mt-4 text-[14px] text-[var(--gym-pink)]">{error}</p>}
 
+          {/* Pinned to the bottom, like the answer page's chat bar */}
+          <div className="sticky bottom-0 z-10 -mx-4 mt-6 px-4 pt-3 pb-4 md:pb-6 bg-[linear-gradient(to_top,var(--gym-night)_70%,transparent)]">
           <form
             ref={formRef}
             onSubmit={(e) => {
               e.preventDefault();
               ask(input);
             }}
-            className="mt-6 flex items-end gap-2 rounded-2xl border border-[var(--gym-line)] bg-[var(--gym-night-2)] p-2 focus-within:border-[var(--gym-cyan)]"
+            className="flex items-end gap-2 rounded-3xl border border-[var(--gym-line)] bg-[var(--gym-night-2)] py-1.5 pl-2 pr-1.5 shadow-[0_10px_40px_-12px_rgba(0,0,0,0.8)] transition-colors focus-within:border-[var(--gym-cyan)]"
           >
             <textarea
               value={input}
@@ -277,17 +297,18 @@ export function GymCoachChat({
               maxLength={1000}
               placeholder={messages.length ? `Follow up with ${who}…` : `Ask ${who} anything about this session…`}
               aria-label={`Ask ${who} about this session`}
-              className="min-h-11 max-h-40 flex-1 resize-none bg-transparent px-2.5 py-2.5 text-[16px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none field-sizing-content"
+              className="min-h-10 max-h-40 flex-1 resize-none bg-transparent px-2.5 py-2 text-[16px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none field-sizing-content"
             />
             <button
               type="submit"
               disabled={busy || !input.trim()}
               aria-label="Ask"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[var(--gym-pink)] text-white disabled:opacity-40 cursor-pointer disabled:cursor-default"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-foreground text-[var(--gym-night)] transition-opacity disabled:opacity-25 cursor-pointer disabled:cursor-default"
             >
               <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
             </button>
           </form>
+          </div>
         </div>
       )}
     </section>

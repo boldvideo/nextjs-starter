@@ -49,7 +49,9 @@ export default async function ClipPage({ params, searchParams }: Props) {
   const coach = coachForVideo(video);
 
   return (
-    <main className="mx-auto w-full max-w-[860px] px-4 py-8 md:py-12">
+    // Its own scroll area, like every other page (the layout is a fixed-height shell)
+    <div className="flex-1 min-h-0 overflow-y-auto">
+    <main className="mx-auto w-full max-w-[860px] px-4 pt-8 md:pt-12">
       <p className="font-osd text-[19px] leading-none text-[var(--gym-cyan)]">
         INSTANT REPLAY ▶ {clipLabel(clip)}
       </p>
@@ -96,5 +98,6 @@ export default async function ClipPage({ params, searchParams }: Props) {
         coachName={coach ? coachLabel(coach) : null}
       />
     </main>
+    </div>
   );
 }
