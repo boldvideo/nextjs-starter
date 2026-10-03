@@ -5,6 +5,7 @@ import { gymMeta } from "@/lib/gym-meta";
 import { rankFor } from "@/lib/gym-roast";
 import { loadRoast } from "@/lib/gym-roast-load";
 import { GymFooter } from "@/components/gym/gym-footer";
+import { sharerName } from "@/lib/gym-share";
 
 /**
  * A finished roast, shareable: the score, the verdict, the hits with their
@@ -12,10 +13,12 @@ import { GymFooter } from "@/components/gym/gym-footer";
  * sits collapsed under "The original" (open for the person who wrote it).
  */
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ by?: string }> };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const [{ id }, sp] = await Promise.all([params, searchParams]);
+  // Whose pitch (?by=Marcel), when the link says
+  const by = sharerName(sp.by);
   const loaded = await loadRoast(id);
   if (!loaded || loaded.roast.score === null) return gymMeta({ title: "Roast my pitch", path: "/roast" });
   const { score, verdict } = loaded.roast;
@@ -23,10 +26,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     ...gymMeta({
       title: `Pitch roasted: ${score}/100`,
-      shareTitle: `My pitch scored ${score}/100: ${rank.label}`,
+      shareTitle: `${by ? `${by}'s` : "My"} pitch scored ${score}/100: ${rank.label}`,
       description: verdict || "Roasted by the Game Master, judged by FounderWell's coaches. Roast yours.",
-      path: `/roast/${id}`,
-      image: `/roast/${id}/og`,
+      path: `/roast/${id}${by ? `?by=${encodeURIComponent(by)}` : ""}`,
+      image: `/roast/${id}/og${by ? `?by=${encodeURIComponent(by)}` : ""}`,
       imageAlt: `Reply score ${score} out of 100: ${rank.label}`,
       type: "article",
     }),

@@ -11,6 +11,7 @@ import { useCoachOf } from "./use-coach-map";
 import { useGymMember } from "./use-gym-member";
 import { GymCoinGate } from "./gym-coin-gate";
 import { ClipLength, GymClipPlayer } from "./gym-clip-player";
+import { GymShareNamePrompt, useShareName, withSharer } from "./gym-share-name";
 import { addXp, markCoin, needsCoin, recordPlay, sfx } from "@/lib/gym-arcade";
 import { track } from "@/lib/gym-track";
 import {
@@ -321,7 +322,7 @@ export function RoastResult({
               {mine ? "Roast another" : "Roast my pitch"}
             </Link>
           )}
-          {conversationId && roast.score !== null && <ShareRoast id={conversationId} score={roast.score} />}
+          {conversationId && roast.score !== null && <ShareRoast id={conversationId} score={roast.score} mine={mine} />}
           <Link
             href="/"
             className="h-11 px-4 rounded-xl border border-[var(--gym-line)] text-[14px] font-semibold text-foreground/85 inline-flex items-center hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)]"
@@ -556,32 +557,58 @@ function Original({ pitch, open }: { pitch: string; open: boolean }) {
   );
 }
 
-function ShareRoast({ id, score }: { id: string; score: number }) {
+/**
+ * Share the score. Your own roast says whose pitch it was (?by=Marcel, the
+ * name asked once if not signed in); someone else's passes on as theirs.
+ */
+function ShareRoast({ id, score, mine }: { id: string; score: number; mine: boolean }) {
   const [copied, setCopied] = useState(false);
+  const sharer = useShareName();
+  const [askName, setAskName] = useState(false);
+
+  const send = async (who: string | null) => {
+    const url = withSharer(`${window.location.origin}/roast/${id}`, who);
+    try {
+      if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+        await navigator.share({ url, title: `${who && mine ? `${who}'s` : "My"} pitch scored ${score}/100 in The GTM Game` });
+        track("Roast shared", { via: "native" });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      sfx("coin");
+      track("Roast shared", { via: "copy" });
+      setTimeout(() => setCopied(false), 2200);
+    } catch {
+      /* dismissed */
+    }
+  };
+
+  const share = () => {
+    if (!mine) return send(new URLSearchParams(window.location.search).get("by"));
+    if (!sharer.known) return setAskName(true);
+    send(sharer.name);
+  };
+
   return (
-    <button
-      type="button"
-      onClick={async () => {
-        const url = `${window.location.origin}/roast/${id}`;
-        try {
-          if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
-            await navigator.share({ url, title: `My pitch scored ${score}/100 in The GTM Game` });
-            track("Roast shared", { via: "native" });
-            return;
-          }
-          await navigator.clipboard.writeText(url);
-          setCopied(true);
-          sfx("coin");
-          track("Roast shared", { via: "copy" });
-          setTimeout(() => setCopied(false), 2200);
-        } catch {
-          /* dismissed */
-        }
-      }}
-      className="h-11 px-4 rounded-xl border border-[var(--gym-line)] text-[14px] font-semibold text-foreground/85 inline-flex items-center gap-2 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)] cursor-pointer"
-    >
-      <Share2 className="h-4 w-4" />
-      {copied ? "Link copied. Dare a friend." : "Share my score"}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={share}
+        className="h-11 px-4 rounded-xl border border-[var(--gym-line)] text-[14px] font-semibold text-foreground/85 inline-flex items-center gap-2 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)] cursor-pointer"
+      >
+        <Share2 className="h-4 w-4" />
+        {copied ? "Link copied. Dare a friend." : mine ? "Share my score" : "Share"}
+      </button>
+      {askName && (
+        <GymShareNamePrompt
+          className="order-last basis-full"
+          onDone={(name) => {
+            setAskName(false);
+            send(sharer.remember(name));
+          }}
+        />
+      )}
+    </>
   );
 }

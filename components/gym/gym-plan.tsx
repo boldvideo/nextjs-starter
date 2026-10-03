@@ -16,9 +16,9 @@ import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
 import { COACH_CHAT_RANK, rankOf } from "@/lib/gym-ranks";
 import { parseDetour, parseMove, plainText, refsIn, splitPlan, stepTarget, stripDetourMarker, stripStepLabel, type Detour } from "@/lib/gym-plan-parse";
-import { findQuest, moveQuest, saveQuest, setPlayerName, sfx, unlock, useArcade } from "@/lib/gym-arcade";
+import { findQuest, moveQuest, saveQuest, sfx, unlock, useArcade } from "@/lib/gym-arcade";
 import { sharerName } from "@/lib/gym-share";
-import { useGymMember } from "./use-gym-member";
+import { GymShareNamePrompt, useShareName, withSharer } from "./gym-share-name";
 import { track } from "@/lib/gym-track";
 import { lineParams, shareLineText } from "@/lib/gym-line";
 
@@ -398,11 +398,22 @@ function GymMove({
   const { name, body, say } = useMemo(() => parseMove(text), [text]);
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
+  // Who's sending the line (?by=), asked once if not signed in
+  const sharer = useShareName();
+  const [askName, setAskName] = useState(false);
 
-  const shareLine = async () => {
+  const shareLine = () => {
+    if (!sharer.known) {
+      setAskName(true);
+      return;
+    }
+    sendLine(sharer.name);
+  };
+
+  const sendLine = async (who: string | null) => {
     const line = shareLineText(say);
     if (!line) return;
-    const url = `${window.location.origin}/line?${lineParams({ line, coach: coachSlug, conversationId })}`;
+    const url = withSharer(`${window.location.origin}/line?${lineParams({ line, coach: coachSlug, conversationId })}`, who);
     try {
       if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
         await navigator.share({ url, title: `“${line}”` });
@@ -471,6 +482,15 @@ function GymMove({
             </div>
           )}
         </figure>
+      )}
+      {askName && (
+        <GymShareNamePrompt
+          className="mt-3"
+          onDone={(name) => {
+            setAskName(false);
+            sendLine(sharer.remember(name));
+          }}
+        />
       )}
     </div>
   );
@@ -698,18 +718,13 @@ function GymSet({
     booked();
   };
 
-  // Shared links say who asked (?by=Marcel). Signed in, we know the name;
-  // otherwise ask once (skipping counts as an answer).
-  const { user } = useGymMember();
-  const { name: savedName } = useArcade();
-  const knownName = sharerName((user?.name || "").split(" ")[0]) ?? savedName;
+  // Shared links say who asked (?by=Marcel): asked once if not signed in
+  const sharer = useShareName();
   const [askName, setAskName] = useState(false);
-  const [nameDraft, setNameDraft] = useState("");
 
   const sendLink = async (name: string | null) => {
-    const base = shareUrl || window.location.href.split("?")[0];
     const who = sharerName(name);
-    const url = who ? `${base}?by=${encodeURIComponent(who)}` : base;
+    const url = withSharer(shareUrl || window.location.href.split("?")[0], who);
     try {
       if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
         await navigator.share({ url, title: who ? `${who} asked the coaches` : "The GTM Game" });
@@ -734,17 +749,11 @@ function GymSet({
       sendLink(new URLSearchParams(window.location.search).get("by"));
       return;
     }
-    if (knownName === null) {
+    if (!sharer.known) {
       setAskName(true);
       return;
     }
-    sendLink(knownName);
-  };
-
-  const shareAs = (name: string | null) => {
-    setPlayerName(sharerName(name) ?? "");
-    setAskName(false);
-    sendLink(name);
+    sendLink(sharer.name);
   };
 
   const button =
@@ -850,29 +859,13 @@ function GymSet({
         )}
         {/* First share, not signed in: one field, so the link says who sent it */}
         {!streaming && askName && (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              shareAs(nameDraft);
+          <GymShareNamePrompt
+            className="mt-3 justify-end"
+            onDone={(name) => {
+              setAskName(false);
+              sendLink(sharer.remember(name));
             }}
-            className="mt-3 flex flex-wrap items-center justify-end gap-2 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200"
-          >
-            <input
-              autoFocus
-              value={nameDraft}
-              onChange={(e) => setNameDraft(e.target.value)}
-              placeholder="Your first name"
-              aria-label="Your first name, shown on the shared link"
-              maxLength={24}
-              className="h-9 w-44 rounded-lg border border-[var(--gym-line)] bg-transparent px-3 text-[14px] text-foreground placeholder:text-muted-foreground/70 focus:border-[var(--gym-pink)] focus:outline-none"
-            />
-            <button type="submit" className="h-9 px-3.5 rounded-lg bg-[var(--gym-pink)] font-display text-[12px] uppercase text-white hover:brightness-110 cursor-pointer">
-              Copy link
-            </button>
-            <button type="button" onClick={() => shareAs(null)} className="h-9 px-1.5 text-[13px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer">
-              Skip
-            </button>
-          </form>
+          />
         )}
         {!streaming && (checkin === "open" || checkin === "sending") && (
           <div className="mt-4 rounded-lg border border-[var(--gym-line)] bg-white/[0.03] p-3.5 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">

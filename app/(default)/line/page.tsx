@@ -5,6 +5,7 @@ import { gymMeta } from "@/lib/gym-meta";
 import { cleanLine, lineParams } from "@/lib/gym-line";
 import { COACHES, coachLabel } from "@/components/gym/gym-coaches-data";
 import { GymFooter } from "@/components/gym/gym-footer";
+import { sharerName } from "@/lib/gym-share";
 
 /**
  * A shared line: /line?t=<line>&c=<coach>&a=<conversation id>.
@@ -12,32 +13,35 @@ import { GymFooter } from "@/components/gym/gym-footer";
  * the click lands: the line, whose play it is, the full answer, your turn.
  */
 
-type Props = { searchParams: Promise<{ t?: string; c?: string; a?: string }> };
+type Props = { searchParams: Promise<{ t?: string; c?: string; a?: string; by?: string }> };
 
-function read(sp: { t?: string; c?: string; a?: string }) {
+function read(sp: { t?: string; c?: string; a?: string; by?: string }) {
   const line = cleanLine(sp.t ?? "");
   const coach = COACHES.find((c) => c.slug === sp.c) ?? null;
   const conversationId = sp.a && /^[\w-]{8,64}$/.test(sp.a) ? sp.a : null;
-  return { line, coach, conversationId };
+  // Who sent it (?by=Marcel)
+  const by = sharerName(sp.by);
+  return { line, coach, conversationId, by };
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const { line, coach, conversationId } = read(await searchParams);
+  const { line, coach, conversationId, by } = read(await searchParams);
   if (!line) return gymMeta({ title: "Say it like this" });
   const query = lineParams({ line, coach: coach?.slug, conversationId });
+  const from = by ? `&by=${encodeURIComponent(by)}` : "";
   return gymMeta({
     title: `“${line}”`,
     shareTitle: `“${line}”`,
-    description: `${coach ? `${coachLabel(coach)}'s` : "The Game Master's"} play from The GTM Game: real FounderWell coaching, with the clip that backs it up.`,
-    path: `/line?${query}`,
-    image: `/og/line?${lineParams({ line, coach: coach?.slug })}`,
+    description: `${by ? `${by} sent you ` : ""}${coach ? `${coachLabel(coach)}'s` : "The Game Master's"} play from The GTM Game: real FounderWell coaching, with the clip that backs it up.`,
+    path: `/line?${query}${from}`,
+    image: `/og/line?${lineParams({ line, coach: coach?.slug })}${from}`,
     imageAlt: `Say it like this: “${line}”`,
     type: "article",
   });
 }
 
 export default async function LinePage({ searchParams }: Props) {
-  const { line, coach, conversationId } = read(await searchParams);
+  const { line, coach, conversationId, by } = read(await searchParams);
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
@@ -60,6 +64,7 @@ export default async function LinePage({ searchParams }: Props) {
         <span>
           <span className="font-semibold text-foreground">{coach ? `${coachLabel(coach)}'s play` : "The Game Master's play"}</span>
           {coach ? ` · ${coach.title}` : " · from FounderWell's sessions"}
+          {by && ` · sent by ${by}`}
         </span>
       </p>
 

@@ -3,6 +3,7 @@ import { ImageResponse } from "next/og";
 import { GYM_PUBLIC_HOST } from "@/lib/gym-meta";
 import { rankFor } from "@/lib/gym-roast";
 import { loadRoast } from "@/lib/gym-roast-load";
+import { sharerName } from "@/lib/gym-share";
 
 /**
  * Roast share card: /roast/<id>/og. The reply score, its rank and the
@@ -79,7 +80,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const words = loaded.roast.verdict.split(/\s+/).filter(Boolean);
   const verdict = words.length > 22 ? `${words.slice(0, 22).join(" ")}…` : loaded.roast.verdict;
   const vSize = verdict.length <= 70 ? 44 : verdict.length <= 110 ? 38 : 34;
-  const text = `THE GTM GAMEby FounderWellROAST MY PITCHREPLY SCORE${score}/100${rank.label}${verdict}ROAST YOURS ▶ ${HOST}/ROAST`;
+  // Whose pitch (?by=Marcel) on the stamp
+  const by = sharerName(new URL(request.url).searchParams.get("by"));
+  const stamp = by ? `${by.toUpperCase()}'S PITCH, ROASTED` : "ROAST MY PITCH";
+  const text = `THE GTM GAMEby FounderWell${stamp}REPLY SCORE${score}/100${rank.label}${verdict}ROAST YOURS ▶ ${HOST}/ROAST`;
 
   const [bungee, grotesk, osd, logo, bg] = await Promise.all([
     loadGoogleFont("Bungee", text),
@@ -140,7 +144,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 transform: "rotate(-2deg)",
               }}
             >
-              ROAST MY PITCH
+              {stamp}
             </div>
             <div style={{ display: "flex", marginTop: 34, fontFamily: "Bungee", fontSize: 58, lineHeight: 1, color }}>{rank.label}</div>
             <div style={{ display: "flex", marginTop: 22, fontSize: vSize, fontWeight: 700, lineHeight: 1.18, letterSpacing: "-0.01em" }}>

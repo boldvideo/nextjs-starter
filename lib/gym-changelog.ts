@@ -13,6 +13,15 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.7.1",
+    date: "2026-10-03",
+    name: "Return to sender",
+    changes: [
+      "Shared lines and roasts say who sent them",
+      "Privacy and terms link to FounderWell",
+    ],
+  },
+  {
     version: "0.7.0",
     date: "2026-10-03",
     name: "Less is more",

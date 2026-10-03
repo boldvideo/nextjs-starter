@@ -3,6 +3,7 @@ import { ImageResponse } from "next/og";
 import { GYM_PUBLIC_HOST } from "@/lib/gym-meta";
 import { cleanLine } from "@/lib/gym-line";
 import { COACHES, coachLabel } from "@/components/gym/gym-coaches-data";
+import { sharerName } from "@/lib/gym-share";
 
 /**
  * "Share this line" card: /og/line?t=<line>&c=<coach slug>
@@ -79,7 +80,10 @@ export async function GET(request: Request) {
   const quoted = `“${line}”`;
   const credit = coach ? `${coachLabel(coach).toUpperCase()}'S PLAY` : "GAME MASTER'S PLAY";
   const size = line.length <= 50 ? 66 : line.length <= 90 ? 56 : line.length <= 135 ? 48 : 42;
-  const text = `THE GTM GAMEby FounderWellSAY IT LIKE THIS${quoted}${credit}THE FULL PLAY ▶ ${HOST}`;
+  // Who sent it (?by=Marcel) takes the footer
+  const by = sharerName(searchParams.get("by"));
+  const footer = by ? `FROM ${by.toUpperCase()} ▶ ${HOST}` : `THE FULL PLAY ▶ ${HOST}`;
+  const text = `THE GTM GAMEby FounderWellSAY IT LIKE THIS${quoted}${credit}${footer}`;
 
   const [bungee, grotesk, osd, logo, face, bg] = await Promise.all([
     loadGoogleFont("Bungee", text),
@@ -207,7 +211,7 @@ export async function GET(request: Request) {
               color: COLORS.cyan,
             }}
           >
-            {`THE FULL PLAY ▶ ${HOST}`}
+            {footer}
           </div>
         </div>
       ),
