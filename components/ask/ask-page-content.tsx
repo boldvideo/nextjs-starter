@@ -23,6 +23,8 @@ import { GymPlan } from "@/components/gym/gym-plan";
 import { useGymMember } from "@/components/gym/use-gym-member";
 import { useCoachOf } from "@/components/gym/use-coach-map";
 import { coachLabel } from "@/components/gym/gym-coaches-data";
+import { openFounderNote } from "@/components/gym/gym-founder-note";
+import { sharerName } from "@/lib/gym-share";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
@@ -468,6 +470,10 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   // The sources rail always reflects the latest answer.
   const lastPair = qaPairs[qaPairs.length - 1];
+  // Shared links carry the sharer's first name (?by=Marcel): visitors see who asked
+  const sharedBy = sharerName(searchParams?.get("by"));
+  const { user: player } = useGymMember();
+  const playerFirst = sharerName((player?.name || "").split(" ")[0]);
   // Who you're talking to in the follow-up bar: the last level's most-cited coach
   const coachOf = useCoachOf();
   const leadCoach = useMemo(() => {
@@ -557,7 +563,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
             <div className="flex items-center justify-between mb-10">
               {/* Whose game this is. The coaches themselves are named on each
                   answer ("Coach Drew's take"), since they change per level. */}
-              <SetHead reps={qaPairs.length} isOwner={canContinue} />
+              <SetHead reps={qaPairs.length} isOwner={canContinue} sharedBy={sharedBy} />
               <div className="flex items-center gap-4">
                 {isStreaming && (
                   <span className="flex items-center gap-1.5 font-osd text-[19px] text-[var(--gym-pink)]">
@@ -585,9 +591,12 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   )}
                   {/* The level: stamp + your question */}
                   <div>
-                    <span className="gym-slam inline-block -rotate-2 mb-3 rounded-md bg-[var(--gym-pink)] px-2.5 py-1 font-display text-[13px] uppercase leading-none text-[#1a0616] shadow-[3px_3px_0_var(--gym-yellow)]">
-                      Level {repLabel}
-                    </span>
+                    {/* Visitors get the question without game jargon on top */}
+                    {canContinue && (
+                      <span className="gym-slam inline-block -rotate-2 mb-3 rounded-md bg-[var(--gym-pink)] px-2.5 py-1 font-display text-[13px] uppercase leading-none text-[#1a0616] shadow-[3px_3px_0_var(--gym-yellow)]">
+                        Level {repLabel}
+                      </span>
+                    )}
                     <h2 className="font-bold text-[26px] md:text-[34px] tracking-[-0.02em] leading-[1.12] text-foreground text-balance">
                       {pair.userMessage.content}
                     </h2>
@@ -620,7 +629,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                         citationDisplayNumberById={pair.citationDisplayNumberById}
                         selectedCitationId={selectedCitation?.id}
                         interaction={pair.assistantMessage.interaction}
-                        shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}` : undefined}
+                        shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}${playerFirst ? `?by=${encodeURIComponent(playerFirst)}` : ""}` : undefined}
                         printUrl={conversationId && !isCurrentlyStreaming ? `/plan/${conversationId}` : undefined}
                         onAsk={askSuggested}
                         isOwner={canContinue}
@@ -772,11 +781,32 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 }
 
 /** "Your game · 2 levels", or "Marcel's game · playing for Acme" when signed in. */
-function SetHead({ reps, isOwner }: { reps: number; isOwner: boolean }) {
+function SetHead({ reps, isOwner, sharedBy }: { reps: number; isOwner: boolean; sharedBy: string | null }) {
   const { user, member } = useGymMember();
   const first = (user?.name || "").split(" ")[0];
   const company = member?.profile?.business_name;
-  const whose = !isOwner ? "Someone's game" : first ? `${first}'s game` : "Your game";
+  const whose = first ? `${first}'s game` : "Your game";
+
+  // A shared link, seen by someone new: who asked whom, and what this is
+  if (!isOwner) {
+    return (
+      <div className="flex items-center gap-3">
+        <Image src="/gym/game/game-master-bot.webp" alt="" width={40} height={40} className="h-10 w-10" />
+        <div className="flex flex-col leading-none">
+          <span className="font-display text-base uppercase text-foreground">
+            {sharedBy ?? "A founder"} asked the coaches
+          </span>
+          <button
+            type="button"
+            onClick={openFounderNote}
+            className="mt-1 self-start font-osd text-[17px] text-[var(--gym-cyan)] hover:underline cursor-pointer"
+          >
+            WHAT IS THIS?
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-3">

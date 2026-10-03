@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { sharerName } from "@/lib/gym-share";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { answerTeaser, gymMeta } from "@/lib/gym-meta";
 
@@ -14,10 +15,14 @@ interface HistoryMessage {
  */
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ conversationId: string }>;
+  searchParams: Promise<{ by?: string }>;
 }): Promise<Metadata> {
-  const { conversationId } = await params;
+  const [{ conversationId }, sp] = await Promise.all([params, searchParams]);
+  // Who shared it: "Marcel asked the coaches" on the card and in the title
+  const by = sharerName(sp.by);
   const path = `/ask/${conversationId}`;
 
   try {
@@ -39,10 +44,10 @@ export async function generateMetadata({
     const answer = messages.find((m) => m.role === "assistant")?.content;
     return gymMeta({
       title: question,
-      shareTitle: `“${question}” — The GTM Game`,
-      description: answerTeaser(answer) || "The coach's take and your next quest, with proof: the exact minutes of FounderWell training that back it up.",
+      shareTitle: by ? `${by} asked the coaches: “${question}”` : `“${question}” — The GTM Game`,
+      description: answerTeaser(answer) || "Real FounderWell coaches answer, with the clips to prove it.",
       path,
-      image: `/og?q=${encodeURIComponent(question)}`,
+      image: `/og?q=${encodeURIComponent(question)}${by ? `&by=${encodeURIComponent(by)}` : ""}`,
       imageAlt: `The GTM Game: “${question}”`,
       type: "article",
     });

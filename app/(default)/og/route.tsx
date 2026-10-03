@@ -2,11 +2,12 @@ import { ImageResponse } from "next/og";
 
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { GYM_PUBLIC_HOST } from "@/lib/gym-meta";
+import { sharerName } from "@/lib/gym-share";
 
 /**
  * The GTM Game social cards (fork-owned; replaces the tenant-branded card).
  *
- *   /og?q=<question>        a shared answer: LEVEL stamp + the question
+ *   /og?q=<question>&by=    a shared answer: who asked + the question
  *   /og?v=<videoId>[&t=s]   a session: frame at t, title, PLAY timecode
  *   /og                     → the static homepage card (/gym/og-home.jpg),
  *                             rendered from real CSS — satori can't do the
@@ -319,7 +320,10 @@ export async function GET(request: Request) {
   // ── Question card ──────────────────────────────────────────────────────
   const q = clamp(question!, 140);
   const size = q.length <= 38 ? 72 : q.length <= 70 ? 60 : q.length <= 105 ? 50 : 44;
-  const text = `THE GTM GAMEby FounderWellLEVEL 01“${q}”GAME PLAN + THE PROOF ▶ ${HOST}1UPINSERT COIN`;
+  // Who asked: the sharer's first name when the link carries one
+  const stamp = `${(sharerName(searchParams.get("by")) ?? "A founder").toUpperCase()} ASKED THE COACHES`;
+  const footer = `ASK YOUR OWN ▶ ${HOST}`;
+  const text = `THE GTM GAMEby FounderWell${stamp}“${q}”${footer}1UPINSERT COIN`;
   const [bungee, grotesk, grotesk500, osd, logo, coach, bg] = await Promise.all([
     loadGoogleFont("Bungee", text),
     loadGoogleFont("Space Grotesk", text, 700),
@@ -384,7 +388,7 @@ export async function GET(request: Request) {
               marginBottom: 26,
             }}
           >
-            LEVEL 01
+            {stamp}
           </div>
           <div
             style={{
@@ -409,7 +413,7 @@ export async function GET(request: Request) {
             color: COLORS.cyan,
           }}
         >
-          {`GAME PLAN + THE PROOF ▶ ${HOST}`}
+          {footer}
         </div>
         <Hud />
       </div>
