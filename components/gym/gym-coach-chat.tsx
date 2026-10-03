@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -80,7 +79,6 @@ export function GymCoachChat({
   const formRef = useRef<HTMLFormElement>(null);
 
   const who = coachName ?? "the coach";
-  const face = coachSlug ? `/gym/game/cast/${coachSlug}.webp` : "/gym/game/game-master-bot.webp";
   const unlocked = rankOf(xp).index >= COACH_CHAT_RANK;
 
   const ask = async (question: string) => {
@@ -144,15 +142,10 @@ export function GymCoachChat({
 
   return (
     <section id="coach" className="mt-12 scroll-mt-24" aria-labelledby="coach-chat">
-      <div className="flex items-center gap-3">
-        <Image src={face} alt="" width={40} height={40} className="h-10 w-10" />
-        <div>
-          <p className="font-osd text-[17px] leading-none text-[var(--gym-cyan)]">OFFICE HOURS</p>
-          <h2 id="coach-chat" className="mt-1 font-display uppercase text-[18px] md:text-[20px] leading-none text-foreground">
-            Ask {who}
-          </h2>
-        </div>
-      </div>
+      {/* The coach's face is already on the page, next to the title */}
+      <h2 id="coach-chat" className="font-display uppercase text-[18px] md:text-[20px] leading-none text-foreground">
+        Ask {who}
+      </h2>
 
       {!ready ? (
         <div className="mt-5 h-40 rounded-xl border border-[var(--gym-line)]" aria-hidden />
@@ -193,8 +186,7 @@ export function GymCoachChat({
                   <p className="max-w-[80%] rounded-2xl rounded-br-md bg-white/[0.07] px-4 py-2.5 text-[15.5px] text-foreground">{m.text}</p>
                 </li>
               ) : (
-                <li key={i} className="grid grid-cols-[32px_1fr] gap-3">
-                  <Image src={face} alt="" width={32} height={32} className="h-8 w-8" />
+                <li key={i}>
                   <div className="min-w-0">
                     {m.text ? (
                       <div

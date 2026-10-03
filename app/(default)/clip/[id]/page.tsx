@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { getTenantContext } from "@/lib/get-tenant-context";
@@ -14,10 +13,9 @@ import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
 
 /**
  * One coach moment, shareable: /clip/<videoId>?t=<seconds>. Plays the clip
- * window around that second (never the whole session), then points to the
- * full session at FounderWell and back into the game. Below it, office hours:
- * chat with the coach about the session (#coach). The Playbook's QR codes
- * land here.
+ * window around that second (never the whole session) and points to the
+ * full session at FounderWell. Below it, chat with the coach about the
+ * session (#coach). The Playbook's QR codes land here.
  */
 
 export const revalidate = 3600;
@@ -67,29 +65,25 @@ export default async function ClipPage({ params, searchParams }: Props) {
       </div>
 
       <h1 className="mt-6 text-[22px] md:text-[26px] font-semibold leading-snug max-w-[40ch]">{video.title}</h1>
-      {coach && (
-        <p className="mt-3 flex items-center gap-2.5 text-[15px] text-muted-foreground">
-          <Image src={`/gym/game/cast/${coach.slug}.webp`} alt="" width={32} height={32} className="h-8 w-8" />
-          <span>
-            <span className="font-semibold text-foreground">{coachLabel(coach)}</span> · {coach.title}
-          </span>
-        </p>
-      )}
-
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Link
-          href="/"
-          className="inline-flex items-center h-11 px-5 rounded-xl font-display text-[14px] uppercase text-[#1a0616] bg-[linear-gradient(90deg,var(--gym-yellow),var(--gym-orange),var(--gym-pink))]"
-        >
-          Ask the Game Master
-        </Link>
+      {/* Whose session, and where the whole thing lives: one row */}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        {coach ? (
+          <p className="flex items-center gap-2.5 text-[15px] text-muted-foreground">
+            <Image src={`/gym/game/cast/${coach.slug}.webp`} alt="" width={32} height={32} className="h-8 w-8" />
+            <span>
+              <span className="font-semibold text-foreground">{coachLabel(coach)}</span> · {coach.title}
+            </span>
+          </p>
+        ) : (
+          <span />
+        )}
         <a
           href={FOUNDERWELL_PROGRAM_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 h-11 px-5 rounded-xl border border-[var(--gym-line)] text-[14px] font-semibold text-foreground/90 hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)]"
+          className="inline-flex items-center gap-1 text-[14px] font-semibold text-muted-foreground hover:text-[var(--gym-cyan)]"
         >
-          The full session lives at FounderWell
+          Full session at FounderWell
           <ArrowUpRight className="h-4 w-4" />
         </a>
       </div>

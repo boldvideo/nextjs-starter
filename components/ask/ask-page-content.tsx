@@ -26,6 +26,7 @@ import { coachLabel } from "@/components/gym/gym-coaches-data";
 import { openFounderNote } from "@/components/gym/gym-founder-note";
 import { sharerName } from "@/lib/gym-share";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
+import { useOnePlayer } from "@/hooks/use-one-player";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 import { PoweredByBold } from "@/components/powered-by-bold";
@@ -122,19 +123,8 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   // One video at a time: inline clips, the replay panel and the mobile
-  // sheet each own a player; starting one pauses the rest. Media play
-  // events don't bubble, so listen in the capture phase.
-  useEffect(() => {
-    const onPlay = (e: Event) => {
-      const started = e.target as Element | null;
-      if (!started || !("pause" in started)) return;
-      document.querySelectorAll<HTMLMediaElement>("mux-player, video").forEach((player) => {
-        if (player !== started && !player.contains(started) && !player.paused) player.pause();
-      });
-    };
-    document.addEventListener("play", onPlay, true);
-    return () => document.removeEventListener("play", onPlay, true);
-  }, []);
+  // sheet each own a player; starting one pauses the rest
+  useOnePlayer();
 
   // The rail (desktop) and the overlay (mobile) both embed a video player —
   // gate on the breakpoint so only one is ever mounted.

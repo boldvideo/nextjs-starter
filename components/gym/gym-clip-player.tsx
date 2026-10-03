@@ -9,6 +9,7 @@ import { track } from "@/lib/gym-track";
 import { FOUNDERWELL_PROGRAM_URL } from "@/lib/gym-lead";
 import { clipLabel, clipLength, sessionLabel } from "@/lib/gym-clip-window";
 import { cn } from "@/lib/utils";
+import { useOnePlayer } from "@/hooks/use-one-player";
 
 /**
  * Plays the coach's moment, not the whole session: the clip window comes from
@@ -32,6 +33,8 @@ export function GymClipPlayer({
   className?: string;
 }) {
   const clip = useGymClip(moment);
+  // Any page with clips: starting one pauses the others
+  useOnePlayer();
   const [ended, setEnded] = useState(false);
   const [take, setTake] = useState(0);
   const boxRef = useRef<HTMLDivElement>(null);
