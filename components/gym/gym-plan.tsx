@@ -45,6 +45,8 @@ interface GymPlanProps {
   printUrl?: string;
   /** Ask one of the suggested questions (wrong-cabinet and thin answers) */
   onAsk?: (question: string) => void;
+  /** Your own game (false: someone else's shared game, so the quest steps back) */
+  isOwner?: boolean;
   /** Show the coin gate, then run (the quest check-in needs an email) */
   onNeedCoin?: (run: () => void) => void;
 }
@@ -61,6 +63,7 @@ export function GymPlan({
   printUrl,
   onAsk,
   onNeedCoin,
+  isOwner = true,
 }: GymPlanProps) {
   const coachOf = useCoachOf();
   const streaming = !!isStreaming;
@@ -289,6 +292,7 @@ export function GymPlan({
           coach={coaches[0] ?? null}
           step={plainText(stripStepLabel(set))}
           onNeedCoin={onNeedCoin}
+          isOwner={isOwner}
         >
           <MarkdownSection content={stripStepLabel(set)} {...section} />
         </GymSet>
@@ -591,6 +595,7 @@ function GymSet({
   coach,
   step,
   onNeedCoin,
+  isOwner,
 }: {
   children: React.ReactNode;
   streaming: boolean;
@@ -600,6 +605,7 @@ function GymSet({
   /** The quest as plain text (for the check-in) */
   step: string;
   onNeedCoin?: (run: () => void) => void;
+  isOwner: boolean;
 }) {
   // The board is the quest's memory: done and saved survive a reload
   const { quests } = useArcade();
@@ -752,7 +758,13 @@ function GymSet({
               <button
                 type="button"
                 onClick={save}
-                className="gym-button inline-flex items-center gap-2 h-11 px-5 rounded-xl text-[14px] uppercase cursor-pointer"
+                className={cn(
+                  "inline-flex items-center gap-2 h-11 px-5 rounded-xl text-[14px] uppercase cursor-pointer",
+                  // Someone else's game: the start bar below is the main action
+                  isOwner
+                    ? "gym-button"
+                    : "border-2 border-[var(--gym-yellow)] font-display text-[var(--gym-yellow)] hover:bg-[var(--gym-yellow)] hover:text-[#1a0616] transition-colors"
+                )}
               >
                 <Bookmark className="h-4 w-4" strokeWidth={2.5} />
                 Save quest

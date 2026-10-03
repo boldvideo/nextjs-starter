@@ -21,6 +21,8 @@ import { GymLoading } from "@/components/gym/gym-loading";
 import { GymReceiptCard } from "@/components/gym/gym-receipt-card";
 import { GymPlan } from "@/components/gym/gym-plan";
 import { useGymMember } from "@/components/gym/use-gym-member";
+import { useCoachOf } from "@/components/gym/use-coach-map";
+import { coachLabel } from "@/components/gym/gym-coaches-data";
 import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
@@ -466,6 +468,18 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
 
   // The sources rail always reflects the latest answer.
   const lastPair = qaPairs[qaPairs.length - 1];
+  // Who you're talking to in the follow-up bar: the last level's most-cited coach
+  const coachOf = useCoachOf();
+  const leadCoach = useMemo(() => {
+    const counts = new Map<string, { slug: string; name: string; n: number }>();
+    for (const c of lastPair?.orderedCitations.slice(0, lastPair.primaryCount) ?? []) {
+      const coach = coachOf(c);
+      if (!coach) continue;
+      const hit = counts.get(coach.slug) ?? { slug: coach.slug, name: coachLabel(coach), n: 0 };
+      counts.set(coach.slug, { ...hit, n: hit.n + 1 });
+    }
+    return Array.from(counts.values()).sort((a, b) => b.n - a.n)[0] ?? null;
+  }, [lastPair, coachOf]);
   const selectedPair = sourceOpen && qaPairs.find(pair => pair.assistantMessage?.interaction === sourceOpen.interaction);
 
   // /ask?q=… paints the thread shape straight away (the stream starts in an
@@ -609,6 +623,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                         shareUrl={conversationId ? `${window.location.origin}/ask/${conversationId}` : undefined}
                         printUrl={conversationId && !isCurrentlyStreaming ? `/plan/${conversationId}` : undefined}
                         onAsk={askSuggested}
+                        isOwner={canContinue}
                         onNeedCoin={(run) => {
                           setCoinReason("checkin");
                           setCoinPending(() => run);
@@ -674,16 +689,15 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   onSubmit={() => handleSubmit()}
                   onStop={handleStop}
                   isStreaming={isStreaming}
+                  coach={leadCoach}
                 />
               ) : (
                 <>
-                  {/* Someone else's shared game: read it, then start your own.
-                      The server refuses follow-ups without the owner token. */}
-                  <p className="mb-2.5 px-1 text-center text-sm text-foreground/85">
-                    <span className="font-display text-[12px] uppercase text-[var(--gym-yellow)] mr-2">Someone else&apos;s game</span>
-                    Your turn: press start. What&apos;s your go-to-market problem?
-                  </p>
+                  {/* Someone else's shared game: read it, then start your own
+                      (the homepage's start bar, not a follow-up). The server
+                      refuses follow-ups without the owner token. */}
                   <GymFollowUp
+                    variant="new-game"
                     value={query}
                     onChange={setQuery}
                     onSubmit={() => {
@@ -699,7 +713,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     }}
                     onStop={handleStop}
                     isStreaming={isStreaming}
-                    placeholder="Ask your own question…"
                   />
                 </>
               )}

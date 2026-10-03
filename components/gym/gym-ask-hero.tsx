@@ -233,7 +233,7 @@ export function GymAskHero({ onAsk }: GymAskHeroProps) {
         {/* How to play, in three words */}
         <p className="mb-5 font-osd text-[18px] md:text-[20px] leading-none text-muted-foreground">
           <span className="text-[var(--gym-yellow)]">1</span> ASK <span className="mx-2 text-white/25">→</span>
-          <span className="text-[var(--gym-cyan)]">2</span> WATCH THE PROOF <span className="mx-2 text-white/25">→</span>
+          <span className="text-[var(--gym-cyan)]">2</span> LEARN <span className="mx-2 text-white/25">→</span>
           <span className="text-[var(--gym-pink)]">3</span> DO THE QUEST
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
