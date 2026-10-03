@@ -5,6 +5,7 @@ import { getMember, isOwner, memberCookie, notOwnerResponse, ownerToken } from "
 import { after } from "next/server";
 import { getMemberViewerId } from "@/lib/gym-viewer";
 import { getPlayer, isStage, pushLead, recordPlayerQuestion, type Stage } from "@/lib/gym-player";
+import { aiGuard } from "@/lib/gym-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -268,24 +269,40 @@ export async function POST(request: Request) {
     );
   }
 
+  // Every ask costs money: cap what one request can carry
+  if (prompt.length > 2000 || images.length > 3) {
+    return new Response(
+      JSON.stringify({ type: "error", code: "TOO_LARGE", message: "Keep it under 2,000 characters and 3 images." }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   // Follow-ups are for the asker only. A shared link is read-only.
   const member = await getMember();
   if (conversationId && !isOwner(conversationId, member.id, ownerTokenValue)) {
     return notOwnerResponse();
   }
 
+  // Free questions, then a coin; a ceiling for everyone (lib/gym-guard)
+  const blocked = await aiGuard(request, "ask");
+  if (blocked) return blocked;
+
   // Signed-in members ask as their Bold viewer: their profile traits
   // personalize the answer (and memory, when the account has it on).
   // Players who inserted a coin ask as theirs, and each question goes to
   // FounderWell's CRM with the lead.
   const player = await getPlayer();
-  const viewer = (await getMemberViewerId()) ?? player?.viewerId ?? null;
+  const memberViewer = await getMemberViewerId();
+  const viewer = memberViewer ?? player?.viewerId ?? null;
+  const question = prompt.slice(0, 500);
   if (player) {
-    const question = prompt.slice(0, 500);
     after(async () => {
       await recordPlayerQuestion(player.viewerId, question);
       await pushLead({ event: "question", email: player.email, question, conversationId, viewerId: player.viewerId });
     });
+  } else if (memberViewer) {
+    // Signed in without a coin: still log who asked what on their viewer
+    after(() => recordPlayerQuestion(memberViewer, question));
   }
 
   try {

@@ -13,6 +13,17 @@ export interface Release {
 
 export const CHANGELOG: Release[] = [
   {
+    version: "0.7.2",
+    date: "2026-10-03",
+    name: "Fair play",
+    changes: [
+      "Free questions and the coin are enforced on the server",
+      "Rate limits per player and per IP; coins limited per hour",
+      "Input caps; unused AI endpoints off in production",
+      "Signed-in questions logged on the player's viewer",
+    ],
+  },
+  {
     version: "0.7.1",
     date: "2026-10-03",
     name: "Return to sender",

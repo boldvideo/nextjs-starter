@@ -1,4 +1,5 @@
 import { after } from "next/server";
+import { ipLimited } from "@/lib/gym-guard";
 import {
   CONSENT_TEXT,
   getPlayer,
@@ -36,6 +37,10 @@ export async function POST(request: Request) {
 
   const email = normalizeEmail(body.email);
   if (!email) return Response.json({ error: "That email doesn't look right." }, { status: 400 });
+  // Each coin is a Bold viewer and a FounderWell lead: no minting in bulk
+  if (await ipLimited(request, "coin", 5, 3600)) {
+    return Response.json({ error: "That's a lot of coins. Try again in an hour." }, { status: 429 });
+  }
   if (body.consent !== true) return Response.json({ error: "Consent is required." }, { status: 400 });
 
   const stage = isStage(body.stage) ? body.stage : undefined;

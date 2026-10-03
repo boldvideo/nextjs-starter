@@ -6,6 +6,7 @@ import { resolveClip } from "@/lib/gym-clip";
 import { portalClient } from "@/lib/portal-client";
 import { coachForVideo } from "@/components/gym/gym-coaches-data";
 import { cleanCounter, type Clip, type Objection } from "@/components/gym/dodger/objections";
+import { pipeline, redisEnabled } from "@/lib/gym-redis";
 
 /**
  * Objection Dodger's server side:
@@ -161,32 +162,8 @@ export interface BoardEntry {
   score: number;
 }
 
-function redis(): { url: string; token: string } | null {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  return url && token ? { url, token } : null;
-}
-
 export function leaderboardEnabled(): boolean {
-  return redis() !== null;
-}
-
-async function pipeline(commands: (string | number)[][]): Promise<unknown[]> {
-  const r = redis();
-  if (!r) throw new Error("Leaderboard store not connected");
-  const res = await fetch(`${r.url}/pipeline`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${r.token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(commands),
-    cache: "no-store",
-    signal: AbortSignal.timeout(5000),
-  });
-  if (!res.ok) throw new Error(`Leaderboard store: ${res.status}`);
-  const out = (await res.json()) as { result?: unknown; error?: string }[];
-  return out.map((o) => {
-    if (o.error) throw new Error(o.error);
-    return o.result;
-  });
+  return redisEnabled();
 }
 
 const boardKey = (day: string) => `gtm-game:daily:${day}`;

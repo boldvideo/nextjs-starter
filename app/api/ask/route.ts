@@ -1,6 +1,8 @@
 import { streamAIQuestion } from "@/lib/ai-question";
 import { getMember, isOwner, memberCookie, notOwnerResponse, ownerToken } from "@/lib/gym-ownership";
 import { getMemberViewerId } from "@/lib/gym-viewer";
+import { aiGuard } from "@/lib/gym-guard";
+import { getPlayer } from "@/lib/gym-player";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5 minutes for web search support
@@ -105,10 +107,22 @@ export async function POST(request: Request) {
     return errorResponse("Request body was not valid JSON.", 400, "bad_json");
   }
 
+  // Coach chat is about one session: a video and a short question, nothing else
+  const b = body as Record<string, unknown>;
+  const videoRef = typeof b.videoId === "string" ? b.videoId : typeof b.id === "string" ? b.id : "";
+  const text = typeof b.question === "string" ? b.question : typeof b.value === "string" ? b.value : "";
+  if (!/^[\w-]{3,64}$/.test(videoRef) || text.length > 1000) {
+    return errorResponse("Ask about one session, in under 1,000 characters.", 400, "invalid_request");
+  }
+
+  const blocked = await aiGuard(request, "chat");
+  if (blocked) return blocked;
+
   // Only the asker continues a conversation (lib/gym-ownership)
   const member = await getMember();
   const ownerFor = (cid: string) => ownerToken(cid, member.id);
-  const viewer = await getMemberViewerId();
+  // Signed-in member, else the coin player: their questions count as theirs
+  const viewer = (await getMemberViewerId()) ?? (await getPlayer())?.viewerId ?? null;
   const withCookie = (response: Response) => {
     const cookie = memberCookie(member);
     if (cookie) response.headers.append("Set-Cookie", cookie);

@@ -144,6 +144,9 @@ function asyncIterableToStream(
 }
 
 export async function POST(request: Request) {
+  // The GTM Game has no UI for this AI endpoint: development only, so it
+  // can't be called (and billed) in production
+  if (process.env.NODE_ENV !== "development") return new Response(null, { status: 404 });
   const context = await getTenantContext();
   if (!context) {
     return new Response(

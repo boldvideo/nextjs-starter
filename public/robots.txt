@@ -1,25 +1,42 @@
-# Allow all crawlers
+# Allow all crawlers. Never the API, or /ask?q= links (they start a paid AI
+# call in any crawler that runs JavaScript); shared answers (/ask/<id>) are fine.
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /ask?
 
 # AI Crawlers - Explicitly allowed
 User-agent: GPTBot
 Allow: /
+Disallow: /api/
+Disallow: /ask?
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /api/
+Disallow: /ask?
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /api/
+Disallow: /ask?
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /api/
+Disallow: /ask?
 
 User-agent: Googlebot
 Allow: /
+Disallow: /api/
+Disallow: /ask?
 
 User-agent: Bingbot
 Allow: /
+Disallow: /api/
+Disallow: /ask?
 
 User-agent: anthropic-ai
 Allow: /
+Disallow: /api/
+Disallow: /ask?

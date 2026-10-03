@@ -1,6 +1,7 @@
 import { getMember } from "@/lib/gym-viewer";
 import { getPlayer, isStage } from "@/lib/gym-player";
 import { scout } from "@/lib/gym-dodger";
+import { aiGuard } from "@/lib/gym-guard";
 
 // The player's own objections, scouted by the coach. Personal, never cached.
 export const dynamic = "force-dynamic";
@@ -15,6 +16,11 @@ export async function POST(request: Request) {
   }
   const business = typeof body.business === "string" ? body.business.trim().slice(0, 400) : "";
   const stage = isStage(body.stage) ? body.stage : undefined;
+  if (business) {
+    // Scouting is an AI call: same allowance as a question
+    const blocked = await aiGuard(request, "objections");
+    if (blocked) return blocked;
+  }
 
   // Who's asking: the signed-in member, else the player who inserted a coin
   const member = await getMember();

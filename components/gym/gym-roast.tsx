@@ -95,6 +95,12 @@ export function GymRoastCabinet() {
       });
       if (!res.ok || !res.body) {
         const body = await res.json().catch(() => ({}));
+        // Out of free plays on the server's count: coin first, then roast
+        if (body.code === "NEEDS_COIN") {
+          setRun(null);
+          setCoinPending(() => start);
+          return;
+        }
         throw new Error(body.error || "The roaster jammed. Try again.");
       }
       const reader = res.body.getReader();

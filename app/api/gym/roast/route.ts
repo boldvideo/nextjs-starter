@@ -6,6 +6,7 @@ import { getMember, memberCookie } from "@/lib/gym-ownership";
 import { getMemberViewerId } from "@/lib/gym-viewer";
 import { getPlayer, pushLead, recordPlayerQuestion } from "@/lib/gym-player";
 import { guessKind, isRoastKind, PITCH_MAX, PITCH_MIN, roastPrompt } from "@/lib/gym-roast";
+import { aiGuard } from "@/lib/gym-guard";
 
 /**
  * POST /api/gym/roast { pitch, kind? } → SSE: start (conversation id), text,
@@ -41,6 +42,9 @@ export async function POST(request: Request) {
   if (pitch.length < PITCH_MIN) return Response.json({ error: "Paste a little more: at least a sentence." }, { status: 400 });
   if (pitch.length > PITCH_MAX) return Response.json({ error: "That's a novel. Keep it under 2,000 characters." }, { status: 400 });
   const kind = isRoastKind(body.kind) ? body.kind : guessKind(pitch);
+
+  const blocked = await aiGuard(request, "roast");
+  if (blocked) return blocked;
 
   const context = await getTenantContext();
   if (!context) return Response.json({ error: "Tenant not found" }, { status: 404 });

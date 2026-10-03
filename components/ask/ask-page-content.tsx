@@ -69,13 +69,22 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     routeConversationId ? { status: "loading" } : { status: "idle" }
   );
 
-  const { messages, isStreaming, statusMessage, conversationId, canContinue, streamQuestion, stop, reset, loadConversation } =
-    useAIAskStream();
-
   // INSERT COIN: after the free levels, the next one waits for an email.
-  // Signed-in players already gave theirs.
+  // Signed-in players already gave theirs. The server enforces it too: if it
+  // says "coin first", the same gate opens and the question runs after.
   const { signedIn } = useGymMember();
   const [coinPending, setCoinPending] = useState<(() => void) | null>(null);
+  const streamOptions = useMemo(
+    () => ({
+      onNeedsCoin: (retry: () => void) => {
+        setCoinReason(null);
+        setCoinPending(() => retry);
+      },
+    }),
+    []
+  );
+  const { messages, isStreaming, statusMessage, conversationId, canContinue, streamQuestion, stop, reset, loadConversation } =
+    useAIAskStream(streamOptions);
   // Why the gate is up when it isn't the free levels running out
   const [coinReason, setCoinReason] = useState<"checkin" | null>(null);
   useEffect(() => {

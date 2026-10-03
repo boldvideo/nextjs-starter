@@ -121,6 +121,11 @@ function normalizeBackendSource(source: BackendSource): AIAskSource {
 interface UseAIAskStreamOptions {
   onComplete?: (answer: string, sources: AIAskSource[]) => void;
   onError?: (error: string) => void;
+  /**
+   * The server wants a coin first (free questions used up). The question is
+   * taken back off the thread; call `retry` once the coin is in.
+   */
+  onNeedsCoin?: (retry: () => void) => void;
 }
 
 /**
@@ -249,12 +254,22 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
 
         if (!response.ok) {
           let message = `Request failed with status ${response.status}`;
+          let code: string | undefined;
           try {
             const body = await response.json();
-            if (body?.code === "NOT_OWNER") setCanContinue(false);
+            code = body?.code;
+            if (code === "NOT_OWNER") setCanContinue(false);
             if (typeof body?.message === "string") message = body.message;
           } catch {
             /* keep the status message */
+          }
+          // Out of free questions: take the question back, show the coin gate
+          if (code === "NEEDS_COIN" && options.onNeedsCoin) {
+            setMessages((prev) => prev.filter((m) => m.id !== messageId && m.id !== userMessageId));
+            options.onNeedsCoin(() => {
+              void streamQuestion(query, images, opts);
+            });
+            return;
           }
           throw new Error(message);
         }
