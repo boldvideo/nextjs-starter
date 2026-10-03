@@ -14,7 +14,8 @@ import { clipLabel, useGymClip } from "@/lib/use-gym-clip";
 import { SourceOpen, type AnswerInteraction } from "@/lib/source-engagement";
 import { coachLabel, type Coach } from "./gym-coaches-data";
 import { useCoachOf } from "./use-coach-map";
-import { parseDetour, parseMove, plainText, proofQuote, refsIn, splitPlan, stepTarget, stripDetourMarker, stripStepLabel, type Detour } from "@/lib/gym-plan-parse";
+import { COACH_CHAT_RANK, rankOf } from "@/lib/gym-ranks";
+import { parseDetour, parseMove, plainText, refsIn, splitPlan, stepTarget, stripDetourMarker, stripStepLabel, type Detour } from "@/lib/gym-plan-parse";
 import { findQuest, moveQuest, saveQuest, sfx, unlock, useArcade } from "@/lib/gym-arcade";
 import { track } from "@/lib/gym-track";
 import { lineParams, shareLineText } from "@/lib/gym-line";
@@ -107,6 +108,8 @@ export function GymPlan({
     onCitationClick,
     isStreaming: streaming,
     selectedCitationId,
+    // Each clip sits right under the beat it backs: no markers needed
+    hideBadges: true,
   };
 
   // Which block is still growing (gets the caret)
@@ -143,7 +146,6 @@ export function GymPlan({
           clip && !streaming ? (
             <GymClip
               citation={clip}
-              number={citationDisplayNumberById?.get(clip.id)}
               interaction={interaction}
               coach={coachOf(clip)}
               label={coachOf(clip) ? undefined : "Guest session"}
@@ -198,7 +200,6 @@ export function GymPlan({
               {clip && !growing && (
                 <GymClip
                   citation={clip}
-                  number={citationDisplayNumberById?.get(clip.id)}
                   interaction={interaction}
                   coach={clipCoach(clip)}
                   label={guestLabel(clip)}
@@ -240,7 +241,6 @@ export function GymPlan({
                   {clip && !growing && (
                     <GymClip
                       citation={clip}
-                      number={citationDisplayNumberById?.get(clip.id)}
                       interaction={interaction}
                       coach={clipCoach(clip)}
                       label={guestLabel(clip)}
@@ -267,7 +267,6 @@ export function GymPlan({
                 {clip && !growing && (
                   <GymClip
                     citation={clip}
-                    number={citationDisplayNumberById?.get(clip.id)}
                     interaction={interaction}
                     coach={clipCoach(clip)}
                     label={guestLabel(clip)}
@@ -430,7 +429,6 @@ function GymMove({
 
   return (
     <div className={cn(growing && !say.length && "chat-stream-cursor")}>
-      <p className="font-osd text-[16px] leading-none text-muted-foreground/80 mb-2 pt-1.5">MOVE</p>
       {name && <p className="mb-1.5 text-[19px] font-semibold leading-snug text-foreground">{name}</p>}
       {body && (
         <div className={cn(PROSE_CLASS, "prose-p:my-0 max-w-[60ch] prose-p:text-[18px] prose-p:leading-[1.7] prose-p:text-foreground/90")}>
@@ -438,30 +436,31 @@ function GymMove({
         </div>
       )}
       {say.length > 0 && (
-        <figure className="group/say relative mt-4 max-w-[60ch] rounded-r-lg border-l-[3px] border-[var(--gym-pink)] bg-white/[0.035] py-3 pl-4 pr-4">
+        <figure className="group/say relative mt-4 max-w-[60ch] rounded-r-lg border-l-[3px] border-[var(--gym-pink)] bg-white/[0.035] py-3 pl-4 pr-20">
           <figcaption className="mb-1.5 text-[12px] font-semibold text-[var(--gym-pink)]">Say it like this</figcaption>
           <div className={cn("space-y-1 text-[17px] leading-[1.6] text-foreground", growing && "chat-stream-cursor")}>
             {say.map((line, i) => (line.trim() ? <p key={i}>{line}</p> : <div key={i} className="h-2" />))}
           </div>
+          {/* Copy / share: tucked in the corner, shown on hover (always on touch) */}
           {!growing && (
-            <div className="mt-2 -ml-2 flex items-center gap-1">
+            <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/say:opacity-100 focus-within:opacity-100">
               <button
                 type="button"
                 onClick={copy}
                 aria-label="Copy these words"
-                className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[12px] font-semibold text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground cursor-pointer"
+                title={copied ? "Copied" : "Copy"}
+                className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground cursor-pointer"
               >
-                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                {copied ? "Copied" : "Copy"}
+                {copied ? <Check className="h-4 w-4 text-[var(--gym-cyan)]" /> : <Copy className="h-4 w-4" />}
               </button>
               <button
                 type="button"
                 onClick={shareLine}
                 aria-label="Share this line"
-                className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[12px] font-semibold text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-[var(--gym-pink)] cursor-pointer"
+                title={shared ? "Link copied" : "Share this line"}
+                className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-[var(--gym-pink)] cursor-pointer"
               >
-                {shared ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-                {shared ? "Link copied" : "Share this line"}
+                {shared ? <Check className="h-4 w-4 text-[var(--gym-cyan)]" /> : <Share2 className="h-4 w-4" />}
               </button>
             </div>
           )}
@@ -474,14 +473,12 @@ function GymMove({
 /** A clip card that turns into the player, right where it sits. */
 function GymClip({
   citation,
-  number,
   interaction,
   label,
   coach,
   className,
 }: {
   citation: AskCitation;
-  number?: number;
   interaction?: AnswerInteraction;
   label?: string;
   coach?: Coach | null;
@@ -489,6 +486,9 @@ function GymClip({
 }) {
   const [open, setOpen] = useState<SourceOpen | null>(null);
   const sessionCoach = useCoachOf()(citation);
+  const { xp } = useArcade();
+  // Coach chat shows up once it's earned (the rank-up says where to find it)
+  const coachChat = rankOf(xp).index >= COACH_CHAT_RANK;
   const seconds = Math.floor(citation.startMs / 1000);
   // Resolve the clip window up front, so the card can say how long it is and
   // play starts without a wait
@@ -516,15 +516,17 @@ function GymClip({
           <span className="shrink-0 font-osd text-[17px] leading-none text-[var(--gym-cyan)]">▶ {clip ? clipLabel(clip) : "CLIP"}</span>
         </div>
         {/* Dig deeper: chat with the coach about the whole session (still clips only) */}
+        {coachChat && (
         <Link
           href={`/clip/${citation.videoId}?t=${seconds}#coach`}
           onClick={() => track("Coach chat opened", { from: "answer" })}
           className="flex items-center gap-2 px-3 py-2.5 border-t border-[var(--gym-line)] bg-[var(--gym-night-2)] text-[13.5px] font-semibold text-foreground/90 hover:text-[var(--gym-cyan)]"
         >
           <MessageCircle className="h-4 w-4" />
-          {sessionCoach ? `Ask ${coachLabel(sessionCoach)} about this session` : "Ask about this session"}
+          {sessionCoach ? `Ask ${coachLabel(sessionCoach)}` : "Ask the coach"}
           <span className="ml-auto" aria-hidden>→</span>
         </Link>
+        )}
       </div>
     );
   }
@@ -548,11 +550,6 @@ function GymClip({
         {thumb && (
           // Plain img: Mux serves exact-second frames; next/image would proxy each one
           <img src={thumb} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-90 transition-[transform,opacity] duration-500 group-hover:scale-[1.04] group-hover:opacity-100" />
-        )}
-        {number != null && (
-          <span className="absolute top-1.5 left-1.5 min-w-5 h-5 px-1 grid place-items-center rounded bg-black/65 font-display text-[10px] leading-none text-white/90">
-            {number}
-          </span>
         )}
         <span className="absolute inset-0 grid place-items-center">
           <span className="grid place-items-center h-9 w-9 rounded-full bg-black/55 text-white ring-1 ring-white/30 backdrop-blur-[2px] transition-all group-hover:scale-110 group-hover:bg-[var(--gym-pink)] group-hover:ring-0">
@@ -580,11 +577,6 @@ function GymClip({
             </>
           )}
         </p>
-        {proofQuote(citation.text) && (
-          <p className="mt-1 text-[13px] leading-snug text-muted-foreground/70 line-clamp-1">
-            &ldquo;{citation.text.trim()}&rdquo;
-          </p>
-        )}
       </div>
     </button>
   );
@@ -714,9 +706,10 @@ function GymSet({
     "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg font-display text-[12px] uppercase cursor-pointer transition-[background-color,color,border-color,transform] active:scale-95";
 
   return (
+    <div>
     <div className="gym-neon-frame">
-      <div className="rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] p-4 md:p-5">
-        <div className="flex items-center gap-2.5 mb-2">
+      <div className="rounded-[calc(1.1rem-2px)] bg-[var(--gym-night-2)] p-5 md:p-6">
+        <div className="flex items-center gap-2.5 mb-3">
           <Image
             src={coach ? `/gym/game/cast/${coach.slug}.webp` : "/gym/game/game-master-bot.webp"}
             alt=""
@@ -735,64 +728,44 @@ function GymSet({
           {children}
         </div>
         {!streaming && (
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={complete}
-              aria-pressed={done}
-              className={cn(
-                button,
-                "relative",
-                done
-                  ? "bg-[var(--gym-cyan)] text-[#06121a]"
-                  : "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-cyan)] hover:text-[var(--gym-cyan)]"
-              )}
-            >
-              <Check className="h-4 w-4" strokeWidth={3} />
-              {done ? "Quest complete! +100 XP" : "I did it"}
-              {burst > 0 && done && <CoinBurst key={burst} />}
-            </button>
-            {!done &&
-              (onBoard ? (
-                <Link
-                  href="/quests"
-                  className={cn(button, "border border-[var(--gym-yellow)] text-[var(--gym-yellow)] hover:bg-[var(--gym-yellow)] hover:text-[#1a0616]")}
-                >
-                  <Bookmark className="h-4 w-4 fill-current" />
-                  Saved · Your quests
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={save}
-                  className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]")}
-                >
-                  <Bookmark className="h-4 w-4" />
-                  Save quest
-                </button>
-              ))}
-            <button
-              type="button"
-              onClick={share}
-              className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-pink)] hover:text-[var(--gym-pink)]")}
-            >
-              <Share2 className="h-4 w-4" />
-              {copied ? "Link copied. Challenge a friend." : "Share your run"}
-            </button>
-            {printUrl && (
-              <a
-                href={printUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => {
-                  unlock("guide");
-                  track("Playbook");
-                }}
-                className={cn(button, "border border-[var(--gym-line)] text-foreground/90 hover:border-[var(--gym-yellow)] hover:text-[var(--gym-yellow)]")}
+          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
+            {done ? (
+              <button
+                type="button"
+                onClick={complete}
+                aria-pressed
+                className="relative inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-[var(--gym-cyan)] text-[#06121a] font-display text-[14px] uppercase cursor-pointer active:scale-95 transition-transform"
               >
-                <BookOpen className="h-4 w-4" />
-                Playbook
-              </a>
+                <Check className="h-4 w-4" strokeWidth={3} />
+                Quest complete · +100 XP
+                {burst > 0 && <CoinBurst key={burst} />}
+              </button>
+            ) : onBoard ? (
+              <Link
+                href="/quests"
+                className="inline-flex items-center gap-2 h-11 px-5 rounded-xl border-2 border-[var(--gym-yellow)] text-[var(--gym-yellow)] font-display text-[14px] uppercase hover:bg-[var(--gym-yellow)] hover:text-[#1a0616] transition-colors"
+              >
+                <Bookmark className="h-4 w-4 fill-current" />
+                Saved →
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={save}
+                className="gym-button inline-flex items-center gap-2 h-11 px-5 rounded-xl text-[14px] uppercase cursor-pointer"
+              >
+                <Bookmark className="h-4 w-4" strokeWidth={2.5} />
+                Save quest
+              </button>
+            )}
+            {!done && (
+              <button
+                type="button"
+                onClick={complete}
+                className="text-[14px] font-semibold text-muted-foreground underline-offset-4 hover:text-[var(--gym-cyan)] hover:underline cursor-pointer"
+              >
+                Already done
+              </button>
             )}
           </div>
         )}
@@ -842,6 +815,31 @@ function GymSet({
           </p>
         )}
       </div>
+    </div>
+    {/* The extras, kept quiet under the card */}
+    {!streaming && (
+      <div className="mt-3 flex items-center justify-center gap-5 text-[13px] font-semibold text-muted-foreground">
+        <button type="button" onClick={share} className="inline-flex items-center gap-1.5 hover:text-[var(--gym-pink)] cursor-pointer">
+          <Share2 className="h-3.5 w-3.5" />
+          {copied ? "Link copied" : "Share"}
+        </button>
+        {printUrl && (
+          <a
+            href={printUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              unlock("guide");
+              track("Playbook");
+            }}
+            className="inline-flex items-center gap-1.5 hover:text-[var(--gym-yellow)]"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            Playbook
+          </a>
+        )}
+      </div>
+    )}
     </div>
   );
 }

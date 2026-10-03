@@ -176,6 +176,8 @@ export interface MarkdownSectionProps {
   onCitationClick: (citation: AskCitation) => void;
   isStreaming: boolean;
   selectedCitationId?: string;
+  /** Drop the inline source markers (the layout shows each clip in place) */
+  hideBadges?: boolean;
 }
 
 export const MarkdownSection = React.memo(function MarkdownSection({
@@ -185,6 +187,7 @@ export const MarkdownSection = React.memo(function MarkdownSection({
   onCitationClick,
   isStreaming,
   selectedCitationId,
+  hideBadges,
 }: MarkdownSectionProps) {
   const remarkPlugins = React.useMemo(
     () => [
@@ -196,6 +199,7 @@ export const MarkdownSection = React.memo(function MarkdownSection({
 
   const renderCitationBadge = React.useCallback(
     (citation: AskCitation, displayNum: number) => {
+      if (hideBadges) return null;
       const hasValidTimestamp = citation.startMs > 0;
       const isActive = citation.id === selectedCitationId;
 
@@ -228,11 +232,12 @@ export const MarkdownSection = React.memo(function MarkdownSection({
         </button>
       );
     },
-    [onCitationClick, selectedCitationId]
+    [onCitationClick, selectedCitationId, hideBadges]
   );
 
   const renderFallbackBadge = React.useCallback(
     (ref: string, displayNum?: number) => {
+      if (hideBadges) return null;
       // Mid-stream a reference can be a beat ahead of its metadata — show a
       // quiet shimmer instead of a "?" that will flip to a chip moments later.
       if (displayNum == null && isStreaming) {
@@ -261,7 +266,7 @@ export const MarkdownSection = React.memo(function MarkdownSection({
         </span>
       );
     },
-    [isStreaming]
+    [isStreaming, hideBadges]
   );
 
   const components = React.useMemo((): Components => {

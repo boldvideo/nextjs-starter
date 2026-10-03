@@ -17,11 +17,11 @@ export interface Rank {
 }
 
 export const RANKS: Rank[] = [
-  { index: 0, name: "Rookie", xp: 0, perk: "The arcade", detail: "Ask, watch the proof, do the quest." },
-  { index: 1, name: "Contender", xp: 300, perk: "Coach chat", detail: "Ask a coach anything about the session behind a clip." },
-  { index: 2, name: "Closer", xp: 1000, perk: "Objection Dodger", detail: "The secret level, no code needed." },
-  { index: 3, name: "Rainmaker", xp: 2500, perk: "Gold player card", detail: "Your card and HUD go gold. Everyone will know." },
-  { index: 4, name: "Legend", xp: 5000, perk: "Hall of fame", detail: "Top of the cabinet. Bragging rights, forever." },
+  { index: 0, name: "Rookie", xp: 0, perk: "The arcade", detail: "Ask. Watch. Do." },
+  { index: 1, name: "Contender", xp: 300, perk: "Coach chat", detail: "Under every clip." },
+  { index: 2, name: "Closer", xp: 1000, perk: "Objection Dodger", detail: "The secret level." },
+  { index: 3, name: "Rainmaker", xp: 2500, perk: "Gold player card", detail: "Everyone will know." },
+  { index: 4, name: "Legend", xp: 5000, perk: "Hall of fame", detail: "Bragging rights." },
 ];
 
 export const COACH_CHAT_RANK = 1;
@@ -32,7 +32,7 @@ export const GOLD_RANK = 3;
 export const PRIZE_LIVE = false;
 export const PRIZE = {
   title: "A month of FounderWell, on us",
-  detail: "Reach Legend and FounderWell unlocks a free month of the full program: every session, live coaching, the community.",
+  detail: "Every session, live coaching, the community.",
 };
 
 export function rankOf(xp: number): Rank {

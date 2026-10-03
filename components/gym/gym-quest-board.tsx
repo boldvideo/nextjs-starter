@@ -17,9 +17,9 @@ import { GymRankLadder, GymRankMeter } from "./gym-rank";
  */
 
 const COLUMNS: { status: QuestStatus; title: string; empty: string; tone: string }[] = [
-  { status: "next", title: "Up next", empty: "Save a quest from any answer and it lands here.", tone: "var(--gym-yellow)" },
-  { status: "doing", title: "Doing", empty: "Start a quest to track it here.", tone: "var(--gym-cyan)" },
-  { status: "done", title: "Done", empty: "Finished quests pay 100 XP.", tone: "var(--gym-pink)" },
+  { status: "next", title: "Up next", empty: "Nothing yet.", tone: "var(--gym-yellow)" },
+  { status: "doing", title: "Doing", empty: "Nothing yet.", tone: "var(--gym-cyan)" },
+  { status: "done", title: "Done", empty: "+100 XP each.", tone: "var(--gym-pink)" },
 ];
 
 export function GymQuestBoard() {
@@ -33,18 +33,13 @@ export function GymQuestBoard() {
     <div className="max-w-[1180px] mx-auto px-4 md:px-6 py-8 md:py-12">
       <p className="font-osd text-[19px] leading-none text-[var(--gym-cyan)]">QUEST LOG</p>
       <h1 className="mt-2 font-display uppercase text-[30px] md:text-[42px] leading-none text-foreground">Your quests</h1>
-      <p className="mt-3 max-w-[56ch] text-[16px] text-muted-foreground">
-        Every answer ends with a quest. Most take a few days. Save them here, count your reps, and come back to finish
-        them. Finished quests pay XP, and XP ranks you up.
-      </p>
 
       <GymRankMeter className="mt-7 max-w-[560px]" />
 
       <section className="mt-10" aria-label="Quest board">
         {ready && quests.length === 0 ? (
           <div className="rounded-xl border border-dashed border-[var(--gym-line)] p-8 text-center">
-            <p className="font-osd text-[20px] text-muted-foreground">NO QUESTS SAVED YET</p>
-            <p className="mt-2 text-[15px] text-muted-foreground">Ask a question, then hit &ldquo;Save quest&rdquo; on the answer&apos;s next quest.</p>
+            <p className="font-osd text-[20px] text-muted-foreground">NO QUESTS YET</p>
             <Link
               href="/"
               className="mt-5 inline-flex items-center h-11 px-5 rounded-xl font-display text-[14px] uppercase text-[#1a0616] bg-[linear-gradient(90deg,var(--gym-yellow),var(--gym-orange),var(--gym-pink))]"
@@ -79,8 +74,7 @@ export function GymQuestBoard() {
       </section>
 
       <section className="mt-14" aria-labelledby="ranks">
-        <h2 id="ranks" className="font-display uppercase text-[22px] md:text-[26px] leading-none text-foreground">What XP gets you</h2>
-        <p className="mt-2 mb-5 text-[15px] text-muted-foreground">Asking, watching the proof, roasting and finishing quests all pay XP. Each rank unlocks something.</p>
+        <h2 id="ranks" className="mb-5 font-display uppercase text-[22px] md:text-[26px] leading-none text-foreground">What XP gets you</h2>
         <GymRankLadder />
       </section>
     </div>

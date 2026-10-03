@@ -230,7 +230,12 @@ export function GymAskHero({ onAsk }: GymAskHeroProps) {
 
       {/* Starters: real questions, each with the coach who teaches it */}
       <div className="relative z-10 mt-6 md:mt-7 w-full">
-        <p className="mb-3 text-sm text-muted-foreground">or try one</p>
+        {/* How to play, in three words */}
+        <p className="mb-5 font-osd text-[18px] md:text-[20px] leading-none text-muted-foreground">
+          <span className="text-[var(--gym-yellow)]">1</span> ASK <span className="mx-2 text-white/25">→</span>
+          <span className="text-[var(--gym-cyan)]">2</span> WATCH THE PROOF <span className="mx-2 text-white/25">→</span>
+          <span className="text-[var(--gym-pink)]">3</span> DO THE QUEST
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {GYM_WORKOUTS.map((w, i) => (
             <button
@@ -267,7 +272,7 @@ export function GymAskHero({ onAsk }: GymAskHeroProps) {
           </span>
           <span className="min-w-0 text-left">
             <span className="block font-display text-[15px] uppercase leading-tight text-foreground">Roast my pitch</span>
-            <span className="block text-[13.5px] text-muted-foreground">Paste your cold email. Get a score out of 100, the coach clips, and a fixed version.</span>
+            <span className="block text-[13.5px] text-muted-foreground">Paste a cold email. Get a score.</span>
           </span>
           <span className="ml-auto font-osd text-[18px] text-[var(--gym-pink)] transition-transform group-hover:translate-x-0.5">▶</span>
         </Link>

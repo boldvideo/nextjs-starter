@@ -11,8 +11,8 @@ import { useGymMember } from "./use-gym-member";
 import { hasDodger, openDodger, sfx, toggleSound, unlock, useArcade } from "@/lib/gym-arcade";
 
 /**
- * The game's one piece of chrome: logo lockup left; quests, sound, new game
- * and the player card right. Fixed at --header-height (64px) — main pads by
+ * The game's one piece of chrome: logo lockup left; quests (once there are
+ * any), sound (home only), new game and the player card right. Fixed at --header-height (64px) — main pads by
  * it. Click the logo five times fast and the machine tilts. Once the Konami
  * code has been entered (or the player ranked up to Closer), FREE PLAY
  * becomes the way back into the secret level.
@@ -91,6 +91,7 @@ export function GymBar() {
               FREE PLAY
             </span>
           )}
+          {arcade.quests.length > 0 && (
           <Link
             href="/quests"
             aria-label={openQuests ? `Your quests (${openQuests} open)` : "Your quests"}
@@ -109,6 +110,7 @@ export function GymBar() {
               </span>
             )}
           </Link>
+          )}
           <button
             type="button"
             onClick={toggleSound}
@@ -117,7 +119,8 @@ export function GymBar() {
             title={sound ? "Sound on" : "Sound off"}
             className={cn(
               "h-10 w-10 place-items-center rounded-xl border transition-colors cursor-pointer",
-              onHome ? "grid" : "hidden sm:grid",
+              // Sound is a home-screen setting; elsewhere it's one more button
+              onHome ? "grid" : "hidden",
               sound
                 ? "border-[var(--gym-cyan)] text-[var(--gym-cyan)] shadow-[0_0_16px_-6px_var(--gym-cyan)]"
                 : "border-[var(--gym-line)] text-muted-foreground hover:text-foreground"

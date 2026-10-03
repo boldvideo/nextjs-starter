@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { Film } from "lucide-react";
 import {
   useAIAskStream,
   askSourceToCitation,
@@ -11,7 +10,6 @@ import {
 } from "@/hooks/use-ai-ask-stream";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
-import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { AskSourcesRail } from "./ask-sources-rail";
 
@@ -118,27 +116,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
     null
   );
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-
-  // The receipts rail is opt-in: the plan already shows each clip inline.
-  // Citation chips still open it (as the instant-replay panel).
-  const [receiptsOpen, setReceiptsOpen] = useState(false);
-  useEffect(() => {
-    try {
-      setReceiptsOpen(localStorage.getItem("gym:receipts") === "1");
-    } catch {
-      /* storage unavailable: stay closed */
-    }
-  }, []);
-  const toggleReceipts = useCallback(() => {
-    setReceiptsOpen((open) => {
-      try {
-        localStorage.setItem("gym:receipts", open ? "0" : "1");
-      } catch {
-        /* storage unavailable */
-      }
-      return !open;
-    });
-  }, []);
 
   // One video at a time: inline clips, the replay panel and the mobile
   // sheet each own a player; starting one pauses the rest. Media play
@@ -574,22 +551,6 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     LIVE
                   </span>
                 )}
-                {isDesktop && (lastPair?.orderedCitations.length ?? 0) > 0 && (
-                  <button
-                    type="button"
-                    onClick={toggleReceipts}
-                    aria-pressed={receiptsOpen}
-                    className={cn(
-                      "inline-flex items-center gap-2 h-9 px-3 rounded-lg font-osd text-[18px] leading-none cursor-pointer transition-colors",
-                      receiptsOpen
-                        ? "bg-[var(--signal-soft)] text-[var(--gym-cyan)] border border-[var(--signal-line)]"
-                        : "border border-[var(--gym-line)] text-muted-foreground hover:text-[var(--gym-cyan)] hover:border-[var(--signal-line)]"
-                    )}
-                  >
-                    <Film className="h-4 w-4" />
-                    {receiptsOpen ? "HIDE PROOF" : `PROOF · ${lastPair?.primaryCount ?? 0} ${lastPair?.primaryCount === 1 ? "CLIP" : "CLIPS"}`}
-                  </button>
-                )}
               </div>
             </div>
 
@@ -656,17 +617,12 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                     </div>
                   )}
 
-                  {/* Receipts — mobile only, and only when the plan couldn't pin
-                      clips inline (no refs in the text); desktop uses the rail */}
+                  {/* Clips, only when the plan couldn't pin them inline (no refs
+                      in the text) */}
                   {pair.orderedCitations.length > 0 && !isCurrentlyStreaming &&
                     !/\[(?:\d+|c_[^\]]+)\]/.test(pair.assistantMessage?.content ?? "") && (
-                    <div className="lg:hidden">
-                      <div className="flex items-baseline justify-between mb-3">
-                        <span className="font-display text-sm uppercase gym-sunset-text">The proof</span>
-                        <span className="font-osd text-[17px] text-muted-foreground">
-                          {pair.primaryCount} {pair.primaryCount === 1 ? "CLIP" : "CLIPS"}
-                        </span>
-                      </div>
+                    <div>
+                      <p className="mb-3 font-display text-sm uppercase gym-sunset-text">Clips</p>
                       <div className="flex gap-4 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1 snap-x snap-mandatory">
                         {pair.orderedCitations.slice(0, pair.primaryCount).map((c) => (
                           <GymReceiptCard
@@ -758,9 +714,8 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
         )}
       </div>
 
-      {/* Sources rail (desktop, opt-in) — also opens as the replay panel
-          when a citation chip is clicked */}
-      {isDesktop && (receiptsOpen || selectedCitation) && (
+      {/* Replay panel (desktop): opens when a citation chip is clicked */}
+      {isDesktop && selectedCitation && (
         <AskSourcesRail
           citations={(selectedCitation ? selectedPair : lastPair)?.orderedCitations ?? []}
           displayNumberById={(selectedCitation ? selectedPair : lastPair)?.citationDisplayNumberById}

@@ -149,7 +149,7 @@ export function GymCoachChat({
         <div>
           <p className="font-osd text-[17px] leading-none text-[var(--gym-cyan)]">OFFICE HOURS</p>
           <h2 id="coach-chat" className="mt-1 font-display uppercase text-[18px] md:text-[20px] leading-none text-foreground">
-            Ask {who} about this session
+            Ask {who}
           </h2>
         </div>
       </div>
@@ -160,10 +160,6 @@ export function GymCoachChat({
         <div className="mt-5 rounded-xl border border-dashed border-[var(--gym-line)] p-5">
           <p className="flex items-center gap-2 font-osd text-[19px] leading-none text-[var(--gym-yellow)]">
             <Lock className="h-4 w-4" /> LOCKED · UNLOCKS AT {RANKS[COACH_CHAT_RANK].name.toUpperCase()}
-          </p>
-          <p className="mt-2.5 max-w-[56ch] text-[15px] text-muted-foreground">
-            Dig into the whole session with {who}: ask follow-ups, get specific, see the exact moments. Earn{" "}
-            {RANKS[COACH_CHAT_RANK].xp} XP to unlock it. Asking questions, watching the proof and finishing quests all count.
           </p>
           <GymRankMeter className="mt-4 max-w-[520px]" />
           <Link
@@ -300,9 +296,6 @@ export function GymCoachChat({
               <ArrowUp className="h-5 w-5" strokeWidth={2.5} />
             </button>
           </form>
-          <p className="mt-2 px-1 text-[12.5px] text-muted-foreground/70">
-            Answers come from this session only. Tap a timestamp to watch that moment.
-          </p>
         </div>
       )}
     </section>

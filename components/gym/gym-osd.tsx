@@ -19,7 +19,7 @@ export function GymOsd() {
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-20 max-w-[1440px] mx-auto px-5 md:px-8 pt-4 md:pt-5 flex justify-between items-start font-osd text-[20px] md:text-[22px] leading-none text-white/70 [text-shadow:0_0_8px_rgba(34,230,255,0.5)]">
-      <div className={cn("flex items-baseline gap-2", gold && "text-[var(--gym-yellow)] [text-shadow:0_0_10px_var(--gym-yellow)]")} aria-label={`Your score: ${xp}, rank ${rank.name}`}>
+      <div className={cn("flex items-baseline gap-2 transition-opacity", xp === 0 && "opacity-0", gold && "text-[var(--gym-yellow)] [text-shadow:0_0_10px_var(--gym-yellow)]")} aria-label={`Your score: ${xp}, rank ${rank.name}`}>
         <span className="text-[var(--gym-pink)]">1UP</span>
         <span className="tabular-nums">{score6(xp)}</span>
         <span className={cn("text-[16px] md:text-[18px]", gold ? "text-[var(--gym-yellow)]" : "text-white/50")}>· {rank.name.toUpperCase()}</span>

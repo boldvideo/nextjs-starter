@@ -41,10 +41,10 @@ export function GymRankMeter({ className }: { className?: string }) {
         {next ? (
           <>
             <span className="font-semibold text-foreground tabular-nums">{(next.xp - xp).toLocaleString("en-US")} XP</span> to{" "}
-            <span className="font-semibold text-foreground">{next.name}</span>: unlocks {next.perk}.
+            <span className="font-semibold text-foreground">{next.perk}</span>
           </>
         ) : (
-          "Top rank. Nothing left to prove. Do the quests anyway."
+          "Top rank."
         )}
       </p>
     </div>

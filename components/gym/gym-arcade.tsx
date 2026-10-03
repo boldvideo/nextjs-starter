@@ -127,30 +127,46 @@ export function GymArcade() {
     setDodger("arcade");
   });
 
-  useEffect(
-    () =>
-      onArcadeEvent((event) => {
-        if (event.type === "dodger") {
-          setDodger("arcade");
-          return;
-        }
-        if (event.type === "secret") return;
-        const id = ++nextId.current;
-        const toast: Toast =
-          event.type === "achievement"
-            ? { id, kind: "achievement", achievement: event.achievement }
-            : event.type === "rank"
-              ? { id, kind: "rank", rank: event.rank }
-              : { id, kind: "xp", amount: event.amount, label: event.label };
-        if (toast.kind === "rank") track("Rank up", { rank: toast.rank.name });
-        setToasts((list) => [...list.slice(-3), toast]);
-        setTimeout(
-          () => setToasts((list) => list.filter((t) => t.id !== id)),
-          toast.kind === "rank" ? 6500 : toast.kind === "achievement" ? 4200 : 1800
-        );
-      }),
-    []
-  );
+  // Notices take turns: one achievement or rank-up on screen at a time, in
+  // order. XP floats only when nothing bigger is showing (big ones carry
+  // their own XP), so a burst of events never stacks into a wall.
+  const queue = useRef<Toast[]>([]);
+  const showing = useRef(false);
+  useEffect(() => {
+    const showNext = () => {
+      const next = queue.current.shift();
+      if (!next) {
+        showing.current = false;
+        return;
+      }
+      showing.current = true;
+      setToasts((list) => [...list.filter((t) => t.kind === "xp"), next]);
+      setTimeout(() => {
+        setToasts((list) => list.filter((t) => t.id !== next.id));
+        setTimeout(showNext, 250);
+      }, next.kind === "rank" ? 6000 : 3600);
+    };
+
+    return onArcadeEvent((event) => {
+      if (event.type === "dodger") {
+        setDodger("arcade");
+        return;
+      }
+      if (event.type === "secret") return;
+      const id = ++nextId.current;
+      if (event.type === "xp") {
+        if (showing.current) return;
+        setToasts((list) => [...list.filter((t) => t.kind !== "xp"), { id, kind: "xp", amount: event.amount, label: event.label }]);
+        setTimeout(() => setToasts((list) => list.filter((t) => t.id !== id)), 1600);
+        return;
+      }
+      const toast: Toast =
+        event.type === "rank" ? { id, kind: "rank", rank: event.rank } : { id, kind: "achievement", achievement: event.achievement };
+      if (toast.kind === "rank") track("Rank up", { rank: toast.rank.name });
+      queue.current.push(toast);
+      if (!showing.current) showNext();
+    });
+  }, []);
 
   // A shared daily run (?play=daily) drops you straight into it
   useEffect(() => {
