@@ -723,7 +723,8 @@ function GymSet({
             height={32}
             className="h-8 w-8"
           />
-          <span className="font-display text-[13px] uppercase gym-sunset-text">Your next quest</span>
+          {/* Someone else's game: their homework, yours only if you take it */}
+          <span className="font-display text-[13px] uppercase gym-sunset-text">{isOwner ? "Your next quest" : "Their quest"}</span>
           {coach && (
             <span className="ml-auto font-osd text-[16px] leading-none text-muted-foreground">
               — {coachLabel(coach).toUpperCase()}
@@ -767,10 +768,10 @@ function GymSet({
                 )}
               >
                 <Bookmark className="h-4 w-4" strokeWidth={2.5} />
-                Save quest
+                {isOwner ? "Save quest" : "Take this quest"}
               </button>
             )}
-            {!done && (
+            {!done && isOwner && (
               <button
                 type="button"
                 onClick={complete}
