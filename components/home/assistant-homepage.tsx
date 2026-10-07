@@ -78,7 +78,7 @@ export function AssistantHomepage({ config }: AssistantHomepageProps) {
             value={query}
             onChange={setQuery}
             onSubmit={handleSubmit}
-            placeholder="Need clarity, connection, or calm? Just ask."
+            placeholder="Ask a question about the videos..."
             disabled={isSubmitting}
             isStreaming={false}
             autoFocus={true}
