@@ -1,7 +1,6 @@
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
-import type { AIEvent, Segment } from "@boldvideo/bold-js";
-import type { PlaybackSegment } from "@/types/bold-extensions";
+import type { AIEvent, PlaybackSource, Segment } from "@boldvideo/bold-js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,7 +33,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       state.sources = event.sources;
       return JSON.stringify({
         type: "sources",
-        sources: event.sources.map((s: PlaybackSegment) => ({
+        sources: event.sources.map((s: Segment & PlaybackSource) => ({
           id: s.id,
           video_id: s.videoId,
           title: s.title,
@@ -69,7 +68,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         interactionId: event.interactionId,
         responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
-        sources: completeSources.map((s: PlaybackSegment) => ({
+        sources: completeSources.map((s: Segment & PlaybackSource) => ({
           id: s.id,
           video_id: s.videoId,
           title: s.title,

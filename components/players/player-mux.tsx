@@ -1,10 +1,10 @@
 "use client";
 
+import { muxPlayerProps, type PlaybackSource } from "@boldvideo/bold-js";
 import dynamic from "next/dynamic";
 import { forwardRef, useEffect, useRef, useState, memo } from "react";
 import { useBold } from "@/components/providers/bold-provider";
 import type { SourceOpen } from "@/lib/source-engagement";
-import type { PlaybackFields } from "@/types/bold-extensions";
 
 // Import MuxPlayer with SSR disabled to prevent hydration errors
 const MuxPlayer = dynamic(
@@ -59,7 +59,7 @@ const timestampToSeconds = (timestamp: string): number => {
 };
 
 // Define a minimal type that the component actually requires
-export interface MuxPlayerVideoLike extends PlaybackFields {
+export interface MuxPlayerVideoLike extends PlaybackSource {
   id: string;
   playbackId: string;
   title: string;
@@ -330,11 +330,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
               }, 100);
             }
           }}
-          playbackId={video.playbackId}
-          tokens={video.playbackToken ? {
-            playback: video.playbackToken,
-            ...(video.storyboardToken ? { storyboard: video.storyboardToken } : {}),
-          } : undefined}
+          {...muxPlayerProps(video)}
           metadata={{
             video_id: video.id,
             video_title: video.title,
