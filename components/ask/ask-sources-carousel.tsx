@@ -47,7 +47,9 @@ export function AskSourcesCarousel({
         {citedSources.map((citation, index) => {
           const isSelected = selectedCitationId === citation.id;
           const hasValidTimestamp = citation.startMs > 0;
-          const thumbnailUrl = citation.playbackId
+          const thumbnailUrl = citation.playbackToken || citation.playbackPolicy === "signed"
+            ? citation.thumbnail
+            : citation.playbackId
             ? `https://image.mux.com/${citation.playbackId}/thumbnail.webp?time=${Math.floor(citation.startMs / 1000)}`
             : null;
 

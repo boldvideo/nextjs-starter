@@ -26,7 +26,7 @@ export async function generateMetadata({
 
   // Mux thumbnails are guaranteed JPEG (imported thumbs can be WebP behind a
   // .jpg name, which the OG renderer can't parse).
-  const ogThumb = video.playbackId
+  const ogThumb = video.playbackId && video.playbackPolicy !== "signed" && !video.playbackToken
     ? `https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=1120&fit_mode=preserve`
     : video.thumbnail;
 

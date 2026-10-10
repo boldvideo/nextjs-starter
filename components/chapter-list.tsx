@@ -16,6 +16,8 @@ interface Chapter {
 interface ChapterListProps {
   chaptersWebVTT: string | null | undefined;
   playbackId: string;
+  playbackPolicy?: "public" | "signed";
+  playbackToken?: string | null;
   onChapterClick: (timeInSeconds: number) => void;
 }
 
@@ -53,6 +55,8 @@ const parseChapters = (webvttString: string | null | undefined): Chapter[] => {
 export function ChapterList({
   chaptersWebVTT,
   playbackId,
+  playbackPolicy,
+  playbackToken,
   onChapterClick,
 }: ChapterListProps): React.JSX.Element | null {
   const chapters = parseChapters(chaptersWebVTT);
@@ -80,7 +84,7 @@ export function ChapterList({
               }}
             >
 
-              <div className="relative w-20 h-12 aspect-video flex-shrink-0 overflow-hidden border border-ring group-hover:border-primary">
+              {playbackPolicy !== "signed" && !playbackToken && <div className="relative w-20 h-12 aspect-video flex-shrink-0 overflow-hidden border border-ring group-hover:border-primary">
                 <Image
                   // Consider adding a placeholder/fallback image
                   src={`https://image.mux.com/${playbackId}/thumbnail.png?width=200&height=100&fit_mode=smartcrop&time=${chapter.startTimeSeconds}`}
@@ -95,7 +99,7 @@ export function ChapterList({
                     (e.target as HTMLImageElement).style.display = "none"; // Hide broken image
                   }}
                 />
-              </div>
+              </div>}
               <div className="flex flex-col">
                 <div className="w-full leading-tight">{chapter.title}</div>
                 <div>

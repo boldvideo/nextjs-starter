@@ -44,6 +44,10 @@ export function CitationModal({ citation, isOpen, onClose, engagement }: Citatio
     id: citation.videoId,
     playbackId: citation.playbackId,
     title: citation.videoTitle,
+    playbackPolicy: citation.playbackPolicy,
+    playbackToken: citation.playbackToken,
+    storyboardToken: citation.storyboardToken,
+    thumbnail: citation.playbackToken || citation.playbackPolicy === "signed" ? citation.thumbnail || "" : undefined,
   };
 
   return (

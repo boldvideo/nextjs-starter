@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { forwardRef, useEffect, useRef, useState, memo } from "react";
 import { useBold } from "@/components/providers/bold-provider";
 import type { SourceOpen } from "@/lib/source-engagement";
+import type { PlaybackFields } from "@/types/bold-extensions";
 
 // Import MuxPlayer with SSR disabled to prevent hydration errors
 const MuxPlayer = dynamic(
@@ -58,7 +59,7 @@ const timestampToSeconds = (timestamp: string): number => {
 };
 
 // Define a minimal type that the component actually requires
-export interface MuxPlayerVideoLike {
+export interface MuxPlayerVideoLike extends PlaybackFields {
   id: string;
   playbackId: string;
   title: string;
@@ -330,13 +331,17 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
             }
           }}
           playbackId={video.playbackId}
+          tokens={video.playbackToken ? {
+            playback: video.playbackToken,
+            ...(video.storyboardToken ? { storyboard: video.storyboardToken } : {}),
+          } : undefined}
           metadata={{
             video_id: video.id,
             video_title: video.title,
           }}
           streamType="on-demand"
           title={video.title}
-          poster={video.thumbnail}
+          poster={video.playbackToken || video.playbackPolicy === "signed" ? video.thumbnail || "" : video.thumbnail}
           autoPlay={autoPlay}
           thumbnailTime={startTime || 0}
           className={`w-full h-full relative z-10 ${className}`}
@@ -370,7 +375,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
           currentTime={startTime || currentTime}
           playbackRate={video.playbackSpeed || 1}
           storyboardSrc={
-            video.playbackId
+            video.playbackId && video.playbackPolicy !== "signed" && !video.playbackToken
               ? `https://image.mux.com/${video.playbackId}/storyboard.vtt`
               : undefined
           }
@@ -385,15 +390,4 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
 });
 
 // Optimize with memo to prevent unnecessary re-renders
-export const MuxPlayerComponent = memo(MuxPlayerComponentBase, (prevProps, nextProps) => {
-  // Only re-render if essential video properties change
-  return (
-    prevProps.video.playbackId === nextProps.video.playbackId &&
-    prevProps.video.id === nextProps.video.id &&
-    prevProps.engagement === nextProps.engagement &&
-    prevProps.startTime === nextProps.startTime &&
-    prevProps.autoPlay === nextProps.autoPlay &&
-    prevProps.currentTime === nextProps.currentTime &&
-    prevProps.onEnded === nextProps.onEnded
-  );
-});
+export const MuxPlayerComponent = memo(MuxPlayerComponentBase);

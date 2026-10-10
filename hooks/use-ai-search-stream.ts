@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { AskCitation } from "@/lib/ask";
+import type { PlaybackFields } from "@/types/bold-extensions";
 
 export interface AISearchMessage {
   id: string;
@@ -13,7 +14,8 @@ export interface AISearchMessage {
   interactionId?: string | null;
 }
 
-export interface AISearchSource {
+export interface AISearchSource extends PlaybackFields {
+  thumbnail?: string | null;
   video_id: string;
   title: string;
   timestamp: number;
@@ -293,6 +295,10 @@ export function sourceToCitation(
     relevanceRank: index + 1,
     videoId: source.video_id,
     playbackId: source.playback_id || "",
+    playbackPolicy: source.playbackPolicy,
+    playbackToken: source.playbackToken,
+    storyboardToken: source.storyboardToken,
+    thumbnail: source.thumbnail,
     videoTitle: source.title,
     timestampStart: formatTimestamp(startMs),
     timestampEnd: formatTimestamp(endMs),
