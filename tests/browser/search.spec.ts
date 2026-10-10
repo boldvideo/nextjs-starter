@@ -88,7 +88,7 @@ test("See all preserves new-tab navigation and pending previews never claim no r
   await expect(link).toBeVisible();
   const href = await link.getAttribute("href");
   const popupPromise = context.waitForEvent("page");
-  await link.click({ modifiers: ["Control"] });
+  await link.click({ modifiers: ["ControlOrMeta"] });
   const popup = await popupPromise;
   await expect(popup).toHaveURL(`http://localhost:4310${href}`);
   await expect(popup.getByText('1 match for “pricing”')).toBeVisible();

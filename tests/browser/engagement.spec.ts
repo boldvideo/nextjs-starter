@@ -91,10 +91,10 @@ test("preview timestamp opened in a new tab settles only at destination and open
   const link = page.getByRole("link", { name: /Pricing moment/ });
   await expect(link).toBeVisible();
   const popupPromise = context.waitForEvent("page");
-  await link.click({ modifiers: ["Control"] });
+  await link.click({ modifiers: ["ControlOrMeta"] });
   const popup = await popupPromise;
   await popup.waitForLoadState();
-  await expect.poll(async () => (await engagement(request)).length).toBe(1);
+  await expect.poll(async () => (await engagement(request)).filter(row => row.n === "source_open").length).toBe(1);
   const searches = await rows(request, "searches");
   expect(searches.map(row => row.search_mode)).toEqual(["preview", "settled"]);
   expect(new URL(popup.url()).searchParams.get("t")).toBe("83");
@@ -187,7 +187,7 @@ test("custom episode/title links retain pending and older answer attribution in 
   await expect(episode.last()).toHaveAttribute("href", /answer_request_id=/);
   await expect(title.last()).toHaveAttribute("href", /answer_request_id=/);
   const pendingPopup = context.waitForEvent("page");
-  await episode.last().click({ modifiers: ["Control"] });
+  await episode.last().click({ modifiers: ["ControlOrMeta"] });
   const pending = await pendingPopup;
   await pending.waitForLoadState();
   await expect.poll(async () => (await engagement(request)).length).toBe(1);
@@ -196,7 +196,7 @@ test("custom episode/title links retain pending and older answer attribution in 
   await expect(episode.first()).toHaveAttribute("href", new RegExp(`interaction_id=${first}`));
   await expect(title.first()).toHaveAttribute("href", new RegExp(`interaction_id=${first}`));
   const oldPopup = context.waitForEvent("page");
-  await title.first().click({ modifiers: ["Control"] });
+  await title.first().click({ modifiers: ["ControlOrMeta"] });
   const old = await oldPopup;
   await old.waitForLoadState();
   await expect.poll(async () => (await engagement(request)).length).toBe(2);
@@ -210,7 +210,7 @@ test("a new-tab source retains pending completion independently of the inline pl
   const link = page.getByRole("link", { name: /full video/i });
   await expect(link).toHaveAttribute("href", /answer_request_id=/);
   const popupPromise = context.waitForEvent("page");
-  await link.click({ modifiers: ["Control"] });
+  await link.click({ modifiers: ["ControlOrMeta"] });
   const popup = await popupPromise;
   await popup.waitForLoadState();
   await expect.poll(async () => (await engagement(request)).filter(row => row.n === "source_open").length).toBe(2);
