@@ -1,11 +1,12 @@
 import { createServer } from "node:http";
 import { generateKeyPairSync, sign } from "node:crypto";
 
+const port = Number(process.env.VOICE_FIXTURE_PORT || 4311);
 const video = {
   id: "11111111-1111-4111-8111-111111111111", slug: "voice-demo",
   title: "Make room for your best work", description: "Small changes to how you plan your day can make a big difference. Explore the lesson, then ask your assistant about the moments that matter to you.",
   duration: 320, playback_id: "voice-demo", thumbnail: "/og-static.png",
-  transcript: { json: { url: "http://127.0.0.1:4311/transcript" } },
+  transcript: { json: { url: `http://127.0.0.1:${port}/transcript` } },
 };
 const nextVideo = { ...video, id: "22222222-2222-4222-8222-222222222222", slug: "voice-next", title: "Build a daily rhythm" };
 // Disposable test credentials: these keys are never saved or trusted by Mux.
@@ -21,6 +22,8 @@ const storyboardToken = fixtureToken("s");
 const signedVideo = { ...video, id: "33333333-3333-4333-8333-333333333333", slug: "signed-demo",
   playback_id: "signed-demo", playback_policy: "signed", playback_token: playbackToken,
   storyboard_token: storyboardToken, thumbnail: "/og-static.png" };
+const signedStreamVideo = { ...signedVideo, slug: "signed-demo-stream",
+  stream_url: `https://stream.mux.com/signed-demo.m3u8?token=${playbackToken}&provided=1` };
 const signedSource = { id: "c_signed", video_id: signedVideo.id, title: signedVideo.title,
   timestamp: 83, timestamp_end: 95, text: "Signed source", playback_id: signedVideo.playback_id,
   playback_policy: "signed", playback_token: playbackToken, storyboard_token: storyboardToken,
@@ -139,10 +142,13 @@ createServer((request, response) => {
   if (path.includes("settings")) settingsRequests++;
   const data = path.includes("settings") ? settings
     : path.includes("/videos/") && !path.includes("/latest") ? (path.includes("signed-demo") ? {
-      ...signedVideo, ...(path.includes("no-storyboard") ? { storyboard_token: null, slug: "signed-demo-no-storyboard" } : {}),
+      ...(path.includes("signed-demo-stream") ? signedStreamVideo : signedVideo),
+      ...(path.includes("no-storyboard") ? { storyboard_token: null, slug: "signed-demo-no-storyboard" } : {}),
     } : path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
     : path.includes("/playlists/") ? { id: path.includes("signed-test") ? "signed-test" : "test",
       title: "Everyday focus", videos: path.includes("signed-test") ? [signedVideo, nextVideo] : [video, nextVideo] }
+    : url.pathname === "/api/v1/videos" || path.includes("/videos/latest")
+      ? Number(url.searchParams.get("page") || 1) === 1 ? [video, { ...signedVideo, title: "Signed episode" }] : []
     : [];
   response.end(JSON.stringify({ data }));
-}).listen(4311, "127.0.0.1");
+}).listen(port, "127.0.0.1");

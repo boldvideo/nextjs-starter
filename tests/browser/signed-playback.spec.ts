@@ -1,4 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Request } from "@playwright/test";
+
+// Failure traces record network URLs, including disposable playback credentials.
+test.use({ trace: "off" });
 
 test.beforeEach(async ({ page }) => {
   // Hold mocked media manifests: tests cover real player request construction,
@@ -33,7 +36,15 @@ const signedPlayer = async (page: Page, storyboard = true, poster = "/og-static.
   }, { storyboard, poster })).toEqual({ playback: true, storyboard: true, poster: true });
 };
 
-for (const path of ["/v/signed-demo", "/e/signed-demo", "/e/signed-demo?chat=1", "/pl/signed-test/v/signed-demo"]) {
+const signedNativePlayer = async (page: Page, manifest: Promise<Request>, provided = false) => {
+  await expect(page.locator("video")).toBeVisible();
+  const url = new URL((await manifest).url());
+  expect(url.pathname === "/signed-demo.m3u8" && !!url.searchParams.get("token") &&
+    url.searchParams.has("provided") === provided).toBe(true);
+  await expect(page.locator('img[src="/og-static.png"]').first()).toBeVisible();
+};
+
+for (const path of ["/v/signed-demo", "/v/signed-demo-stream", "/e/signed-demo", "/e/signed-demo?chat=1", "/pl/signed-test/v/signed-demo"]) {
   test(`signed credentials and poster reach ${path}`, async ({ page }) => {
     const unsigned: string[] = [];
     page.on("request", request => {
@@ -43,11 +54,15 @@ for (const path of ["/v/signed-demo", "/e/signed-demo", "/e/signed-demo?chat=1",
         unsigned.push(url.hostname); // Never retain or log tokenized URLs.
       }
     });
+    const manifest = page.waitForRequest(request => new URL(request.url()).hostname === "stream.mux.com");
     await page.goto(path);
     await expect(page).toHaveURL(path);
-    await signedPlayer(page);
+    await signedNativePlayer(page, manifest, path.includes("-stream"));
     if (path === "/v/signed-demo") {
-      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", /\/og-static\.png$/);
+      expect(await page.locator('meta[property="og:image"]').evaluate(element => {
+        const og = new URL(element.getAttribute("content")!, location.origin);
+        return og.pathname === "/og" && og.searchParams.get("img") === "/og-static.png";
+      })).toBe(true);
       if (process.env.PLAYBACK_SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.PLAYBACK_SCREENSHOT_DIR}/signed-desktop-after.png` });
     }
     expect(unsigned).toEqual([]);
@@ -56,21 +71,69 @@ for (const path of ["/v/signed-demo", "/e/signed-demo", "/e/signed-demo?chat=1",
 
 test("signed video without storyboard and mobile video preserve the API poster", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  const manifest = page.waitForRequest(request => new URL(request.url()).hostname === "stream.mux.com");
   await page.goto("/v/signed-demo-no-storyboard");
-  await signedPlayer(page, false);
+  await signedNativePlayer(page, manifest);
   if (process.env.PLAYBACK_SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.PLAYBACK_SCREENSHOT_DIR}/signed-mobile-after.png` });
 });
 
 test("public player and OG URLs are unchanged", async ({ page }) => {
+  const manifest = page.waitForRequest(request => new URL(request.url()).hostname === "stream.mux.com");
   await page.goto("/v/voice-demo");
-  await expect(page.locator("mux-player")).toBeVisible();
-  expect(await page.locator("mux-player").evaluate(element => {
-    const player = element as HTMLElement & { tokens: { playback?: string }; poster: string; storyboard: string; src: string };
-    return !player.tokens.playback && player.poster === "/og-static.png" &&
-      player.storyboard === "https://image.mux.com/voice-demo/storyboard.vtt" && !new URL(player.src).searchParams.has("token");
+  await expect(page.locator("video")).toBeVisible();
+  expect((await manifest).url() === "https://stream.mux.com/voice-demo.m3u8").toBe(true);
+  await expect(page.locator('img[src="/og-static.png"]').first()).toBeVisible();
+  expect(await page.locator('meta[property="og:image"]').evaluate(element => {
+    const og = new URL(element.getAttribute("content")!, location.origin);
+    return og.pathname === "/og" && og.searchParams.get("img") ===
+      "https://image.mux.com/voice-demo/thumbnail.jpg?width=1120&fit_mode=preserve";
   })).toBe(true);
-  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", "https://image.mux.com/voice-demo/thumbnail.jpg?width=1200&fit_mode=preserve");
   if (process.env.PLAYBACK_SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.PLAYBACK_SCREENSHOT_DIR}/public-desktop-after.png` });
+});
+
+test("homepage prewarm and pointer scrub request only public storyboards", async ({ page }) => {
+  const storyboards: string[] = [];
+  await page.route("https://image.mux.com/**", route => {
+    const url = new URL(route.request().url());
+    storyboards.push(url.pathname);
+    return route.fulfill({ json: { url: "/og-static.png", tile_width: 400, tile_height: 225,
+      duration: 320, tiles: [{ start: 0, x: 0, y: 0 }] } });
+  });
+  await page.goto("/");
+  expect(await page.evaluate(() => matchMedia("(hover: hover) and (pointer: fine)").matches)).toBe(true);
+  const signed = page.locator('a[href="/v/signed-demo"]');
+  const publicCard = page.locator('a[href="/v/voice-demo"]');
+  await expect(signed).toBeVisible();
+  await expect.poll(() => storyboards.includes("/voice-demo/storyboard.json")).toBe(true);
+  await signed.locator("img").hover();
+  await expect(signed.locator('[style*="background-image"]')).toHaveCount(0);
+  await expect(signed).toContainText("5:20");
+  await publicCard.locator("img").hover();
+  await expect(publicCard.locator('[style*="background-image"]')).toHaveCount(1);
+  expect(storyboards).toEqual(["/voice-demo/storyboard.json"]);
+});
+
+test("signed homepage long press keeps the poster and allows navigation", async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const page = await context.newPage();
+  const storyboards: string[] = [];
+  await page.route("https://stream.mux.com/**", () => {});
+  await page.route("https://image.mux.com/**", route => {
+    storyboards.push(new URL(route.request().url()).pathname);
+    return route.fulfill({ contentType: "text/vtt", body: "WEBVTT\n\n" });
+  });
+  await page.goto("/");
+  const signed = page.locator('a[href="/v/signed-demo"]');
+  await signed.scrollIntoViewIfNeeded();
+  await signed.locator("img").dispatchEvent("touchstart", { touches: [{ identifier: 1, clientX: 100, clientY: 200 }] });
+  await page.waitForTimeout(450); // exceed the tenant's 350ms long-press threshold
+  await expect(signed).toContainText("5:20");
+  await expect(signed.locator('[style*="background-image"]')).toHaveCount(0);
+  await signed.locator("img").dispatchEvent("touchend", { touches: [] });
+  await signed.tap();
+  await expect(page).toHaveURL("/v/signed-demo");
+  expect(storyboards.some(path => path.includes("signed-demo"))).toBe(false);
+  await context.close();
 });
 
 for (const mobile of [false, true]) {
