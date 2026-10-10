@@ -6,7 +6,7 @@ import {
   SynthesizedResponse,
   AskCitation
 } from "@/lib/ask";
-import type { ChatAttachment } from "@/hooks/use-ai-ask-stream";
+import type { AIAskSource, ChatAttachment } from "@/hooks/use-ai-ask-stream";
 import { createPlaceholderCitations } from "@/lib/citation-helpers";
 import { AnswerInteraction } from "@/lib/source-engagement";
 
@@ -36,17 +36,7 @@ interface TextDeltaMessage {
 
 interface SourcesMessage {
   type: "sources";
-  sources: Array<{
-    id?: string;
-    video_id: string;
-    title: string;
-    timestamp: number;
-    timestamp_end?: number;
-    text: string;
-    playback_id?: string;
-    speaker?: string;
-    cited?: boolean;
-  }>;
+  sources: AIAskSource[];
 }
 
 interface MessageCompleteMessage {
@@ -54,17 +44,7 @@ interface MessageCompleteMessage {
   type: "message_complete";
   responseType: "answer" | "clarification"; // camelCase from server
   content: string;
-  sources?: Array<{
-    id?: string;
-    video_id: string;
-    title: string;
-    timestamp: number;
-    timestamp_end?: number;
-    text: string;
-    playback_id?: string;
-    speaker?: string;
-    cited?: boolean;
-  }>;
+  sources?: AIAskSource[];
   conversationId?: string;
   usage?: unknown;
   context?: unknown;
@@ -122,6 +102,10 @@ function convertToCitation(
     relevanceRank: index + 1,
     videoId: source.video_id,
     playbackId: source.playback_id || "",
+    playbackPolicy: source.playbackPolicy,
+    playbackToken: source.playbackToken,
+    storyboardToken: source.storyboardToken,
+    thumbnail: source.thumbnail,
     videoTitle: source.title,
     timestampStart: formatTimestamp(startMs),
     timestampEnd: formatTimestamp(endMs),

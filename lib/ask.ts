@@ -1,7 +1,8 @@
 // Types for the ask API response
+import type { PlaybackSource } from "@boldvideo/bold-js";
 import type { AnswerInteraction } from "@/lib/source-engagement";
 
-export type AskCitation = {
+export type AskCitation = PlaybackSource & {
   // API v2.0 citation format
   id: string;  // Unique identifier like "vid1_5000"
   relevanceScore: number;  // 0.0 to 1.0

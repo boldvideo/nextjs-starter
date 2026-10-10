@@ -2,7 +2,7 @@ import "server-only";
 
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
-import type { AIEvent, Segment } from "@boldvideo/bold-js";
+import type { AIEvent, PlaybackSource, Segment } from "@boldvideo/bold-js";
 
 export type Message = {
   role: "user" | "assistant";
@@ -20,9 +20,14 @@ interface StreamState {
   conversationId?: string;
 }
 
-function toCitations(sources: Segment[]) {
+function toCitations(sources: (Segment & PlaybackSource)[]) {
   return sources.map((s) => ({
     video_id: s.videoId,
+    playback_id: s.playbackId,
+    playbackPolicy: s.playbackPolicy,
+    playbackToken: s.playbackToken,
+    storyboardToken: s.storyboardToken,
+    thumbnail: s.thumbnail,
     title: s.title,
     timestamp: s.timestamp,
     text: s.text,
@@ -101,18 +106,22 @@ function asyncIterableToStream(
   return new ReadableStream({
     async pull(controller) {
       try {
-        const { done, value } = await iterator.next();
+        // Keep reading ignored SDK events until there is a client event to send.
+        for (;;) {
+          const { done, value } = await iterator.next();
 
-        if (done) {
-          controller.enqueue(encoder.encode(`data: ${formatDone(state)}\n\n`));
-          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          controller.close();
-          return;
-        }
+          if (done) {
+            controller.enqueue(encoder.encode(`data: ${formatDone(state)}\n\n`));
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+            return;
+          }
 
-        const sseData = formatSSE(value, state);
-        if (sseData) {
-          controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
+          const sseData = formatSSE(value, state);
+          if (sseData) {
+            controller.enqueue(encoder.encode(`data: ${sseData}\n\n`));
+            return;
+          }
         }
       } catch (error) {
         controller.enqueue(

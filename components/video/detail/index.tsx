@@ -106,8 +106,7 @@ export function VideoDetail({
         className={className}
         player={
           <Player
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ExtendedVideo type compatibility with Player component
-            video={video as any}
+            video={video}
             autoPlay={true}
             ref={playerRef}
             engagement={chatOpen?.open.videoId === video.id && chatOpen.navigation === navigationOpen ? chatOpen.open : navigationOpen}

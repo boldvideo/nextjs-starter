@@ -1,5 +1,6 @@
 "use client";
 
+import type { PlaybackSource } from "@boldvideo/bold-js";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
 import { AnswerInteraction } from "@/lib/source-engagement";
@@ -31,7 +32,7 @@ export interface AIAskMessage {
   attachments?: ChatAttachment[];
 }
 
-export interface AIAskSource {
+export interface AIAskSource extends PlaybackSource {
   id?: string;
   video_id: string;
   title: string;
@@ -43,7 +44,7 @@ export interface AIAskSource {
   cited?: boolean;
 }
 
-interface BackendSource {
+interface BackendSource extends PlaybackSource {
   id: string;
   videoId: string;
   videoTitle?: string;
@@ -112,6 +113,10 @@ function normalizeBackendSource(source: BackendSource): AIAskSource {
     timestamp: source.timestampSeconds ?? source.timestamp ?? 0,
     timestamp_end: source.timestampEndSeconds ?? source.timestampEnd,
     playback_id: source.muxPlaybackId || source.playbackId,
+    playbackPolicy: source.playbackPolicy,
+    playbackToken: source.playbackToken,
+    storyboardToken: source.storyboardToken,
+    thumbnail: source.thumbnail,
     speaker: source.speaker,
     cited: source.cited,
   };
@@ -330,6 +335,10 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                         ...finalSrc,
                         title: finalSrc.title || origSrc?.title || "Untitled",
                         playback_id: finalSrc.playback_id || origSrc?.playback_id,
+                        playbackPolicy: finalSrc.playbackPolicy ?? origSrc?.playbackPolicy,
+                        playbackToken: finalSrc.playbackToken ?? origSrc?.playbackToken,
+                        storyboardToken: finalSrc.storyboardToken ?? origSrc?.storyboardToken,
+                        thumbnail: finalSrc.thumbnail ?? origSrc?.thumbnail,
                         timestamp: finalSrc.timestamp ?? origSrc?.timestamp ?? 0,
                         timestamp_end: finalSrc.timestamp_end ?? origSrc?.timestamp_end,
                       };
@@ -615,6 +624,10 @@ export function askSourceToCitation(
     relevanceRank: index + 1,
     videoId: source.video_id,
     playbackId: source.playback_id || "",
+    playbackPolicy: source.playbackPolicy,
+    playbackToken: source.playbackToken,
+    storyboardToken: source.storyboardToken,
+    thumbnail: source.thumbnail,
     videoTitle: source.title,
     timestampStart: formatTimestamp(startMs),
     timestampEnd: formatTimestamp(endMs),

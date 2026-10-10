@@ -2,10 +2,11 @@
 
 ## Published SDK and rollout
 
-The manifest requires published `@boldvideo/bold-js` ^1.30.0 and the lockfile
-resolves 1.30.0. This release forwards `channel` and `clientName` in AI request
-bodies. SDK 1.29.0 preserved interaction IDs but dropped these options; headers
-do not satisfy the backend's body/query contract.
+The manifest requires `@boldvideo/bold-js` ^2.2.0 and the lockfile resolves
+2.2.0, which provides the signed playback helpers. Since 1.30.0 the SDK forwards
+`channel` and `clientName` in AI request bodies. SDK 1.29.0 preserved interaction
+IDs but dropped these options; headers do not satisfy the backend's body/query
+contract.
 
 The SDK publication blocker is resolved. Routine `bun run test:browser` and CI
 now unconditionally verify Ask, coach, video chat, and AI search upstream bodies
