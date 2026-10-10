@@ -1,9 +1,9 @@
 "use client";
 
+import type { PlaybackSource } from "@boldvideo/bold-js";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
 import { AnswerInteraction } from "@/lib/source-engagement";
-import type { PlaybackFields } from "@/types/bold-extensions";
 
 export interface ChatAttachment {
   id: string;
@@ -32,8 +32,7 @@ export interface AIAskMessage {
   attachments?: ChatAttachment[];
 }
 
-export interface AIAskSource extends PlaybackFields {
-  thumbnail?: string | null;
+export interface AIAskSource extends PlaybackSource {
   id?: string;
   video_id: string;
   title: string;
@@ -45,8 +44,7 @@ export interface AIAskSource extends PlaybackFields {
   cited?: boolean;
 }
 
-interface BackendSource extends PlaybackFields {
-  thumbnail?: string | null;
+interface BackendSource extends PlaybackSource {
   id: string;
   videoId: string;
   videoTitle?: string;
