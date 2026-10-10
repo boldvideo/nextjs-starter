@@ -1,12 +1,33 @@
 import { createServer } from "node:http";
+import { generateKeyPairSync, sign } from "node:crypto";
 
 const video = {
   id: "11111111-1111-4111-8111-111111111111", slug: "voice-demo",
   title: "Make room for your best work", description: "Small changes to how you plan your day can make a big difference. Explore the lesson, then ask your assistant about the moments that matter to you.",
   duration: 320, playback_id: "voice-demo", thumbnail: "/og-static.png",
+  published_at: "2026-01-01T00:00:00Z",
   transcript: { json: { url: "http://127.0.0.1:4311/transcript" } },
 };
 const nextVideo = { ...video, id: "22222222-2222-4222-8222-222222222222", slug: "voice-next", title: "Build a daily rhythm" };
+// Disposable test credentials: these keys are never saved or trusted by Mux.
+const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+const fixtureToken = (aud: string) => {
+  const header = Buffer.from(JSON.stringify({ alg: "RS256", kid: "fixture" })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({ sub: "signed-demo", aud, exp: Math.floor(Date.now() / 1000) + 43200 })).toString("base64url");
+  const input = `${header}.${payload}`;
+  return `${input}.${sign("RSA-SHA256", Buffer.from(input), privateKey).toString("base64url")}`;
+};
+const playbackToken = fixtureToken("v");
+const storyboardToken = fixtureToken("s");
+const signedVideo = { ...video, id: "33333333-3333-4333-8333-333333333333", slug: "signed-demo",
+  playback_id: "signed-demo", playback_policy: "signed", playback_token: playbackToken,
+  storyboard_token: storyboardToken, thumbnail: "/og-static.png" };
+const policyOnlyVideo = { ...signedVideo, id: "44444444-4444-4444-8444-444444444444", slug: "signed-policy-only", playback_id: "signed-policy-only", playback_token: null };
+const tokenOnlyVideo = { ...signedVideo, id: "55555555-5555-4555-8555-555555555555", slug: "signed-token-only", playback_id: "signed-token-only", playback_policy: null };
+const signedSource = { id: "c_signed", video_id: signedVideo.id, title: signedVideo.title,
+  timestamp: 83, timestamp_end: 95, text: "Signed source", playback_id: signedVideo.playback_id,
+  playback_policy: "signed", playback_token: playbackToken, storyboard_token: storyboardToken,
+  thumbnail: signedVideo.thumbnail };
 const settings = {
   name: "Bold Learning", slug: "voice-test", logo_url: "/bold-logo.svg",
   account: { id: "voice-test", name: "Bold Learning", subdomain: "voice-test", ai: {
@@ -28,6 +49,14 @@ createServer((request, response) => {
   if (request.method === "OPTIONS") { response.end(); return; }
   const path = request.url ?? "";
   const url = new URL(path, "http://localhost");
+  if (url.pathname === "/api/v1/ai/chat/signed-history") {
+    response.end(JSON.stringify({ conversation_id: "signed-history", messages: [{
+      id: "signed-question", role: "user", content: "Show me the signed lesson", inserted_at: new Date(Date.now() - 1000).toISOString(),
+    }, {
+      id: "signed-answer", role: "assistant", content: "Watch [1].", sources: [signedSource], inserted_at: new Date().toISOString(),
+    }] }));
+    return;
+  }
   if (url.pathname === "/test/settings-requests") {
     if (request.method === "DELETE") settingsRequests = 0;
     response.end(JSON.stringify(settingsRequests));
@@ -51,11 +80,18 @@ createServer((request, response) => {
       }
       const interactionId = crypto.randomUUID();
       chats.push({ ...input, path: url.pathname, interactionId });
-      const source = { id: "c_abc123", video_id: video.id, title: video.title, timestamp: 83, text: "Pricing source", playback_id: "voice-demo" };
+      const source = input.prompt?.includes("signed") ? {
+        ...signedSource,
+        ...(input.prompt.includes("no-poster") ? { thumbnail: null, storyboard_token: null } : {}),
+      } : { id: "c_abc123", video_id: video.id, title: video.title, timestamp: 83, text: "Pricing source", playback_id: "voice-demo",
+        ...(input.prompt === "public-poster" ? { thumbnail: video.thumbnail } : {}) };
       const content = input.prompt?.includes("mentions")
         ? `Watch [1]. "${video.title}" and *${video.title}*.`
         : "Watch [1] and [01:23] for pricing.";
       response.setHeader("Content-Type", "text/event-stream");
+      if (input.prompt?.includes("signed")) {
+        response.write(`data: ${JSON.stringify({ type: "citation_map", citation_map: { c_signed: source } })}\n\n`);
+      }
       response.write(`data: ${JSON.stringify({ type: "sources", sources: [source] })}\n\n`);
       response.write(`data: ${JSON.stringify({ type: "text_delta", delta: content })}\n\n`);
       setTimeout(() => response.end(`data: ${JSON.stringify({ type: "message_complete", content, citations: [source], interaction_id: input.prompt === "no-id" ? null : interactionId, response_type: "answer" })}\n\ndata: [DONE]\n\n`), input.prompt?.includes("pending") ? 2500 : 0);
@@ -75,11 +111,12 @@ createServer((request, response) => {
       aiSearches.push(search);
       const key = search.request_id || crypto.randomUUID();
       if (!interactions.has(key)) interactions.set(key, crypto.randomUUID());
-      const result = { content: "Pricing answer", citations: [], response_type: "answer",
+      const result = { content: "Pricing answer", citations: search.prompt?.includes("signed") ? [signedSource] : [], response_type: "answer",
         interaction_id: search.search_mode === "preview" ? null : interactions.get(key) };
       if (search.stream === false) response.end(JSON.stringify(result));
       else {
         response.setHeader("Content-Type", "text/event-stream");
+        if (result.citations.length) response.write(`data: ${JSON.stringify({ type: "sources", sources: result.citations })}\n\n`);
         response.end(`data: ${JSON.stringify({ type: "text_delta", delta: result.content })}\n\ndata: ${JSON.stringify({ type: "message_complete", ...result })}\n\ndata: [DONE]\n\n`);
       }
     });
@@ -104,8 +141,12 @@ createServer((request, response) => {
   }
   if (path.includes("settings")) settingsRequests++;
   const data = path.includes("settings") ? settings
-    : path.includes("/videos/") && !path.includes("/latest") ? (path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
-    : path.includes("/playlists/") ? { id: "test", title: "Everyday focus", videos: [video, nextVideo] }
+    : /\/videos\/?$/.test(url.pathname) ? [signedVideo, policyOnlyVideo, tokenOnlyVideo, video]
+    : path.includes("/videos/") && !path.includes("/latest") ? (path.includes("signed-demo") ? {
+      ...signedVideo, ...(path.includes("no-storyboard") ? { storyboard_token: null, slug: "signed-demo-no-storyboard" } : {}),
+    } : path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
+    : path.includes("/playlists/") ? { id: path.includes("signed-test") ? "signed-test" : "test",
+      title: "Everyday focus", videos: path.includes("signed-test") ? [signedVideo, nextVideo] : [video, nextVideo] }
     : [];
   response.end(JSON.stringify({ data }));
 }).listen(4311, "127.0.0.1");

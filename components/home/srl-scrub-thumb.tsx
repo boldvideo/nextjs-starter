@@ -165,7 +165,7 @@ export function SrlScrubThumb({
 
   const handleMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (storyboard === null) return; // no storyboard for this video
+      if (!playbackId || storyboard === null) return; // no storyboard for this video
       const rect = e.currentTarget.getBoundingClientRect();
       const frac = Math.min(
         1,
@@ -174,7 +174,7 @@ export function SrlScrubThumb({
       lastFracRef.current = frac;
       applyFrac(storyboard, frac);
     },
-    [storyboard, applyFrac]
+    [playbackId, storyboard, applyFrac]
   );
 
   const handleLeave = useCallback(() => setHovering(false), []);
@@ -283,7 +283,7 @@ export function SrlScrubThumb({
 
   // Frames need the loaded sheet; playhead + timecode respond immediately.
   const isScrubbing =
-    hovering && storyboard != null && storyboard.tiles.length > 0;
+    !!playbackId && hovering && storyboard != null && storyboard.tiles.length > 0;
   const isSheetLoading = hovering && !!playbackId && storyboard === undefined;
   const showScrubUi = isScrubbing || isSheetLoading;
 

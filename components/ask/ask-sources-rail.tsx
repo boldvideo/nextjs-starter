@@ -23,7 +23,7 @@ interface FramePreview {
  */
 function MomentFramePreview({ preview }: { preview: FramePreview }) {
   const { citation } = preview;
-  if (!citation.playbackId) return null;
+  if (!citation.playbackId || citation.playbackPolicy === "signed" || citation.playbackToken) return null;
   const seconds = Math.floor(citation.startMs / 1000);
 
   return (
@@ -224,6 +224,10 @@ function VideoSourcePanel({
     id: citation.videoId,
     playbackId: citation.playbackId,
     title: citation.videoTitle,
+    playbackPolicy: citation.playbackPolicy,
+    playbackToken: citation.playbackToken,
+    storyboardToken: citation.storyboardToken,
+    thumbnail: citation.playbackToken || citation.playbackPolicy === "signed" ? citation.thumbnail || "" : undefined,
   };
   const startSeconds = Math.floor(citation.startMs / 1000);
 

@@ -95,7 +95,7 @@ export function SrlLibrary({ videos }: { videos: Video[] | null }) {
                 title={featured.title}
                 duration={featured.duration}
                 playbackId={
-                  (featured as Video & { playbackId?: string }).playbackId
+                  featured.playbackPolicy === "signed" || featured.playbackToken ? undefined : featured.playbackId
                 }
                 videoId={featured.id}
                 priority
