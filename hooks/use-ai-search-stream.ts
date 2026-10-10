@@ -1,8 +1,8 @@
 "use client";
 
+import type { PlaybackSource } from "@boldvideo/bold-js";
 import { useState, useCallback, useRef } from "react";
 import { AskCitation } from "@/lib/ask";
-import type { PlaybackFields } from "@/types/bold-extensions";
 
 export interface AISearchMessage {
   id: string;
@@ -14,8 +14,7 @@ export interface AISearchMessage {
   interactionId?: string | null;
 }
 
-export interface AISearchSource extends PlaybackFields {
-  thumbnail?: string | null;
+export interface AISearchSource extends PlaybackSource {
   video_id: string;
   title: string;
   timestamp: number;

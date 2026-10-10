@@ -5,11 +5,10 @@ import { formatDuration } from "util/format-duration";
 import { ProgressBar } from "../progress-bar";
 import { CompletionIndicator } from "../completion-indicator";
 import type { Video } from "@boldvideo/bold-js";
-import type { PlaybackFields } from "@/types/bold-extensions";
 import { buildVideoUrl } from "@/lib/video-path";
 
 interface VideoThumbnailProps {
-  video: Video & PlaybackFields;
+  video: Video;
   prefetch?: boolean;
   playlistId?: string;
   progress?: {
