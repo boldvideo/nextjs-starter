@@ -40,7 +40,9 @@ export function AskVideosTab({
         <div className="space-y-3">
           {citations.map((citation) => {
             const isSelected = selectedCitationId === citation.id;
-            const thumbnailUrl = citation.playbackId
+            const thumbnailUrl = citation.playbackToken || citation.playbackPolicy === "signed"
+              ? citation.thumbnail
+              : citation.playbackId
               ? `https://image.mux.com/${citation.playbackId}/thumbnail.webp?time=${Math.floor(citation.startMs / 1000)}`
               : null;
 

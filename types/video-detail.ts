@@ -1,4 +1,5 @@
 import type { Video } from "@boldvideo/bold-js";
+import type { PlaybackFields } from "@/types/bold-extensions";
 
 /**
  * CTA type for call-to-action data
@@ -15,7 +16,7 @@ export interface CTA {
 /**
  * Extended Video type with additional properties used in our application
  */
-export interface ExtendedVideo extends Omit<Video, "cta" | "attachments"> {
+export interface ExtendedVideo extends Omit<Video, "cta" | "attachments">, PlaybackFields {
   chaptersUrl?: string;
   aiAvatar?: string;
   aiName?: string;
