@@ -1,13 +1,15 @@
 // Types for the ask API response
 import type { AnswerInteraction } from "@/lib/source-engagement";
+import type { PlaybackFields } from "@/types/bold-extensions";
 
-export type AskCitation = {
+export type AskCitation = PlaybackFields & {
   // API v2.0 citation format
   id: string;  // Unique identifier like "vid1_5000"
   relevanceScore: number;  // 0.0 to 1.0
   relevanceRank: number;  // 1 = most relevant, 2 = second most, etc.
   videoId: string;
   playbackId: string;
+  thumbnail?: string | null;
   videoTitle: string;
   timestampStart: string;  // "00:05" format
   timestampEnd: string;    // "07:45" format
