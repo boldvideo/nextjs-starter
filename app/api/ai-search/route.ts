@@ -2,6 +2,7 @@ import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
 import { isSearchRequestId } from "@/lib/search-request";
 import type { AIEvent, Segment } from "@boldvideo/bold-js";
+import type { PlaybackSegment } from "@/types/bold-extensions";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -41,7 +42,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       state.sources = event.sources;
       return JSON.stringify({
         type: "sources",
-        sources: event.sources.map((s) => ({
+        sources: event.sources.map((s: PlaybackSegment) => ({
           id: s.id,
           video_id: s.videoId,
           title: s.title,
@@ -49,6 +50,10 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
           timestamp_end: s.timestampEnd,
           text: s.text,
           playback_id: s.playbackId,
+          playbackPolicy: s.playbackPolicy,
+          playbackToken: s.playbackToken,
+          storyboardToken: s.storyboardToken,
+          thumbnail: s.thumbnail,
           speaker: s.speaker,
           cited: s.cited,
         })),
@@ -62,7 +67,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
         interactionId: event.interactionId,
         responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
-        sources: completeSources.map((s: Segment) => ({
+        sources: completeSources.map((s: PlaybackSegment) => ({
           id: s.id,
           video_id: s.videoId,
           title: s.title,
@@ -70,6 +75,10 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
           timestamp_end: s.timestampEnd,
           text: s.text,
           playback_id: s.playbackId,
+          playbackPolicy: s.playbackPolicy,
+          playbackToken: s.playbackToken,
+          storyboardToken: s.storyboardToken,
+          thumbnail: s.thumbnail,
           speaker: s.speaker,
           cited: s.cited,
         })),
