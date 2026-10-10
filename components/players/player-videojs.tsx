@@ -1,6 +1,7 @@
 "use client";
 
 import "@videojs/react/video/skin.css";
+import { streamUrl } from "@boldvideo/bold-js";
 import { forwardRef, memo, useCallback, useEffect, useRef } from "react";
 import { createPlayer } from "@videojs/react";
 import { VideoSkin, videoFeatures } from "@videojs/react/video";
@@ -100,7 +101,7 @@ const VideoJsPlayerBase = forwardRef(function VideoJsPlayer(
         <VideoSkin poster={video.thumbnail} className="w-full h-full">
           <MuxVideo
             ref={attachMedia}
-            src={`https://stream.mux.com/${video.playbackId}.m3u8`}
+            src={streamUrl(video)}
             autoPlay={autoPlay}
             playsInline
             crossOrigin="anonymous"
@@ -130,14 +131,4 @@ const VideoJsPlayerBase = forwardRef(function VideoJsPlayer(
   );
 });
 
-export const VideoJsPlayerComponent = memo(
-  VideoJsPlayerBase,
-  (prev, next) =>
-    prev.video.playbackId === next.video.playbackId &&
-    prev.video.id === next.video.id &&
-    prev.engagement === next.engagement &&
-    prev.startTime === next.startTime &&
-    prev.autoPlay === next.autoPlay &&
-    prev.currentTime === next.currentTime &&
-    prev.onEnded === next.onEnded
-);
+export const VideoJsPlayerComponent = memo(VideoJsPlayerBase);

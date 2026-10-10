@@ -2,7 +2,7 @@ import "server-only";
 
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
-import type { AIEvent, Segment } from "@boldvideo/bold-js";
+import type { AIEvent, PlaybackSource, Segment } from "@boldvideo/bold-js";
 
 export type Message = {
   role: "user" | "assistant";
@@ -20,12 +20,17 @@ interface StreamState {
   conversationId?: string;
 }
 
-function toCitations(sources: Segment[]) {
+function toCitations(sources: Array<Segment & PlaybackSource>) {
   return sources.map((s) => ({
     video_id: s.videoId,
     title: s.title,
     timestamp: s.timestamp,
     text: s.text,
+    playback_id: s.playbackId,
+    playbackPolicy: s.playbackPolicy,
+    playbackToken: s.playbackToken,
+    storyboardToken: s.storyboardToken,
+    thumbnail: s.thumbnail,
   }));
 }
 

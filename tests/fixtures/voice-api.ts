@@ -5,6 +5,7 @@ const video = {
   id: "11111111-1111-4111-8111-111111111111", slug: "voice-demo",
   title: "Make room for your best work", description: "Small changes to how you plan your day can make a big difference. Explore the lesson, then ask your assistant about the moments that matter to you.",
   duration: 320, playback_id: "voice-demo", thumbnail: "/og-static.png",
+  published_at: "2026-01-01T00:00:00Z",
   transcript: { json: { url: "http://127.0.0.1:4311/transcript" } },
 };
 const nextVideo = { ...video, id: "22222222-2222-4222-8222-222222222222", slug: "voice-next", title: "Build a daily rhythm" };
@@ -21,6 +22,8 @@ const storyboardToken = fixtureToken("s");
 const signedVideo = { ...video, id: "33333333-3333-4333-8333-333333333333", slug: "signed-demo",
   playback_id: "signed-demo", playback_policy: "signed", playback_token: playbackToken,
   storyboard_token: storyboardToken, thumbnail: "/og-static.png" };
+const policyOnlyVideo = { ...signedVideo, id: "44444444-4444-4444-8444-444444444444", slug: "signed-policy-only", playback_id: "signed-policy-only", playback_token: null };
+const tokenOnlyVideo = { ...signedVideo, id: "55555555-5555-4555-8555-555555555555", slug: "signed-token-only", playback_id: "signed-token-only", playback_policy: null };
 const signedSource = { id: "c_signed", video_id: signedVideo.id, title: signedVideo.title,
   timestamp: 83, timestamp_end: 95, text: "Signed source", playback_id: signedVideo.playback_id,
   playback_policy: "signed", playback_token: playbackToken, storyboard_token: storyboardToken,
@@ -138,6 +141,7 @@ createServer((request, response) => {
   }
   if (path.includes("settings")) settingsRequests++;
   const data = path.includes("settings") ? settings
+    : /\/videos\/?$/.test(url.pathname) ? [signedVideo, policyOnlyVideo, tokenOnlyVideo, video]
     : path.includes("/videos/") && !path.includes("/latest") ? (path.includes("signed-demo") ? {
       ...signedVideo, ...(path.includes("no-storyboard") ? { storyboard_token: null, slug: "signed-demo-no-storyboard" } : {}),
     } : path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
