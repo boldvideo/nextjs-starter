@@ -145,7 +145,11 @@ interface Storyboard {
 }
 const storyboardCache = new Map<string, Promise<Storyboard | null>>();
 
-function loadStoryboard(playbackId: string): Promise<Storyboard | null> {
+function loadStoryboard(video: Video): Promise<Storyboard | null> {
+  if (video.playbackPolicy === "signed" || video.playbackToken || !video.playbackId) {
+    return Promise.resolve(null);
+  }
+  const playbackId = video.playbackId;
   let p = storyboardCache.get(playbackId);
   if (!p) {
     p = fetch(`https://image.mux.com/${playbackId}/storyboard.json`)
@@ -195,7 +199,7 @@ function EpisodeCard({
   const frameRef = useRef<HTMLDivElement | null>(null);
   const playheadRef = useRef<HTMLDivElement | null>(null);
   const badgeRef = useRef<HTMLSpanElement | null>(null);
-  const playbackId = (video as { playbackId?: string }).playbackId;
+  const canScrub = !!video.playbackId && video.playbackPolicy !== "signed" && !video.playbackToken;
 
   const applyFrac = useCallback(
     (sb: Storyboard | null | undefined, frac: number) => {
@@ -237,16 +241,17 @@ function EpisodeCard({
   );
 
   const handleEnter = useCallback(() => {
-    if (!playbackId) return;
+    if (!canScrub) return;
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
       return;
-    loadStoryboard(playbackId).then((sb) => setStoryboard(sb));
-  }, [playbackId]);
+    loadStoryboard(video).then((sb) => setStoryboard(sb));
+  }, [canScrub, video]);
 
   const lastFracRef = useRef(0);
 
   const handleThumbEnter = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!canScrub) return;
       handleEnter();
       if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -257,12 +262,12 @@ function EpisodeCard({
         setHovering(true);
       }
     },
-    [handleEnter]
+    [canScrub, handleEnter]
   );
 
   const handleMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (storyboard === null) return; // no storyboard available for this video
+      if (!canScrub || storyboard === null) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const frac = Math.min(
         1,
@@ -271,7 +276,7 @@ function EpisodeCard({
       lastFracRef.current = frac;
       applyFrac(storyboard, frac);
     },
-    [storyboard, applyFrac]
+    [canScrub, storyboard, applyFrac]
   );
 
   const handleLeave = useCallback(() => setHovering(false), []);
@@ -294,8 +299,8 @@ function EpisodeCard({
 
   const handleTouchStart = useCallback(
     (e: React.TouchEvent<HTMLDivElement>) => {
-      if (!playbackId || e.touches.length !== 1) return;
-      loadStoryboard(playbackId).then((sb) => setStoryboard(sb));
+      if (!canScrub || e.touches.length !== 1) return;
+      loadStoryboard(video).then((sb) => setStoryboard(sb));
       const t = e.touches[0];
       const state = touchRef.current;
       state.startX = t.clientX;
@@ -317,7 +322,7 @@ function EpisodeCard({
         setHovering(true);
       }, 350);
     },
-    [playbackId]
+    [canScrub, video]
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -379,8 +384,8 @@ function EpisodeCard({
 
   // Frames need the loaded sheet; playhead + timecode respond immediately.
   const isScrubbing =
-    hovering && storyboard != null && storyboard.tiles.length > 0;
-  const isSheetLoading = hovering && !!playbackId && storyboard === undefined;
+    canScrub && hovering && storyboard != null && storyboard.tiles.length > 0;
+  const isSheetLoading = canScrub && hovering && storyboard === undefined;
   const showScrubUi = isScrubbing || isSheetLoading;
 
   // Position the frame (or at least playhead/timecode) before first paint
@@ -631,8 +636,7 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
 
     const warm = () => {
       for (const v of initialVideos.slice(0, 6)) {
-        const pid = (v as { playbackId?: string }).playbackId;
-        if (pid) loadStoryboard(pid);
+        loadStoryboard(v);
       }
     };
     const w = window as Window & {
