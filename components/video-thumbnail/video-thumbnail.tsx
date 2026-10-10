@@ -6,10 +6,11 @@ import { ProgressBar } from "../progress-bar";
 import { CompletionIndicator } from "../completion-indicator";
 import { ScrubOverlay } from "./scrub-overlay";
 import type { Video } from "@boldvideo/bold-js";
+import type { PlaybackFields } from "@/types/bold-extensions";
 import { buildVideoUrl } from "@/lib/video-path";
 
 interface VideoThumbnailProps {
-  video: Video;
+  video: Video & PlaybackFields;
   prefetch?: boolean;
   playlistId?: string;
   progress?: {
@@ -27,6 +28,7 @@ export function VideoThumbnail({
   progress,
   scrub = false,
 }: VideoThumbnailProps) {
+  const canScrub = scrub && video.playbackPolicy !== "signed" && !video.playbackToken;
 
   return (
     <div className="aspect-video group relative">
@@ -47,14 +49,14 @@ export function VideoThumbnail({
         {progress?.completed ? (
           <CompletionIndicator completed={true} />
         ) : (
-          !scrub && (
+          !canScrub && (
             <span className="bg-black text-white absolute px-2 py-1 font-semibold text-sm bottom-3 right-3 rounded-md">
               {formatDuration(video.duration)}
             </span>
           )
         )}
 
-        {scrub && (
+        {canScrub && (
           <ScrubOverlay
             video={video}
             playlistId={playlistId}
@@ -76,5 +78,4 @@ export function VideoThumbnail({
     </div>
   );
 }
-
 

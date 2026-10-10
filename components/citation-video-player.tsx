@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Play, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
+import type { PlaybackFields } from "@/types/bold-extensions";
 
 // Import MuxPlayer dynamically to avoid SSR issues
 const MuxPlayer = dynamic(
@@ -18,7 +19,8 @@ const MuxPlayer = dynamic(
   }
 );
 
-interface CitationVideoPlayerProps {
+interface CitationVideoPlayerProps extends PlaybackFields {
+  thumbnail?: string | null;
   videoId: string;
   playbackId: string; // Now required from the API
   videoTitle?: string;
@@ -32,6 +34,10 @@ interface CitationVideoPlayerProps {
 
 export function CitationVideoPlayer({
   playbackId,
+  playbackPolicy,
+  playbackToken,
+  storyboardToken,
+  thumbnail,
   videoTitle,
   startTime,
   label,
@@ -110,6 +116,11 @@ export function CitationVideoPlayer({
             <MuxPlayer
               ref={playerRef}
               playbackId={playbackId}
+              tokens={playbackToken ? {
+                playback: playbackToken,
+                ...(storyboardToken ? { storyboard: storyboardToken } : {}),
+              } : undefined}
+              poster={playbackToken || playbackPolicy === "signed" ? thumbnail || "" : undefined}
               startTime={startTime}
               streamType="on-demand"
               autoPlay={false} // We control this manually
