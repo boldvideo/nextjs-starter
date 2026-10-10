@@ -331,6 +331,7 @@ const MuxPlayerComponentBase = forwardRef(function MuxPlayerComponent(
             }
           }}
           {...muxPlayerProps(video)}
+          playbackId={video.playbackPolicy === "signed" && !video.playbackToken ? undefined : video.playbackId}
           metadata={{
             video_id: video.id,
             video_title: video.title,

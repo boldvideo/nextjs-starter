@@ -115,6 +115,7 @@ export function CitationVideoPlayer({
             <MuxPlayer
               ref={playerRef}
               {...muxPlayerProps({ playbackId, playbackPolicy, playbackToken, storyboardToken })}
+              playbackId={playbackPolicy === "signed" && !playbackToken ? undefined : playbackId}
               poster={playbackToken || playbackPolicy === "signed" ? thumbnail || "" : undefined}
               startTime={startTime}
               streamType="on-demand"

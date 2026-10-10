@@ -140,7 +140,11 @@ createServer((request, response) => {
   const data = path.includes("settings") ? settings
     : path.includes("/videos/") && !path.includes("/latest") ? (path.includes("signed-demo") ? {
       ...signedVideo, ...(path.includes("no-storyboard") ? { storyboard_token: null, slug: "signed-demo-no-storyboard" } : {}),
+      ...(path.includes("no-token") ? { playback_token: null, storyboard_token: null, slug: "signed-demo-no-token" } : {}),
     } : path.includes(nextVideo.slug) || path.includes(nextVideo.id) ? nextVideo : video)
+    : url.pathname === "/api/v1/videos" ? [signedVideo, video, {
+      ...signedVideo, id: "44444444-4444-4444-8444-444444444444", slug: "signed-token-only", playback_policy: null,
+    }]
     : path.includes("/playlists/") ? { id: path.includes("signed-test") ? "signed-test" : "test",
       title: "Everyday focus", videos: path.includes("signed-test") ? [signedVideo, nextVideo] : [video, nextVideo] }
     : [];

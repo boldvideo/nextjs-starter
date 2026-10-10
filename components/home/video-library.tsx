@@ -191,7 +191,9 @@ function EpisodeCard({
   const frameRef = useRef<HTMLDivElement | null>(null);
   const playheadRef = useRef<HTMLDivElement | null>(null);
   const badgeRef = useRef<HTMLSpanElement | null>(null);
-  const playbackId = (video as { playbackId?: string }).playbackId;
+  // Signed videos keep the API poster; public videos retain storyboard scrubbing.
+  const playbackId = video.playbackPolicy === "signed" || video.playbackToken
+    ? undefined : video.playbackId;
 
   const applyFrac = useCallback(
     (sb: Storyboard | null | undefined, frac: number) => {
@@ -244,7 +246,7 @@ function EpisodeCard({
   const handleThumbEnter = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       handleEnter();
-      if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      if (playbackId && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
         const rect = e.currentTarget.getBoundingClientRect();
         lastFracRef.current = Math.min(
           1,
@@ -253,12 +255,12 @@ function EpisodeCard({
         setHovering(true);
       }
     },
-    [handleEnter]
+    [handleEnter, playbackId]
   );
 
   const handleMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (storyboard === null) return; // no storyboard available for this video
+      if (!playbackId || storyboard === null) return; // no public preview available
       const rect = e.currentTarget.getBoundingClientRect();
       const frac = Math.min(
         1,
@@ -267,7 +269,7 @@ function EpisodeCard({
       lastFracRef.current = frac;
       applyFrac(storyboard, frac);
     },
-    [storyboard, applyFrac]
+    [playbackId, storyboard, applyFrac]
   );
 
   const handleLeave = useCallback(() => setHovering(false), []);
@@ -627,8 +629,9 @@ export function VideoLibrary({ initialVideos, subtitle }: VideoLibraryProps) {
 
     const warm = () => {
       for (const v of initialVideos.slice(0, 6)) {
-        const pid = (v as { playbackId?: string }).playbackId;
-        if (pid) loadStoryboard(pid);
+        if (v.playbackId && v.playbackPolicy !== "signed" && !v.playbackToken) {
+          loadStoryboard(v.playbackId);
+        }
       }
     };
     const w = window as Window & {
