@@ -5,7 +5,7 @@ import { videoQuery, type VideoQueryParams } from "@/lib/video-voice";
 import { VideoSchema } from "@/components/seo/video-schema";
 import { isUUID } from "@/util/is-uuid";
 import { getVideoPathStyle, getCanonicalVideoPath } from "@/lib/video-path";
-import type { Video, Settings } from "@boldvideo/bold-js";
+import { thumbnailUrl, type Video, type Settings } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
 
 export const revalidate = 30;
@@ -20,15 +20,12 @@ export async function generateMetadata({
   const context = await getTenantContext();
   if (!context) return {};
 
-  const { data } = await context.client.videos.get(id);
-  const video = data as ExtendedVideo;
+  const { data: video } = await context.client.videos.get(id);
   const description = video.teaser || video.description || "";
 
   // Mux thumbnails are guaranteed JPEG (imported thumbs can be WebP behind a
   // .jpg name, which some scrapers can't parse).
-  const ogThumb = video.playbackId && video.playbackPolicy !== "signed" && !video.playbackToken
-    ? `https://image.mux.com/${video.playbackId}/thumbnail.jpg?width=1200&fit_mode=preserve`
-    : video.thumbnail;
+  const ogThumb = thumbnailUrl(video, { width: 1200, fitMode: "preserve" }) ?? video.thumbnail;
 
   return {
     title: video.title,

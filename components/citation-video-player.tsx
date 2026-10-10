@@ -1,10 +1,10 @@
 "use client";
 
+import { muxPlayerProps, type PlaybackSource } from "@boldvideo/bold-js";
 import { useState, useEffect, useRef } from "react";
 import { Play, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
-import type { PlaybackFields } from "@/types/bold-extensions";
 
 // Import MuxPlayer dynamically to avoid SSR issues
 const MuxPlayer = dynamic(
@@ -19,8 +19,7 @@ const MuxPlayer = dynamic(
   }
 );
 
-interface CitationVideoPlayerProps extends PlaybackFields {
-  thumbnail?: string | null;
+interface CitationVideoPlayerProps extends PlaybackSource {
   videoId: string;
   playbackId: string; // Now required from the API
   videoTitle?: string;
@@ -115,11 +114,7 @@ export function CitationVideoPlayer({
           <div className="relative aspect-video">
             <MuxPlayer
               ref={playerRef}
-              playbackId={playbackId}
-              tokens={playbackToken ? {
-                playback: playbackToken,
-                ...(storyboardToken ? { storyboard: storyboardToken } : {}),
-              } : undefined}
+              {...muxPlayerProps({ playbackId, playbackPolicy, playbackToken, storyboardToken })}
               poster={playbackToken || playbackPolicy === "signed" ? thumbnail || "" : undefined}
               startTime={startTime}
               streamType="on-demand"
