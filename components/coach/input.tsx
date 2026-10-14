@@ -16,6 +16,8 @@ interface ChatInputProps {
   autoFocus?: boolean;
   suggestions?: string[];
   showSuggestions?: boolean;
+  // When set, clicking a suggestion calls this instead of filling the input.
+  onSuggestionSelect?: (suggestion: string) => void;
   className?: string;
   disclaimer?: string;
   // Multimodal (Phase 2)
@@ -74,6 +76,7 @@ export function ChatInput({
   autoFocus = false,
   suggestions = [],
   showSuggestions = false,
+  onSuggestionSelect,
   className,
   disclaimer,
   multimodalEnabled = false,
@@ -132,6 +135,10 @@ export function ChatInput({
   };
 
   const handleSuggestionClick = (suggestion: string) => {
+    if (onSuggestionSelect) {
+      onSuggestionSelect(suggestion);
+      return;
+    }
     onChange(suggestion);
     textareaRef.current?.focus();
   };

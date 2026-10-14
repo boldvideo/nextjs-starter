@@ -18,10 +18,9 @@ export function AssistantHomepage({ config }: AssistantHomepageProps) {
   const router = useRouter();
   const multimodal = config.ai.multimodal;
 
-  const handleSubmit = useCallback(
-    async (e?: React.FormEvent) => {
-      e?.preventDefault();
-      const trimmedQuery = query.trim();
+  const submitQuery = useCallback(
+    (text: string) => {
+      const trimmedQuery = text.trim();
 
       if (!trimmedQuery || isSubmitting) return;
 
@@ -32,7 +31,24 @@ export function AssistantHomepage({ config }: AssistantHomepageProps) {
 
       router.push(`/ask?q=${encodeURIComponent(trimmedQuery)}`);
     },
-    [query, isSubmitting, router]
+    [isSubmitting, router]
+  );
+
+  const handleSubmit = useCallback(
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
+      submitQuery(query);
+    },
+    [query, submitQuery]
+  );
+
+  // A starter is a complete question, so clicking one asks it right away.
+  const handleSuggestionSelect = useCallback(
+    (suggestion: string) => {
+      setQuery(suggestion);
+      submitQuery(suggestion);
+    },
+    [submitQuery]
   );
 
   // Use AI name as headline, or custom headline if provided
@@ -84,6 +100,7 @@ export function AssistantHomepage({ config }: AssistantHomepageProps) {
             autoFocus={true}
             suggestions={suggestions}
             showSuggestions={true}
+            onSuggestionSelect={handleSuggestionSelect}
             multimodalEnabled={multimodal.enabled}
             images={images}
             onImagesChange={setImages}
