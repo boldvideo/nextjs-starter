@@ -151,7 +151,7 @@ export function useAIStream({
                   case "complete":
                     interaction?.complete(data.interactionId);
                     setMessages(prev => prev.map(message => message.interaction === interaction
-                      ? { ...message, interactionId: data.interactionId } : message));
+                      ? { ...message, interactionId: data.interactionId, messageId: data.messageId } : message));
                     // Final answer payload; `done` carries the conversation id.
                     break;
                   case "error":

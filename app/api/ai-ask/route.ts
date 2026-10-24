@@ -51,6 +51,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       });
 
     case "message_complete": {
+      const { messageId } = event as typeof event & { messageId?: string };
       // Use sources from event (SDK provides as citations), fall back to accumulated state
       const completeSources = event.citations || state.sources;
       // BOLD-1463: optional user-message attachments (server-resolved URLs)
@@ -65,6 +66,7 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
       }> | undefined;
       return JSON.stringify({
         type: "message_complete",
+        messageId: typeof messageId === "string" && messageId.trim() ? messageId : undefined,
         interactionId: event.interactionId,
         responseType: event.responseType,
         content: event.content || state.accumulatedAnswer,
