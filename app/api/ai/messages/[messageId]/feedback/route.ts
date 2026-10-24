@@ -1,39 +1,35 @@
-import { DEFAULT_API_BASE_URL } from "@boldvideo/bold-js";
+import type { FeedbackReason } from "@boldvideo/bold-js";
 import { getTenantContext } from "@/lib/get-tenant-context";
+
+const REASONS: FeedbackReason[] = ["wrong", "not_in_video", "too_short", "off_topic", "other"];
 
 async function feedback(request: Request, { params }: { params: Promise<{ messageId: string }> }) {
   const { messageId } = await params;
-  let body;
+  let input: { rating: "up" | "down"; reasons?: FeedbackReason[]; note?: string } | undefined;
   if (request.method === "POST") {
-    const input = await request.json().catch(() => null);
-    if (!input || (input.rating !== "up" && input.rating !== "down") ||
-        (input.reasons !== undefined && (!Array.isArray(input.reasons) ||
-          !input.reasons.every((reason: unknown) => typeof reason === "string" &&
-            ["wrong", "not_in_video", "too_short", "off_topic", "other"].includes(reason)))) ||
-        (input.note !== undefined && (typeof input.note !== "string" || input.note.length > 500))) {
+    const body = await request.json().catch(() => null);
+    if (!body || (body.rating !== "up" && body.rating !== "down") ||
+        (body.reasons !== undefined && (!Array.isArray(body.reasons) ||
+          !body.reasons.every((reason: unknown) => typeof reason === "string" && REASONS.includes(reason as FeedbackReason)))) ||
+        (body.note !== undefined && (typeof body.note !== "string" || body.note.length > 500))) {
       return Response.json({ error: "Invalid feedback" }, { status: 400 });
     }
-    body = JSON.stringify({ rating: input.rating, reasons: input.reasons, note: input.note });
+    input = { rating: body.rating, reasons: body.reasons, note: body.note };
   }
 
   try {
     const context = await getTenantContext({ includeSettings: false });
     if (!context) return Response.json({ error: "Tenant not found" }, { status: 404 });
 
-    const baseURL = (process.env.BACKEND_URL || DEFAULT_API_BASE_URL).replace(/\/$/, "");
-    const response = await fetch(`${baseURL}/ai/messages/${encodeURIComponent(messageId)}/feedback`, {
-      method: request.method,
-      headers: { "Content-Type": "application/json", Authorization: context.tenantToken },
-      body,
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      return Response.json({ error: "Feedback failed" }, { status: response.status });
+    if (input) {
+      const data = await context.client.ai.rateMessage(messageId, input);
+      return Response.json({ data });
     }
-    if (response.status === 204) return new Response(null, { status: 204 });
-    return Response.json(await response.json());
-  } catch {
-    return Response.json({ error: "Feedback unavailable" }, { status: 502 });
+    await context.client.ai.clearRating(messageId);
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    const status = typeof (error as { status?: unknown })?.status === "number" ? (error as { status: number }).status : 502;
+    return Response.json({ error: status === 502 ? "Feedback unavailable" : "Feedback failed" }, { status });
   }
 }
 
