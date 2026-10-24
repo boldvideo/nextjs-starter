@@ -22,8 +22,8 @@ async function feedback(request: Request, { params }: { params: Promise<{ messag
     if (!context) return Response.json({ error: "Tenant not found" }, { status: 404 });
 
     if (input) {
-      const data = await context.client.ai.rateMessage(messageId, input);
-      return Response.json({ data });
+      const saved = await context.client.ai.rateMessage(messageId, input);
+      return Response.json({ data: { message_id: saved.messageId, rating: saved.rating, reasons: saved.reasons, note: saved.note } });
     }
     await context.client.ai.clearRating(messageId);
     return new Response(null, { status: 204 });
