@@ -15,6 +15,7 @@ export type Message = {
   interaction?: AnswerInteraction;
   interactionId?: string | null;
   id?: string;
+  messageId?: string;
   voiceSegments?: readonly VoiceCaptionSegment[];
   role: "user" | "assistant";
   content: string;

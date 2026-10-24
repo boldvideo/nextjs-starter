@@ -6,6 +6,7 @@ import ReactMarkdown, { Components, ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import { AskCitation } from "@/lib/ask";
+import { AnswerFeedback } from "@/components/answer-feedback";
 import { buildVideoUrl } from "@/lib/video-path";
 import { sourceUrl } from "@/lib/source-engagement";
 import { cn } from "@/lib/utils";
@@ -402,6 +403,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
 interface AskMessageCardProps {
   content: string;
   citations: AskCitation[];
+  messageId?: string;
   interactionId?: string | null;
   answerRequestId?: string;
   aiName: string;
@@ -415,6 +417,7 @@ interface AskMessageCardProps {
 export function AskMessageCard({
   content,
   citations,
+  messageId,
   interactionId,
   answerRequestId,
   onCitationClick,
@@ -469,6 +472,7 @@ export function AskMessageCard({
           <MarkdownSection content={tailPart} {...sectionProps} />
         ) : null}
       </div>
+      {!streaming && messageId && <AnswerFeedback key={messageId} messageId={messageId} />}
     </div>
   );
 }
