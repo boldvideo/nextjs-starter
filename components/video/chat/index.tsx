@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { X, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnswerFeedback } from "@/components/answer-feedback";
 import { useAIAssistant } from "./use-ai-assistant";
 import { useAIStream } from "./use-ai-stream";
 import { timestampToSeconds } from "@/lib/utils/time";
@@ -548,6 +549,9 @@ export const AIAssistant = ({
                     )}
                   </>
                 )}
+              {message.role === "assistant" && !isStreamingMessage && message.messageId && (
+                <AnswerFeedback key={message.messageId} messageId={message.messageId} />
+              )}
             </div>
           </div>
         );

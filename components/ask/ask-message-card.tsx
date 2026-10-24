@@ -6,6 +6,7 @@ import ReactMarkdown, { Components, ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import { AskCitation } from "@/lib/ask";
+import { AnswerFeedback } from "@/components/answer-feedback";
 import { buildVideoUrl } from "@/lib/video-path";
 import { sourceUrl, type AnswerInteraction } from "@/lib/source-engagement";
 import { cn } from "@/lib/utils";
@@ -494,6 +495,7 @@ interface AskMessageCardProps {
   content: string;
   citations: AskCitation[];
   interaction?: AnswerInteraction;
+  messageId?: string;
   aiName: string;
   aiAvatar?: string;
   onCitationClick: (citation: AskCitation) => void;
@@ -506,6 +508,7 @@ export function AskMessageCard({
   content,
   citations,
   interaction,
+  messageId,
   onCitationClick,
   isStreaming,
   citationDisplayNumberById,
@@ -557,6 +560,7 @@ export function AskMessageCard({
           <MarkdownSection content={tailPart} {...sectionProps} />
         ) : null}
       </div>
+      {!streaming && messageId && <AnswerFeedback key={messageId} messageId={messageId} />}
     </div>
     </SourceInteractionContext.Provider>
   );

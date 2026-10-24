@@ -37,6 +37,7 @@ const searches: Record<string, string>[] = [];
 const aiSearches: Record<string, unknown>[] = [];
 const events: Record<string, unknown>[] = [];
 const chats: Record<string, unknown>[] = [];
+const feedback: Record<string, unknown>[] = [];
 let settingsRequests = 0;
 const interactions = new Map<string, string>();
 createServer((request, response) => {
@@ -46,6 +47,25 @@ createServer((request, response) => {
   if (request.method === "OPTIONS") { response.end(); return; }
   const path = request.url ?? "";
   const url = new URL(path, "http://localhost");
+  if (url.pathname === "/test/feedback") {
+    if (request.method === "DELETE") feedback.length = 0;
+    response.end(JSON.stringify(feedback));
+    return;
+  }
+  const feedbackPath = url.pathname.match(/^\/api\/v1\/ai\/messages\/([^/]+)\/feedback$/);
+  if (feedbackPath) {
+    let body = "";
+    request.on("data", chunk => { body += chunk; });
+    request.on("end", () => {
+      const input = body ? JSON.parse(body) : null;
+      const status = feedbackPath[1] === "feedback-fail" ? 503 : request.method === "DELETE" ? 204 : 200;
+      feedback.push({ method: request.method, path: url.pathname, body: input, status,
+        trustedTenant: request.headers.authorization === process.env.EXPECTED_API_KEY });
+      response.statusCode = status;
+      response.end(status === 204 ? undefined : JSON.stringify({ data: { message_id: feedbackPath[1], ...input } }));
+    });
+    return;
+  }
   if (url.pathname === "/api/v1/ai/chat/signed-history") {
     response.end(JSON.stringify({ conversation_id: "signed-history", messages: [{
       id: "signed-question", role: "user", content: "Show me the signed lesson", inserted_at: new Date(Date.now() - 1000).toISOString(),
@@ -76,7 +96,8 @@ createServer((request, response) => {
         return;
       }
       const interactionId = crypto.randomUUID();
-      chats.push({ ...input, path: url.pathname, interactionId });
+      const messageId = input.prompt?.includes("no-message-id") ? undefined : crypto.randomUUID();
+      chats.push({ ...input, path: url.pathname, interactionId, messageId });
       const source = input.prompt?.includes("signed") ? {
         ...signedSource,
         ...(input.prompt.includes("no-poster") ? { thumbnail: null, storyboard_token: null } : {}),
@@ -91,7 +112,7 @@ createServer((request, response) => {
       }
       response.write(`data: ${JSON.stringify({ type: "sources", sources: [source] })}\n\n`);
       response.write(`data: ${JSON.stringify({ type: "text_delta", delta: content })}\n\n`);
-      setTimeout(() => response.end(`data: ${JSON.stringify({ type: "message_complete", content, citations: [source], interaction_id: input.prompt === "no-id" ? null : interactionId, response_type: "answer" })}\n\ndata: [DONE]\n\n`), input.prompt?.includes("pending") ? 2500 : 0);
+      setTimeout(() => response.end(`data: ${JSON.stringify({ type: "message_complete", content, citations: [source], message_id: messageId, interaction_id: input.prompt === "no-id" ? null : interactionId, response_type: "answer" })}\n\ndata: [DONE]\n\n`), input.prompt?.includes("pending") ? 2500 : 0);
     });
     return;
   }
