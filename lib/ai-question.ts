@@ -51,8 +51,10 @@ function formatSSE(event: AIEvent, state: StreamState): string | null {
 
     case "message_complete": {
       if (event.conversationId) state.conversationId = event.conversationId;
+      const { messageId } = event as typeof event & { messageId?: string };
       return JSON.stringify({
         type: "complete",
+        messageId: typeof messageId === "string" && messageId.trim() ? messageId : undefined,
         interactionId: event.interactionId,
         success: true,
         answer: {

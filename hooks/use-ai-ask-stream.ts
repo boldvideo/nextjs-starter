@@ -19,6 +19,7 @@ export interface AIAskMessage {
   interaction?: AnswerInteraction;
   interactionId?: string | null;
   id: string;
+  messageId?: string;
   role: "user" | "assistant";
   content: string;
   type: "text" | "answer" | "error" | "loading";
@@ -296,7 +297,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
               case "message_complete": {
                 interaction.complete(event.interactionId);
                 setMessages(prev => prev.map(message => message.id === messageId
-                  ? { ...message, interactionId: event.interactionId } : message));
+                  ? { ...message, interactionId: event.interactionId, messageId: event.messageId } : message));
                 if (event.conversationId) {
                   setConversationId(event.conversationId);
                 }
@@ -580,6 +581,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       for (const msg of ordered) {
         loadedMessages.push({
           id: msg.id,
+          messageId: msg.role === "assistant" ? msg.id : undefined,
           role: msg.role,
           interactionId: msg.interactionId,
           interaction: new AnswerInteraction(msg.interactionId ?? null),
