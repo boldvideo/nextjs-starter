@@ -13,6 +13,7 @@ export type ToolCall = {
 export type Message = {
   interaction?: AnswerInteraction;
   interactionId?: string | null;
+  messageId?: string;
   role: "user" | "assistant";
   content: string;
   suggested_actions?: SuggestedAction[];

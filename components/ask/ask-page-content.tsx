@@ -521,6 +521,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                       content={pair.assistantMessage.content}
                       citations={pair.citations}
                       interaction={pair.assistantMessage.interaction}
+                      messageId={pair.assistantMessage.messageId}
                       aiName={aiName}
                       aiAvatar={aiAvatar}
                       onCitationClick={citation => handleCitationClick(citation, pair.assistantMessage?.interaction)}
