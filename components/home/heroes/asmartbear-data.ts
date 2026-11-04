@@ -19,7 +19,7 @@ export const episodes: Episode[] = [
     company: "Post Bridge",
     cohost: "Tibo Louis-Lucas",
     crux: "Almost every dollar he adds gets eaten by a dollar walking out the door.",
-    videoId: "",
+    videoId: "e12-wtibo-maker-how-to-find-customers-who-actually-need-your-saas",
   },
   {
     number: "E11",
@@ -27,7 +27,7 @@ export const episodes: Episode[] = [
     company: "Userlist",
     cohost: "Mariya Delano",
     crux: "About half of Userlist’s paying customers never fully set up the email automation they paid for.",
-    videoId: "",
+    videoId: "e11-w-mariya-delano-how-to-fix-a-saas-trial-to-paid-conversion-problem",
   },
   {
     number: "E10",
@@ -35,7 +35,7 @@ export const episodes: Episode[] = [
     company: "Mindstamp",
     cohost: "Jessica Malnik",
     crux: "He sees two completely opposite ways of restarting growth. And who knows, maybe the best way is neither one of those.",
-    videoId: "",
+    videoId: "e10-w-jessica-malnik-how-to-find-customers-who-actually-need-your-saas",
   },
   {
     number: "E09",
@@ -43,14 +43,14 @@ export const episodes: Episode[] = [
     company: "DevriX",
     cohost: "Jon Sturgeon",
     crux: "A lot of people say they want to do that. He actually cracked it.",
-    videoId: "",
+    videoId: "e09-w-jon-sturgeon-ai-changed-his-agencys-model-should-he-grow-or-sell",
   },
   {
     number: "E08",
     founder: "Rison Simon",
     company: "PainPointy",
     crux: "He sold his last startup the same week he launched it. But his current startup is stuck with basically no customers at all.",
-    videoId: "",
+    videoId: "e08-creating-customer-interview-questions-before-you-have-customers",
   },
   {
     number: "E07",
@@ -58,7 +58,7 @@ export const episodes: Episode[] = [
     company: "NaiL",
     cohost: "Dan Martell",
     crux: "Almost all that revenue comes from a single customer, big customer.",
-    videoId: "",
+    videoId: "e07-w-dan-martell-how-do-you-scale-after-your-first-big-customer",
   },
   {
     number: "E06",
@@ -66,7 +66,7 @@ export const episodes: Episode[] = [
     company: "Ymir",
     cohost: "Bryce Adams",
     crux: "Customers love it. … But nobody else wants it.",
-    videoId: "",
+    videoId: "e06-w-bryce-adams-how-to-fix-a-saas-business-thats-not-growing",
   },
   {
     number: "E05",
@@ -74,7 +74,7 @@ export const episodes: Episode[] = [
     company: "PostPlanify",
     cohost: "Laura Roeder",
     crux: "The customers who love the product and never leave are agencies, and he’s having trouble landing more of them.",
-    videoId: "",
+    videoId: "e05-w-laura-roeder-scared-to-commit-to-his-best-customers",
   },
   {
     number: "E04",
@@ -82,7 +82,7 @@ export const episodes: Episode[] = [
     company: "appointmed",
     cohost: "Dr. Sherry Walling",
     crux: "The mission is complete. … So what is it all for?",
-    videoId: "",
+    videoId: "e04-w-dr-sherry-walling-he-built-a-great-business-but-it-doesnt-feel-like-it",
   },
   {
     number: "E03",
@@ -90,7 +90,7 @@ export const episodes: Episode[] = [
     company: "Podsqueeze",
     cohost: "Craig Hewitt",
     crux: "Turned down an acquisition offer last year. That’s a pretty strong move. I like that. But … growth has already plateaued.",
-    videoId: "",
+    videoId: "e03-w-craig-hewitt-restarting-growth-after-stuck-at-16kmo",
   },
   {
     number: "E02",
@@ -98,14 +98,14 @@ export const episodes: Episode[] = [
     company: "DropInBlog",
     cohost: "Rob Walling",
     crux: "A flat growth curve and a potential new juicy market segment, but he’s not quite sure how to go to there.",
-    videoId: "",
+    videoId: "e02-w-rob-walling-1m-arr-how-to-expand-into-a-new-market",
   },
   {
     number: "E01",
     founder: "Dmytro Krasun",
     company: "ScreenshotOne",
     crux: "He opened his entire dashboard and let me poke at all of it.",
-    videoId: "",
+    videoId: "e01-using-transparent-metrics-to-restart-growth-when-stuck-at-32k-mrr",
   },
 ];
 
@@ -145,3 +145,13 @@ export const BOOK_URL = "https://hiddenmultipliers.com";
 export const SHOW_URL = "https://smartbearlive.com";
 export const LONGFORM_URL = "https://longform.asmartbear.com";
 export const SKILLS_URL = "https://skills.asmartbear.com";
+
+// Jason's solo talks: not in the library, linked out to YouTube.
+export const talks: { title: string; note: string; youtubeId: string }[] = [
+  { title: "Profit Whale Curve", note: "21 min", youtubeId: "g9-TVWNu4Aw" },
+  { title: "Intentional Weakness", note: "18 min", youtubeId: "dVSXNkWUq88" },
+  { title: "Mystery of a broken A/B test", note: "11 min", youtubeId: "FaUO2-AQmr0" },
+  { title: "Naked Business", note: "Business of Software 2011", youtubeId: "hF1P8blGMQ4" },
+  { title: "When to Break the Rules", note: "Business of Software 2010", youtubeId: "nAvozs0itOc" },
+  { title: "Agile Marketing", note: "Business of Software 2008", youtubeId: "YuXmM8bHMxY" },
+];

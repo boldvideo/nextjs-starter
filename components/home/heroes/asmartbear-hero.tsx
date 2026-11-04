@@ -9,6 +9,7 @@ import type { HeroProps } from "../hero-slot";
 import { getPortalConfig } from "@/lib/portal-config";
 import {
   episodes,
+  talks,
   chapters,
   blurbs,
   BOOK_URL,
@@ -285,6 +286,32 @@ export default function AsmartbearHero({ settings }: HeroProps) {
               );
             })}
           </ol>
+        </div>
+      </section>
+
+      {/* Talks: link out to YouTube */}
+      <section className="px-5 md:px-10 py-10 border-b border-border">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="font-heading text-2xl font-bold tracking-tight">Talks</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Solo talks and keynotes, on YouTube.</p>
+          <ul className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {talks.map((t) => (
+              <li key={t.youtubeId}>
+                <a
+                  href={`https://www.youtube.com/watch?v=${t.youtubeId}`}
+                  target="_blank"
+                  rel="noopener"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border px-4 py-3 hover:border-[#577544] transition-colors"
+                >
+                  <span>
+                    <span className="block font-semibold text-foreground">{t.title}</span>
+                    <span className="text-sm text-muted-foreground">{t.note}</span>
+                  </span>
+                  <ArrowUpRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 

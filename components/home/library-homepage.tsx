@@ -34,7 +34,7 @@ export function LibraryHomepage({
       {hasVideos && (
         <section>
           <h2 className="font-heading font-bold text-3xl mb-5" id="latest-videos">
-            {settings?.account?.slug === "asmartbear" ? "Every episode and talk" : "Latest Videos"}
+            {settings?.account?.slug === "asmartbear" ? "Every episode" : "Latest Videos"}
           </h2>
           <ul
             className="mb-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10"
