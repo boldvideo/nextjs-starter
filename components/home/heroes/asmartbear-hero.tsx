@@ -8,7 +8,7 @@ import { ArrowUp, ArrowUpRight, BookOpen, Headphones } from "lucide-react";
 import type { HeroProps } from "../hero-slot";
 import { getPortalConfig } from "@/lib/portal-config";
 import type { HomeContent } from "@/lib/asmartbear/sanity";
-import { CompanyChip, CompanyForm, useCompanyProfile } from "@/components/asmartbear/company";
+import { CompanyDetectStrip, CompanyUrlBox, ComposerCompanyPill, useCompanyProfile } from "@/components/asmartbear/company";
 import {
   episodes as staticEpisodes,
   talks as staticTalks,
@@ -85,8 +85,8 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
   const router = useRouter();
   const config = getPortalConfig(settings);
   const [question, setQuestion] = useState("");
-  const [company, setCompany] = useCompanyProfile();
-  const [companyOpen, setCompanyOpen] = useState(false);
+  const [company] = useCompanyProfile();
+  const [urlMode, setUrlMode] = useState(false);
 
   const starters = (config.ai.conversationStarters.length > 0
     ? config.ai.conversationStarters
@@ -206,25 +206,15 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
               </div>
             </div>
 
-            {companyOpen && (
-              <div className="mt-5 max-w-xl">
-                <CompanyForm
-                  initial={company}
-                  onClose={() => setCompanyOpen(false)}
-                  onSave={(p) => {
-                    setCompany(p);
-                    setCompanyOpen(false);
-                  }}
-                />
-              </div>
-            )}
-
+            {urlMode ? (
+              <CompanyUrlBox className="mt-5 min-h-[118px]" onCancel={() => setUrlMode(false)} onDone={() => setUrlMode(false)} />
+            ) : (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 ask(question);
               }}
-              className="mt-5 rounded-xl border border-border bg-background focus-within:border-[#577544] focus-within:ring-2 focus-within:ring-[#577544]/15 transition"
+              className="mt-5 min-h-[118px] rounded-2xl border border-border bg-background focus-within:border-[#577544] focus-within:ring-2 focus-within:ring-[#577544]/15 transition"
             >
               <textarea
                 value={question}
@@ -239,13 +229,13 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
                 placeholder={
                   name
                     ? `Ask about ${name}. “Growth went flat after…”`
-                    : "Describe your situation. “We’re at $20K MRR, churn is 6%, and growth has gone flat…”"
+                    : "Ask anything, or paste your website…"
                 }
                 className="block w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-base outline-none placeholder:text-muted-foreground/70"
                 aria-label={`Ask ${config.ai.name}`}
               />
               <div className="flex items-center justify-between px-3 pb-3">
-                <CompanyChip profile={company} onOpen={() => setCompanyOpen(true)} onClear={() => setCompany(null)} />
+                <ComposerCompanyPill onAdd={() => setUrlMode(true)} />
                 <button
                   type="submit"
                   aria-label="Send"
@@ -257,6 +247,8 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
                 </button>
               </div>
             </form>
+            )}
+            {!urlMode && <CompanyDetectStrip text={question} />}
 
             <div className="mt-4 flex flex-wrap gap-2">
               {chips.map((s) => (

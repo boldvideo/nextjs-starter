@@ -25,6 +25,29 @@ export interface SiteProfile {
   text: string;
   /** Pages that were read, for the "read from" line */
   pages: string[];
+  /** The site's own icon (apple-touch-icon or favicon), absolute https URL */
+  icon?: string;
+}
+
+/** Best icon the homepage declares: apple-touch-icon first, then a sized/plain icon. */
+function iconFrom(html: string, base: string): string | undefined {
+  const links = html.match(/<link\b[^>]*>/gi) ?? [];
+  const pick = (re: RegExp) => {
+    for (const tag of links) {
+      const rel = tag.match(/rel=["']([^"']+)["']/i)?.[1]?.toLowerCase() ?? "";
+      if (!re.test(rel)) continue;
+      const href = tag.match(/href=["']([^"']+)["']/i)?.[1];
+      if (!href) continue;
+      try {
+        const url = new URL(href, base);
+        if (url.protocol === "https:") return url.toString();
+      } catch {
+        /* skip */
+      }
+    }
+    return undefined;
+  };
+  return pick(/apple-touch-icon/) ?? pick(/(^|\s)icon(\s|$)/) ?? pick(/shortcut icon/);
 }
 
 export type SiteReadError = "invalid" | "unreachable" | "empty";
@@ -265,6 +288,6 @@ export async function readSite(input: string): Promise<{ ok: true; profile: Site
 
   return {
     ok: true,
-    profile: { website: `https://${site.domain}`, domain: site.domain, name, summary, text, pages },
+    profile: { website: `https://${site.domain}`, domain: site.domain, name, summary, text, pages, icon: iconFrom(home.html, home.url) },
   };
 }

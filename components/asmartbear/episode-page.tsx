@@ -17,7 +17,8 @@ import type { EpisodeContent, Person } from "@/lib/asmartbear/sanity";
 import type { Chapter, Paragraph } from "@/lib/asmartbear/episode-data";
 import { formatStamp, stampToSeconds } from "@/lib/asmartbear/time";
 import { viewerProfile } from "@/lib/asmartbear/profile";
-import { CompanyChip, CompanyForm, useCompanyProfile } from "./company";
+import { CompanyDetectStrip, CompanySeat, CompanyUrlBox, ComposerCompanyPill, useCompanyProfile } from "./company";
+import { useAIAssistantContext } from "@/components/video/chat/context";
 
 const GREEN = "#577544";
 const NAVY = "#152A45";
@@ -97,8 +98,8 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   const [now, setNow] = useState(0);
   const [follow, setFollow] = useState(true);
   const [query, setQuery] = useState("");
-  const [company, setCompany] = useCompanyProfile();
-  const [companyOpen, setCompanyOpen] = useState(false);
+  const [company] = useCompanyProfile();
+  const [urlMode, setUrlMode] = useState(false);
 
   const skipScroll = useRef(false);
   const seekTarget = useRef<{ t: number; until: number } | null>(null);
@@ -326,6 +327,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                   </span>
                 </a>
               ))}
+              <CompanySeat />
               <span className="flex-1" />
               <a
                 href="https://smartbearlive.com"
@@ -599,21 +601,13 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                       "What would Jason tell me if I had this problem?",
                     ]
               }
-              composerTop={
-                companyOpen ? (
-                  <CompanyForm
-                    initial={company}
-                    onClose={() => setCompanyOpen(false)}
-                    onSave={(p) => {
-                      setCompany(p);
-                      setCompanyOpen(false);
-                    }}
-                  />
+              composerOverride={
+                urlMode ? (
+                  <CompanyUrlBox className="min-h-[104px]" onCancel={() => setUrlMode(false)} onDone={() => setUrlMode(false)} />
                 ) : null
               }
-              composerAccessory={
-                <CompanyChip profile={company} onOpen={() => setCompanyOpen(true)} onClear={() => setCompany(null)} />
-              }
+              composerAccessory={<ComposerCompanyPill onAdd={() => setUrlMode(true)} />}
+              composerBottom={<ChatDetectStrip />}
               className="h-full"
             />
           </section>
@@ -660,4 +654,10 @@ function formatDuration(s: number) {
   const h = Math.floor(s / 3600);
   const m = Math.round((s % 3600) / 60);
   return h > 0 ? `${h} h ${m} min` : `${m} min`;
+}
+
+/** B in the episode chat: watches what's being typed for a domain. */
+function ChatDetectStrip() {
+  const { inputValue } = useAIAssistantContext();
+  return <CompanyDetectStrip text={inputValue} />;
 }

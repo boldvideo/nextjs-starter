@@ -14,6 +14,10 @@ export interface CompanyProfile {
   churn?: string;
   /** "What's your biggest problem right now?" */
   goal?: string;
+  /** Growth stage in their words, e.g. "plateau at $40K MRR" */
+  stage?: string;
+  /** The site's icon, for display only (never sent to Bold) */
+  icon?: string;
 }
 
 // Bold caps an inline viewer_profile value at 2,000 characters.
@@ -24,6 +28,7 @@ const LIMITS: Record<string, number> = {
   mrr: 60,
   churn: 60,
   goal: 400,
+  stage: 120,
 };
 
 /** Profile → the viewer_profile keys Bold's prompts know (business_*, mrr, goal) plus churn. */
@@ -40,6 +45,7 @@ export function viewerProfile(p: CompanyProfile | null | undefined): Record<stri
     mrr: p.mrr,
     churn: p.churn,
     goal: p.goal,
+    stage: p.stage,
   });
 }
 

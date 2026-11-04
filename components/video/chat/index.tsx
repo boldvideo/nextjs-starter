@@ -47,6 +47,10 @@ interface AIAssistantProps {
   composerAccessory?: React.ReactNode;
   /** Rendered above the composer (e.g. a company form) */
   composerTop?: React.ReactNode;
+  /** Replaces the panel composer in place (e.g. a URL field), same footprint */
+  composerOverride?: React.ReactNode;
+  /** Rendered under the composer (e.g. a "put this site on the hot seat?" strip) */
+  composerBottom?: React.ReactNode;
   /** Inline viewer profile sent with every question */
   viewerProfile?: Record<string, string>;
   /** Suggested first questions, shown until the first message */
@@ -200,6 +204,8 @@ export const AIAssistant = ({
   variant = "default",
   composerAccessory,
   composerTop,
+  composerOverride,
+  composerBottom,
   viewerProfile,
   starters,
   placeholder,
@@ -659,7 +665,9 @@ export const AIAssistant = ({
           />
         </div>
         {composerTop}
-        {voiceActive ? <VoiceBar /> : panel ? (
+        {voiceActive ? <VoiceBar /> : panel && composerOverride ? (
+          composerOverride
+        ) : panel ? (
         <div ref={inputContainerRef} className="rounded-2xl border border-border bg-background shadow-[0_1px_0_rgba(0,0,0,0.03)] focus-within:border-[#577544] focus-within:ring-4 focus-within:ring-[#577544]/10 transition">
           <textarea
             ref={textareaRef}
@@ -765,6 +773,7 @@ export const AIAssistant = ({
           </button>
         </div>
         )}
+        {panel && !composerOverride && composerBottom}
         <p role="status" aria-live="polite" aria-atomic="true"
           className={cn("text-xs leading-5 text-muted-foreground", voice?.notice ? "mt-2" : "sr-only")}>
           {voiceAnnouncement}
