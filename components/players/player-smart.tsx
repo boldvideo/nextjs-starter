@@ -3,7 +3,14 @@
 import { forwardRef, memo } from "react";
 import { MuxPlayerComponent } from "./player-mux";
 import type { MuxPlayerVideoLike } from "./player-mux";
-import { extractYouTubeId, YouTubePlayerComponent } from "./player-youtube";
+import { extractYouTubeId } from "./player-youtube";
+import dynamic from "next/dynamic";
+
+// Video.js renders media state on the client; skip SSR to avoid hydration drift.
+const VideoJsYouTubePlayer = dynamic(
+  () => import("./player-videojs-youtube").then((m) => m.VideoJsYouTubePlayer),
+  { ssr: false, loading: () => <div className="w-full h-full bg-black" /> }
+);
 import type { SourceOpen } from "@/lib/source-engagement";
 
 type SmartPlayerVideo = MuxPlayerVideoLike & {
@@ -43,7 +50,7 @@ const SmartPlayerBase = forwardRef(function SmartPlayer(
     !!extractYouTubeId(video);
 
   if (playFromSource) {
-    return <YouTubePlayerComponent ref={ref} video={video} {...rest} />;
+    return <VideoJsYouTubePlayer ref={ref} video={video} {...rest} />;
   }
   return <MuxPlayerComponent ref={ref} video={video} {...rest} />;
 });
