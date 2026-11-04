@@ -1,3 +1,4 @@
+import { sanitizeViewerProfile } from "@/lib/asmartbear/profile";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, PlaybackSource, Segment } from "@boldvideo/bold-js";
@@ -208,6 +209,7 @@ export async function POST(request: Request) {
   let conversationId: string | undefined;
   let collectionId: string | undefined;
   let images: File[] = [];
+  let viewerProfile: Record<string, string> = {};
 
   if (contentType.startsWith("multipart/form-data")) {
     try {
@@ -219,6 +221,14 @@ export async function POST(request: Request) {
       const colId = form.get("collectionId");
       collectionId = typeof colId === "string" ? colId : undefined;
       images = form.getAll("image").filter((v): v is File => v instanceof File);
+      const vp = form.get("viewerProfile");
+      if (typeof vp === "string") {
+        try {
+          viewerProfile = sanitizeViewerProfile(JSON.parse(vp));
+        } catch {
+          /* ignore a malformed profile */
+        }
+      }
     } catch {
       return new Response(
         JSON.stringify({ type: "error", code: "INVALID_MULTIPART", message: "Invalid multipart body" }),
@@ -238,6 +248,7 @@ export async function POST(request: Request) {
     prompt = body.prompt;
     conversationId = body.conversationId;
     collectionId = body.collectionId;
+    viewerProfile = sanitizeViewerProfile((body as { viewerProfile?: unknown }).viewerProfile);
   }
 
   if (!prompt || typeof prompt !== "string") {
@@ -249,6 +260,7 @@ export async function POST(request: Request) {
 
   try {
     const stream = await context.client.ai.ask({
+      ...(Object.keys(viewerProfile).length ? { viewerProfile } : {}),
       ...portalClient,
       prompt,
       stream: true,

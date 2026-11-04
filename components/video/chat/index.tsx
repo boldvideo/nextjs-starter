@@ -70,9 +70,8 @@ const TextWithTimestamps: React.FC<{ children: string; interaction?: AnswerInter
 
   const handleTimestampClick = (seconds: number, _endSeconds?: number) => {
     // Call the onTimeClick callback to seek the video
-    if (onTimeClick) {
-      onTimeClick(seconds, interaction);
-    }
+    // A host that manages its own scroll (returns true) handles the rest.
+    if (onTimeClick && (onTimeClick(seconds, interaction) as unknown) === true) return;
 
     // Scroll to video player
     const videoPlayer = document.querySelector('video, [data-video-player]');

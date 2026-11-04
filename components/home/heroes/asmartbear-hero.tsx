@@ -8,6 +8,7 @@ import { ArrowUp, ArrowUpRight, BookOpen, Headphones } from "lucide-react";
 import type { HeroProps } from "../hero-slot";
 import { getPortalConfig } from "@/lib/portal-config";
 import type { HomeContent } from "@/lib/asmartbear/sanity";
+import { CompanyChip, CompanyForm, useCompanyProfile } from "@/components/asmartbear/company";
 import {
   episodes as staticEpisodes,
   talks as staticTalks,
@@ -84,6 +85,8 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
   const router = useRouter();
   const config = getPortalConfig(settings);
   const [question, setQuestion] = useState("");
+  const [company, setCompany] = useCompanyProfile();
+  const [companyOpen, setCompanyOpen] = useState(false);
 
   const starters = (config.ai.conversationStarters.length > 0
     ? config.ai.conversationStarters
@@ -93,6 +96,15 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
         "Should I raise my prices?",
       ]
   ).slice(0, 5);
+  const name = company?.business_name;
+  const chips = name
+    ? [
+        `Which episode is most like ${name}?`,
+        `What would Jason tell ${name} to fix first?`,
+        `Should ${name} raise prices?`,
+        `How does ${name} pick a niche?`,
+      ]
+    : starters;
 
   const ask = (q: string) => {
     const trimmed = q.trim();
@@ -194,6 +206,19 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
               </div>
             </div>
 
+            {companyOpen && (
+              <div className="mt-5 max-w-xl">
+                <CompanyForm
+                  initial={company}
+                  onClose={() => setCompanyOpen(false)}
+                  onSave={(p) => {
+                    setCompany(p);
+                    setCompanyOpen(false);
+                  }}
+                />
+              </div>
+            )}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -211,14 +236,16 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
                   }
                 }}
                 rows={2}
-                placeholder="Describe your situation. “We’re at $20K MRR, churn is 6%, and growth has gone flat…”"
+                placeholder={
+                  name
+                    ? `Ask about ${name}. “Growth went flat after…”`
+                    : "Describe your situation. “We’re at $20K MRR, churn is 6%, and growth has gone flat…”"
+                }
                 className="block w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-base outline-none placeholder:text-muted-foreground/70"
                 aria-label={`Ask ${config.ai.name}`}
               />
               <div className="flex items-center justify-between px-3 pb-3">
-                <span className="text-xs text-muted-foreground pl-1 hidden sm:inline">
-                  Enter to send · Shift+Enter for a new line
-                </span>
+                <CompanyChip profile={company} onOpen={() => setCompanyOpen(true)} onClear={() => setCompany(null)} />
                 <button
                   type="submit"
                   aria-label="Send"
@@ -232,7 +259,7 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
             </form>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              {starters.map((s) => (
+              {chips.map((s) => (
                 <button
                   key={s}
                   onClick={() => ask(s)}

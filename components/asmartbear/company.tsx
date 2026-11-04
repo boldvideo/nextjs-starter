@@ -3,30 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, Loader2, Plus, X } from "lucide-react";
 import { domainOf, type CompanyProfile } from "@/lib/asmartbear/profile";
+import { onCompanyChange, readCompany, writeCompany } from "@/lib/asmartbear/company-store";
 import { cn } from "@/lib/utils";
 
-const KEY = "asb-company-v1";
-
-/** The visitor's company, kept in this browser only. */
+/** The visitor's company, kept in this browser and shared across the site. */
 export function useCompanyProfile() {
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setProfile(JSON.parse(raw));
-    } catch {
-      /* private mode or blocked storage: start empty */
-    }
+    setProfile(readCompany());
+    return onCompanyChange(() => setProfile(readCompany()));
   }, []);
-  const save = useCallback((p: CompanyProfile | null) => {
-    setProfile(p);
-    try {
-      if (p) localStorage.setItem(KEY, JSON.stringify(p));
-      else localStorage.removeItem(KEY);
-    } catch {
-      /* fine: it still works for this page view */
-    }
-  }, []);
+  const save = useCallback((p: CompanyProfile | null) => writeCompany(p), []);
   return [profile, save] as const;
 }
 
@@ -228,6 +215,29 @@ export function CompanyForm({
           >
             Looks right, put me on the hot seat
           </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Chip + dropdown form in one, for headers and other tight spots. */
+export function CompanyControl({ align = "right" }: { align?: "left" | "right" }) {
+  const [company, setCompany] = useCompanyProfile();
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <CompanyChip profile={company} onOpen={() => setOpen(true)} onClear={() => setCompany(null)} />
+      {open && (
+        <div className={cn("absolute top-full mt-2 z-30 w-[min(380px,calc(100vw-40px))]", align === "right" ? "right-0" : "left-0")}>
+          <CompanyForm
+            initial={company}
+            onClose={() => setOpen(false)}
+            onSave={(p) => {
+              setCompany(p);
+              setOpen(false);
+            }}
+          />
         </div>
       )}
     </div>

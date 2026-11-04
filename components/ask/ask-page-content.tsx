@@ -11,6 +11,7 @@ import {
 } from "@/hooks/use-ai-ask-stream";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
+import { CompanyControl } from "@/components/asmartbear/company";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { AskMessageCard } from "./ask-message-card";
@@ -462,6 +463,8 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                   <span className="font-semibold">{personaDisplayName}</span>
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+              {settings?.account?.slug === "asmartbear" && <CompanyControl />}
               <button
                 onClick={handleReset}
                 className={cn(
@@ -474,6 +477,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 <Plus className="h-[15px] w-[15px]" />
                 <span className="hidden sm:inline">New chat</span>
               </button>
+              </div>
             </div>
 
             <div className="space-y-12">

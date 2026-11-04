@@ -251,7 +251,18 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   ];
 
   return (
-    <AIAssistantProvider key={video.id} onTimeClick={(t) => seek(t)}>
+    <AIAssistantProvider
+      key={video.id}
+      onTimeClick={(t) => {
+        seek(t);
+        const box = scrollRef.current;
+        const player = box?.querySelector<HTMLElement>("main .aspect-video");
+        if (box && player && player.getBoundingClientRect().bottom < box.getBoundingClientRect().top + 80) {
+          box.scrollTo({ top: 0, behavior: "smooth" });
+        }
+        return true;
+      }}
+    >
       <Breadcrumb label={episode ? `E${number} · ${episode.company}` : video.title} />
       {/* The portal layout locks the page (main is overflow-hidden), so the episode page owns its scroll area. */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto">

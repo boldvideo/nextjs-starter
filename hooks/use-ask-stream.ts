@@ -1,5 +1,7 @@
 "use client";
 
+import { storedViewerProfile } from "@/lib/asmartbear/company-store";
+
 import { useState, useCallback, useRef } from "react";
 import {
   ClarificationResponse,
@@ -223,6 +225,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
               fd.append("message", query);
               if (coachConversationId) fd.append("conversationId", coachConversationId);
               for (const f of images) fd.append("image", f, f.name);
+              fd.append("viewerProfile", JSON.stringify(storedViewerProfile()));
               return fd;
             })(),
             signal: abortControllerRef.current.signal,
@@ -236,6 +239,7 @@ export function useAskStream(options: UseAskStreamOptions = {}) {
             body: JSON.stringify({
               message: query,
               conversationId: coachConversationId,
+              viewerProfile: storedViewerProfile(),
             }),
             signal: abortControllerRef.current.signal,
           };

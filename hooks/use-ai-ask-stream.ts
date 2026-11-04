@@ -1,5 +1,7 @@
 "use client";
 
+import { storedViewerProfile } from "@/lib/asmartbear/company-store";
+
 import type { PlaybackSource } from "@boldvideo/bold-js";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
@@ -198,6 +200,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 fd.append("prompt", query);
                 if (conversationId) fd.append("conversationId", conversationId);
                 for (const f of images) fd.append("image", f, f.name);
+                fd.append("viewerProfile", JSON.stringify(storedViewerProfile()));
                 return fd;
               })(),
               signal: abortControllerRef.current.signal,
@@ -208,7 +211,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
                 "Content-Type": "application/json",
                 Accept: "text/event-stream",
               },
-              body: JSON.stringify({ prompt: query, conversationId }),
+              body: JSON.stringify({ prompt: query, conversationId, viewerProfile: storedViewerProfile() }),
               signal: abortControllerRef.current.signal,
             };
         const response = await fetch("/api/ai-ask", init);
