@@ -113,7 +113,7 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
   };
 
   return (
-    <div className="-mx-5 md:-mx-10 -mt-5 md:-mt-10 mb-14">
+    <div className="mb-4">
       {/* The twin banner from longform.asmartbear.com */}
       <div className="grid grid-cols-1 sm:grid-cols-2 text-[13px] font-bold uppercase tracking-wide font-sans">
         <a

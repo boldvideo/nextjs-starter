@@ -16,6 +16,7 @@ import { useStreamingScroll } from "@/hooks/use-streaming-scroll";
 import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { useVideoVoice } from "@/components/video/chat/voice-provider";
 import { VoiceBar } from "@/components/video/chat/voice-bar";
+import { BookCard, bookChapterOf } from "@/components/asmartbear/book-card";
 
 /**
  * Props for the AIAssistant component
@@ -553,7 +554,11 @@ export const AIAssistant = ({
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    p: ({ children }) => <p>{processChildren(children, message.interaction)}</p>,
+                    p: ({ children }) => {
+                      const ch = bookChapterOf(children);
+                      if (ch) return <BookCard chapter={ch} />;
+                      return <p>{processChildren(children, message.interaction)}</p>;
+                    },
                     li: ({ children }) => <li>{processChildren(children, message.interaction)}</li>,
                     strong: ({ children }) => (
                       <strong>{processChildren(children, message.interaction)}</strong>

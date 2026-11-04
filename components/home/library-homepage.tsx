@@ -26,11 +26,15 @@ export function LibraryHomepage({
 }: LibraryHomepageProps) {
   const hasVideos = videos && videos.length > 0;
   const hasPlaylists = settings?.featuredPlaylists && settings.featuredPlaylists.length > 0;
+  const fullBleedHero = settings?.account?.slug === "asmartbear";
   const showPlaylists = settings?.portal?.layout?.showPlaylists ?? true;
 
   return (
-    <div className="p-5 md:p-10 max-w-screen-2xl mx-auto overflow-y-auto">
-      <HeroSlot settings={settings} config={config} content={heroContent} />
+    <div className="overflow-y-auto">
+      {/* Full-bleed heroes pad their own sections; the rest stays in the column. */}
+      {fullBleedHero && <HeroSlot settings={settings} config={config} content={heroContent} />}
+      <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
+      {!fullBleedHero && <HeroSlot settings={settings} config={config} content={heroContent} />}
       {/* Continue watching — local progress, renders nothing without records */}
       {hasVideos && <ContinueWatching videos={videos} />}
       {/* Videos Section */}
@@ -70,6 +74,7 @@ export function LibraryHomepage({
       {!hasVideos && (!hasPlaylists || !showPlaylists) && (
         <p className="text-center text-gray-500">No content available yet.</p>
       )}
+      </div>
     </div>
   );
 }

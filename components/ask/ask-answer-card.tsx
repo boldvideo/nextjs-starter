@@ -4,6 +4,7 @@ import React, { useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import { BookCard, bookChapterOf } from "@/components/asmartbear/book-card";
 import remarkGfm from "remark-gfm";
 import { SynthesizedResponse, AskCitation } from "@/lib/ask";
 import { ChevronDown, ChevronUp, PlayCircle, MessageSquare } from "lucide-react";
@@ -150,6 +151,8 @@ export function AskAnswerCard({
               remarkPlugins={[remarkGfm]}
               components={{
                 p: ({ children, ...props }) => {
+                  const ch = bookChapterOf(children);
+                  if (ch) return <BookCard chapter={ch} />;
                   const processedChildren = React.Children.map(
                     children,
                     (child) => {

@@ -10,6 +10,7 @@ import { AnswerFeedback } from "@/components/answer-feedback";
 import { buildVideoUrl } from "@/lib/video-path";
 import { sourceUrl } from "@/lib/source-engagement";
 import { cn } from "@/lib/utils";
+import { BookCard, bookChapterOf } from "@/components/asmartbear/book-card";
 import { remarkCitations } from "@/lib/remark-citations";
 import { PROSE_CLASS } from "@/lib/prose";
 import { useSmoothText } from "@/hooks/use-smooth-text";
@@ -312,6 +313,11 @@ const MarkdownSection = React.memo(function MarkdownSection({
 
     return {
       a: AnchorComponent,
+      p: ({ node: _node, children, ...props }) => {
+        const ch = bookChapterOf(children);
+        if (ch) return <BookCard chapter={ch} />;
+        return <p {...props}>{children}</p>;
+      },
       // Episode mentions like **Episode 8 ("Human as Tools")** deep-link to
       // the video when the quoted title matches one of the answer's sources.
       strong: ({ children }) => {

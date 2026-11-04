@@ -136,7 +136,7 @@ export default async function VideoPage({
     const transcriptUrl = ext.transcript?.json?.url;
     const paragraphs = transcriptUrl ? await transcriptParagraphs(transcriptUrl).catch(() => []) : [];
     const chapters = parseChapters(ext.chapters);
-    const pageUrl = `${baseUrl || "https://asmartbear.bold.video"}${canonicalPath}`;
+    const pageUrl = `${baseUrl || "https://smartbearlive.bold.video"}${canonicalPath}`;
     return (
       <>
         <EpisodeSchema video={video} episode={episode} chapters={chapters} paragraphs={paragraphs} url={pageUrl} />

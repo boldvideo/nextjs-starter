@@ -5,7 +5,7 @@ import { SINGLETONS, schemaTypes } from "./schemaTypes";
 import { structure } from "./structure";
 
 const projectId = process.env.SANITY_STUDIO_PROJECT_ID ?? "je17v8aj";
-const site = process.env.SANITY_STUDIO_SITE_URL ?? "https://asmartbear.bold.video";
+const site = process.env.SANITY_STUDIO_SITE_URL ?? "https://smartbearlive.bold.video";
 
 export default defineConfig({
   name: "asmartbear",

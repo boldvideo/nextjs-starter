@@ -55,7 +55,7 @@ export type SiteReadError = "invalid" | "unreachable" | "empty";
 const TIMEOUT_MS = 8000;
 const MAX_BYTES = 600_000;
 const MAX_REDIRECTS = 3;
-const UA = "Mozilla/5.0 (compatible; SmartBearLiveBot/1.0; +https://asmartbear.bold.video)";
+const UA = "Mozilla/5.0 (compatible; SmartBearLiveBot/1.0; +https://smartbearlive.bold.video)";
 
 /** "acme.com", "https://www.acme.com/pricing" → https URL + bare domain, or null */
 export function normalizeWebsite(input: string): { url: string; domain: string } | null {
