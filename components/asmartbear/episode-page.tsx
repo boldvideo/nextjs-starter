@@ -201,9 +201,15 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
     const box = listRef.current;
     const el = box?.querySelector<HTMLElement>(`[data-p="${activeIndex}"]`);
     if (!box || !el) return;
-    const top = el.offsetTop - box.offsetTop - box.clientHeight / 3;
+    // Position inside the box's scroll area (the box is the offsetParent).
+    const elTop = el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+    const visibleTop = elTop - box.scrollTop;
+    const comfortable =
+      visibleTop >= 0 && visibleTop + Math.min(el.offsetHeight, box.clientHeight * 0.4) <= box.clientHeight * 0.8;
+    // Leave the reader alone while the playing paragraph is comfortably in view.
+    if (comfortable) return;
     programmaticUntil.current = Date.now() + 900;
-    box.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    box.scrollTo({ top: Math.max(0, elTop - box.clientHeight / 4), behavior: "smooth" });
   }, [activeIndex, follow, tab]);
 
   const onListScroll = useCallback(() => {
