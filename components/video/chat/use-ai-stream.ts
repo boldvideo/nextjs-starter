@@ -9,6 +9,8 @@ interface UseAIStreamOptions {
   subdomain?: string;
   /** Optional endpoint override. Defaults to /api/ai_question_stream */
   endpoint?: string;
+  /** Inline viewer profile sent with each question (never stored by Bold) */
+  viewerProfile?: Record<string, string>;
   /** Optional configuration for the AI service */
   config?: {
     /** Headers to include in the request */
@@ -25,6 +27,7 @@ export function useAIStream({
   subdomain = "",
   endpoint = "/api/ask",
   config,
+  viewerProfile,
 }: UseAIStreamOptions) {
   const { setMessages, setConversationId } = useAIAssistantContext();
   
@@ -54,12 +57,14 @@ export function useAIStream({
               value: actionData.value,
               label: actionData.label,
               ...(conversationId && { conversation_id: conversationId }),
+              ...(viewerProfile && Object.keys(viewerProfile).length ? { viewerProfile } : {}),
             }
           : {
               question,
               videoId,
               subdomain,
               ...(conversationId && { conversationId }),
+              ...(viewerProfile && Object.keys(viewerProfile).length ? { viewerProfile } : {}),
             };
 
         const response = await fetch(endpoint, {
@@ -202,7 +207,7 @@ export function useAIStream({
         interaction?.complete(null);
       }
     },
-    [videoId, subdomain, endpoint, config, setMessages, setConversationId]
+    [videoId, subdomain, endpoint, viewerProfile, config, setMessages, setConversationId]
   );
 
   return handleAIQuestion;

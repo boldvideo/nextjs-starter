@@ -1,4 +1,5 @@
 import { streamAIQuestion } from "../../../lib/ai-question";
+import { sanitizeViewerProfile } from "@/lib/asmartbear/profile";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5 minutes for web search support
@@ -105,10 +106,11 @@ export async function POST(request: Request) {
     // Check if it's an action request
     if (validateActionBody(body)) {
       const { id: videoId, conversation_id, type, value, label } = body;
+      const viewerProfile = sanitizeViewerProfile((body as { viewerProfile?: unknown }).viewerProfile);
       return await streamAIQuestion(videoId, "", value, conversation_id ?? undefined, {
         type,
         label,
-      });
+      }, viewerProfile);
     }
 
     // Otherwise validate as a regular question
@@ -121,11 +123,14 @@ export async function POST(request: Request) {
     }
 
     const { question, videoId, subdomain, conversationId } = body;
+    const viewerProfile = sanitizeViewerProfile((body as { viewerProfile?: unknown }).viewerProfile);
     return await streamAIQuestion(
       videoId,
       subdomain,
       question,
-      conversationId ?? undefined
+      conversationId ?? undefined,
+      undefined,
+      viewerProfile
     );
   } catch (error) {
     // Surface the real reason. An opaque 500 here is what the chat UI can only

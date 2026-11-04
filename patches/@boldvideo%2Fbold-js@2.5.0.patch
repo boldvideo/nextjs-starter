@@ -1,0 +1,56 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 5030e6e72774475cd42a53bbe617444af364a90a..eabc879bfd84a55a18c8a03004afb478edce0aaa 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -1326,6 +1326,8 @@ function createAI(config) {
+     if (options.clientVersion !== void 0) body.client_version = options.clientVersion;
+     if (options.collectionId) body.collection_id = options.collectionId;
+     if (options.tags) body.tags = options.tags;
++    if (options.viewer) body.viewer = options.viewer;
++    if (options.viewerProfile) body.viewer_profile = options.viewerProfile;
+     if (isVideoScoped && options.currentTime !== void 0) {
+       body.current_time = options.currentTime;
+     }
+diff --git a/dist/index.d.cts b/dist/index.d.cts
+index 51e535424d608649a733a1d160258c65ff138f65..6f04541149437cec69c158e544bb2949d1ee549c 100644
+--- a/dist/index.d.cts
++++ b/dist/index.d.cts
+@@ -362,6 +362,10 @@ interface AIResponse {
+  */
+ interface ChatOptions {
+     prompt: string;
++    /** Viewer UUID or customer external id (local patch until bold-js sends it). */
++    viewer?: string;
++    /** Inline viewer profile, merged over the synced viewer's traits (local patch). */
++    viewerProfile?: string | Record<string, string | number | boolean>;
+     /** UUID for analytics deduplication. Reuse on retries; generate a new UUID for each intentional action. */
+     requestId?: string;
+     /** Analytics attribution only; does not affect requestId deduplication. Missing/malformed values become unknown on the server. */
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 51e535424d608649a733a1d160258c65ff138f65..6f04541149437cec69c158e544bb2949d1ee549c 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -362,6 +362,10 @@ interface AIResponse {
+  */
+ interface ChatOptions {
+     prompt: string;
++    /** Viewer UUID or customer external id (local patch until bold-js sends it). */
++    viewer?: string;
++    /** Inline viewer profile, merged over the synced viewer's traits (local patch). */
++    viewerProfile?: string | Record<string, string | number | boolean>;
+     /** UUID for analytics deduplication. Reuse on retries; generate a new UUID for each intentional action. */
+     requestId?: string;
+     /** Analytics attribution only; does not affect requestId deduplication. Missing/malformed values become unknown on the server. */
+diff --git a/dist/index.js b/dist/index.js
+index a6f4dd5fbb3a3586d006209a61594fd8a6437da5..c83b22adc96d487a50d480c471ffab20405d369b 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1273,6 +1273,8 @@ function createAI(config) {
+     if (options.clientVersion !== void 0) body.client_version = options.clientVersion;
+     if (options.collectionId) body.collection_id = options.collectionId;
+     if (options.tags) body.tags = options.tags;
++    if (options.viewer) body.viewer = options.viewer;
++    if (options.viewerProfile) body.viewer_profile = options.viewerProfile;
+     if (isVideoScoped && options.currentTime !== void 0) {
+       body.current_time = options.currentTime;
+     }

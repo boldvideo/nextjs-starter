@@ -41,6 +41,19 @@ interface AIAssistantProps {
   isEmbedded?: boolean;
   /** Compact mode for embeds - hides avatar header, uses minimal styling */
   compact?: boolean;
+  /** "panel": roomy editorial look for a dedicated side panel */
+  variant?: "default" | "panel";
+  /** Rendered inside the composer, left of the send button (e.g. "Add your company") */
+  composerAccessory?: React.ReactNode;
+  /** Rendered above the composer (e.g. a company form) */
+  composerTop?: React.ReactNode;
+  /** Inline viewer profile sent with every question */
+  viewerProfile?: Record<string, string>;
+  /** Suggested first questions, shown until the first message */
+  starters?: string[];
+  placeholder?: string;
+  /** Short line under the assistant's name in panel mode */
+  tagline?: string;
 }
 
 /**
@@ -185,7 +198,15 @@ export const AIAssistant = ({
   endpoint,
   isEmbedded = false, // Default to floating mode
   compact = false, // Compact mode for embeds
+  variant = "default",
+  composerAccessory,
+  composerTop,
+  viewerProfile,
+  starters,
+  placeholder,
+  tagline,
 }: AIAssistantProps) => {
+  const panel = variant === "panel";
   const { onTimeClick } = useAIAssistantContext();
   const voice = useVideoVoice();
   const voiceActive = voice?.active ?? false;
@@ -212,6 +233,7 @@ export const AIAssistant = ({
     videoId,
     subdomain,
     endpoint,
+    viewerProfile,
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -431,6 +453,32 @@ export const AIAssistant = ({
               <p className="line-clamp-2">{greetingText}</p>
             </div>
           </div>
+        ) : panel ? (
+          <div className="pt-5 pb-2">
+            <div className="flex items-center gap-3">
+              <Image src={avatar} alt="" width={44} height={44} className="rounded-full" />
+              <span className="leading-tight">
+                <span className="block font-heading font-bold text-[19px]">{name}</span>
+                {tagline && <span className="text-[12.5px] text-muted-foreground">{tagline}</span>}
+              </span>
+            </div>
+            <p className="mt-4 text-[17px] font-heading leading-snug text-foreground">{greetingText}</p>
+            {messages.length === 0 && starters && starters.length > 0 && (
+              <div className="mt-4 flex flex-col items-start gap-2">
+                {starters.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => handleSubmit(s)}
+                    disabled={isPending}
+                    className="text-left text-[14px] leading-snug rounded-xl border border-border bg-background px-3.5 py-2.5 hover:border-[#577544] hover:text-[#2c3d22] transition-colors"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         ) : (
           <div className={cn("mb-4", isEmbedded ? "pt-4" : "px-4 pt-4")}>
             <div className="flex items-center mb-2">
@@ -468,7 +516,11 @@ export const AIAssistant = ({
             <div
               className={cn(
                 "rounded-lg p-3 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
-                message.role === "user"
+                panel
+                  ? message.role === "user"
+                    ? "!ml-auto w-fit max-w-[85%] !rounded-[18px] !rounded-br-md bg-foreground text-background prose-invert !px-4 !py-2.5 text-[15px]"
+                    : "!p-0 !ml-0 bg-transparent text-foreground text-[15.5px] leading-relaxed prose-p:my-2.5"
+                  : message.role === "user"
                   ? "bg-muted/50 text-foreground border border-border/50"
                   : "bg-muted text-foreground",
                 message.role === "user" && !isEmbedded ? "mr-8" : "",
@@ -591,10 +643,12 @@ export const AIAssistant = ({
       <div
         className={cn(
           "relative",
-          isEmbedded
+          panel
+            ? "mt-auto px-4 pt-3 pb-4"
+            : isEmbedded
             ? "mt-auto bg-background border-t p-4 shadow-lg"
             : "p-4 bg-background-muted border-t border-background-muted",
-          compact ? "p-2 pb-16" : "pb-16 lg:pb-4"
+          panel ? "" : compact ? "p-2 pb-16" : "pb-16 lg:pb-4"
         )}
       >
         {/* Scroll to live button */}
@@ -605,7 +659,45 @@ export const AIAssistant = ({
             onClick={jumpToLive}
           />
         </div>
-        {voiceActive ? <VoiceBar /> : (
+        {composerTop}
+        {voiceActive ? <VoiceBar /> : panel ? (
+        <div ref={inputContainerRef} className="rounded-2xl border border-border bg-background shadow-[0_1px_0_rgba(0,0,0,0.03)] focus-within:border-[#577544] focus-within:ring-4 focus-within:ring-[#577544]/10 transition">
+          <textarea
+            ref={textareaRef}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
+            placeholder={placeholder ?? "Ask about this episode…"}
+            aria-label={placeholder ?? "Ask about this episode"}
+            rows={2}
+            className="block w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-base sm:text-[15px] outline-none placeholder:text-muted-foreground/80"
+          />
+          <div className="flex items-center gap-2 px-2.5 pb-2.5">
+            <div className="flex-1 min-w-0">{composerAccessory}</div>
+            {voice?.enabled && (
+              <button ref={micRef} type="button" onClick={voice.start} disabled={isPending} aria-label="Start voice conversation"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border hover:bg-muted disabled:opacity-40">
+                <Mic size={17} aria-hidden="true" />
+              </button>
+            )}
+            <button
+              type="button"
+              aria-label="Send question"
+              onClick={() => handleSubmit()}
+              disabled={isPending || !inputValue.trim()}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white transition-opacity disabled:opacity-35"
+              style={{ background: "#577544" }}
+            >
+              <Send size={16} />
+            </button>
+          </div>
+        </div>
+        ) : (
         <div className={cn("relative flex gap-2", compact ? "items-center mb-2" : "items-end")} ref={inputContainerRef}>
           {compact ? (
             <input

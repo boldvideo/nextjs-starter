@@ -16,6 +16,8 @@ import type { ExtendedVideo } from "@/types/video-detail";
 import type { EpisodeContent, Person } from "@/lib/asmartbear/sanity";
 import type { Chapter, Paragraph } from "@/lib/asmartbear/episode-data";
 import { formatStamp, stampToSeconds } from "@/lib/asmartbear/time";
+import { viewerProfile } from "@/lib/asmartbear/profile";
+import { CompanyChip, CompanyForm, useCompanyProfile } from "./company";
 
 const GREEN = "#577544";
 const NAVY = "#152A45";
@@ -76,6 +78,8 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   const [now, setNow] = useState(0);
   const [follow, setFollow] = useState(true);
   const [query, setQuery] = useState("");
+  const [company, setCompany] = useCompanyProfile();
+  const [companyOpen, setCompanyOpen] = useState(false);
 
   const seek = useCallback((t: number) => {
     const p = playerRef.current;
@@ -289,7 +293,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
           )}
 
           {/* Tabs */}
-          <div role="tablist" aria-label="Episode content" className="mt-9 flex flex-wrap gap-1 border-b border-border sticky top-[var(--header-height,64px)] bg-background z-10">
+          <div role="tablist" aria-label="Episode content" className="mt-9 flex flex-wrap gap-1 border-b border-border sticky top-0 bg-background z-10">
             {tabs.filter((t) => t.show).map((t) => (
               <button
                 key={t.id}
@@ -470,22 +474,44 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
         </main>
 
         {/* RAIL */}
-        <aside aria-label="Ask about this episode" className="flex-[1_1_420px] max-w-[470px] w-full lg:sticky lg:top-[calc(var(--header-height,64px)+16px)] flex flex-col gap-4">
-          <section className="asb-chat rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col h-[min(780px,calc(100vh-var(--header-height,64px)-140px))] min-h-[520px] overflow-hidden">
-            <div className="flex-1 min-h-0">
-              <AIAssistant
-                videoId={video.id}
-                name={ai.name}
-                avatar={ai.avatar}
-                subdomain=""
-                greeting={ai.greeting}
-                isEmbedded
-                className="h-full"
-              />
-            </div>
-            <p className="px-6 py-2.5 text-[12px] text-muted-foreground border-t border-border/70">
-              Knows every episode. Not Jason. Cites the moment.
-            </p>
+        <aside aria-label="Ask about this episode" className="flex-[1_1_420px] max-w-[470px] w-full lg:sticky lg:top-5 flex flex-col gap-4">
+          <section className="rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col h-[min(820px,calc(100vh-var(--header-height,64px)-40px))] min-h-[560px] overflow-hidden">
+            <AIAssistant
+              videoId={video.id}
+              name={ai.name}
+              avatar={ai.avatar}
+              subdomain=""
+              greeting={company?.business_name ? `${company.business_name} is on the hot seat. What’s the biggest challenge right now?` : ai.greeting}
+              isEmbedded
+              variant="panel"
+              tagline="Knows every episode. Not Jason. Cites the moment."
+              placeholder={company?.business_name ? `Ask about ${company.business_name} and this episode…` : "Ask about this episode, or your own business…"}
+              viewerProfile={viewerProfile(company)}
+              starters={
+                company?.business_name
+                  ? [`How does this episode apply to ${company.business_name}?`, "What would Jason look at first in my numbers?"]
+                  : [
+                      episode?.company ? `What did ${episode.company} decide to do?` : "What did they decide to do?",
+                      "What would Jason tell me if I had this problem?",
+                    ]
+              }
+              composerTop={
+                companyOpen ? (
+                  <CompanyForm
+                    initial={company}
+                    onClose={() => setCompanyOpen(false)}
+                    onSave={(p) => {
+                      setCompany(p);
+                      setCompanyOpen(false);
+                    }}
+                  />
+                ) : null
+              }
+              composerAccessory={
+                <CompanyChip profile={company} onOpen={() => setCompanyOpen(true)} onClear={() => setCompany(null)} />
+              }
+              className="h-full"
+            />
           </section>
 
           {episode?.next && (
