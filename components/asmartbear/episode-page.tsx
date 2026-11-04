@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { format } from "date-fns";
-import { ArrowDown, ArrowUpRight, ChevronRight, Headphones, Play, Search, Share2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpRight, ChevronRight, Headphones, Play, Search, Share2, X } from "lucide-react";
 import type { Settings } from "@boldvideo/bold-js";
 import { Player } from "@/components/players";
 import { AIAssistant } from "@/components/video/chat";
@@ -24,7 +24,20 @@ const GREEN = "#577544";
 const NAVY = "#152A45";
 const SPEAKER_COLORS = ["#3f5631", NAVY, "#8a5a00", "#7a2e4a", "#1f5f6b"];
 
-type Tab = "transcript" | "chapters" | "moments" | "tools";
+type Tab = "transcript" | "ask" | "chapters" | "moments" | "tools";
+
+/** lg breakpoint; the rail exists only above it. Defaults to desktop for SSR. */
+function useIsDesktop() {
+  const [desktop, setDesktop] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const on = () => setDesktop(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return desktop;
+}
 
 interface EpisodePageProps {
   video: ExtendedVideo;
@@ -100,6 +113,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   const [query, setQuery] = useState("");
   const [company] = useCompanyProfile();
   const [urlMode, setUrlMode] = useState(false);
+  const isDesktop = useIsDesktop();
 
   const skipScroll = useRef(false);
   const seekTarget = useRef<{ t: number; until: number } | null>(null);
@@ -198,6 +212,64 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
 
   const barRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Mini player: while the video plays and its spot has scrolled away, the
+  // player pins to the rail's top (desktop) or the top of the screen (phone).
+  // The player element never moves in the DOM (a YouTube iframe would reload);
+  // its shell switches to position: fixed over a slot, and back.
+  const placeholderRef = useRef<HTMLDivElement | null>(null);
+  const slotRef = useRef<HTMLDivElement | null>(null);
+  const dismissed = useRef(false);
+  const [mini, setMini] = useState(false);
+  const [miniStyle, setMiniStyle] = useState<CSSProperties>({});
+  const [miniH, setMiniH] = useState(0);
+  const updateMini = useCallback(() => {
+    const ph = placeholderRef.current;
+    const sc = scrollRef.current;
+    if (!ph || !sc) return;
+    const out = ph.getBoundingClientRect().bottom < sc.getBoundingClientRect().top + 60;
+    if (!out) dismissed.current = false;
+    const playing = (playerRef.current as unknown as { paused?: boolean } | null)?.paused === false;
+    setMini((m) => out && !dismissed.current && (playing || m));
+  }, []);
+  useEffect(() => {
+    updateMini();
+  }, [now, updateMini]);
+  useEffect(() => {
+    window.addEventListener("scroll", updateMini, { capture: true, passive: true });
+    return () => window.removeEventListener("scroll", updateMini, { capture: true });
+  }, [updateMini]);
+  useLayoutEffect(() => {
+    if (!mini) {
+      setMiniH(0);
+      return;
+    }
+    const place = () => {
+      if (isDesktop) {
+        const s = slotRef.current?.getBoundingClientRect();
+        if (s) setMiniStyle({ position: "fixed", top: s.top, left: s.left, width: s.width, height: s.height });
+        setMiniH(0);
+      } else {
+        const top = scrollRef.current?.getBoundingClientRect().top ?? 0;
+        const w = window.innerWidth;
+        setMiniStyle({ position: "fixed", top, left: 0, width: w, height: (w * 9) / 16 });
+        setMiniH(Math.round((w * 9) / 16));
+      }
+    };
+    place();
+    window.addEventListener("scroll", place, { capture: true, passive: true });
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, { capture: true });
+      window.removeEventListener("resize", place);
+    };
+  }, [mini, isDesktop]);
+  const closeMini = () => {
+    dismissed.current = true;
+    setMini(false);
+  };
+  // On phones the pinned player covers the top, so the sticky bar sits under it.
+  const stickyOffset = !isDesktop && mini ? miniH : 0;
   const [docked, setDocked] = useState(false);
   const [boxHeight, setBoxHeight] = useState<string>("70vh");
   useEffect(() => {
@@ -207,9 +279,9 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
       if (!bar || !box) return;
       // Docked = the sticky bar has reached the top of the page's scroll area.
       const top = scrollRef.current?.getBoundingClientRect().top ?? 0;
-      setDocked(bar.getBoundingClientRect().top <= top + 1);
+      setDocked(bar.getBoundingClientRect().top <= top + stickyOffset + 1);
       // Exactly the room left under the sticky bar, so the docked box fills the screen.
-      setBoxHeight(`max(320px, calc(100dvh - var(--header-height, 57px) - ${bar.offsetHeight}px - 12px))`);
+      setBoxHeight(`max(320px, calc(100dvh - var(--header-height, 57px) - ${bar.offsetHeight + stickyOffset}px - 12px))`);
     };
     measure();
     window.addEventListener("scroll", measure, { capture: true, passive: true });
@@ -218,7 +290,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
       window.removeEventListener("scroll", measure, { capture: true });
       window.removeEventListener("resize", measure);
     };
-  }, [tab]);
+  }, [tab, stickyOffset]);
 
   const q = query.trim().toLowerCase();
   const chapterAt = useMemo(() => {
@@ -238,6 +310,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   const duration = video.duration ? formatDuration(video.duration) : null;
   const tabs: { id: Tab; label: string; count?: string; show: boolean }[] = [
     { id: "transcript", label: "Transcript", count: duration ?? undefined, show: paragraphs.length > 0 },
+    { id: "ask", label: "Ask", show: !isDesktop },
     { id: "chapters", label: "Chapters", count: String(chapters.length), show: chapters.length > 0 },
     { id: "moments", label: "Moments", count: String(episode?.moments?.length ?? 0), show: (episode?.moments?.length ?? 0) > 0 },
     { id: "tools", label: "Toolbox", count: String(episode?.tools?.length ?? 0), show: (episode?.tools?.length ?? 0) > 0 },
@@ -250,6 +323,68 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
     { key: "options", label: "On the table" },
     { key: "landed", label: "Where it landed" },
   ];
+
+  const chat = (
+    <AIAssistant
+              videoId={video.id}
+              name={ai.name}
+              avatar={ai.avatar}
+              subdomain=""
+              greeting={company?.business_name ? `${company.business_name} is on the hot seat. What’s the biggest challenge right now?` : ai.greeting}
+              isEmbedded
+              variant="panel"
+              tagline="AI assistant · not Jason"
+              placeholder={company?.business_name ? `Ask about ${company.business_name} and this episode…` : "Ask about this episode, or your own business…"}
+              viewerProfile={viewerProfile(company)}
+              starters={
+                company?.business_name
+                  ? [`How does this episode apply to ${company.business_name}?`, "What would Jason look at first in my numbers?"]
+                  : [
+                      episode?.company ? `What did ${episode.company} decide to do?` : "What did they decide to do?",
+                      "What would Jason tell me if I had this problem?",
+                    ]
+              }
+              composerOverride={
+                urlMode ? (
+                  <CompanyUrlBox className="min-h-[104px]" onCancel={() => setUrlMode(false)} onDone={() => setUrlMode(false)} />
+                ) : null
+              }
+              composerAccessory={<ComposerCompanyPill onAdd={() => setUrlMode(true)} />}
+              composerBottom={<ChatDetectStrip />}
+              className="h-full"
+            />
+  );
+  const nextCard = episode?.next && (
+            <Link
+              href={`/v/${episode.next.boldSlug}`}
+              className="flex items-center gap-3.5 rounded-2xl border border-border px-4 py-4 hover:border-[#577544] transition-colors"
+            >
+              <span className="flex shrink-0">
+                {[...(episode.next.hotSeat ?? []), ...(episode.next.cohosts ?? [])].slice(0, 3).map((p, i) => (
+                  <span key={p.slug} className={cn("rounded-full ring-2 ring-background", i > 0 && "-ml-3")}>
+                    <Face person={p} size={40} />
+                  </span>
+                ))}
+              </span>
+              <span className="flex-1 leading-snug">
+                <span className="block text-[11px] font-bold uppercase tracking-[0.12em]" style={{ color: GREEN }}>
+                  Next · E{String(episode.next.number).padStart(2, "0")}
+                </span>
+                <span className="block text-sm font-semibold mt-0.5">
+                  {(episode.next.hotSeat ?? []).map((p) => p.name).join(" & ")}, {episode.next.company}
+                  {episode.next.cohosts?.length ? (
+                    <span className="font-normal text-muted-foreground">
+                      {" "}· with {episode.next.cohosts.map((p) => `${p.name}${p.company ? `, ${p.company.split(",")[0]}` : ""}`).join(" & ")}
+                    </span>
+                  ) : null}
+                </span>
+                {episode.next.logline?.quote && (
+                  <span className="block font-heading italic text-[15px] text-muted-foreground mt-1 line-clamp-2">“{episode.next.logline.quote}”</span>
+                )}
+              </span>
+              <ChevronRight className="h-5 w-5 shrink-0" />
+            </Link>
+  );
 
   return (
     <AIAssistantProvider
@@ -270,8 +405,38 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
       <div className="max-w-[1360px] mx-auto px-5 md:px-7 pt-5 pb-20 flex flex-wrap gap-9 items-start">
         {/* MAIN */}
         <main className="flex-[999_1_640px] min-w-0">
-          <div className="relative rounded-2xl overflow-hidden bg-black aspect-video">
-            <Player video={video} autoPlay={false} ref={playerRef} startTime={startTime} className="w-full h-full" />
+          <div ref={placeholderRef} className="relative aspect-video bg-[#f2f2ee] -mx-5 md:mx-0 rounded-none md:rounded-2xl">
+            <div
+              style={mini ? miniStyle : undefined}
+              className={cn(
+                "bg-black overflow-hidden",
+                mini
+                  ? cn("z-40 shadow-[0_18px_40px_rgba(0,0,0,0.28)]", isDesktop ? "rounded-xl" : "rounded-none")
+                  : "absolute inset-0 rounded-none md:rounded-2xl"
+              )}
+            >
+              <Player video={video} autoPlay={false} ref={playerRef} startTime={startTime} className="w-full h-full" />
+              {mini && (
+                <div className="absolute top-2 right-2 flex gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+                    aria-label="Back to the video"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeMini}
+                    aria-label="Close mini player"
+                    className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <header className="mt-6">
@@ -304,7 +469,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
 
           {/* Cast */}
           {episode && (
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="mt-6 flex items-center gap-3 max-sm:-mx-5 max-sm:px-5 max-sm:overflow-x-auto max-sm:pb-1 [scrollbar-width:none] sm:flex-wrap [&>*]:shrink-0">
               {[
                 ...(episode.hotSeat ?? []).map((p) => ({ p, role: "On the hot seat" })),
                 ...(episode.cohosts ?? []).map((p) => ({ p, role: "Cohost" })),
@@ -386,8 +551,8 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
           )}
 
           {/* Sticky bar: tabs, plus the transcript tools while on that tab */}
-          <div ref={barRef} className="mt-9 sticky top-0 bg-background z-10">
-          <div role="tablist" aria-label="Episode content" className="flex flex-wrap gap-1 border-b border-border">
+          <div ref={barRef} style={{ top: stickyOffset }} className="mt-9 sticky top-0 bg-background z-10">
+          <div role="tablist" aria-label="Episode content" className="flex gap-1 border-b border-border overflow-x-auto -mx-5 px-5 md:mx-0 md:px-0 [scrollbar-width:none]">
             {tabs.filter((t) => t.show).map((t) => (
               <button
                 key={t.id}
@@ -395,7 +560,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                 aria-selected={tab === t.id}
                 onClick={() => setTab(t.id)}
                 className={cn(
-                  "px-4 min-h-11 text-[15px] -mb-px border-b-2 transition-colors",
+                  "px-3 sm:px-4 min-h-11 text-[15px] -mb-px border-b-2 transition-colors whitespace-nowrap shrink-0",
                   tab === t.id ? "font-bold text-foreground border-[#577544]" : "text-muted-foreground border-transparent hover:text-foreground"
                 )}
               >
@@ -465,14 +630,14 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                         }}
                         title={`Play from ${formatStamp(p.start)}`}
                         className={cn(
-                          "flex gap-5 rounded-xl px-4 -mx-4 transition-colors cursor-pointer hover:bg-[#f4f6ef]",
+                          "flex flex-col sm:flex-row gap-1.5 sm:gap-5 rounded-xl px-4 -mx-4 transition-colors cursor-pointer hover:bg-[#f4f6ef]",
                           tiny ? "py-1" : showSpeaker ? "pt-4 pb-2" : "py-2",
                           i === activeIndex && "!bg-[#eef1e6]"
                         )}
                       >
-                        <div className="w-[150px] shrink-0 flex gap-2.5 items-start pt-0.5">
+                        <div className={cn("sm:w-[150px] shrink-0 flex gap-2.5 items-center sm:items-start pt-0.5", !showSpeaker && "max-sm:hidden")}>
                           {showSpeaker ? <Face person={person} size={30} /> : <span className="w-[30px] shrink-0" />}
-                          <span className="leading-tight">
+                          <span className="leading-tight flex items-baseline gap-2 sm:block">
                             {showSpeaker && (
                               <span className="block text-[13px] font-bold" style={{ color: speakerColor(p.speaker) }}>
                                 {p.speaker}
@@ -490,7 +655,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                             </button>
                           </span>
                         </div>
-                        <p className={cn("flex-1 min-w-0 font-heading text-foreground/90", tiny ? "text-[15px] italic text-muted-foreground" : "text-[17px] leading-[1.7]")}>
+                        <p className={cn("flex-1 min-w-0 font-heading text-foreground/90", tiny ? "text-[15px] italic text-muted-foreground" : "text-[16.5px] sm:text-[17px] leading-[1.7]")}>
                           {tiny && <span className="not-italic font-sans text-xs font-semibold mr-1.5" style={{ color: speakerColor(p.speaker) }}>{p.speaker}:</span>}
                           {p.text}
                         </p>
@@ -511,6 +676,15 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
               </button>
             )}
           </div>
+
+          {/* Ask (phones) */}
+          {!isDesktop && (
+            <div hidden={tab !== "ask"} className="pt-3">
+              <div style={{ height: boxHeight }} className="rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col overflow-hidden">
+                {chat}
+              </div>
+            </div>
+          )}
 
           {/* Chapters */}
           <ol hidden={tab !== "chapters"} className="border-t border-border mt-4">
@@ -577,73 +751,26 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
               </div>
             ))}
           </div>
+          {!isDesktop && <div className="mt-8">{nextCard}</div>}
         </main>
 
-        {/* RAIL */}
+        {/* RAIL (desktop only; on phones the chat is the Ask tab) */}
+        {isDesktop && (
         <aside aria-label="Ask about this episode" className="flex-[1_1_420px] max-w-[470px] w-full lg:sticky lg:top-5 flex flex-col gap-4">
-          <section className="rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col h-[min(820px,calc(100dvh-var(--header-height,57px)-235px))] min-h-[400px] overflow-hidden">
-            <AIAssistant
-              videoId={video.id}
-              name={ai.name}
-              avatar={ai.avatar}
-              subdomain=""
-              greeting={company?.business_name ? `${company.business_name} is on the hot seat. What’s the biggest challenge right now?` : ai.greeting}
-              isEmbedded
-              variant="panel"
-              tagline="AI assistant · not Jason"
-              placeholder={company?.business_name ? `Ask about ${company.business_name} and this episode…` : "Ask about this episode, or your own business…"}
-              viewerProfile={viewerProfile(company)}
-              starters={
-                company?.business_name
-                  ? [`How does this episode apply to ${company.business_name}?`, "What would Jason look at first in my numbers?"]
-                  : [
-                      episode?.company ? `What did ${episode.company} decide to do?` : "What did they decide to do?",
-                      "What would Jason tell me if I had this problem?",
-                    ]
-              }
-              composerOverride={
-                urlMode ? (
-                  <CompanyUrlBox className="min-h-[104px]" onCancel={() => setUrlMode(false)} onDone={() => setUrlMode(false)} />
-                ) : null
-              }
-              composerAccessory={<ComposerCompanyPill onAdd={() => setUrlMode(true)} />}
-              composerBottom={<ChatDetectStrip />}
-              className="h-full"
-            />
+          {mini && <div ref={slotRef} className="aspect-video w-full rounded-xl bg-[#f2f2ee]" aria-hidden="true" />}
+          <section
+            className="rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col min-h-[340px] overflow-hidden"
+            style={{
+              height: mini
+                ? "calc(100dvh - var(--header-height, 57px) - 40px - (min(470px, 100%) * 9 / 16) - 16px)"
+                : "min(820px, calc(100dvh - var(--header-height, 57px) - 235px))",
+            }}
+          >
+            {chat}
           </section>
-
-          {episode?.next && (
-            <Link
-              href={`/v/${episode.next.boldSlug}`}
-              className="flex items-center gap-3.5 rounded-2xl border border-border px-4 py-4 hover:border-[#577544] transition-colors"
-            >
-              <span className="flex shrink-0">
-                {[...(episode.next.hotSeat ?? []), ...(episode.next.cohosts ?? [])].slice(0, 3).map((p, i) => (
-                  <span key={p.slug} className={cn("rounded-full ring-2 ring-background", i > 0 && "-ml-3")}>
-                    <Face person={p} size={40} />
-                  </span>
-                ))}
-              </span>
-              <span className="flex-1 leading-snug">
-                <span className="block text-[11px] font-bold uppercase tracking-[0.12em]" style={{ color: GREEN }}>
-                  Next · E{String(episode.next.number).padStart(2, "0")}
-                </span>
-                <span className="block text-sm font-semibold mt-0.5">
-                  {(episode.next.hotSeat ?? []).map((p) => p.name).join(" & ")}, {episode.next.company}
-                  {episode.next.cohosts?.length ? (
-                    <span className="font-normal text-muted-foreground">
-                      {" "}· with {episode.next.cohosts.map((p) => `${p.name}${p.company ? `, ${p.company.split(",")[0]}` : ""}`).join(" & ")}
-                    </span>
-                  ) : null}
-                </span>
-                {episode.next.logline?.quote && (
-                  <span className="block font-heading italic text-[15px] text-muted-foreground mt-1 line-clamp-2">“{episode.next.logline.quote}”</span>
-                )}
-              </span>
-              <ChevronRight className="h-5 w-5 shrink-0" />
-            </Link>
-          )}
+          {!mini && nextCard}
         </aside>
+        )}
       </div>
       </div>
     </AIAssistantProvider>

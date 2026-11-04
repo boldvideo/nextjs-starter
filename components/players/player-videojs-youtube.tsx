@@ -67,6 +67,9 @@ const VideoJsYouTubePlayerBase = forwardRef(function VideoJsYouTubePlayer(
       get readyState() {
         return 4;
       },
+      get paused() {
+        return adapterRef.current?.paused ?? true;
+      },
       play: async () => adapterRef.current?.play(),
       pause: () => adapterRef.current?.pause(),
       addEventListener: (type: string, fn: EventListener) =>
