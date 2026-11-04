@@ -135,21 +135,22 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
     return i;
   }, [chapters, now]);
 
-  // Keep the active paragraph in view while following; scrolling by hand pauses it.
+  // Follow mode scrolls the transcript box, never the window, and only when the
+  // active paragraph changes. Any scroll the reader makes in the box stops it.
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const programmaticUntil = useRef(0);
   useEffect(() => {
-    if (!follow || tab !== "transcript" || activeIndex < 0 || now < 1) return;
-    const el = transcriptRef.current?.querySelector<HTMLElement>(`[data-p="${activeIndex}"]`);
-    el?.scrollIntoView({ block: "center", behavior: "smooth" });
-  }, [activeIndex, follow, tab, now]);
+    if (!follow || tab !== "transcript" || activeIndex < 0) return;
+    const box = listRef.current;
+    const el = box?.querySelector<HTMLElement>(`[data-p="${activeIndex}"]`);
+    if (!box || !el) return;
+    const top = el.offsetTop - box.offsetTop - box.clientHeight / 3;
+    programmaticUntil.current = Date.now() + 900;
+    box.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, [activeIndex, follow, tab]);
 
-  useEffect(() => {
-    const stop = () => setFollow(false);
-    window.addEventListener("wheel", stop, { passive: true });
-    window.addEventListener("touchmove", stop, { passive: true });
-    return () => {
-      window.removeEventListener("wheel", stop);
-      window.removeEventListener("touchmove", stop);
-    };
+  const onListScroll = useCallback(() => {
+    if (Date.now() > programmaticUntil.current) setFollow(false);
   }, []);
 
   const q = query.trim().toLowerCase();
@@ -333,7 +334,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
               </button>
             </div>
 
-            <div className="pb-6">
+            <div ref={listRef} onScroll={onListScroll} className="relative max-h-[72vh] overflow-y-auto overscroll-contain pr-2 pb-6 rounded-xl">
               {paragraphs.map((p, i) => {
                 const chapter = chapterAt.get(i);
                 const person = people.get(p.speaker);
@@ -390,7 +391,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
               <button
                 type="button"
                 onClick={() => setFollow(true)}
-                className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 rounded-full px-4 min-h-11 text-sm font-semibold text-white shadow-lg"
+                className="sticky bottom-4 mx-auto mt-[-56px] block rounded-full px-4 min-h-11 text-sm font-semibold text-white shadow-lg"
                 style={{ background: GREEN }}
               >
                 Jump to now · {formatStamp(now)}
