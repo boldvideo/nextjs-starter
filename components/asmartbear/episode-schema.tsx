@@ -4,12 +4,12 @@ import type { Chapter, Paragraph } from "@/lib/asmartbear/episode-data";
 
 // JSON-LD for an episode page: a VideoObject (the YouTube video, credited to
 // the channel) that is also a PodcastEpisode of Smart Bear Live, with one Clip
-// per chapter, a SeekToAction for deep links, the people, and the transcript.
+// per chapter, a SeekToAction for deep links and the people. The transcript is
+// already server-rendered in the page, so it is not repeated here (page weight).
 export function EpisodeSchema({
   video,
   episode,
   chapters,
-  paragraphs,
   url,
 }: {
   video: Video;
@@ -26,7 +26,6 @@ export function EpisodeSchema({
     ...(p.company && { affiliation: { "@type": "Organization", name: p.company } }),
   });
   const youtube = episode?.youtubeId ? `https://www.youtube.com/watch?v=${episode.youtubeId}` : undefined;
-  const transcript = paragraphs.map((p) => `${p.speaker}: ${p.text}`).join("\n");
 
   const schema = {
     "@context": "https://schema.org",
@@ -59,7 +58,6 @@ export function EpisodeSchema({
       target: `${url}?t={seek_to_second_number}`,
       "startOffset-input": "required name=seek_to_second_number",
     },
-    ...(transcript && { transcript }),
   };
 
   return (
