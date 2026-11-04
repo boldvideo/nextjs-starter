@@ -81,11 +81,18 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   const [company, setCompany] = useCompanyProfile();
   const [companyOpen, setCompanyOpen] = useState(false);
 
-  const seek = useCallback((t: number) => {
+  const skipScroll = useRef(false);
+  const seekTarget = useRef<{ t: number; until: number } | null>(null);
+  const seek = useCallback((t: number, opts?: { fromTranscript?: boolean }) => {
     const p = playerRef.current;
     if (!p) return;
     p.currentTime = t;
     void p.play?.();
+    // The player reports its new time a beat later; without this the follow
+    // scroll would chase the old position first.
+    setNow(t);
+    seekTarget.current = { t, until: Date.now() + 2500 };
+    skipScroll.current = !!opts?.fromTranscript;
     setFollow(true);
   }, []);
 
@@ -94,6 +101,13 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
     let raf = 0;
     const id = window.setInterval(() => {
       const t = playerRef.current?.currentTime ?? 0;
+      // Right after a seek the YouTube player still reports the old time for a
+      // moment; ignore readings that aren't near the target until it catches up.
+      const target = seekTarget.current;
+      if (target) {
+        if (Math.abs(t - target.t) < 3 || Date.now() > target.until) seekTarget.current = null;
+        else return;
+      }
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => setNow(t));
     }, 500);
@@ -145,6 +159,11 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   const programmaticUntil = useRef(0);
   useEffect(() => {
     if (!follow || tab !== "transcript" || activeIndex < 0) return;
+    if (skipScroll.current) {
+      // The reader clicked this paragraph; it is already where they are looking.
+      skipScroll.current = false;
+      return;
+    }
     const box = listRef.current;
     const el = box?.querySelector<HTMLElement>(`[data-p="${activeIndex}"]`);
     if (!box || !el) return;
@@ -156,6 +175,30 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   const onListScroll = useCallback(() => {
     if (Date.now() > programmaticUntil.current) setFollow(false);
   }, []);
+
+  const barRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [docked, setDocked] = useState(false);
+  const [boxHeight, setBoxHeight] = useState<string>("70vh");
+  useEffect(() => {
+    const measure = () => {
+      const bar = barRef.current;
+      const box = listRef.current;
+      if (!bar || !box) return;
+      // Docked = the sticky bar has reached the top of the page's scroll area.
+      const top = scrollRef.current?.getBoundingClientRect().top ?? 0;
+      setDocked(bar.getBoundingClientRect().top <= top + 1);
+      // Exactly the room left under the sticky bar, so the docked box fills the screen.
+      setBoxHeight(`max(320px, calc(100dvh - var(--header-height, 57px) - ${bar.offsetHeight}px - 12px))`);
+    };
+    measure();
+    window.addEventListener("scroll", measure, { capture: true, passive: true });
+    window.addEventListener("resize", measure);
+    return () => {
+      window.removeEventListener("scroll", measure, { capture: true });
+      window.removeEventListener("resize", measure);
+    };
+  }, [tab]);
 
   const q = query.trim().toLowerCase();
   const chapterAt = useMemo(() => {
@@ -191,6 +234,8 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
   return (
     <AIAssistantProvider key={video.id} onTimeClick={(t) => seek(t)}>
       <Breadcrumb label={episode ? `E${number} · ${episode.company}` : video.title} />
+      {/* The portal layout locks the page (main is overflow-hidden), so the episode page owns its scroll area. */}
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto">
       <div className="max-w-[1360px] mx-auto px-5 md:px-7 pt-5 pb-20 flex flex-wrap gap-9 items-start">
         {/* MAIN */}
         <main className="flex-[999_1_640px] min-w-0">
@@ -292,8 +337,9 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
             </section>
           )}
 
-          {/* Tabs */}
-          <div role="tablist" aria-label="Episode content" className="mt-9 flex flex-wrap gap-1 border-b border-border sticky top-0 bg-background z-10">
+          {/* Sticky bar: tabs, plus the transcript tools while on that tab */}
+          <div ref={barRef} className="mt-9 sticky top-0 bg-background z-10">
+          <div role="tablist" aria-label="Episode content" className="flex flex-wrap gap-1 border-b border-border">
             {tabs.filter((t) => t.show).map((t) => (
               <button
                 key={t.id}
@@ -310,10 +356,8 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
               </button>
             ))}
           </div>
-
-          {/* Transcript: rendered in full on the server so it is readable by search and AI crawlers */}
-          <div hidden={tab !== "transcript"} ref={transcriptRef}>
-            <div className="flex flex-wrap items-center gap-3 py-4">
+          {tab === "transcript" && (
+            <div className="flex flex-wrap items-center gap-3 py-3">
               <label className="flex flex-1 min-w-[220px] items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm text-muted-foreground focus-within:border-[#577544]">
                 <Search className="h-4 w-4" aria-hidden="true" />
                 <span className="sr-only">Search this transcript</span>
@@ -337,8 +381,17 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                 <ArrowDown className="h-4 w-4" /> Follow video
               </button>
             </div>
+          )}
+          </div>
 
-            <div ref={listRef} onScroll={onListScroll} className="relative max-h-[72vh] overflow-y-auto overscroll-contain pr-2 pb-6 rounded-xl">
+          {/* Transcript: rendered in full on the server so it is readable by search and AI crawlers */}
+          <div hidden={tab !== "transcript"} ref={transcriptRef}>
+            <div
+              ref={listRef}
+              onScroll={onListScroll}
+              style={{ height: boxHeight }}
+              className={cn("relative pr-2 pb-6", docked ? "overflow-y-auto" : "overflow-hidden")}
+            >
               {paragraphs.map((p, i) => {
                 const chapter = chapterAt.get(i);
                 const person = people.get(p.speaker);
@@ -358,10 +411,15 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                     {(!q || match) && (
                       <div
                         data-p={i}
+                        onClick={() => {
+                          if (window.getSelection()?.toString()) return;
+                          seek(p.start, { fromTranscript: true });
+                        }}
+                        title={`Play from ${formatStamp(p.start)}`}
                         className={cn(
-                          "flex gap-5 rounded-xl px-4 -mx-4 transition-colors",
+                          "flex gap-5 rounded-xl px-4 -mx-4 transition-colors cursor-pointer hover:bg-[#f4f6ef]",
                           tiny ? "py-1" : showSpeaker ? "pt-4 pb-2" : "py-2",
-                          i === activeIndex && "bg-[#eef1e6]"
+                          i === activeIndex && "!bg-[#eef1e6]"
                         )}
                       >
                         <div className="w-[150px] shrink-0 flex gap-2.5 items-start pt-0.5">
@@ -374,7 +432,10 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                             )}
                             <button
                               type="button"
-                              onClick={() => seek(p.start)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                seek(p.start, { fromTranscript: true });
+                              }}
                               className="text-xs text-muted-foreground tabular-nums hover:text-[#3f5631] hover:underline"
                             >
                               {formatStamp(p.start)}
@@ -546,6 +607,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
             </Link>
           )}
         </aside>
+      </div>
       </div>
     </AIAssistantProvider>
   );

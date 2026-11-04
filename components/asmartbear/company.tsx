@@ -115,6 +115,9 @@ export function CompanyForm({
       {label}
       {multiline ? (
         <textarea
+          autoComplete="off"
+          data-1p-ignore
+          data-lpignore="true"
           value={draft[key] ?? ""}
           onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
           placeholder={placeholder}
@@ -123,6 +126,10 @@ export function CompanyForm({
         />
       ) : (
         <input
+          autoComplete="off"
+          data-1p-ignore
+          data-lpignore="true"
+          data-form-type="other"
           value={draft[key] ?? ""}
           onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
           placeholder={placeholder}
@@ -146,6 +153,8 @@ export function CompanyForm({
       {(step === "url" || step === "reading") && (
         <>
           <form
+            autoComplete="off"
+            data-1p-ignore
             onSubmit={(e) => {
               e.preventDefault();
               if (website.trim()) void read();
@@ -155,6 +164,13 @@ export function CompanyForm({
             <label className="sr-only" htmlFor="asb-site">Your website</label>
             <input
               id="asb-site"
+              name="website"
+              type="url"
+              inputMode="url"
+              autoComplete="url"
+              data-1p-ignore
+              data-lpignore="true"
+              data-form-type="other"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="yourcompany.com"
