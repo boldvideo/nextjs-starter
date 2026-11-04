@@ -16,6 +16,7 @@ import {
   DM_Sans,
   JetBrains_Mono,
   Poppins,
+  Charis_SIL,
 } from "next/font/google";
 
 // Pre-load all fonts at build time
@@ -129,6 +130,14 @@ const poppins = Poppins({
   display: "swap",
 });
 
+const charisSil = Charis_SIL({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-charis-sil",
+  display: "swap",
+});
+
 // All font instances for className injection
 export const fontInstances = {
   inter,
@@ -148,6 +157,7 @@ export const fontInstances = {
   dmSans,
   jetbrainsMono,
   poppins,
+  charisSil,
 };
 
 // Map font names (as they come from API) to CSS variables
@@ -170,6 +180,7 @@ const fontNameToVar: Record<string, string> = {
   "DM Sans": "var(--font-dm-sans)",
   "JetBrains Mono": "var(--font-jetbrains-mono)",
   "Poppins": "var(--font-poppins)",
+  "Charis SIL": "var(--font-charis-sil)",
 };
 
 // Default font (Inter)

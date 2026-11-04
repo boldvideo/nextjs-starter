@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Hidden Multipliers gold gear favicon</title>
+  <rect width="512" height="512" rx="72" fill="#152A45"/>
+  <g fill="#D6A31A" transform="translate(256 256)">
+    <rect x="-31" y="-222" width="62" height="92" rx="12"/>
+    <rect x="-31" y="-222" width="62" height="92" rx="12" transform="rotate(45)"/>
+    <rect x="-31" y="-222" width="62" height="92" rx="12" transform="rotate(90)"/>
+    <rect x="-31" y="-222" width="62" height="92" rx="12" transform="rotate(135)"/>
+    <rect x="-31" y="-222" width="62" height="92" rx="12" transform="rotate(180)"/>
+    <rect x="-31" y="-222" width="62" height="92" rx="12" transform="rotate(225)"/>
+    <rect x="-31" y="-222" width="62" height="92" rx="12" transform="rotate(270)"/>
+    <rect x="-31" y="-222" width="62" height="92" rx="12" transform="rotate(315)"/>
+    <circle r="166"/>
+  </g>
+  <circle cx="256" cy="256" r="92" fill="#152A45"/>
+</svg>
