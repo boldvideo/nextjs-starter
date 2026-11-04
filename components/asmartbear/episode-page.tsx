@@ -616,7 +616,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                 return (
                   <div key={i}>
                     {chapter && !q && (
-                      <div className="flex flex-wrap items-baseline gap-3 pt-6 pb-2 mt-2 border-t border-border">
+                      <div className="flex flex-wrap items-baseline gap-3 pt-6 pb-2 mt-2 px-3 sm:px-4 border-t border-border">
                         <Stamp at={formatStamp(chapter.start)} onSeek={seek} className="text-[13px]" />
                         <h3 className="font-heading text-xl font-bold">{chapter.title}</h3>
                       </div>
@@ -630,7 +630,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                         }}
                         title={`Play from ${formatStamp(p.start)}`}
                         className={cn(
-                          "flex flex-col sm:flex-row gap-1.5 sm:gap-5 rounded-xl px-4 -mx-4 transition-colors cursor-pointer hover:bg-[#f4f6ef]",
+                          "flex flex-col sm:flex-row gap-1.5 sm:gap-5 rounded-xl px-3 sm:px-4 transition-colors cursor-pointer hover:bg-[#f4f6ef]",
                           tiny ? "py-1" : showSpeaker ? "pt-4 pb-2" : "py-2",
                           i === activeIndex && "!bg-[#eef1e6]"
                         )}
