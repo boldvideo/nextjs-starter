@@ -536,7 +536,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
 
         {/* RAIL */}
         <aside aria-label="Ask about this episode" className="flex-[1_1_420px] max-w-[470px] w-full lg:sticky lg:top-5 flex flex-col gap-4">
-          <section className="rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col h-[min(820px,calc(100dvh-var(--header-height,57px)-190px))] min-h-[420px] overflow-hidden">
+          <section className="rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col h-[min(820px,calc(100dvh-var(--header-height,57px)-235px))] min-h-[400px] overflow-hidden">
             <AIAssistant
               videoId={video.id}
               name={ai.name}
