@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { format } from "date-fns";
-import { ArrowDown, ArrowUpRight, ChevronRight, Headphones, Search, Share2 } from "lucide-react";
+import { ArrowDown, ArrowUpRight, ChevronRight, Headphones, Play, Search, Share2 } from "lucide-react";
 import type { Settings } from "@boldvideo/bold-js";
 import { Player } from "@/components/players";
 import { AIAssistant } from "@/components/video/chat";
@@ -55,16 +55,35 @@ function Face({ person, size = 40 }: { person?: Person; size?: number }) {
   );
 }
 
+/** A timestamp always looks like what it does: a small "play from here" pill. */
+function PlayPill({ at, filled = false }: { at: string; filled?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full pl-1.5 pr-2 py-[3px] text-[12px] font-semibold tabular-nums leading-none transition-colors duration-150",
+        filled ? "bg-[#577544] text-white" : "bg-[#eef1e6] text-[#2c3d22]"
+      )}
+    >
+      <Play className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
+      {at}
+    </span>
+  );
+}
+
 function Stamp({ at, onSeek, className }: { at?: string | null; onSeek: (s: number) => void; className?: string }) {
   const s = stampToSeconds(at);
-  if (s === null) return null;
+  if (s === null || !at) return null;
   return (
     <button
       type="button"
       onClick={() => onSeek(s)}
-      className={cn("font-semibold tabular-nums text-[#3f5631] hover:underline", className)}
+      aria-label={`Play from ${at}`}
+      className={cn(
+        "group/stamp align-middle rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#577544] focus-visible:ring-offset-2 [&>span]:hover:bg-[#577544] [&>span]:hover:text-white active:scale-[0.97] transition-transform",
+        className
+      )}
     >
-      {at}
+      <PlayPill at={at} />
     </button>
   );
 }
@@ -317,22 +336,38 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
 
           {/* The crux */}
           {crux && (
-            <section aria-labelledby="crux" className="mt-8 rounded-2xl border border-border overflow-hidden">
-              <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4 bg-[#f6f7f2] border-b border-border">
-                <h2 id="crux" className="font-heading text-xl font-bold">The crux, in four minutes of reading</h2>
-                <span className="text-xs text-muted-foreground">Every line links to the moment it was said</span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                {cruxCells.map(({ key, label }, i) =>
-                  crux[key]?.text ? (
-                    <div key={key} className={cn("p-5 border-border", i < 3 && "lg:border-r", i % 2 === 0 && "sm:border-r lg:border-r", i < 2 && "sm:border-b lg:border-b-0", "border-b sm:border-b-0 last:border-b-0")}>
-                      <p className="text-[11px] font-bold uppercase tracking-[0.12em] mb-2" style={{ color: GREEN }}>{label}</p>
-                      <p className="text-sm leading-relaxed">
-                        {crux[key].text} <Stamp at={crux[key].at} onSeek={seek} className="text-xs" />
-                      </p>
-                    </div>
-                  ) : null
-                )}
+            <section aria-labelledby="crux" className="mt-10">
+              <h2 id="crux" className="font-heading text-[22px] font-bold mb-3">The crux</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px rounded-2xl border border-border bg-border overflow-hidden">
+                {cruxCells.map(({ key, label }) => {
+                  const cell = crux[key];
+                  if (!cell?.text) return null;
+                  const s = stampToSeconds(cell.at);
+                  const body = (
+                    <>
+                      <span className="block text-[11px] font-bold uppercase tracking-[0.12em] mb-2" style={{ color: GREEN }}>{label}</span>
+                      <span className="block text-[14.5px] leading-relaxed text-foreground">{cell.text}</span>
+                      {cell.at && s !== null && (
+                        <span className="mt-auto pt-4 block [&>span]:group-hover:bg-[#577544] [&>span]:group-hover:text-white">
+                          <PlayPill at={cell.at} />
+                        </span>
+                      )}
+                    </>
+                  );
+                  return s !== null ? (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => seek(s)}
+                      aria-label={`${label}: play from ${cell.at}`}
+                      className="group flex flex-col text-left p-5 bg-background hover:bg-[#f6f7f2] active:bg-[#eef1e6] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#577544]"
+                    >
+                      {body}
+                    </button>
+                  ) : (
+                    <div key={key} className="flex flex-col p-5 bg-background">{body}</div>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -466,7 +501,6 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
 
           {/* Chapters */}
           <ol hidden={tab !== "chapters"} className="border-t border-border mt-4">
-            <p className="text-[13px] text-muted-foreground py-3">Chapters by Jason, from the episode description.</p>
             {chapters.map((c, i) => {
               const done = now >= c.end ? 100 : now > c.start ? ((now - c.start) / (c.end - c.start)) * 100 : 0;
               return (
@@ -490,7 +524,6 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
 
           {/* Moments */}
           <div hidden={tab !== "moments"} className="pt-4">
-            <p className="text-[13px] text-muted-foreground mb-3">The lines worth stealing. Click to hear it.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {episode?.moments?.map((m) => (
                 <button
@@ -500,14 +533,14 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                     const s = stampToSeconds(m.at);
                     if (s !== null) seek(s);
                   }}
-                  className="text-left rounded-2xl border border-border p-5 hover:border-[#577544] transition-colors"
+                  className="group text-left rounded-2xl border border-border p-5 hover:border-[#577544] hover:bg-[#fbfcf8] active:scale-[0.99] transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#577544]"
                 >
                   <span className="block font-heading text-[19px] leading-snug">“{m.quote}”</span>
                   <span className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-2 font-semibold text-foreground">
                       <Face person={m.speaker} size={22} /> {m.speaker?.name}
                     </span>
-                    <span className="tabular-nums">{m.at}</span>
+                    {m.at && <span className="[&>span]:group-hover:bg-[#577544] [&>span]:group-hover:text-white"><PlayPill at={m.at} /></span>}
                   </span>
                 </button>
               ))}
@@ -516,7 +549,6 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
 
           {/* Toolbox */}
           <div hidden={tab !== "tools"} className="pt-4 flex flex-col gap-2.5">
-            <p className="text-[13px] text-muted-foreground">The frameworks Jason reached for in this episode.</p>
             {episode?.tools?.map((t) => (
               <div key={t.name} className="flex flex-wrap items-center gap-4 rounded-2xl border border-border px-5 py-4">
                 <span className="flex-1 min-w-[220px]">
@@ -545,7 +577,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
               greeting={company?.business_name ? `${company.business_name} is on the hot seat. What’s the biggest challenge right now?` : ai.greeting}
               isEmbedded
               variant="panel"
-              tagline="Knows every episode. Not Jason. Cites the moment."
+              tagline="AI assistant · not Jason"
               placeholder={company?.business_name ? `Ask about ${company.business_name} and this episode…` : "Ask about this episode, or your own business…"}
               viewerProfile={viewerProfile(company)}
               starters={

@@ -188,10 +188,8 @@ export default function AsmartbearHero({ settings, content }: HeroProps) {
                   Stuck on something yourself?
                 </p>
                 <p className="text-[15px] text-foreground/75 mt-1 max-w-2xl">
-                  {config.ai.name} is an AI that has sat through every
-                  episode and talk, so it can point you to the moment where we
-                  worked through your kind of problem. It isn’t me, and it
-                  shows its sources so you can check.
+                  It’s an AI that has watched every episode. It isn’t me, and
+                  it shows you exactly where each answer comes from.
                 </p>
               </div>
             </div>

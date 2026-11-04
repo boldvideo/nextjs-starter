@@ -153,6 +153,7 @@ export function CompanyForm({
       {(step === "url" || step === "reading") && (
         <>
           <form
+            noValidate
             autoComplete="off"
             data-1p-ignore
             onSubmit={(e) => {
@@ -165,8 +166,10 @@ export function CompanyForm({
             <input
               id="asb-site"
               name="website"
-              type="url"
+              type="text"
               inputMode="url"
+              spellCheck={false}
+              autoCapitalize="none"
               autoComplete="url"
               data-1p-ignore
               data-lpignore="true"
@@ -190,7 +193,7 @@ export function CompanyForm({
           </form>
           {error && <p className="mt-2 text-[13px] text-[#9a3b1f]">{error}</p>}
           <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
-            I read your homepage and one about page, nothing else. It stays in this browser.
+            Reads your homepage and about page. Saved only in this browser.
           </p>
           <button type="button" onClick={() => setStep("manual")} className="mt-1 text-[12.5px] text-muted-foreground underline underline-offset-2 hover:text-foreground">
             No website yet? Describe it instead
@@ -211,12 +214,11 @@ export function CompanyForm({
           )}
           {field("business_name", "Company", "Acme")}
           {field("summary", "What it is, and who it’s for", "We help … do …", true)}
-          <p className="pt-1 text-[12.5px] text-foreground/80">Two things a website never says. Optional, but they change the advice:</p>
-          <div className="grid grid-cols-2 gap-2">
-            {field("mrr", "MRR", "$")}
-            {field("churn", "Monthly churn", "%")}
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            {field("mrr", "MRR (optional)", "$")}
+            {field("churn", "Monthly churn (optional)", "%")}
           </div>
-          {field("goal", "Your biggest problem right now", "Growth went flat after…")}
+          {field("goal", "Biggest problem right now (optional)", "Growth went flat after…")}
           <button
             type="button"
             disabled={!draft.business_name?.trim()}
