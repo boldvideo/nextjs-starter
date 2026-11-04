@@ -17,6 +17,8 @@
     "@boldvideo/bold-js": "^2.5.0",
     "@boldvideo/ui": "^0.2.0",
     "@mux/mux-player-react": "^3.13.2",
+    "@sanity/client": "7",
+    "@sanity/image-url": "^2.1.1",
     "@types/mdast": "^4.0.4",
     "@types/node": "24.13.3",
     "@types/react": "19.2.18",

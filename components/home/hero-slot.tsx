@@ -5,6 +5,8 @@ import type { PortalSettings, PortalConfig } from "@/lib/portal-config";
 
 export interface HeroProps {
   settings: PortalSettings | null;
+  /** Tenant editorial content (Sanity) fetched on the server, if any */
+  content?: unknown;
 }
 
 const heroes: Record<string, React.ComponentType<HeroProps>> = {
@@ -15,9 +17,10 @@ const heroes: Record<string, React.ComponentType<HeroProps>> = {
 interface HeroSlotProps {
   settings: PortalSettings | null;
   config: PortalConfig;
+  content?: unknown;
 }
 
-export function HeroSlot({ settings, config }: HeroSlotProps) {
+export function HeroSlot({ settings, config, content }: HeroSlotProps) {
   if (!config.hero.enabled || config.hero.type !== "custom") {
     return null;
   }
@@ -28,5 +31,5 @@ export function HeroSlot({ settings, config }: HeroSlotProps) {
   const HeroComponent = heroes[slug];
   if (!HeroComponent) return null;
 
-  return <HeroComponent settings={settings} />;
+  return <HeroComponent settings={settings} content={content} />;
 }

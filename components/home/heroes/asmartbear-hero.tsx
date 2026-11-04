@@ -7,11 +7,12 @@ import { useState } from "react";
 import { ArrowUp, ArrowUpRight, BookOpen, Headphones } from "lucide-react";
 import type { HeroProps } from "../hero-slot";
 import { getPortalConfig } from "@/lib/portal-config";
+import type { HomeContent } from "@/lib/asmartbear/sanity";
 import {
-  episodes,
-  talks,
-  chapters,
-  blurbs,
+  episodes as staticEpisodes,
+  talks as staticTalks,
+  chapters as staticChapters,
+  blurbs as staticBlurbs,
   BOOK_URL,
   SHOW_URL,
   LONGFORM_URL,
@@ -51,7 +52,35 @@ function Gear({ className, size = 120 }: { className?: string; size?: number }) 
   );
 }
 
-export default function AsmartbearHero({ settings }: HeroProps) {
+interface Row {
+  number: string;
+  founder: string;
+  company: string;
+  cohost?: string;
+  crux: string;
+  videoId: string;
+  faces: string[];
+}
+
+export default function AsmartbearHero({ settings, content }: HeroProps) {
+  const c = (content ?? null) as HomeContent | null;
+  // Sanity first; the bundled data file is the fallback if Sanity is unreachable.
+  const episodes: Row[] = c?.episodes?.length
+    ? c.episodes.map((e) => ({
+        number: `E${String(e.number).padStart(2, "0")}`,
+        founder: (e.hotSeat ?? []).map((p) => p.name).join(" & "),
+        company: e.company ?? "",
+        cohost: (e.cohosts ?? []).map((p) => p.name).join(" & ") || undefined,
+        crux: e.logline?.quote ?? "",
+        videoId: e.boldSlug,
+        faces: [...(e.hotSeat ?? []), ...(e.cohosts ?? [])].map((p) => p.photo).filter((x): x is string => !!x),
+      }))
+    : staticEpisodes.map((e) => ({ ...e, faces: [] }));
+  const talks = c?.talks?.length ? c.talks : staticTalks;
+  const chapters = c?.chapters?.length
+    ? c.chapters.map((ch) => ({ ...ch, number: String(ch.number) }))
+    : staticChapters;
+  const blurbs = c?.book?.blurbs?.length ? (c.book.blurbs as typeof staticBlurbs) : staticBlurbs;
   const router = useRouter();
   const config = getPortalConfig(settings);
   const [question, setQuestion] = useState("");
@@ -254,7 +283,22 @@ export default function AsmartbearHero({ settings }: HeroProps) {
                   >
                     {ep.number}
                   </span>
-                  <div className="col-span-10 md:col-span-4">
+                  <div className="col-span-10 md:col-span-4 flex items-center gap-3">
+                    {ep.faces.length > 0 && (
+                      <span className="flex shrink-0 w-[84px]">
+                        {ep.faces.slice(0, 3).map((src, i) => (
+                          <Image
+                            key={src}
+                            src={src}
+                            alt=""
+                            width={36}
+                            height={36}
+                            className={`h-9 w-9 rounded-full object-cover ring-2 ring-background ${i > 0 ? "-ml-3" : ""}`}
+                          />
+                        ))}
+                      </span>
+                    )}
+                    <div>
                     <div className="font-semibold text-foreground group-hover:underline decoration-2 underline-offset-4 decoration-[#577544]">
                       {ep.company}
                     </div>
@@ -266,6 +310,7 @@ export default function AsmartbearHero({ settings }: HeroProps) {
                           <span className="opacity-60">· with</span> {ep.cohost}
                         </>
                       )}
+                    </div>
                     </div>
                   </div>
                   <p className="col-span-12 md:col-span-7 md:pl-0 pl-[16.6%] font-heading italic text-[1.05rem] text-foreground/85 leading-snug">

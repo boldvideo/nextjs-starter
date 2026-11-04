@@ -5,11 +5,13 @@ import { HeroSlot } from "@/components/home/hero-slot";
 import { ContinueWatching } from "@/components/home/continue-watching";
 import type { Video, Playlist } from "@boldvideo/bold-js";
 import type { PortalSettings, PortalConfig } from "@/lib/portal-config";
+import type { HomeContent } from "@/lib/asmartbear/sanity";
 
 interface LibraryHomepageProps {
   settings: PortalSettings | null;
   videos: Video[] | null;
   config: PortalConfig;
+  heroContent?: HomeContent | null;
   playlistShowAllVideos?: boolean;
   playlistStandaloneLinks?: boolean;
 }
@@ -18,6 +20,7 @@ export function LibraryHomepage({
   settings, 
   videos,
   config,
+  heroContent = null,
   playlistShowAllVideos = false,
   playlistStandaloneLinks = false,
 }: LibraryHomepageProps) {
@@ -27,7 +30,7 @@ export function LibraryHomepage({
 
   return (
     <div className="p-5 md:p-10 max-w-screen-2xl mx-auto overflow-y-auto">
-      <HeroSlot settings={settings} config={config} />
+      <HeroSlot settings={settings} config={config} content={heroContent} />
       {/* Continue watching — local progress, renders nothing without records */}
       {hasVideos && <ContinueWatching videos={videos} />}
       {/* Videos Section */}

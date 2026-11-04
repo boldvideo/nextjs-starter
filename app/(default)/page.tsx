@@ -5,6 +5,7 @@ import { getPortalConfig, PortalSettings } from "@/lib/portal-config";
 import { LibraryHomepage } from "@/components/home/library-homepage";
 import { AssistantHomepage } from "@/components/home/assistant-homepage";
 import { EmptyHomepage } from "@/components/home/empty-homepage";
+import { sanityFetch, HOME_QUERY, type HomeContent } from "@/lib/asmartbear/sanity";
 
 // How often this page should revalidate (in seconds)
 export const revalidate = 60;
@@ -16,6 +17,7 @@ export const revalidate = 60;
 async function getHomeData(): Promise<{
   settings: PortalSettings | null;
   videos: Video[] | null;
+  heroContent: HomeContent | null;
 }> {
   const context = await getTenantContext();
   if (!context) {
@@ -24,10 +26,6 @@ async function getHomeData(): Promise<{
 
   const { client, settings } = context;
 
-  // Debug: log full settings payload
-  console.log("=== SETTINGS PAYLOAD ===");
-  console.log(JSON.stringify(settings, null, 2));
-  console.log("=== END SETTINGS PAYLOAD ===");
 
   // Get portal configuration
   const config = getPortalConfig(settings);
@@ -39,7 +37,10 @@ async function getHomeData(): Promise<{
     videos = videosResponse?.data ?? null;
   }
 
-  return { settings, videos };
+  const heroContent =
+    settings?.account?.slug === "asmartbear" ? await sanityFetch<HomeContent>(HOME_QUERY) : null;
+
+  return { settings, videos, heroContent };
 }
 
 /**
@@ -47,7 +48,7 @@ async function getHomeData(): Promise<{
  * @returns The rendered homepage based on portal settings
  */
 export default async function Home(): Promise<React.JSX.Element> {
-  const { settings, videos } = await getHomeData();
+  const { settings, videos, heroContent } = await getHomeData();
   const config = getPortalConfig(settings);
   
   // Check for playlist display overrides
@@ -65,6 +66,7 @@ export default async function Home(): Promise<React.JSX.Element> {
           settings={settings} 
           videos={videos}
           config={config}
+          heroContent={heroContent}
           playlistShowAllVideos={playlistShowAllVideos}
           playlistStandaloneLinks={playlistStandaloneLinks}
         />
@@ -80,6 +82,7 @@ export default async function Home(): Promise<React.JSX.Element> {
           settings={settings} 
           videos={videos}
           config={config}
+          heroContent={heroContent}
           playlistShowAllVideos={playlistShowAllVideos}
           playlistStandaloneLinks={playlistStandaloneLinks}
         />

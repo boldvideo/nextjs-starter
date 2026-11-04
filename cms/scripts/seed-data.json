@@ -1,0 +1,766 @@
+{
+ "people": [
+  {
+   "_id": "person-jason-cohen",
+   "slug": "jason-cohen",
+   "name": "Jason Cohen",
+   "company": "Smart Bear, WP Engine",
+   "companyUrl": "https://longform.asmartbear.com",
+   "x": "asmartbear",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/jason-cohen.jpg"
+  },
+  {
+   "_id": "person-dmytro-krasun",
+   "slug": "dmytro-krasun",
+   "name": "Dmytro Krasun",
+   "company": "ScreenshotOne",
+   "companyUrl": "https://screenshotone.com",
+   "x": "DmytroKrasun",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/dmytro-krasun.jpg"
+  },
+  {
+   "_id": "person-jesse-schoberg",
+   "slug": "jesse-schoberg",
+   "name": "Jesse Schoberg",
+   "company": "DropInBlog",
+   "companyUrl": "https://dropinblog.com",
+   "x": "JesseSchoberg",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/jesse-schoberg.jpg"
+  },
+  {
+   "_id": "person-rob-walling",
+   "slug": "rob-walling",
+   "name": "Rob Walling",
+   "company": "TinySeed, MicroConf",
+   "companyUrl": "https://robwalling.com",
+   "x": "robwalling",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/rob-walling.jpg"
+  },
+  {
+   "_id": "person-tiago-ferreira",
+   "slug": "tiago-ferreira",
+   "name": "Tiago Ferreira",
+   "company": "Podsqueeze",
+   "companyUrl": "https://podsqueeze.com",
+   "x": "wbetiago",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/tiago-ferreira.jpg"
+  },
+  {
+   "_id": "person-joao-amaro",
+   "slug": "joao-amaro",
+   "name": "João Amaro",
+   "company": "Podsqueeze",
+   "companyUrl": "https://podsqueeze.com",
+   "x": "JOAOTHA",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/joao-amaro.jpg"
+  },
+  {
+   "_id": "person-craig-hewitt",
+   "slug": "craig-hewitt",
+   "name": "Craig Hewitt",
+   "company": "Castos",
+   "companyUrl": "https://castos.com",
+   "x": "thecraighewitt",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/craig-hewitt.jpg"
+  },
+  {
+   "_id": "person-patrik-inzinger",
+   "slug": "patrik-inzinger",
+   "name": "Patrik Inzinger",
+   "company": "appointmed",
+   "companyUrl": "https://www.appointmed.com",
+   "x": "patrikinzinger",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/patrik-inzinger.jpg"
+  },
+  {
+   "_id": "person-sherry-walling",
+   "slug": "sherry-walling",
+   "name": "Dr. Sherry Walling",
+   "company": "ZenFounder",
+   "companyUrl": "https://www.sherrywalling.com",
+   "x": "drsherrywalling",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/sherry-walling.jpg"
+  },
+  {
+   "_id": "person-hasan-cagli",
+   "slug": "hasan-cagli",
+   "name": "Hasan Cagli",
+   "company": "PostPlanify",
+   "companyUrl": "https://postplanify.com",
+   "x": "HsanC_",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/hasan-cagli.jpg"
+  },
+  {
+   "_id": "person-laura-roeder",
+   "slug": "laura-roeder",
+   "name": "Laura Roeder",
+   "company": "Paperbell, MeetEdgar",
+   "companyUrl": "https://paperbell.com",
+   "x": "lkr",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/laura-roeder.jpg"
+  },
+  {
+   "_id": "person-carl-alexander",
+   "slug": "carl-alexander",
+   "name": "Carl Alexander",
+   "company": "Ymir",
+   "companyUrl": "https://ymirapp.com",
+   "x": "twigpress",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/carl-alexander.jpg"
+  },
+  {
+   "_id": "person-bryce-adams",
+   "slug": "bryce-adams",
+   "name": "Bryce Adams",
+   "company": "Metorik",
+   "companyUrl": "https://metorik.com",
+   "x": "bryceadams",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/bryce-adams.jpg"
+  },
+  {
+   "_id": "person-george-paladichuk",
+   "slug": "george-paladichuk",
+   "name": "George Paladichuk",
+   "company": "NaiL",
+   "companyUrl": "https://usenail.com",
+   "x": null,
+   "photo": null
+  },
+  {
+   "_id": "person-dan-martell",
+   "slug": "dan-martell",
+   "name": "Dan Martell",
+   "company": "Buy Back Your Time",
+   "companyUrl": "https://www.danmartell.com",
+   "x": "danmartell",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/dan-martell.jpg"
+  },
+  {
+   "_id": "person-rison-simon",
+   "slug": "rison-simon",
+   "name": "Rison Simon",
+   "company": "PainPointy",
+   "companyUrl": "https://painpointy.com",
+   "x": "risonsimon",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/rison-simon.jpg"
+  },
+  {
+   "_id": "person-mario-peshev",
+   "slug": "mario-peshev",
+   "name": "Mario Peshev",
+   "company": "DevriX",
+   "companyUrl": "https://devrix.com",
+   "x": "no_fear_inc",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/mario-peshev.jpg"
+  },
+  {
+   "_id": "person-jon-sturgeon",
+   "slug": "jon-sturgeon",
+   "name": "Jon Sturgeon",
+   "company": "Dingus & Zazzy",
+   "companyUrl": "https://www.dingusandzazzy.com",
+   "x": "imintomoms",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/jon-sturgeon.jpg"
+  },
+  {
+   "_id": "person-brett-lindenberg",
+   "slug": "brett-lindenberg",
+   "name": "Brett Lindenberg",
+   "company": "Mindstamp",
+   "companyUrl": "https://mindstamp.com",
+   "x": "balindenberg",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/brett-lindenberg.jpg"
+  },
+  {
+   "_id": "person-jessica-malnik",
+   "slug": "jessica-malnik",
+   "name": "Jessica Malnik",
+   "company": "The Remote Work Tribe",
+   "companyUrl": "https://jessicamalnik.com",
+   "x": "jessicamalnik",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/jessica-malnik.jpg"
+  },
+  {
+   "_id": "person-jane-portman",
+   "slug": "jane-portman",
+   "name": "Jane Portman",
+   "company": "Userlist",
+   "companyUrl": "https://userlist.com",
+   "x": "uibreakfast",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/jane-portman.jpg"
+  },
+  {
+   "_id": "person-benedikt-deicke",
+   "slug": "benedikt-deicke",
+   "name": "Benedikt Deicke",
+   "company": "Userlist",
+   "companyUrl": "https://userlist.com",
+   "x": "benediktdeicke",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/benedikt-deicke.jpg"
+  },
+  {
+   "_id": "person-mariya-delano",
+   "slug": "mariya-delano",
+   "name": "Mariya Delano",
+   "company": "Kalyna Marketing",
+   "companyUrl": "https://kalynamarketing.com",
+   "x": null,
+   "photo": null
+  },
+  {
+   "_id": "person-jack-friks",
+   "slug": "jack-friks",
+   "name": "Jack Friks",
+   "company": "Post Bridge",
+   "companyUrl": "https://post-bridge.com",
+   "x": "jackfriks",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/jack-friks.jpg"
+  },
+  {
+   "_id": "person-tibo-louis-lucas",
+   "slug": "tibo-louis-lucas",
+   "name": "Tibo Louis-Lucas",
+   "company": "TMaker",
+   "companyUrl": "https://tmaker.io",
+   "x": "tibo_maker",
+   "photo": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/people/tibo-louis-lucas.jpg"
+  }
+ ],
+ "episodes": [
+  {
+   "_id": "episode-e01",
+   "number": 1,
+   "title": "Using transparent metrics to restart growth when stuck at $32K MRR",
+   "boldSlug": "e01-using-transparent-metrics-to-restart-growth-when-stuck-at-32k-mrr",
+   "youtubeId": "hYBi2OAakNo",
+   "publishedAt": "2026-07-21",
+   "company": "ScreenshotOne",
+   "hotSeat": [
+    "dmytro-krasun"
+   ],
+   "cohosts": [],
+   "logline": {
+    "quote": "He opened his entire dashboard and let me poke at all of it.",
+    "at": null,
+    "source": "description"
+   }
+  },
+  {
+   "_id": "episode-e02",
+   "number": 2,
+   "title": "$1M ARR, how to expand into a new market",
+   "boldSlug": "e02-w-rob-walling-1m-arr-how-to-expand-into-a-new-market",
+   "youtubeId": "o3oN1g8xpXY",
+   "publishedAt": "2026-08-16",
+   "company": "DropInBlog",
+   "hotSeat": [
+    "jesse-schoberg"
+   ],
+   "cohosts": [
+    "rob-walling"
+   ],
+   "logline": {
+    "quote": "A flat growth curve and a potential new juicy market segment, but he’s not quite sure how to go to there.",
+    "at": "0:08",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e03",
+   "number": 3,
+   "title": "Restarting growth after stuck at €16k/mo",
+   "boldSlug": "e03-w-craig-hewitt-restarting-growth-after-stuck-at-16kmo",
+   "youtubeId": "4ZSfcD94DQw",
+   "publishedAt": "2026-08-23",
+   "company": "Podsqueeze",
+   "hotSeat": [
+    "tiago-ferreira",
+    "joao-amaro"
+   ],
+   "cohosts": [
+    "craig-hewitt"
+   ],
+   "logline": {
+    "quote": "Turned down an acquisition offer last year. That’s a pretty strong move. I like that. But … growth has already plateaued.",
+    "at": "0:12",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e04",
+   "number": 4,
+   "title": "He built a great business, but it doesn't feel like it",
+   "boldSlug": "e04-w-dr-sherry-walling-he-built-a-great-business-but-it-doesnt-feel-like-it",
+   "youtubeId": "WeqBHrKrCEI",
+   "publishedAt": "2026-08-30",
+   "company": "appointmed",
+   "hotSeat": [
+    "patrik-inzinger"
+   ],
+   "cohosts": [
+    "sherry-walling"
+   ],
+   "logline": {
+    "quote": "The mission is complete. … So what is it all for?",
+    "at": "0:19",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e05",
+   "number": 5,
+   "title": "Scared to commit to his best customers",
+   "boldSlug": "e05-w-laura-roeder-scared-to-commit-to-his-best-customers",
+   "youtubeId": "Jg7QyAzT76Y",
+   "publishedAt": "2026-09-06",
+   "company": "PostPlanify",
+   "hotSeat": [
+    "hasan-cagli"
+   ],
+   "cohosts": [
+    "laura-roeder"
+   ],
+   "logline": {
+    "quote": "The customers who love the product and never leave are agencies, and he’s having trouble landing more of them.",
+    "at": "0:14",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e06",
+   "number": 6,
+   "title": "How to Fix a SaaS Business That’s Not Growing",
+   "boldSlug": "e06-w-bryce-adams-how-to-fix-a-saas-business-thats-not-growing",
+   "youtubeId": "CdGcSk6TKqI",
+   "publishedAt": "2026-09-13",
+   "company": "Ymir",
+   "hotSeat": [
+    "carl-alexander"
+   ],
+   "cohosts": [
+    "bryce-adams"
+   ],
+   "logline": {
+    "quote": "Customers love it. … But nobody else wants it.",
+    "at": "0:09",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e07",
+   "number": 7,
+   "title": "How Do You Scale After Your First Big Customer?",
+   "boldSlug": "e07-w-dan-martell-how-do-you-scale-after-your-first-big-customer",
+   "youtubeId": "AlEmh5BmNF0",
+   "publishedAt": "2026-09-20",
+   "company": "NaiL",
+   "hotSeat": [
+    "george-paladichuk"
+   ],
+   "cohosts": [
+    "dan-martell"
+   ],
+   "logline": {
+    "quote": "Almost all that revenue comes from a single customer, big customer.",
+    "at": "0:11",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e08",
+   "number": 8,
+   "title": "Creating customer interview questions before you have customers",
+   "boldSlug": "e08-creating-customer-interview-questions-before-you-have-customers",
+   "youtubeId": "1QFJFCDnWGo",
+   "publishedAt": "2026-09-27",
+   "company": "PainPointy",
+   "hotSeat": [
+    "rison-simon"
+   ],
+   "cohosts": [],
+   "logline": {
+    "quote": "He sold his last startup the same week he launched it. But his current startup is stuck with basically no customers at all.",
+    "at": "0:04",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e09",
+   "number": 9,
+   "title": "AI changed his agency's model. Should he grow or sell?",
+   "boldSlug": "e09-w-jon-sturgeon-ai-changed-his-agencys-model-should-he-grow-or-sell",
+   "youtubeId": "wKVKpWMNn5c",
+   "publishedAt": "2026-10-04",
+   "company": "DevriX",
+   "hotSeat": [
+    "mario-peshev"
+   ],
+   "cohosts": [
+    "jon-sturgeon"
+   ],
+   "logline": {
+    "quote": "A lot of people say they want to do that. He actually cracked it.",
+    "at": "0:13",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e10",
+   "number": 10,
+   "title": "How to Find Customers Who Actually Need Your SaaS",
+   "boldSlug": "e10-w-jessica-malnik-how-to-find-customers-who-actually-need-your-saas",
+   "youtubeId": "pfflbL_ie2Q",
+   "publishedAt": "2026-10-18",
+   "company": "Mindstamp",
+   "hotSeat": [
+    "brett-lindenberg"
+   ],
+   "cohosts": [
+    "jessica-malnik"
+   ],
+   "logline": {
+    "quote": "He sees two completely opposite ways of restarting growth. And who knows, maybe the best way is neither one of those.",
+    "at": "0:12",
+    "source": "intro"
+   }
+  },
+  {
+   "_id": "episode-e11",
+   "number": 11,
+   "title": "How to Fix a SaaS Trial-to-Paid Conversion Problem",
+   "boldSlug": "e11-w-mariya-delano-how-to-fix-a-saas-trial-to-paid-conversion-problem",
+   "youtubeId": "7gJvwR78ot8",
+   "publishedAt": "2026-10-24",
+   "company": "Userlist",
+   "hotSeat": [
+    "jane-portman",
+    "benedikt-deicke"
+   ],
+   "cohosts": [
+    "mariya-delano"
+   ],
+   "logline": {
+    "quote": "About half of Userlist’s paying customers never fully set up the email automation they paid for.",
+    "at": null,
+    "source": "description"
+   }
+  },
+  {
+   "_id": "episode-e12",
+   "number": 12,
+   "title": "How to Find Customers Who Actually Need Your SaaS",
+   "boldSlug": "e12-wtibo-maker-how-to-find-customers-who-actually-need-your-saas",
+   "youtubeId": "uTVyLYDOd1M",
+   "publishedAt": "2026-11-01",
+   "company": "Post Bridge",
+   "hotSeat": [
+    "jack-friks"
+   ],
+   "cohosts": [
+    "tibo-louis-lucas"
+   ],
+   "logline": {
+    "quote": "Almost every dollar he adds gets eaten by a dollar walking out the door.",
+    "at": "0:29",
+    "source": "intro"
+   }
+  }
+ ],
+ "chapters": [
+  {
+   "_id": "chapter-1",
+   "number": 1,
+   "title": "The Profit Whale’s Tail",
+   "promise": "Double profits by reshaping just 1% of your customer relationships."
+  },
+  {
+   "_id": "chapter-2",
+   "number": 2,
+   "title": "Carol Loves You For You",
+   "promise": "Win your target market by embracing your strengths and weaknesses."
+  },
+  {
+   "_id": "chapter-3",
+   "number": 3,
+   "title": "Speaking Carol Into Existence",
+   "promise": "Pinpoint the customers who are excited to buy today and stay for years."
+  },
+  {
+   "_id": "chapter-4",
+   "number": 4,
+   "title": "A Rose By Any Other Name",
+   "promise": "Products don’t sell themselves; your words do."
+  },
+  {
+   "_id": "chapter-5",
+   "number": 5,
+   "title": "Price Is Just a Number",
+   "promise": "Double profits from small pricing changes."
+  },
+  {
+   "_id": "chapter-6",
+   "number": 6,
+   "title": "Price Is Not Just a Number",
+   "promise": "Earn customers who want you to raise prices."
+  },
+  {
+   "_id": "chapter-7",
+   "number": 7,
+   "title": "And After All That, They Left",
+   "promise": "Outrun the churn that is quietly capping your growth."
+  },
+  {
+   "_id": "chapter-8",
+   "number": 8,
+   "title": "Splitting the Surplus",
+   "promise": "Accelerate growth from the customers you already have."
+  },
+  {
+   "_id": "chapter-9",
+   "number": 9,
+   "title": "Your False-Positives Factory",
+   "promise": "Design winning ideas using principled experiments, not guesswork."
+  },
+  {
+   "_id": "chapter-10",
+   "number": 10,
+   "title": "A Multiplier of One’s Own",
+   "promise": "Unearth your company’s unique multipliers."
+  },
+  {
+   "_id": "chapter-11",
+   "number": 11,
+   "title": "To Thine Own Self Be True",
+   "promise": "Win at life by playing games you are built to win, flaws and all."
+  }
+ ],
+ "blurbs": [
+  {
+   "quote": "This is the book that founders need. The chapters on pricing and churn alone are worth the price of the book. Read it with a pen.",
+   "name": "Lenny Rachitsky",
+   "role": "Lenny’s Newsletter & Podcast"
+  },
+  {
+   "quote": "Jason’s advice on growth was key to scaling Kit past $50M in ARR. I’m glad he finally put it in a book you can read.",
+   "name": "Nathan Barry",
+   "role": "Founder, Kit"
+  },
+  {
+   "quote": "I’m angry. Angry that Jason’s written such an astonishingly useful book just eight short years after I desperately needed it.",
+   "name": "Rand Fishkin",
+   "role": "Cofounder, SparkToro"
+  }
+ ],
+ "talks": [
+  {
+   "_id": "talk-g9-TVWNu4Aw",
+   "title": "Profit Whale Curve",
+   "note": "21 min",
+   "youtubeId": "g9-TVWNu4Aw",
+   "order": 0
+  },
+  {
+   "_id": "talk-dVSXNkWUq88",
+   "title": "Intentional Weakness",
+   "note": "18 min",
+   "youtubeId": "dVSXNkWUq88",
+   "order": 1
+  },
+  {
+   "_id": "talk-FaUO2-AQmr0",
+   "title": "Mystery of a broken A/B test",
+   "note": "11 min",
+   "youtubeId": "FaUO2-AQmr0",
+   "order": 2
+  },
+  {
+   "_id": "talk-hF1P8blGMQ4",
+   "title": "Naked Business",
+   "note": "Business of Software 2011",
+   "youtubeId": "hF1P8blGMQ4",
+   "order": 3
+  },
+  {
+   "_id": "talk-nAvozs0itOc",
+   "title": "When to Break the Rules",
+   "note": "Business of Software 2010",
+   "youtubeId": "nAvozs0itOc",
+   "order": 4
+  },
+  {
+   "_id": "talk-YuXmM8bHMxY",
+   "title": "Agile Marketing",
+   "note": "Business of Software 2008",
+   "youtubeId": "YuXmM8bHMxY",
+   "order": 5
+  }
+ ],
+ "tools": [
+  {
+   "_id": "tool-max-mrr",
+   "name": "Max MRR",
+   "summary": "Churn sets a hard ceiling on revenue. Compute yours before planning growth.",
+   "articleUrl": "https://longform.asmartbear.com/max-mrr/",
+   "chapter": 7
+  },
+  {
+   "_id": "tool-iterative-hypothesis",
+   "name": "The Iterative Hypothesis method",
+   "summary": "Write down what you think before you interview customers, then let them prove you wrong.",
+   "articleUrl": "https://longform.asmartbear.com/customer-development/",
+   "chapter": 10
+  },
+  {
+   "_id": "tool-needs-stack",
+   "name": "The Needs Stack",
+   "summary": "What customers actually value, layer by layer, and where you can win.",
+   "articleUrl": "https://longform.asmartbear.com/needs-stack/",
+   "chapter": 4
+  },
+  {
+   "_id": "tool-target-market",
+   "name": "Your target market isn't demographic",
+   "summary": "Define the market by the situation and the buyer, not by age or industry.",
+   "articleUrl": "https://longform.asmartbear.com/target-market/",
+   "chapter": 3
+  },
+  {
+   "_id": "tool-pricing-business-model",
+   "name": "Pricing determines your business model",
+   "summary": "The price picks the customer, the channel and the company you become.",
+   "articleUrl": "https://longform.asmartbear.com/pricing-determines-your-business-model/",
+   "chapter": 5
+  },
+  {
+   "_id": "tool-elephant-curve",
+   "name": "The Elephant Curve",
+   "summary": "Real SaaS growth is not exponential. Use the right model to understand it.",
+   "articleUrl": "https://longform.asmartbear.com/exponential-growth/",
+   "chapter": null
+  },
+  {
+   "_id": "tool-profit-whale",
+   "name": "The Profit Whale curve",
+   "summary": "Plot cumulative profit per customer to find the few relationships holding you back.",
+   "articleUrl": null,
+   "chapter": 1
+  },
+  {
+   "_id": "tool-customer-7",
+   "name": "The customer #7 trap",
+   "summary": "Your mind skips your six best customers to worry about the one who doesn't fit.",
+   "articleUrl": null,
+   "chapter": 2
+  }
+ ],
+ "episodeTools": {
+  "e05": [
+   "tool-customer-7",
+   "tool-target-market"
+  ],
+  "e01": [
+   "tool-max-mrr",
+   "tool-elephant-curve",
+   "tool-iterative-hypothesis"
+  ],
+  "e02": [
+   "tool-max-mrr",
+   "tool-elephant-curve"
+  ],
+  "e03": [
+   "tool-pricing-business-model"
+  ],
+  "e04": [
+   "tool-max-mrr"
+  ],
+  "e06": [
+   "tool-needs-stack"
+  ],
+  "e08": [
+   "tool-iterative-hypothesis"
+  ],
+  "e10": [
+   "tool-iterative-hypothesis"
+  ]
+ },
+ "e05": {
+  "crux": {
+   "situation": {
+    "text": "$3.5K MRR. Agencies use it every day and stay; indie hackers sign up, poke around and churn.",
+    "at": "3:13"
+   },
+   "diagnosis": {
+    "text": "“Agency is not a niche.” The niche is already in his customer list; he just won't commit to it.",
+    "at": "47:39"
+   },
+   "options": {
+    "text": "Price by workspace, not account. Fork agency tool vs. client login. Dream 100 outreach.",
+    "at": "1:42:26"
+   },
+   "landed": {
+    "text": "Niche down without fear: local agencies that want simple. Customer #7 can wait.",
+    "at": "2:00:06"
+   }
+  },
+  "moments": [
+   {
+    "quote": "Agency is not a niche — that's one facet in a gem that then becomes your niche.",
+    "speaker": "jason-cohen",
+    "at": "47:39",
+    "slug": "agency-is-not-a-niche"
+   },
+   {
+    "quote": "See, to me, that's data. Out of your top ten customers, this is not the use case you're already winning with.",
+    "speaker": "jason-cohen",
+    "at": "45:35",
+    "slug": "thats-data"
+   },
+   {
+    "quote": "The greatest sports people ever still need a coach to hold a mirror up.",
+    "speaker": "jason-cohen",
+    "at": "47:00",
+    "slug": "coach-holds-the-mirror"
+   }
+  ]
+ },
+ "site": {
+  "heroEyebrow": "Smart Bear Live",
+  "heroTitle": "This is not an interview.",
+  "heroTitleItalic": "There’s no script.",
+  "heroBody": [
+   "A startup founder takes the hot seat, opens up their business, and explains their biggest challenge. Then we dig in: a few other founders who have already solved that challenge in their own businesses.",
+   "This is the messy, uncomfortable process of solving a real puzzle faced by a real company. For the love of the game, for those in the arena."
+  ],
+  "heroAttribution": "Jason Cohen",
+  "askTitle": "Stuck on something yourself?",
+  "askBody": "is an AI that has sat through every episode and talk, so it can point you to the moment where we worked through your kind of problem. It isn’t me, and it shows its sources so you can check.",
+  "hotSeatTitle": "The hot seat",
+  "hotSeatBody": "Every one of these founders opened up their real numbers. Here’s what each one was stuck on, in my words from the top of the episode.",
+  "banners": [
+   {
+    "label": "I wrote a book! Click here.",
+    "url": "https://hiddenmultipliers.com",
+    "color": "#DD7A2A"
+   },
+   {
+    "label": "Smart Bear Live is now a podcast. Listen there.",
+    "url": "https://smartbearlive.com",
+    "color": "#6A9BC3"
+   }
+  ],
+  "showUrl": "https://smartbearlive.com",
+  "longformUrl": "https://longform.asmartbear.com",
+  "longformLine": "Articles from building two unicorns over two decades; one bootstrapped, one funded."
+ },
+ "book": {
+  "title": "Hidden Multipliers",
+  "subtitle": "My best ideas for how to grow.",
+  "url": "https://hiddenmultipliers.com",
+  "skillsUrl": "https://skills.asmartbear.com",
+  "cover": "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-asmartbear/assets/book-cover-3d.png",
+  "pitch": [
+   "I founded two unicorns and invested in dozens of companies over 25 years. These are my best ideas: mechanisms that create outsized profit and growth, with your current budget and team.",
+   "Blogs and podcasts are mostly generic platitudes or tactics you can’t replicate. This book isn’t like that. It’s written for adults. You’re not in the 5th grade."
+  ]
+ }
+}

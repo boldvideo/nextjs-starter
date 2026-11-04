@@ -45,3 +45,8 @@ CLAUDE.md
 hack
 thoughts
 .env*.local
+
+# Sanity Studio
+cms/node_modules
+cms/dist
+cms/.sanity
