@@ -402,7 +402,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
       <Breadcrumb label={episode ? `E${number} · ${episode.company}` : video.title} />
       {/* The portal layout locks the page (main is overflow-hidden), so the episode page owns its scroll area. */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto">
-      <div className="max-w-[1360px] mx-auto px-5 md:px-7 pt-5 pb-20 flex flex-wrap gap-9 items-start">
+      <div className="max-w-[1360px] mx-auto px-5 md:px-7 pt-5 pb-20 lg:pb-6 flex flex-wrap gap-9 items-start">
         {/* MAIN */}
         <main className="flex-[999_1_640px] min-w-0">
           <div ref={placeholderRef} className="relative aspect-video bg-[#f2f2ee] -mx-5 md:mx-0 rounded-none md:rounded-2xl">
@@ -756,19 +756,17 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
 
         {/* RAIL (desktop only; on phones the chat is the Ask tab) */}
         {isDesktop && (
-        <aside aria-label="Ask about this episode" className="flex-[1_1_420px] max-w-[470px] w-full lg:sticky lg:top-5 flex flex-col gap-4">
-          {mini && <div ref={slotRef} className="aspect-video w-full rounded-xl bg-[#f2f2ee]" aria-hidden="true" />}
-          <section
-            className="rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col min-h-[340px] overflow-hidden"
-            style={{
-              height: mini
-                ? "calc(100dvh - var(--header-height, 57px) - 40px - (min(470px, 100%) * 9 / 16) - 16px)"
-                : "min(820px, calc(100dvh - var(--header-height, 57px) - 235px))",
-            }}
-          >
+        <aside
+          aria-label="Ask about this episode"
+          className="flex-[1_1_420px] max-w-[470px] w-full lg:sticky lg:top-5 flex flex-col gap-4"
+          // The rail always fills the screen: slot + next card take their size, the chat takes the rest.
+          style={{ height: "calc(100dvh - var(--header-height, 57px) - 50px)", minHeight: 560 }}
+        >
+          {mini && <div ref={slotRef} className="aspect-video w-full shrink-0 rounded-xl bg-[#f2f2ee]" aria-hidden="true" />}
+          <section className="flex-1 min-h-[300px] rounded-[20px] border border-border bg-[#fbfbf8] flex flex-col overflow-hidden">
             {chat}
           </section>
-          {!mini && nextCard}
+          {!mini && <div className="shrink-0">{nextCard}</div>}
         </aside>
         )}
       </div>
