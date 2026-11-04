@@ -7,6 +7,10 @@ import { isUUID } from "@/util/is-uuid";
 import { getVideoPathStyle, getCanonicalVideoPath } from "@/lib/video-path";
 import { thumbnailUrl, type Video, type Settings } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
+import { EpisodePage } from "@/components/asmartbear/episode-page";
+import { EpisodeSchema } from "@/components/asmartbear/episode-schema";
+import { sanityFetch, EPISODE_QUERY, type EpisodeContent } from "@/lib/asmartbear/sanity";
+import { transcriptParagraphs, parseChapters } from "@/lib/asmartbear/episode-data";
 
 export const revalidate = 30;
 
@@ -21,17 +25,24 @@ export async function generateMetadata({
   if (!context) return {};
 
   const { data: video } = await context.client.videos.get(id);
-  const description = video.teaser || video.description || "";
+  const episode =
+    context.settings?.account?.slug === "asmartbear"
+      ? await sanityFetch<EpisodeContent>(EPISODE_QUERY, { slug: video.slug || id })
+      : null;
+  const description = episode?.logline?.quote || video.teaser || video.description || "";
+  const title = episode
+    ? `E${String(episode.number).padStart(2, "0")} · ${episode.title} · ${episode.company}`
+    : video.title;
 
   // Mux thumbnails are guaranteed JPEG (imported thumbs can be WebP behind a
   // .jpg name, which some scrapers can't parse).
   const ogThumb = thumbnailUrl(video, { width: 1200, fitMode: "preserve" }) ?? video.thumbnail;
 
   return {
-    title: video.title,
+    title,
     description,
     openGraph: {
-      title: video.title,
+      title,
       description,
       images: [
         {
@@ -118,6 +129,28 @@ export default async function VideoPage({
   // Build URL for schema
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const videoUrl = baseUrl ? `${baseUrl}${canonicalPath}` : null;
+
+  if (settings?.account?.slug === "asmartbear") {
+    const episode = await sanityFetch<EpisodeContent>(EPISODE_QUERY, { slug: video.slug || id });
+    const ext = video as unknown as ExtendedVideo;
+    const transcriptUrl = ext.transcript?.json?.url;
+    const paragraphs = transcriptUrl ? await transcriptParagraphs(transcriptUrl).catch(() => []) : [];
+    const chapters = parseChapters(ext.chapters);
+    const pageUrl = `${baseUrl || "https://asmartbear.bold.video"}${canonicalPath}`;
+    return (
+      <>
+        <EpisodeSchema video={video} episode={episode} chapters={chapters} paragraphs={paragraphs} url={pageUrl} />
+        <EpisodePage
+          video={ext}
+          settings={settings}
+          episode={episode}
+          paragraphs={paragraphs}
+          chapters={chapters}
+          startTime={startTime}
+        />
+      </>
+    );
+  }
 
   return (
     <>
