@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, ArrowUpRight, BookOpen, Headphones } from "lucide-react";
+import { ArrowUp, ArrowUpRight, BookOpen, Headphones } from "lucide-react";
 import type { HeroProps } from "../hero-slot";
 import { getPortalConfig } from "@/lib/portal-config";
 import {
@@ -62,7 +62,7 @@ export default function AsmartbearHero({ settings }: HeroProps) {
         "How does churn put a ceiling on my growth?",
         "Should I raise my prices?",
       ]
-  ).slice(0, 4);
+  ).slice(0, 5);
 
   const ask = (q: string) => {
     const trimmed = q.trim();
@@ -95,66 +95,32 @@ export default function AsmartbearHero({ settings }: HeroProps) {
       </div>
 
       {/* Hero */}
-      <section className="px-5 md:px-10 pt-12 md:pt-16 pb-12 border-b border-border">
+      <section className="px-5 md:px-10 pt-12 md:pt-16 pb-14 border-b border-border">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7">
             <p
-              className="text-xs font-bold uppercase tracking-[0.18em] mb-4"
+              className="text-xs font-bold uppercase tracking-[0.18em] mb-5"
               style={{ color: GREEN }}
             >
-              Smart Bear Live · 12 episodes · 22 hours on the hot seat
+              Smart Bear Live
             </p>
-            <h1 className="font-heading text-4xl md:text-[3.4rem] leading-[1.08] font-bold text-foreground tracking-tight">
-              Twelve founders opened their books.
+            <h1 className="font-heading text-4xl md:text-[3.25rem] leading-[1.08] font-bold text-foreground tracking-tight">
+              This is not an interview.
               <br />
-              <span className="italic font-normal">Ask what we found.</span>
+              <span className="italic font-normal">There’s no script.</span>
             </h1>
-            <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-xl">
-              A founder takes the hot seat, opens up their business, and brings
-              their biggest problem. Jason Cohen and a cohost who has already
-              solved it dig in. No script, no interview. Every answer below
-              comes with the moment it was said.
+            <p className="mt-6 text-lg text-foreground/80 leading-relaxed max-w-xl">
+              A startup founder takes the hot seat, opens up their business,
+              and explains their biggest challenge. Then we dig in: a few
+              other founders who have already solved that challenge in their
+              own businesses.
             </p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                ask(question);
-              }}
-              className="mt-8 flex items-stretch rounded-md border-2 bg-background shadow-[4px_4px_0_0_rgba(17,17,17,0.9)] focus-within:shadow-[4px_4px_0_0_#577544] transition-shadow max-w-xl"
-              style={{ borderColor: "#111" }}
-            >
-              <input
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Ask about pricing, churn, niches, selling…"
-                className="flex-1 bg-transparent px-4 py-3.5 text-base outline-none placeholder:text-muted-foreground/70"
-                aria-label={`Ask ${config.ai.name}`}
-              />
-              <button
-                type="submit"
-                className="px-5 font-semibold text-white flex items-center gap-2 rounded-r-[3px]"
-                style={{ backgroundColor: GREEN }}
-              >
-                Ask <ArrowRight className="h-4 w-4" />
-              </button>
-            </form>
-
-            <div className="mt-4 flex flex-wrap gap-2 max-w-2xl">
-              {starters.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => ask(s)}
-                  className="text-left text-sm px-3 py-1.5 rounded-full border border-[#577544]/30 bg-[#A2EA76]/25 hover:bg-[#A2EA76]/60 text-foreground transition-colors"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              {config.ai.name} is an AI trained on the show and Jason’s talks.
-              It isn’t Jason, and it cites its sources so you can check.
+            <p className="mt-3 text-lg text-foreground/80 leading-relaxed max-w-xl">
+              This is the messy, uncomfortable process of solving a real puzzle
+              faced by a real company. For the love of the game, for those in
+              the arena.
             </p>
+            <p className="mt-6 text-sm text-muted-foreground">— Jason Cohen</p>
           </div>
 
           <div className="lg:col-span-5 flex justify-center">
@@ -169,8 +135,84 @@ export default function AsmartbearHero({ settings }: HeroProps) {
                 width={420}
                 height={420}
                 priority
-                className="relative w-72 md:w-[26rem] h-auto"
+                className="relative w-64 md:w-[24rem] h-auto"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Ask: reads as a conversation, not a form */}
+        <div className="max-w-6xl mx-auto mt-12">
+          <div className="rounded-2xl border border-border bg-[#F6F7F2] p-5 md:p-7">
+            <div className="flex items-start gap-3">
+              <Image
+                src={config.ai.avatar}
+                alt=""
+                width={44}
+                height={44}
+                className="rounded-full shrink-0 ring-2 ring-white"
+                unoptimized
+              />
+              <div>
+                <p className="font-heading font-bold text-lg leading-tight">
+                  Stuck on something yourself?
+                </p>
+                <p className="text-[15px] text-foreground/75 mt-1 max-w-2xl">
+                  {config.ai.name} is an AI that has sat through every
+                  episode and talk, so it can point you to the moment where we
+                  worked through your kind of problem. It isn’t me, and it
+                  shows its sources so you can check.
+                </p>
+              </div>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                ask(question);
+              }}
+              className="mt-5 rounded-xl border border-border bg-background focus-within:border-[#577544] focus-within:ring-2 focus-within:ring-[#577544]/15 transition"
+            >
+              <textarea
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    ask(question);
+                  }
+                }}
+                rows={2}
+                placeholder="Describe your situation. “We’re at $20K MRR, churn is 6%, and growth has gone flat…”"
+                className="block w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-base outline-none placeholder:text-muted-foreground/70"
+                aria-label={`Ask ${config.ai.name}`}
+              />
+              <div className="flex items-center justify-between px-3 pb-3">
+                <span className="text-xs text-muted-foreground pl-1 hidden sm:inline">
+                  Enter to send · Shift+Enter for a new line
+                </span>
+                <button
+                  type="submit"
+                  aria-label="Send"
+                  disabled={!question.trim()}
+                  className="ml-auto h-9 w-9 rounded-full flex items-center justify-center text-white disabled:opacity-40 transition-opacity"
+                  style={{ backgroundColor: GREEN }}
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {starters.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => ask(s)}
+                  className="text-left text-sm px-3 py-1.5 rounded-lg border border-border bg-background hover:border-[#577544] hover:text-[#3f5631] transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -182,11 +224,12 @@ export default function AsmartbearHero({ settings }: HeroProps) {
           <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
             <div>
               <h2 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">
-                Who’s been on the hot seat
+                The hot seat
               </h2>
               <p className="mt-2 text-muted-foreground max-w-2xl">
-                Real companies, real numbers, and the cohosts who’d already
-                solved the problem.
+                Every one of these founders opened up their real numbers. Here’s
+                what each one was stuck on, in my words from the top of the
+                episode.
               </p>
             </div>
             <a
@@ -272,19 +315,23 @@ export default function AsmartbearHero({ settings }: HeroProps) {
               className="text-xs font-bold uppercase tracking-[0.18em] mb-3"
               style={{ color: GOLD }}
             >
-              The book behind the show
+              I wrote a book!
             </p>
             <h2 className="font-heading text-4xl md:text-5xl font-bold tracking-tight">
               Hidden Multipliers
             </h2>
             <p className="font-heading italic text-xl md:text-2xl mt-2 text-white/85">
-              Jumpstart growth with your existing budget and team.
+              My best ideas for how to grow.
             </p>
             <p className="mt-5 text-white/80 leading-relaxed max-w-2xl">
-              Ten patterns Jason has used and seen, not once but repeatedly,
-              across two unicorns (Smart Bear and WP Engine) and sixty
-              investments. Many of the answers on this site trace back to a
-              chapter. Written for adults.
+              I founded two unicorns and invested in dozens of companies over
+              25 years. These are my best ideas: mechanisms that create
+              outsized profit and growth, with your current budget and team.
+            </p>
+            <p className="mt-3 text-white/80 leading-relaxed max-w-2xl">
+              Blogs and podcasts are mostly generic platitudes or tactics you
+              can’t replicate. This book isn’t like that. It’s written for
+              adults. You’re not in the 5th grade.
             </p>
 
             <ol className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
@@ -354,7 +401,8 @@ export default function AsmartbearHero({ settings }: HeroProps) {
             <p className="text-foreground">
               <span className="font-heading font-bold">A Smart Bear: Longform.</span>{" "}
               <span className="text-muted-foreground">
-                Twenty years of articles from building two unicorns.
+                Articles from building two unicorns over two decades; one
+                bootstrapped, one funded.
               </span>
             </p>
           </div>

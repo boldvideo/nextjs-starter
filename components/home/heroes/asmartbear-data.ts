@@ -1,5 +1,7 @@
 // Smart Bear Live episode index. Copy comes from the episode descriptions on
-// youtube.com/@asmartbear; `videoId` is the Bold video id in bt_asmartbear.
+// youtube.com/@asmartbear. `crux` is Jason's own line, verbatim from the
+// episode intro (E01/E11: from his episode description). `videoId` is the Bold
+// video slug in bt_asmartbear.
 
 export interface Episode {
   number: string;
@@ -16,7 +18,7 @@ export const episodes: Episode[] = [
     founder: "Jack Friks",
     company: "Post Bridge",
     cohost: "Tibo Louis-Lucas",
-    crux: "20% of customers leave every month. Who should he build for?",
+    crux: "Almost every dollar he adds gets eaten by a dollar walking out the door.",
     videoId: "",
   },
   {
@@ -24,7 +26,7 @@ export const episodes: Episode[] = [
     founder: "Jane Portman & Benedikt Deicke",
     company: "Userlist",
     cohost: "Mariya Delano",
-    crux: "Half the paying customers never finish setup. Charge for onboarding?",
+    crux: "About half of Userlist’s paying customers never fully set up the email automation they paid for.",
     videoId: "",
   },
   {
@@ -32,7 +34,7 @@ export const episodes: Episode[] = [
     founder: "Brett Lindenberg",
     company: "Mindstamp",
     cohost: "Jessica Malnik",
-    crux: "Six figures of profit, flat growth. Niche down or stay general?",
+    crux: "He sees two completely opposite ways of restarting growth. And who knows, maybe the best way is neither one of those.",
     videoId: "",
   },
   {
@@ -40,14 +42,14 @@ export const episodes: Episode[] = [
     founder: "Mario Peshev",
     company: "DevriX",
     cohost: "Jon Sturgeon",
-    crux: "AI cut the agency from 60 to 30 people. Grow it, or sell it?",
+    crux: "A lot of people say they want to do that. He actually cracked it.",
     videoId: "",
   },
   {
     number: "E08",
     founder: "Rison Simon",
     company: "PainPointy",
-    crux: "Never more than six customers. What do you ask in the interviews?",
+    crux: "He sold his last startup the same week he launched it. But his current startup is stuck with basically no customers at all.",
     videoId: "",
   },
   {
@@ -55,7 +57,7 @@ export const episodes: Episode[] = [
     founder: "George Paladichuk",
     company: "NaiL",
     cohost: "Dan Martell",
-    crux: "90% of revenue from one client. How do you get the next 100?",
+    crux: "Almost all that revenue comes from a single customer, big customer.",
     videoId: "",
   },
   {
@@ -63,7 +65,7 @@ export const episodes: Episode[] = [
     founder: "Carl Alexander",
     company: "Ymir",
     cohost: "Bryce Adams",
-    crux: "Customers never leave, nobody new signs up, and everyone pays $39.",
+    crux: "Customers love it. … But nobody else wants it.",
     videoId: "",
   },
   {
@@ -71,7 +73,7 @@ export const episodes: Episode[] = [
     founder: "Hasan Cagli",
     company: "PostPlanify",
     cohost: "Laura Roeder",
-    crux: "Agencies stay, everyone else churns. Scared to commit to them.",
+    crux: "The customers who love the product and never leave are agencies, and he’s having trouble landing more of them.",
     videoId: "",
   },
   {
@@ -79,7 +81,7 @@ export const episodes: Episode[] = [
     founder: "Patrik Inzinger",
     company: "appointmed",
     cohost: "Dr. Sherry Walling",
-    crux: "€2M ARR, 1% churn, calm and profitable. Why doesn't it feel like enough?",
+    crux: "The mission is complete. … So what is it all for?",
     videoId: "",
   },
   {
@@ -87,7 +89,7 @@ export const episodes: Episode[] = [
     founder: "Tiago Ferreira & João Amaro",
     company: "Podsqueeze",
     cohost: "Craig Hewitt",
-    crux: "Flat at €16K a month for two years. The 5x price test.",
+    crux: "Turned down an acquisition offer last year. That’s a pretty strong move. I like that. But … growth has already plateaued.",
     videoId: "",
   },
   {
@@ -95,14 +97,14 @@ export const episodes: Episode[] = [
     founder: "Jesse Schoberg",
     company: "DropInBlog",
     cohost: "Rob Walling",
-    crux: "$1M ARR, big companies visiting, nothing to sell them.",
+    crux: "A flat growth curve and a potential new juicy market segment, but he’s not quite sure how to go to there.",
     videoId: "",
   },
   {
     number: "E01",
     founder: "Dmytro Krasun",
     company: "ScreenshotOne",
-    crux: "$32K MRR, 9% churn, and a ceiling around $40K. Push, pivot, or sell?",
+    crux: "He opened his entire dashboard and let me poke at all of it.",
     videoId: "",
   },
 ];
