@@ -3,6 +3,8 @@ import { useAIAssistantContext } from "./context"; // Import context hook
 import type { Message } from "./types"; // Import Message type from types.ts
 import { useVideoVoice } from "@/components/video/chat/voice-provider";
 import { AnswerInteraction } from "@/lib/source-engagement";
+import { track } from "@/lib/asmartbear/track";
+import { readCompany as readCompanyForTrack } from "@/lib/asmartbear/company-store";
 
 export type { Message }; // Re-export Message type
 
@@ -88,6 +90,12 @@ export function useAIAssistant({ onAskQuestion }: UseAIAssistantProps) {
       setInputValue(""); // Only clear input if not an override
     }
     setIsPending(true); // Use setter from context
+    track("Ask", {
+      surface: "episode",
+      question,
+      episode: typeof window !== "undefined" ? window.location.pathname.replace(/^\/v\//, "").slice(0, 3).toUpperCase() : undefined,
+      company: readCompanyForTrack()?.business_name ?? "none",
+    });
 
     if (isAction) {
       // For actions, update the last message to show which action was selected

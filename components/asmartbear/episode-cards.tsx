@@ -1,6 +1,9 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { EPISODE_INDEX, mentionedEpisodes } from "@/lib/asmartbear/episode-index";
+import { track } from "@/lib/asmartbear/track";
 
 /** Inline "E10 (Mindstamp)" in an answer: a link that reads like a reference. */
 export function EpisodeLink({ num, children }: { num: string; children: React.ReactNode }) {
@@ -9,6 +12,7 @@ export function EpisodeLink({ num, children }: { num: string; children: React.Re
   return (
     <Link
       href={`/v/${ep.slug}`}
+      onClick={() => track("Episode link", { episode: num, company: ep.company })}
       title={`${num} · ${ep.company} with ${ep.founders.join(" & ")}`}
       className="font-semibold text-[#3f5631] no-underline underline-offset-[3px] decoration-[#577544]/50 hover:underline dark:text-[#a9c294]"
     >
@@ -37,6 +41,7 @@ export function EpisodeCards({ text, narrow = false }: { text: string; narrow?: 
             <Link
               key={num}
               href={`/v/${ep.slug}`}
+              onClick={() => track("Episode card", { episode: num, company: ep.company })}
               className="group flex items-center gap-3 rounded-xl border border-border bg-background p-2 pr-3 no-underline transition-colors hover:border-[#577544]/50 hover:bg-[#577544]/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#577544]"
             >
               <span className="relative aspect-video w-24 shrink-0 overflow-hidden rounded-lg bg-muted">

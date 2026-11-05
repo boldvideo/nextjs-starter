@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
+import { track } from "@/lib/asmartbear/track";
 
 const BOOK_URL = "https://hiddenmultipliers.com";
 
@@ -47,6 +50,7 @@ export function BookCard({ chapter }: { chapter: number }) {
       href={BOOK_URL}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => track("Book card", { chapter: `Ch ${chapter}: ${CHAPTERS[chapter]}` })}
       className="not-prose group my-4 flex items-center gap-3 rounded-xl border border-[#152A45]/15 bg-[#152A45] p-3 pr-4 text-white no-underline transition-colors hover:bg-[#1d375a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6A31A]"
     >
       <Image

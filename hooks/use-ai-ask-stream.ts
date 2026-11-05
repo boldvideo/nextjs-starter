@@ -6,6 +6,8 @@ import type { PlaybackSource } from "@boldvideo/bold-js";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
 import { AnswerInteraction } from "@/lib/source-engagement";
+import { track } from "@/lib/asmartbear/track";
+import { readCompany as readCompanyForTrack } from "@/lib/asmartbear/company-store";
 
 export interface ChatAttachment {
   id: string;
@@ -160,6 +162,7 @@ export function useAIAskStream(options: UseAIAskStreamOptions = {}) {
       }
 
       abortControllerRef.current = new AbortController();
+      track("Ask", { surface: "ask", question: query, company: readCompanyForTrack()?.business_name ?? "none" });
       const messageId = `assistant-${Date.now()}`;
       const interaction = new AnswerInteraction();
       streamingMessageIdRef.current = messageId;

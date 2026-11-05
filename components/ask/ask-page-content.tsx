@@ -28,6 +28,7 @@ import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 import { PoweredByBold } from "@/components/powered-by-bold";
 import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
+import { track } from "@/lib/asmartbear/track";
 
 type PageState =
   | { status: "idle" }
@@ -227,6 +228,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
   }, [reset, stop]);
 
   const handleCitationClick = useCallback((citation: AskCitation, interaction?: AnswerInteraction) => {
+    track("Citation", { video: citation.videoTitle, at: citation.timestampStart });
     setSourceOpen(interaction ? new SourceOpen(citation.videoId, interaction) : undefined);
     setSelectedCitation(citation);
     setIsPanelOpen(true);

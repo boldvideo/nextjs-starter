@@ -7,6 +7,7 @@ import { ChevronDown, Pencil, Plus } from "lucide-react";
 import { domainOf, type CompanyProfile } from "@/lib/asmartbear/profile";
 import { onCompanyChange, readCompany, writeCompany } from "@/lib/asmartbear/company-store";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/asmartbear/track";
 
 // "Put your company on the hot seat", v2. Nothing ever drops in above the
 // composer: the composer itself turns into the URL field (A), a domain typed
@@ -38,10 +39,12 @@ const READING_STEPS = ["Reading the homepage…", "Reading pricing…", "Reading
 function useReadingStep(active: boolean) {
   const [step, setStep] = useState(0);
   useEffect(() => {
-    setStep(0);
     if (!active) return;
     const id = window.setInterval(() => setStep((n) => Math.min(n + 1, READING_STEPS.length - 1)), 2600);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+      setStep(0);
+    };
   }, [active]);
   return READING_STEPS[step];
 }
@@ -60,10 +63,12 @@ export function useCompanyReader() {
       });
       const data = await res.json();
       if (!res.ok) {
+        track("Company read failed", { domain, reason: data.code });
         setState({ phase: "error", message: data.error ?? "Couldn't read that site." });
         return false;
       }
       setState({ phase: "reading", domain, found: data.summary });
+      track("Company added", { domain: data.domain, name: data.name, profile: data.facts?.length ? "full" : "basic" });
       const prev = readCompany();
       writeCompany({
         ...(prev && domainOf(prev.website) === data.domain ? prev : {}),
@@ -335,6 +340,7 @@ export function CompanyPopover({
               <button
                 type="button"
                 onClick={() => {
+                  track("Company removed", { domain: domainOf(profile.website) });
                   setProfile(null);
                   onClose();
                 }}

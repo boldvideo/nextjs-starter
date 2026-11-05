@@ -19,6 +19,7 @@ import { formatStamp, stampToSeconds } from "@/lib/asmartbear/time";
 import { viewerProfile } from "@/lib/asmartbear/profile";
 import { CompanyDetectStrip, CompanySeat, CompanyUrlBox, ComposerCompanyPill, useCompanyProfile } from "./company";
 import { useAIAssistantContext } from "@/components/video/chat/context";
+import { track } from "@/lib/asmartbear/track";
 
 const GREEN = "#577544";
 const NAVY = "#152A45";
@@ -510,7 +511,10 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
               </a>
               <button
                 type="button"
-                onClick={() => navigator.share?.({ title: episode.title, url: window.location.href }).catch(() => {})}
+                onClick={() => {
+                  track("Episode share", { episode: `E${number}` });
+                  navigator.share?.({ title: episode.title, url: window.location.href }).catch(() => {});
+                }}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3.5 min-h-11 text-[13px] font-semibold hover:border-[#577544]"
               >
                 <Share2 className="h-4 w-4" /> Share
@@ -542,7 +546,10 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                     <button
                       key={key}
                       type="button"
-                      onClick={() => seek(s)}
+                      onClick={() => {
+                        track("Episode jump", { from: "crux", part: label, episode: `E${number}` });
+                        seek(s);
+                      }}
                       aria-label={`${label}: play from ${cell.at}`}
                       className="group flex flex-col text-left p-5 bg-background hover:bg-[#f6f7f2] active:bg-[#eef1e6] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#577544]"
                     >
@@ -564,7 +571,10 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                 key={t.id}
                 role="tab"
                 aria-selected={tab === t.id}
-                onClick={() => setTab(t.id)}
+                onClick={() => {
+                  track("Episode tab", { tab: t.id, episode: `E${number}` });
+                  setTab(t.id);
+                }}
                 className={cn(
                   "px-3 sm:px-4 min-h-11 text-[15px] -mb-px border-b-2 transition-colors whitespace-nowrap shrink-0",
                   tab === t.id ? "font-bold text-foreground border-[#577544]" : "text-muted-foreground border-transparent hover:text-foreground"
@@ -632,6 +642,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                         data-p={i}
                         onClick={() => {
                           if (window.getSelection()?.toString()) return;
+                          track("Episode jump", { from: "transcript", episode: `E${number}` });
                           seek(p.start, { fromTranscript: true });
                         }}
                         title={`Play from ${formatStamp(p.start)}`}
@@ -700,7 +711,10 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                 <li key={i}>
                   <button
                     type="button"
-                    onClick={() => seek(c.start)}
+                    onClick={() => {
+                      track("Episode jump", { from: "chapter", part: c.title, episode: `E${number}` });
+                      seek(c.start);
+                    }}
                     className={cn("w-full flex items-center gap-4 px-3 py-3.5 border-b border-border text-left rounded-lg", i === activeChapter && "bg-[#eef1e6]")}
                   >
                     <span className="w-16 tabular-nums text-sm font-semibold text-[#3f5631]">{formatStamp(c.start)}</span>
@@ -724,6 +738,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, st
                   type="button"
                   onClick={() => {
                     const s = stampToSeconds(m.at);
+                    track("Episode jump", { from: "moment", part: m.quote?.slice(0, 80), episode: `E${number}` });
                     if (s !== null) seek(s);
                   }}
                   className="group text-left rounded-2xl border border-border p-5 hover:border-[#577544] hover:bg-[#fbfcf8] active:scale-[0.99] transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#577544]"

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { track } from "@/lib/asmartbear/track";
 
 const reasons = [
   ["wrong", "Wrong"],
@@ -25,6 +26,7 @@ export function AnswerFeedback({ messageId }: { messageId: string }) {
 
   const save = async (next: Feedback | null) => {
     const previous = feedback;
+    if (next) track("Answer feedback", { rating: next.rating, note: next.note });
     setFeedback(next);
     setPending(true);
     try {
