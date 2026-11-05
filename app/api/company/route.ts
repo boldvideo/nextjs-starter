@@ -3,7 +3,7 @@ import { readSite } from "@/lib/asmartbear/site";
 // "Add your company": reads the visitor's site into a profile. Nothing is
 // stored here; the browser keeps it and sends it with every question.
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const MESSAGES = {
   invalid: "That doesn't look like a website address.",

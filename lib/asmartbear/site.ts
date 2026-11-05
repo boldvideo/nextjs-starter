@@ -2,12 +2,15 @@ import "server-only";
 
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
+import { gtmFacts, gtmText, profileFromPages } from "./gtm";
 
 /**
  * Reads a visitor's company website for "Add your company" (ported from
  * boldvideo/gtm-game lib/gym-site.ts): name, one-line summary, and enough
- * visible text for the answer model to tune to. No model call here; the ask prompt does the
- * understanding (the profile goes along as Bold's inline viewer profile).
+ * a go-to-market profile (buyer, price, motion, proof) written by Claude from
+ * the homepage plus the pricing, customers, about and product pages. Without
+ * ANTHROPIC_API_KEY, or if the model fails, it falls back to the homepage's
+ * own headline text. The profile goes along as Bold's inline viewer profile.
  *
  * Fetches are guarded: public http(s) hosts only, no private addresses,
  * short timeout, small body, few redirects. The page text is data, never
@@ -25,6 +28,8 @@ export interface SiteProfile {
   text: string;
   /** Pages that were read, for the "read from" line */
   pages: string[];
+  /** Short labeled facts for the company card (buyer, price, motion) */
+  facts?: { label: string; value: string }[];
   /** The site's own icon (apple-touch-icon or favicon), absolute https URL */
   icon?: string;
 }
@@ -230,24 +235,68 @@ function summaryFrom(html: string, text: string): string {
   return line.length > 240 ? `${line.slice(0, 239).trimEnd()}…` : line;
 }
 
-/** Links on the homepage that look like an about or product page, same host. */
-function secondPage(html: string, base: string): string | null {
-  const re = /<a\b[^>]*href=["']([^"'#]+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  let m: RegExpExecArray | null;
+/** Every block of visible text on a page, one line per block, deduped. */
+function pageText(html: string, cap: number): string {
+  const body = (html.match(/<body\b[\s\S]*$/i)?.[0] ?? html)
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<(script|style|noscript|svg|template|iframe|head)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<(nav|footer)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<\/(p|h[1-6]|li|div|tr|td|th|section|article|dt|dd|blockquote|figcaption|button|a)>|<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, " ");
+  const seen = new Set<string>();
+  const lines: string[] = [];
+  let size = 0;
+  for (const raw of body.split("\n")) {
+    const line = clean(raw);
+    if (line.length < 2 || seen.has(line) || /^(cookie|accept|©)/i.test(line)) continue;
+    seen.add(line);
+    if (size + line.length > cap) break;
+    lines.push(line);
+    size += line.length + 1;
+  }
+  return lines.join("\n");
+}
+
+type PageKind = "pricing" | "customers" | "about" | "product" | "audience";
+
+const KINDS: { kind: PageKind; path: RegExp; label: RegExp }[] = [
+  { kind: "pricing", path: /\/(pricing|plans|prices)\/?$/i, label: /^(pricing|plans|plans & pricing|plans and pricing|prices)$/i },
+  { kind: "customers", path: /\/(customers|case-studies|stories|success-stories|testimonials|results|clients|wall-of-love)\/?$/i, label: /^(customers|case studies|customer stories|success stories|testimonials|results|clients|wall of love)$/i },
+  { kind: "about", path: /\/(about|about-us|company|our-story|team)\/?$/i, label: /^(about|about us|our story|company|team|who we are)$/i },
+  { kind: "product", path: /\/(product|features|platform|how-it-works|tour)\/?$/i, label: /^(product|features|platform|how it works|tour|what we do)$/i },
+  { kind: "audience", path: /\/(solutions|use-cases|who-its-for|industries)\/?$/i, label: /^(solutions|use cases|who it's for|who it’s for|industries)$/i },
+];
+
+/** Same-site pages worth reading for a go-to-market picture, from every link on the homepage (nav and footer included). */
+function pagesToRead(html: string, base: string): { kind: PageKind; url: string }[] {
   const origin = new URL(base).origin;
+  const found = new Map<PageKind, string>();
+  const re = /<a\b[^>]*href=["']([^"'#?]+)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let m: RegExpExecArray | null;
   while ((m = re.exec(html))) {
-    const label = clean(m[2].replace(/<[^>]+>/g, " ")).toLowerCase();
-    const href = m[1];
-    if (!/^(about|about us|our story|company|what we do|product|how it works)$/.test(label) && !/\/(about|company|product)\/?$/i.test(href)) continue;
+    const label = clean(m[2].replace(/<[^>]+>/g, " "));
+    let url: URL;
     try {
-      const url = new URL(href, base);
-      if (url.origin === origin && url.pathname !== "/" && url.pathname.length < 80) return url.toString();
+      url = new URL(m[1], base);
     } catch {
-      /* skip */
+      continue;
+    }
+    if (url.origin !== origin || url.pathname === "/" || url.pathname.length > 80) continue;
+    const href = url.origin + url.pathname.replace(/\/$/, "");
+    if (Array.from(found.values()).some((u) => u.replace(/\/$/, "") === href)) continue;
+    for (const { kind, path, label: lre } of KINDS) {
+      if (!found.has(kind) && (path.test(url.pathname) || lre.test(label))) {
+        found.set(kind, url.origin + url.pathname);
+        break;
+      }
     }
   }
-  return null;
+  // Most sites have /pricing even when the homepage hides the link behind a menu script.
+  if (!found.has("pricing")) found.set("pricing", `${origin}/pricing`);
+  return KINDS.filter((k) => found.has(k.kind)).map((k) => ({ kind: k.kind, url: found.get(k.kind)! }));
 }
+
+const CAPS: Record<PageKind | "home", number> = { home: 7000, pricing: 7000, customers: 4000, about: 3500, product: 3500, audience: 3000 };
 
 export async function readSite(input: string): Promise<{ ok: true; profile: SiteProfile } | { ok: false; error: SiteReadError }> {
   const site = normalizeWebsite(input);
@@ -264,30 +313,30 @@ export async function readSite(input: string): Promise<{ ok: true; profile: Site
   }
   if (!home) return { ok: false, error: "unreachable" };
 
-  const pages = [home.url];
-  let text = visibleText(home.html);
-  const more = secondPage(home.html, home.url);
-  if (more && text.length < 1400) {
-    try {
-      const page = await safeFetch(more, AbortSignal.timeout(5000));
-      if (page) {
-        const extra = visibleText(page.html);
-        if (extra) {
-          text = `${text}\n${extra}`.slice(0, 2400);
-          pages.push(page.url);
-        }
+  // Read the pages a founder-advisor would click first, in parallel.
+  const extra = await Promise.all(
+    pagesToRead(home.html, home.url).map(async ({ kind, url }) => {
+      try {
+        const page = await safeFetch(url, AbortSignal.timeout(6000));
+        const text = page ? pageText(page.html, CAPS[kind]) : "";
+        return text.length > 80 ? { kind, url: page!.url, text } : null;
+      } catch {
+        return null;
       }
-    } catch {
-      /* the homepage is enough */
-    }
-  }
+    })
+  );
+  const read = [{ kind: "home" as const, url: home.url, text: pageText(home.html, CAPS.home) }, ...extra.filter((p) => p !== null)];
 
   const name = nameFrom(home.html, site.domain);
-  const summary = summaryFrom(home.html, text);
-  if (!summary && text.length < 40) return { ok: false, error: "empty" };
+  const fallbackText = visibleText(home.html);
+  const fallbackSummary = summaryFrom(home.html, fallbackText);
+  if (!fallbackSummary && read[0].text.length < 40) return { ok: false, error: "empty" };
 
-  return {
-    ok: true,
-    profile: { website: `https://${site.domain}`, domain: site.domain, name, summary, text, pages, icon: iconFrom(home.html, home.url) },
-  };
+  const base = { website: `https://${site.domain}`, domain: site.domain, pages: read.map((p) => p.url), icon: iconFrom(home.html, home.url) };
+  const gtm = await profileFromPages(name, site.domain, read).catch((e) => {
+    console.error("[company] profile model failed", e instanceof Error ? e.message : e);
+    return null;
+  });
+  if (!gtm) return { ok: true, profile: { ...base, name, summary: fallbackSummary, text: fallbackText } };
+  return { ok: true, profile: { ...base, name: gtm.name || name, summary: gtm.summary, text: gtmText(gtm), facts: gtmFacts(gtm) } };
 }

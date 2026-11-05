@@ -32,6 +32,20 @@ type ReadState =
   | { phase: "reading"; domain: string; found?: string }
   | { phase: "error"; message: string };
 
+const READING_STEPS = ["Reading the homepage…", "Reading pricing…", "Reading customers and about…", "Sizing up buyer, price and motion…"];
+
+/** Steps through what the reader is doing, so a 10-20 second read doesn't look stuck. */
+function useReadingStep(active: boolean) {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    setStep(0);
+    if (!active) return;
+    const id = window.setInterval(() => setStep((n) => Math.min(n + 1, READING_STEPS.length - 1)), 2600);
+    return () => window.clearInterval(id);
+  }, [active]);
+  return READING_STEPS[step];
+}
+
 /** Reads a site into the shared profile. */
 export function useCompanyReader() {
   const [state, setState] = useState<ReadState>({ phase: "idle" });
@@ -57,6 +71,7 @@ export function useCompanyReader() {
         business_name: data.name,
         summary: data.summary,
         business_description: data.text,
+        facts: data.facts,
         icon: data.icon,
       });
       // Let "Found: …" register before the box turns back into the composer.
@@ -156,6 +171,7 @@ export function CompanyUrlBox({
   const [value, setValue] = useState("");
   const { state, read } = useCompanyReader();
   const reading = state.phase === "reading";
+  const step = useReadingStep(reading);
   const submit = async () => {
     if (!value.trim() || reading) return;
     if (await read(value)) onDone();
@@ -180,7 +196,7 @@ export function CompanyUrlBox({
             {state.domain}
           </span>
           <span className="text-[13px] text-muted-foreground line-clamp-2">
-            {state.found ? `Found: ${state.found}` : "Reading the homepage…"}
+            {state.found ? `Found: ${state.found}` : step}
           </span>
         </div>
       ) : (
@@ -339,6 +355,16 @@ export function CompanyPopover({
             ) : (
               <p className="mt-3 text-[13px] leading-relaxed text-foreground/85 line-clamp-4">{profile.summary}</p>
             )}
+            {!editing && profile.facts && profile.facts.length > 0 && (
+              <dl className="mt-3 space-y-1.5 border-t border-border pt-3 text-[12px] leading-snug">
+                {profile.facts.map((f) => (
+                  <div key={f.label} className="grid grid-cols-[52px_1fr] gap-2">
+                    <dt className="font-semibold text-muted-foreground">{f.label}</dt>
+                    <dd className="line-clamp-2 text-foreground/85" title={f.value}>{f.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
             <div className="mt-3 grid grid-cols-3 gap-2">
               {field("mrr", "MRR", "$")}
               {field("churn", "Churn", "%")}
@@ -387,6 +413,7 @@ export function CompanyDetectStrip({ text, className }: { text: string; classNam
     return m ? domainOf(m[1]) : null;
   }, [text]);
   const reading = state.phase === "reading";
+  const step = useReadingStep(reading);
   if (!domain || dismissed.includes(domain) || (!reading && domainOf(profile?.website) === domain)) return null;
   return (
     <div
@@ -398,7 +425,7 @@ export function CompanyDetectStrip({ text, className }: { text: string; classNam
     >
       <span className="flex-1 min-w-[180px]">
         {reading ? (
-          <span className="text-muted-foreground">{state.found ? `Found: ${state.found}` : `Reading ${domain}…`}</span>
+          <span className="text-muted-foreground">{state.found ? `Found: ${state.found}` : step}</span>
         ) : state.phase === "error" ? (
           <span className="text-[#9a3b1f]">{state.message}</span>
         ) : (

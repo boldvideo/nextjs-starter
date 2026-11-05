@@ -16,6 +16,8 @@ export interface CompanyProfile {
   goal?: string;
   /** Growth stage in their words, e.g. "plateau at $40K MRR" */
   stage?: string;
+  /** Buyer / price / motion as read from the site, for display (the full profile is business_description) */
+  facts?: { label: string; value: string }[];
   /** The site's icon, for display only (never sent to Bold) */
   icon?: string;
 }
