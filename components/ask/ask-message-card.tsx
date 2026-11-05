@@ -11,6 +11,8 @@ import { buildVideoUrl } from "@/lib/video-path";
 import { sourceUrl } from "@/lib/source-engagement";
 import { cn } from "@/lib/utils";
 import { BookCard, bookChapterOf } from "@/components/asmartbear/book-card";
+import { EpisodeCards, EpisodeLink } from "@/components/asmartbear/episode-cards";
+import { remarkEpisodes } from "@/lib/asmartbear/remark-episodes";
 import { remarkCitations } from "@/lib/remark-citations";
 import { PROSE_CLASS } from "@/lib/prose";
 import { useSmoothText } from "@/hooks/use-smooth-text";
@@ -197,6 +199,7 @@ const MarkdownSection = React.memo(function MarkdownSection({
     () => [
       remarkGfm,
       () => remarkCitations({ citations, citationDisplayNumberById }),
+      remarkEpisodes,
     ],
     [citations, citationDisplayNumberById]
   );
@@ -281,6 +284,8 @@ const MarkdownSection = React.memo(function MarkdownSection({
       const citationId = hProps["data-citation-id"] as string | undefined;
       const citationNumStr = hProps["data-citation-num"] as string | undefined;
       const citationRef = hProps["data-citation-ref"] as string | undefined;
+      const episode = hProps["data-episode"] as string | undefined;
+      if (episode) return <EpisodeLink num={episode}>{children}</EpisodeLink>;
 
       if (citationId || citationRef) {
         const citation = citations.find((c) => c.id === citationId);
@@ -478,6 +483,7 @@ export function AskMessageCard({
           <MarkdownSection content={tailPart} {...sectionProps} />
         ) : null}
       </div>
+      {!streaming && <EpisodeCards text={displayContent} />}
       {!streaming && messageId && <AnswerFeedback key={messageId} messageId={messageId} />}
     </div>
   );

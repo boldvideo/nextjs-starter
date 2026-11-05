@@ -17,6 +17,8 @@ import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { useVideoVoice } from "@/components/video/chat/voice-provider";
 import { VoiceBar } from "@/components/video/chat/voice-bar";
 import { BookCard, bookChapterOf } from "@/components/asmartbear/book-card";
+import { EpisodeCards, EpisodeLink } from "@/components/asmartbear/episode-cards";
+import { remarkEpisodes } from "@/lib/asmartbear/remark-episodes";
 
 /**
  * Props for the AIAssistant component
@@ -551,8 +553,9 @@ export const AIAssistant = ({
                   </p>
                 </>
               ) : message.content ? (
+                <>
                 <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
+                  remarkPlugins={[remarkGfm, remarkEpisodes]}
                   components={{
                     p: ({ children }) => {
                       const ch = bookChapterOf(children);
@@ -570,7 +573,10 @@ export const AIAssistant = ({
                     h4: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
                     h5: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
                     h6: ({ children }) => <strong className="block my-2">{processChildren(children, message.interaction)}</strong>,
-                    a: ({ href, children }) => (
+                    a: ({ href, children, node }) => {
+                      const ep = (node?.properties as Record<string, unknown> | undefined)?.["data-episode"];
+                      if (typeof ep === "string") return <EpisodeLink num={ep}>{children}</EpisodeLink>;
+                      return (
                       <a
                         href={href}
                         target="_blank"
@@ -579,11 +585,16 @@ export const AIAssistant = ({
                       >
                         {processChildren(children)}
                       </a>
-                    ),
+                      );
+                    },
                   }}
                 >
                   {message.content}
                 </ReactMarkdown>
+                {message.role === "assistant" && !isStreamingMessage && (
+                  <EpisodeCards text={message.content} narrow />
+                )}
+                </>
               ) : !message.suggested_actions ? (
                 <div className="flex items-center gap-2">
                   <span className="flex gap-1">
