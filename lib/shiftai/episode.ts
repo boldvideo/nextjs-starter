@@ -30,6 +30,7 @@ export interface EpisodeContent extends EpisodeSummary {
   youtubeId: string;
   title: string;
   date: string;
+  duration: number;
   host: Person;
   chaptersFromFeed: boolean;
   next: EpisodeSummary | null;
@@ -60,6 +61,7 @@ export function episodeContent(
     youtubeId: e.youtubeId,
     title: e.title,
     date: e.date,
+    duration: e.duration,
     host: HOST,
     chaptersFromFeed: e.chaptersFromFeed,
     next: newer ? summary(newer, links) : null,

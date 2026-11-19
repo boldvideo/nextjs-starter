@@ -138,7 +138,7 @@ export default async function VideoPage({
     const transcriptUrl = ext.transcript?.json?.url;
     const paragraphs = transcriptUrl ? await transcriptParagraphs(transcriptUrl).catch(() => []) : [];
     // The show's own chapters first; Bold's generated ones when an episode has none.
-    const own = episode ? showChapters(episode.youtubeId, video.duration ?? 0) : [];
+    const own = episode ? showChapters(episode.youtubeId, video.duration || episode.duration) : [];
     const chapters = own.length > 0 && !episode?.chaptersFromFeed ? own : parseChapters(ext.chapters).length > 0 ? parseChapters(ext.chapters) : own;
     const pageUrl = `${baseUrl || "https://shiftai.bold.video"}${canonicalPath}`;
     return (
@@ -152,6 +152,7 @@ export default async function VideoPage({
           chapters={chapters}
           moments={episode ? momentsFor(episode.youtubeId) : []}
           brief={episode ? briefFor(episode.youtubeId) : null}
+          durationHint={episode?.duration}
           startTime={startTime}
         />
       </>

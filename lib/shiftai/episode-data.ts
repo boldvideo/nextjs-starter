@@ -45,13 +45,45 @@ interface TranscriptJson {
 
 const SENTENCE_END = /[.!?]["”’)]?$/;
 
+// The speech model keeps some "uh"/"um" even with disfluencies off. They carry
+// nothing for a reader, so they are dropped here, at display time only: the
+// stored transcript and its word timings are untouched.
+const FILLER = /^(uh+|um+|uhm+|erm+|hmm+|mm+)[,.…?!-]*$/i;
+
+function dropFillers<T extends { word?: string; text?: string }>(words: T[]): T[] {
+  const out: T[] = [];
+  let capitaliseNext = false;
+  for (const w of words) {
+    const key = w.word !== undefined ? "word" : "text";
+    const token = ((w as Record<string, unknown>)[key] as string | undefined)?.trim() ?? "";
+    if (FILLER.test(token)) {
+      const prev = out[out.length - 1];
+      const prevToken = prev ? (((prev as Record<string, unknown>)[key] as string) ?? "") : "";
+      if (/[.?!]$/.test(token)) {
+        // "…the effort, uh." -> the sentence still ends here.
+        if (prev && !SENTENCE_END.test(prevToken)) (prev as Record<string, unknown>)[key] = prevToken.replace(/[,;:]$/, "") + token.slice(-1);
+        capitaliseNext = true;
+      } else if (!prev || SENTENCE_END.test(prevToken)) {
+        // "Uh, there, but…" -> the next word now opens the sentence.
+        capitaliseNext = true;
+      }
+      continue;
+    }
+    const next = { ...w };
+    if (capitaliseNext && token) (next as Record<string, unknown>)[key] = token[0].toUpperCase() + token.slice(1);
+    capitaliseNext = false;
+    out.push(next);
+  }
+  return out;
+}
+
 export function paragraphs(json: TranscriptJson): Paragraph[] {
   const names = json.metadata?.speakers ?? {};
   const out: Paragraph[] = [];
 
   for (const u of json.utterances ?? []) {
     const speaker = names[u.speaker] || `Speaker ${u.speaker}`;
-    const words = u.words ?? [];
+    const words = dropFillers(u.words ?? []);
     if (words.length === 0) {
       out.push({ speaker, start: u.start, text: u.text });
       continue;
@@ -128,7 +160,7 @@ export const transcriptParagraphs = unstable_cache(
     if (!res.ok) return [];
     return paragraphs((await res.json()) as TranscriptJson);
   },
-  ["asb-paragraphs-v1"],
+  ["shiftai-paragraphs-v2"],
   { revalidate: 3600 }
 );
 

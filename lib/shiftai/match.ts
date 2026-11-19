@@ -11,10 +11,16 @@ interface VideoLike {
   id: string;
   slug?: string | null;
   title?: string | null;
+  importedFrom?: unknown;
+  imported_from?: unknown;
 }
 
 /** Bold imports keep the YouTube title, so the title joins a Bold video to its episode. */
 export function episodeForVideo(video: VideoLike): ShowEpisode | null {
+  // The import records the source URL; the YouTube id in it is the surest join.
+  const source = JSON.stringify(video.importedFrom ?? video.imported_from ?? "");
+  const bySource = source.length > 4 ? EPISODES.find((e) => source.includes(e.youtubeId)) : undefined;
+  if (bySource) return bySource;
   const title = norm(video.title ?? "");
   if (!title) return null;
   const exact = EPISODES.find((e) => norm(e.title) === title);

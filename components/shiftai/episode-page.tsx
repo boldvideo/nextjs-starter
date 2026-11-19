@@ -49,6 +49,8 @@ interface EpisodePageProps {
   chapters: Chapter[];
   moments?: Moment[];
   brief?: Brief | null;
+  /** The show's own runtime, for when Bold has not measured the video yet. */
+  durationHint?: number;
   startTime?: number;
 }
 
@@ -90,7 +92,7 @@ function Stamp({ at, onSeek, className }: { at?: string | null; onSeek: (s: numb
   );
 }
 
-export function EpisodePage({ video, settings, episode, paragraphs, chapters, moments = [], brief = null, startTime }: EpisodePageProps) {
+export function EpisodePage({ video, settings, episode, paragraphs, chapters, moments = [], brief = null, durationHint, startTime }: EpisodePageProps) {
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const transcriptRef = useRef<HTMLDivElement | null>(null);
   const ai = getPortalConfig(settings).ai;
@@ -301,7 +303,8 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
     : video.publishedAt
       ? format(new Date(video.publishedAt), "d MMM yyyy")
       : null;
-  const duration = video.duration ? formatDuration(video.duration) : null;
+  const seconds = video.duration || durationHint || 0;
+  const duration = seconds ? formatDuration(seconds) : null;
   const tabs: { id: Tab; label: string; count?: string; show: boolean }[] = [
     { id: "transcript", label: "Transcript", count: duration ?? undefined, show: paragraphs.length > 0 },
     { id: "ask", label: "Ask", show: !isDesktop },

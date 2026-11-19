@@ -17,6 +17,7 @@ import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { useVideoVoice } from "@/components/video/chat/voice-provider";
 import { VoiceBar } from "@/components/video/chat/voice-bar";
 import { EpisodeCards, EpisodeLink } from "@/components/shiftai/episode-cards";
+import { CopilotMark } from "@/components/shiftai/copilot-mark";
 import { remarkEpisodes } from "@/lib/shiftai/remark-episodes";
 
 /**
@@ -463,13 +464,13 @@ export const AIAssistant = ({
         ) : panel ? (
           <div className="pt-5 pb-2">
             <div className="flex items-center gap-3">
-              <Image src={avatar} alt="" width={44} height={44} className="rounded-full" />
+              <CopilotMark size={40} />
               <span className="leading-tight">
-                <span className="block font-heading font-bold text-[19px]">{name}</span>
-                {tagline && <span className="text-[12.5px] text-muted-foreground">{tagline}</span>}
+                <span className="block text-[17px] font-medium text-foreground">{name}</span>
+                {tagline && <span className="sx-label mt-0.5 block !text-[10px] text-dim">{tagline}</span>}
               </span>
             </div>
-            <p className="mt-4 text-[17px] font-heading leading-snug text-foreground">{greetingText}</p>
+            <p className="mt-5 text-[19px] font-light leading-[1.45] text-foreground">{greetingText}</p>
             {messages.length === 0 && starters && starters.length > 0 && (
               <div className="mt-4 flex flex-col items-start gap-2">
                 {starters.map((s) => (
@@ -478,7 +479,7 @@ export const AIAssistant = ({
                     type="button"
                     onClick={() => handleSubmit(s)}
                     disabled={isPending}
-                    className="text-left text-[14px] leading-snug rounded-xl border border-border bg-background px-3.5 py-2.5 hover:border-[#577544] hover:text-[#2c3d22] transition-colors"
+                    className="text-left text-[14.5px] leading-snug rounded-[2px] border border-border bg-background px-3.5 py-3 text-muted-foreground hover:border-acid hover:text-foreground transition-colors"
                   >
                     {s}
                   </button>
@@ -525,7 +526,7 @@ export const AIAssistant = ({
                 "rounded-lg p-3 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
                 panel
                   ? message.role === "user"
-                    ? "!ml-auto w-fit max-w-[85%] !rounded-[18px] !rounded-br-md bg-foreground text-background prose-invert !px-4 !py-2.5 text-[15px]"
+                    ? "!ml-auto w-fit max-w-[85%] !rounded-[2px] border border-border bg-raised text-foreground !px-4 !py-2.5 text-[15px]"
                     : "!p-0 !ml-0 bg-transparent text-foreground text-[15.5px] leading-relaxed prose-p:my-2.5"
                   : message.role === "user"
                   ? "bg-muted/50 text-foreground border border-border/50"
@@ -681,7 +682,7 @@ export const AIAssistant = ({
         {voiceActive ? <VoiceBar /> : panel && composerOverride ? (
           composerOverride
         ) : panel ? (
-        <div ref={inputContainerRef} className="rounded-2xl border border-border bg-background shadow-[0_1px_0_rgba(0,0,0,0.03)] focus-within:border-[#577544] focus-within:ring-4 focus-within:ring-[#577544]/10 transition">
+        <div ref={inputContainerRef} className="rounded-[2px] border border-border bg-background focus-within:border-acid transition-colors">
           <textarea
             ref={textareaRef}
             value={inputValue}
@@ -710,8 +711,7 @@ export const AIAssistant = ({
               aria-label="Send question"
               onClick={() => handleSubmit()}
               disabled={isPending || !inputValue.trim()}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white transition-opacity disabled:opacity-35"
-              style={{ background: "#577544" }}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] bg-acid text-[#0a0a08] transition hover:bg-acid-dim active:scale-95 disabled:bg-raised disabled:text-dim"
             >
               <Send size={16} />
             </button>
@@ -753,7 +753,7 @@ export const AIAssistant = ({
               aria-label="Ask about this video"
               rows={2}
               className={cn(
-                "min-w-0 w-full rounded-2xl resize-none overflow-hidden",
+                "min-w-0 w-full rounded-[2px] resize-none overflow-hidden",
                 "focus:outline-none focus:ring-2 focus:ring-primary/50 text-base sm:text-sm",
                 isEmbedded
                   ? "bg-muted text-foreground"

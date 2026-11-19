@@ -78,14 +78,14 @@ export function Header({
                       Library
                     </Link>
                     <span className="text-muted-foreground/40">/</span>
-                    <span className="text-muted-foreground max-w-[320px] truncate">
+                    <span className="text-muted-foreground max-w-[260px] truncate">
                       {crumbLabel}
                     </span>
                   </div>
                 )}
 
                 {/* Desktop Navigation Menu */}
-                <div className="hidden lg:flex space-x-1">
+                <div className={crumbLabel ? "hidden" : "hidden xl:flex space-x-1"}>
                   {menuItems.map((item, idx) => (
                     <Link
                       className="sx-label px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
