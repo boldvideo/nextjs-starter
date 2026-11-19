@@ -13,12 +13,13 @@ interface VideoLike {
   title?: string | null;
   importedFrom?: unknown;
   imported_from?: unknown;
+  thumbnail?: string | null;
 }
 
 /** Bold imports keep the YouTube title, so the title joins a Bold video to its episode. */
 export function episodeForVideo(video: VideoLike): ShowEpisode | null {
-  // The import records the source URL; the YouTube id in it is the surest join.
-  const source = JSON.stringify(video.importedFrom ?? video.imported_from ?? "");
+  // The import keeps the YouTube id in the thumbnail path (imports/<tenant>/<id>/thumbnail.jpg): the surest join.
+  const source = `${video.thumbnail ?? ""} ${JSON.stringify(video.importedFrom ?? video.imported_from ?? "")}`;
   const bySource = source.length > 4 ? EPISODES.find((e) => source.includes(e.youtubeId)) : undefined;
   if (bySource) return bySource;
   const title = norm(video.title ?? "");

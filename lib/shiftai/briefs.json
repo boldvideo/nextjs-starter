@@ -1,1 +1,26 @@
-{}
+{
+  "6YA50yEZFpU": {
+    "brief": {
+      "move": {
+        "text": "Olivier scrapped the spread of AI coach, insights and voice bets. Voice agents are now Aircall's single core strategy.",
+        "at": 432,
+        "quote": "Voice agent is the future of Aircall. We're going to lead there. We're not going to do 3 or 4 different things"
+      },
+      "numbers": {
+        "text": "Olivier set voice agents, at a few million ARR, a target of 10% growth a week. They have managed about 1% a week.",
+        "at": 1513,
+        "quote": "We were a few million ARR and it was like 10%. We've done like 1% a week. Which is not too bad."
+      },
+      "broke": {
+        "text": "The HubSpot, Zendesk and Salesforce partnerships that drove growth before 2022 have mostly dried up. Aircall had to switch to resellers.",
+        "at": 1422,
+        "quote": "What's interesting is that today this is gone, mostly gone, because first, what we started with Aircall has become a bit more table stakes."
+      },
+      "advice": {
+        "text": "Olivier says keep one core strategy but fund a lab. Air Labs backs four ideas with $1.5 million to test adjacencies.",
+        "at": 1776,
+        "quote": "So it's very important for me that all companies, you have a core strategy, but you need to have a lab."
+      }
+    }
+  }
+}
