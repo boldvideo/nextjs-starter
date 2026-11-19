@@ -1,6 +1,6 @@
 "use client";
 
-import { storedViewerProfile } from "@/lib/asmartbear/company-store";
+import { storedViewerProfile } from "@/lib/shiftai/company-store";
 
 import { useState, useCallback, useRef } from "react";
 import {

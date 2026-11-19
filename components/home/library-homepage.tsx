@@ -5,13 +5,12 @@ import { HeroSlot } from "@/components/home/hero-slot";
 import { ContinueWatching } from "@/components/home/continue-watching";
 import type { Video, Playlist } from "@boldvideo/bold-js";
 import type { PortalSettings, PortalConfig } from "@/lib/portal-config";
-import type { HomeContent } from "@/lib/asmartbear/sanity";
 
 interface LibraryHomepageProps {
   settings: PortalSettings | null;
   videos: Video[] | null;
   config: PortalConfig;
-  heroContent?: HomeContent | null;
+  heroContent?: unknown;
   playlistShowAllVideos?: boolean;
   playlistStandaloneLinks?: boolean;
 }
@@ -26,13 +25,14 @@ export function LibraryHomepage({
 }: LibraryHomepageProps) {
   const hasVideos = videos && videos.length > 0;
   const hasPlaylists = settings?.featuredPlaylists && settings.featuredPlaylists.length > 0;
-  const fullBleedHero = settings?.account?.slug === "asmartbear";
+  const fullBleedHero = settings?.account?.slug === "shiftai";
   const showPlaylists = settings?.portal?.layout?.showPlaylists ?? true;
 
   return (
     <div className="overflow-y-auto">
       {/* Full-bleed heroes pad their own sections; the rest stays in the column. */}
       {fullBleedHero && <HeroSlot settings={settings} config={config} content={heroContent} />}
+      {!fullBleedHero && (
       <div className="p-5 md:p-10 max-w-screen-2xl mx-auto">
       {!fullBleedHero && <HeroSlot settings={settings} config={config} content={heroContent} />}
       {/* Continue watching — local progress, renders nothing without records */}
@@ -41,7 +41,7 @@ export function LibraryHomepage({
       {hasVideos && (
         <section>
           <h2 className="font-heading font-bold text-3xl mb-5" id="latest-videos">
-            {settings?.account?.slug === "asmartbear" ? "Every episode" : "Latest Videos"}
+            {settings?.account?.slug === "shiftai" ? "Every episode" : "Latest Videos"}
           </h2>
           <ul
             className="mb-16 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-10"
@@ -75,6 +75,7 @@ export function LibraryHomepage({
         <p className="text-center text-gray-500">No content available yet.</p>
       )}
       </div>
+      )}
     </div>
   );
 }

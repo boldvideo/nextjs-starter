@@ -1,4 +1,4 @@
-import { readSite } from "@/lib/asmartbear/site";
+import { readSite } from "@/lib/shiftai/site";
 
 // "Add your company": reads the visitor's site into a profile. Nothing is
 // stored here; the browser keeps it and sends it with every question.

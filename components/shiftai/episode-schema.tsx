@@ -1,9 +1,9 @@
 import type { Video } from "@boldvideo/bold-js";
-import type { EpisodeContent, Person } from "@/lib/asmartbear/sanity";
-import type { Chapter, Paragraph } from "@/lib/asmartbear/episode-data";
+import type { EpisodeContent, Person } from "@/lib/shiftai/episode";
+import type { Chapter, Paragraph } from "@/lib/shiftai/episode-data";
 
 // JSON-LD for an episode page: a VideoObject (the YouTube video, credited to
-// the channel) that is also a PodcastEpisode of Smart Bear Live, with one Clip
+// the channel) that is also a PodcastEpisode of The AI Revolution Show, with one Clip
 // per chapter, a SeekToAction for deep links and the people. The transcript is
 // already server-rendered in the page, so it is not repeated here (page weight).
 export function EpisodeSchema({
@@ -22,7 +22,6 @@ export function EpisodeSchema({
     "@type": "Person",
     name: p.name,
     ...(p.companyUrl && { url: p.companyUrl }),
-    ...(p.x && { sameAs: [`https://x.com/${p.x}`] }),
     ...(p.company && { affiliation: { "@type": "Organization", name: p.company } }),
   });
   const youtube = episode?.youtubeId ? `https://www.youtube.com/watch?v=${episode.youtubeId}` : undefined;
@@ -32,19 +31,19 @@ export function EpisodeSchema({
     "@type": ["VideoObject", "PodcastEpisode"],
     "@id": url,
     url,
-    name: episode ? `E${String(episode.number).padStart(2, "0")}: ${episode.title}` : video.title,
-    description: episode?.logline?.quote || video.description || video.title,
+    name: episode ? `Episode ${episode.number}: ${episode.title}` : video.title,
+    description: episode?.hook || video.description || video.title,
     thumbnailUrl: video.thumbnail,
     uploadDate: video.publishedAt,
-    datePublished: episode?.publishedAt ?? video.publishedAt,
+    datePublished: episode?.date ?? video.publishedAt,
     duration: iso(video.duration),
     ...(episode?.number && { episodeNumber: episode.number }),
-    ...(youtube && { embedUrl: `https://www.youtube.com/embed/${episode!.youtubeId}`, sameAs: [youtube] }),
-    partOfSeries: { "@type": "PodcastSeries", name: "Smart Bear Live", url: "https://smartbearlive.com" },
+    ...(youtube && { sameAs: [youtube] }),
+    partOfSeries: { "@type": "PodcastSeries", name: "The AI Revolution Show", url: "https://www.shiftai.events/podcast" },
     ...(episode?.host && { author: person(episode.host), creator: person(episode.host) }),
     ...(episode && {
-      actor: [...(episode.hotSeat ?? []), ...(episode.cohosts ?? [])].map(person),
-      about: episode.company,
+      actor: [person(episode.guest)],
+      about: episode.guest.company,
     }),
     hasPart: chapters.map((c) => ({
       "@type": "Clip",

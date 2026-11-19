@@ -1,4 +1,5 @@
 "use client";
+import { Wordmark } from "@/components/shiftai/wordmark";
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -53,38 +54,7 @@ export function MobileMenu({ menuItems, logo, logoDark }: Props) {
                 className=""
                 onClick={() => setIsMobileMenu(false)}
               >
-                {logoDark ? (
-                  <>
-                    {/* Light Mode Logo */}
-                    <Image
-                      src={logo}
-                      alt="Logo"
-                      className="h-12 md:h-16 object-contain object-left block dark:hidden"
-                      height={64}
-                      width={200}
-                      priority
-                    />
-                    {/* Dark Mode Logo */}
-                    <Image
-                      src={logoDark}
-                      alt="Logo"
-                      className="h-12 md:h-16 object-contain object-left hidden dark:block"
-                      height={64}
-                      width={200}
-                      priority
-                    />
-                  </>
-                ) : (
-                  // Default Logo if no dark variant
-                  <Image
-                    src={logo}
-                    alt="Logo"
-                    className="h-12 md:h-16 object-contain object-left"
-                    height={64}
-                    width={200}
-                    priority
-                  />
-                )}
+                <Wordmark className="[&>span:first-child]:text-[26px]" />
               </Link>
               <button
                 type="button"

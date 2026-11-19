@@ -11,7 +11,7 @@ import {
 } from "@/hooks/use-ai-ask-stream";
 import { useSettings } from "@/components/providers/settings-provider";
 import { getPortalConfig } from "@/lib/portal-config";
-import { CompanyControl } from "@/components/asmartbear/company";
+import { CompanyControl } from "@/components/shiftai/company";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
 import { AskMessageCard } from "./ask-message-card";
@@ -28,7 +28,7 @@ import { ScrollToLiveButton } from "@/components/ui/scroll-to-live-button";
 import { AttachmentThumbnails } from "@/components/chat/attachment-thumbnails";
 import { PoweredByBold } from "@/components/powered-by-bold";
 import { AnswerInteraction, SourceOpen } from "@/lib/source-engagement";
-import { track } from "@/lib/asmartbear/track";
+import { track } from "@/lib/shiftai/track";
 
 type PageState =
   | { status: "idle" }
@@ -466,7 +466,7 @@ export function AskPageContent({ conversationId: routeConversationId }: AskPageC
                 </span>
               </div>
               <div className="flex items-center gap-2">
-              {settings?.account?.slug === "asmartbear" && <CompanyControl />}
+              {settings?.account?.slug === "shiftai" && <CompanyControl />}
               <button
                 onClick={handleReset}
                 className={cn(

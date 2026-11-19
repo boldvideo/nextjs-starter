@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
 import { getSafeRedirect } from "@/lib/portal-redirect";
 
 export function PortalLoginForm() {
@@ -43,31 +42,26 @@ export function PortalLoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium text-foreground">
+      <div className="space-y-2.5">
+        <label htmlFor="password" className="sx-label block text-muted-foreground">
           Password
         </label>
-        <Input
+        <input
           id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter portal password"
+          placeholder="From your invitation"
           required
           disabled={isLoading}
           autoFocus
+          className="block h-12 w-full rounded-[2px] border border-border bg-background px-4 text-[16px] text-foreground outline-none transition-colors placeholder:text-dim focus:border-acid"
         />
       </div>
 
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-      )}
+      {error && <p className="text-sm text-[#ff6b47]">{error === "Invalid password" ? "That password isn’t right. Check your invitation." : error}</p>}
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
+      <button type="submit" disabled={isLoading} className="sx-btn w-full disabled:opacity-60">
         {isLoading ? (
           <>
             <svg

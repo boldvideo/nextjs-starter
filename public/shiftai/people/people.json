@@ -1,0 +1,222 @@
+[
+  {
+    "slug": "alex-theuma",
+    "name": "Alex Theuma",
+    "file": "alex-theuma.jpg",
+    "source_url": "https://beehiiv-images-production.s3.amazonaws.com/uploads/guest_author/profile_picture/1832184e-af80-47ab-81e5-df79320b23fb/1778074896066.png",
+    "method": "shiftai-newsletter-author-avatar",
+    "x_handle": "alextheuma",
+    "linkedin_url": null,
+    "company_url": "https://www.shiftai.events"
+  },
+  {
+    "slug": "olivier-pailhes",
+    "name": "Olivier Pailhès",
+    "file": "olivier-pailhes.jpg",
+    "source_url": "https://cdn.prod.website-files.com/69dccb3df86e75aa1934a410/6ab3add0987960999bd47c02_Aircall-Co-founder-and-CEO-Olivier-Pailhes.jpg",
+    "method": "shiftai-speakers-page",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/olivier-pailhes/",
+    "company_url": "https://aircall.io"
+  },
+  {
+    "slug": "emeric-ernoult",
+    "name": "Emeric Ernoult",
+    "file": "emeric-ernoult.jpg",
+    "source_url": "https://secure.gravatar.com/avatar/f6539b12814a128e61af6ee906cf792003bff396393ecafcefb2d5d0285947b1?s=400&d=404&r=g",
+    "method": "company-site",
+    "x_handle": "eernoult",
+    "linkedin_url": "https://www.linkedin.com/in/ernoult/",
+    "company_url": "https://www.agorapulse.com"
+  },
+  {
+    "slug": "arjun-pillai",
+    "name": "Arjun Pillai",
+    "file": "arjun-pillai.jpg",
+    "source_url": "https://cdn.prod.website-files.com/69dccb3df86e75aa1934a410/6aaaa51838d60070d4277ee4_Arjun-p-800.png",
+    "method": "shiftai-speakers-page",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/rarjunpillai/",
+    "company_url": "https://www.docket.io"
+  },
+  {
+    "slug": "alex-turnbull",
+    "name": "Alex Turnbull",
+    "file": "alex-turnbull.jpg",
+    "source_url": "https://cdn.prod.website-files.com/69dccb3df86e75aa1934a410/6abba8b9e00c80731fa1091a_alex-turnbull.png",
+    "method": "shiftai-speakers-page",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/alex-turnbull-1ab9992/",
+    "company_url": "https://helply.com"
+  },
+  {
+    "slug": "eleonore-crespo",
+    "name": "Eléonore Crespo",
+    "file": "eleonore-crespo.jpg",
+    "source_url": "https://unavatar.io/linkedin/eleonorecrespo",
+    "method": "unavatar-linkedin",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/eleonorecrespo/",
+    "company_url": "https://www.pigment.com"
+  },
+  {
+    "slug": "jacco-van-der-kooij",
+    "name": "Jacco van der Kooij",
+    "file": "jacco-van-der-kooij.jpg",
+    "source_url": "https://cdn.prod.website-files.com/69dccb3df86e75aa1934a410/6a4bb1565a3f0607b9975c92_Jacco-van-der-Kooij-Speaker.jpg",
+    "method": "shiftai-speakers-page",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/jaccovanderkooij/",
+    "company_url": "https://winningbydesign.com"
+  },
+  {
+    "slug": "st-john-dalgleish",
+    "name": "St John Dalgleish",
+    "file": "st-john-dalgleish.jpg",
+    "source_url": "https://i.ytimg.com/vi/btPVbtP_erQ/maxresdefault.jpg",
+    "method": "youtube-thumbnail-crop",
+    "x_handle": null,
+    "linkedin_url": null,
+    "company_url": "https://perlonai.com"
+  },
+  {
+    "slug": "krzysztof-szyszkiewicz",
+    "name": "Krzysztof Szyszkiewicz",
+    "file": "krzysztof-szyszkiewicz.jpg",
+    "source_url": "https://cdn.prod.website-files.com/69dccb3df86e75aa1934a410/6a86f716343500933b3af99c_Krzysztof-1.jpg",
+    "method": "shiftai-speakers-page",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/krzysztof-szyszkiewicz/",
+    "company_url": "https://www.valueships.com"
+  },
+  {
+    "slug": "jay-hack",
+    "name": "Jay Hack",
+    "file": "jay-hack.jpg",
+    "source_url": "https://unavatar.io/linkedin/jayhack",
+    "method": "unavatar-linkedin",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/jayhack/",
+    "company_url": "https://clickup.com"
+  },
+  {
+    "slug": "kai-brandt",
+    "name": "Kai Brandt",
+    "file": "kai-brandt.jpg",
+    "source_url": "https://cdn.prod.website-files.com/69dccb3df86e75aa1934a410/6a86f71a47fb6cfb31b14401_1769593958105.jpeg",
+    "method": "shiftai-speakers-page",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/kaibrandtlopez/",
+    "company_url": "https://www.enginy.ai"
+  },
+  {
+    "slug": "wouter-durville",
+    "name": "Wouter Durville",
+    "file": "wouter-durville.jpg",
+    "source_url": "https://images.ctfassets.net/vztl6s0hp3ro/3VTUeOc9ASBiQUiFEkL49R/83455eae25d900b6ad2f2a7216f4917e/Property_1_Wouter.png",
+    "method": "company-site",
+    "x_handle": "wouterdurville",
+    "linkedin_url": null,
+    "company_url": "https://www.testgorilla.com"
+  },
+  {
+    "slug": "aleks-dekic",
+    "name": "Aleks Đekić",
+    "file": "aleks-dekic.jpg",
+    "source_url": "https://storage.ghost.io/c/8d/b5/8db52e91-30b8-4a30-8611-d4cdf1f6df4d/content/images/2023/11/1699409322474.jpeg",
+    "method": "company-site",
+    "x_handle": "aleks_djekic",
+    "linkedin_url": null,
+    "company_url": "https://www.alguna.com"
+  },
+  {
+    "slug": "jonathan-sanders",
+    "name": "Jonathan Sanders",
+    "file": "jonathan-sanders.jpg",
+    "source_url": "https://cdn.prod.website-files.com/69dccb3df86e75aa1934a410/6a0eaa589237b0f6fe9d8245_Jonathan%20Sanders.jpg",
+    "method": "shiftai-speakers-page",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/jonathan-sanders/",
+    "company_url": "https://light.inc"
+  },
+  {
+    "slug": "adam-liska",
+    "name": "Adam Liska",
+    "file": "adam-liska.jpg",
+    "source_url": "https://www.goairspeed.com/.netlify/images?url=%2Fcms-images%2Fadam-liska-portrait.webp&fm=png&w=800&h=800",
+    "method": "company-site",
+    "x_handle": "adliska",
+    "linkedin_url": "https://www.linkedin.com/in/adliska/",
+    "company_url": "https://www.goairspeed.com"
+  },
+  {
+    "slug": "semir-jahic",
+    "name": "Semir Jahic",
+    "file": "semir-jahic.jpg",
+    "source_url": "https://salesmotion.io/avatars/semir-jahic-headshot.png",
+    "method": "company-site",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/semir-jahic/",
+    "company_url": "https://salesmotion.io"
+  },
+  {
+    "slug": "des-traynor",
+    "name": "Des Traynor",
+    "file": "des-traynor.jpg",
+    "source_url": "https://unavatar.io/x/destraynor",
+    "method": "unavatar-x",
+    "x_handle": "destraynor",
+    "linkedin_url": null,
+    "company_url": "https://www.intercom.com"
+  },
+  {
+    "slug": "richard-white",
+    "name": "Richard White",
+    "file": "richard-white.jpg",
+    "source_url": "https://unavatar.io/linkedin/rrwhite",
+    "method": "unavatar-linkedin",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/rrwhite/",
+    "company_url": "https://fathom.video"
+  },
+  {
+    "slug": "marty-kausas",
+    "name": "Marty Kausas",
+    "file": "marty-kausas.jpg",
+    "source_url": "https://cdn.prod.website-files.com/69dccb3df86e75aa1934a410/6a0c8edd052d47679cbbcaa0_Marty%20Kausas%20Co-founder%20%26%20CEO%20Pylon.jpg",
+    "method": "shiftai-speakers-page",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/martykausas/",
+    "company_url": "https://www.usepylon.com"
+  },
+  {
+    "slug": "paul-becker",
+    "name": "Paul Becker",
+    "file": "paul-becker.jpg",
+    "source_url": "https://unavatar.io/linkedin/paulbckr",
+    "method": "unavatar-linkedin",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/paulbckr/",
+    "company_url": "https://www.re-cap.com"
+  },
+  {
+    "slug": "roy-mann",
+    "name": "Roy Mann",
+    "file": "roy-mann.jpg",
+    "source_url": "https://unavatar.io/linkedin/manroy",
+    "method": "unavatar-linkedin",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/manroy/",
+    "company_url": "https://monday.com"
+  },
+  {
+    "slug": "nicolas-sharp",
+    "name": "Nicolas Sharp",
+    "file": "nicolas-sharp.jpg",
+    "source_url": "https://unavatar.io/linkedin/nicolas-sharp-a92726b1",
+    "method": "unavatar-linkedin",
+    "x_handle": null,
+    "linkedin_url": "https://www.linkedin.com/in/nicolas-sharp-a92726b1/",
+    "company_url": "https://attio.com"
+  }
+]

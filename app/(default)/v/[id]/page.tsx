@@ -7,10 +7,12 @@ import { isUUID } from "@/util/is-uuid";
 import { getVideoPathStyle, getCanonicalVideoPath } from "@/lib/video-path";
 import { thumbnailUrl, type Video, type Settings } from "@boldvideo/bold-js";
 import type { ExtendedVideo } from "@/types/video-detail";
-import { EpisodePage } from "@/components/asmartbear/episode-page";
-import { EpisodeSchema } from "@/components/asmartbear/episode-schema";
-import { sanityFetch, EPISODE_QUERY, type EpisodeContent } from "@/lib/asmartbear/sanity";
-import { transcriptParagraphs, parseChapters } from "@/lib/asmartbear/episode-data";
+import { EpisodePage } from "@/components/shiftai/episode-page";
+import { EpisodeSchema } from "@/components/shiftai/episode-schema";
+import { episodeContent, showChapters } from "@/lib/shiftai/episode";
+import { episodeLinks } from "@/lib/shiftai/match";
+import { briefFor, momentsFor } from "@/lib/shiftai/briefs";
+import { transcriptParagraphs, parseChapters } from "@/lib/shiftai/episode-data";
 
 export const revalidate = 30;
 
@@ -25,13 +27,10 @@ export async function generateMetadata({
   if (!context) return {};
 
   const { data: video } = await context.client.videos.get(id);
-  const episode =
-    context.settings?.account?.slug === "asmartbear"
-      ? await sanityFetch<EpisodeContent>(EPISODE_QUERY, { slug: video.slug || id })
-      : null;
-  const description = episode?.logline?.quote || video.teaser || video.description || "";
+  const episode = context.settings?.account?.slug === "shiftai" ? episodeContent(video, {}) : null;
+  const description = episode?.hook || video.teaser || video.description || "";
   const title = episode
-    ? `E${String(episode.number).padStart(2, "0")} · ${episode.title} · ${episode.company}`
+    ? `${episode.guest.name}, ${episode.guest.company}: ${episode.headline}`
     : video.title;
 
   // Mux thumbnails are guaranteed JPEG (imported thumbs can be WebP behind a
@@ -130,13 +129,18 @@ export default async function VideoPage({
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const videoUrl = baseUrl ? `${baseUrl}${canonicalPath}` : null;
 
-  if (settings?.account?.slug === "asmartbear") {
-    const episode = await sanityFetch<EpisodeContent>(EPISODE_QUERY, { slug: video.slug || id });
+  if (settings?.account?.slug === "shiftai") {
+    const context = await getTenantContext();
+    const list = await context?.client.videos.list(60).catch(() => null);
+    const links = episodeLinks(list?.data ?? []);
+    const episode = episodeContent(video, links);
     const ext = video as unknown as ExtendedVideo;
     const transcriptUrl = ext.transcript?.json?.url;
     const paragraphs = transcriptUrl ? await transcriptParagraphs(transcriptUrl).catch(() => []) : [];
-    const chapters = parseChapters(ext.chapters);
-    const pageUrl = `${baseUrl || "https://smartbearlive.bold.video"}${canonicalPath}`;
+    // The show's own chapters first; Bold's generated ones when an episode has none.
+    const own = episode ? showChapters(episode.youtubeId, video.duration ?? 0) : [];
+    const chapters = own.length > 0 && !episode?.chaptersFromFeed ? own : parseChapters(ext.chapters).length > 0 ? parseChapters(ext.chapters) : own;
+    const pageUrl = `${baseUrl || "https://shiftai.bold.video"}${canonicalPath}`;
     return (
       <>
         <EpisodeSchema video={video} episode={episode} chapters={chapters} paragraphs={paragraphs} url={pageUrl} />
@@ -146,6 +150,8 @@ export default async function VideoPage({
           episode={episode}
           paragraphs={paragraphs}
           chapters={chapters}
+          moments={episode ? momentsFor(episode.youtubeId) : []}
+          brief={episode ? briefFor(episode.youtubeId) : null}
           startTime={startTime}
         />
       </>

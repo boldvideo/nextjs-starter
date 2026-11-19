@@ -11,7 +11,7 @@ export interface HeroProps {
 
 const heroes: Record<string, React.ComponentType<HeroProps>> = {
   yo: dynamic(() => import("./heroes/yo-hero")),
-  asmartbear: dynamic(() => import("./heroes/asmartbear-hero")),
+  shiftai: dynamic(() => import("./heroes/shiftai-hero")),
 };
 
 interface HeroSlotProps {

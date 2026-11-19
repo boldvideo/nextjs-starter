@@ -1,5 +1,5 @@
 import { streamAIQuestion } from "../../../lib/ai-question";
-import { sanitizeViewerProfile } from "@/lib/asmartbear/profile";
+import { sanitizeViewerProfile } from "@/lib/shiftai/profile";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5 minutes for web search support

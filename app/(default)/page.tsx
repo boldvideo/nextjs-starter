@@ -5,7 +5,7 @@ import { getPortalConfig, PortalSettings } from "@/lib/portal-config";
 import { LibraryHomepage } from "@/components/home/library-homepage";
 import { AssistantHomepage } from "@/components/home/assistant-homepage";
 import { EmptyHomepage } from "@/components/home/empty-homepage";
-import { sanityFetch, HOME_QUERY, type HomeContent } from "@/lib/asmartbear/sanity";
+import { episodeLinks } from "@/lib/shiftai/match";
 
 // How often this page should revalidate (in seconds)
 export const revalidate = 60;
@@ -17,7 +17,7 @@ export const revalidate = 60;
 async function getHomeData(): Promise<{
   settings: PortalSettings | null;
   videos: Video[] | null;
-  heroContent: HomeContent | null;
+  heroContent: unknown;
 }> {
   const context = await getTenantContext();
   if (!context) {
@@ -38,7 +38,7 @@ async function getHomeData(): Promise<{
   }
 
   const heroContent =
-    settings?.account?.slug === "asmartbear" ? await sanityFetch<HomeContent>(HOME_QUERY) : null;
+    settings?.account?.slug === "shiftai" ? { links: episodeLinks(videos) } : null;
 
   return { settings, videos, heroContent };
 }

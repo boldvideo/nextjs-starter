@@ -4,6 +4,7 @@ import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { askLabel } from "@/lib/utils";
+import { Wordmark } from "@/components/shiftai/wordmark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileMenu } from "./mobile-menu";
 import UserMenu from "@/components/auth/user-menu";
@@ -54,7 +55,7 @@ export function Header({
   return (
     <>
       <header
-        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5 border-b border-border transition-all h-[var(--header-height)] flex items-center ${
+        className={`fixed top-0 w-full z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-5 md:px-8 border-b border-border transition-all h-[var(--header-height)] flex items-center ${
           className || ""
         }`}
       >
@@ -64,43 +65,12 @@ export function Header({
               {/* Logo */}
               <div className="flex items-center">
                 <Link href="/" className="mr-8 hidden lg:block">
-                  {logoDark ? (
-                    <>
-                      {/* Light Mode Logo */}
-                      <Image
-                        src={logo}
-                        alt="Logo"
-                        className={`${desktopLogoClass} w-auto object-contain block dark:hidden`}
-                        height={40}
-                        width={160}
-                        priority
-                      />
-                      {/* Dark Mode Logo */}
-                      <Image
-                        src={logoDark}
-                        alt="Logo"
-                        className={`${desktopLogoClass} w-auto object-contain hidden dark:block`}
-                        height={40}
-                        width={160}
-                        priority
-                      />
-                    </>
-                  ) : (
-                    // Default Logo if no dark variant
-                    <Image
-                      src={logo}
-                      alt="Logo"
-                      className={`${desktopLogoClass} w-auto object-contain`}
-                      height={40}
-                      width={160}
-                      priority
-                    />
-                  )}
+                  <Wordmark sub="The AI Revolution Show" />
                 </Link>
 
                 {/* Breadcrumb */}
                 {crumbLabel && (
-                  <div className="hidden lg:flex items-center gap-2 text-sm mr-6">
+                  <div className="hidden lg:flex items-center gap-2 sx-label mr-6">
                     <Link
                       href="/"
                       className="text-muted-foreground/70 hover:text-foreground transition-colors"
@@ -118,7 +88,7 @@ export function Header({
                 <div className="hidden lg:flex space-x-1">
                   {menuItems.map((item, idx) => (
                     <Link
-                      className="text-sm px-3 py-2 rounded-md border border-transparent hover:border-primary hover:text-primary transition-colors"
+                      className="sx-label px-3 py-2 text-muted-foreground hover:text-foreground transition-colors"
                       key={`${item.label}-${idx}`}
                       href={item.url}
                       {...(item.blank ? { target: "_blank", rel: "noopener noreferrer" } : {})}
@@ -144,6 +114,9 @@ export function Header({
                     <UserMenu session={session} />
                   </Suspense>
                 )}
+                <Link href="/connect" className="sx-btn !min-h-10 !px-4 !text-[11px] shrink-0">
+                  Add to Claude <span aria-hidden="true">→</span>
+                </Link>
               </div>
 
               {/* Mobile Header Controls */}
@@ -159,35 +132,7 @@ export function Header({
                   </Suspense>
 
                   <Link href="/">
-                    {logoDark ? (
-                      <>
-                        {/* Light Mode Logo */}
-                        <Image
-                          src={logo}
-                          alt="Logo"
-                          className={`${mobileLogoClass} w-auto object-contain block dark:hidden`}
-                          height={32}
-                          width={128}
-                        />
-                        {/* Dark Mode Logo */}
-                        <Image
-                          src={logoDark}
-                          alt="Logo"
-                          className={`${mobileLogoClass} w-auto object-contain hidden dark:block`}
-                          height={32}
-                          width={128}
-                        />
-                      </>
-                    ) : (
-                      // Default Logo if no dark variant
-                      <Image
-                        src={logo}
-                        alt="Logo"
-                        className={`${mobileLogoClass} w-auto object-contain`}
-                        height={32}
-                        width={128}
-                      />
-                    )}
+                    <Wordmark className="[&>span:first-child]:text-[26px]" />
                   </Link>
                 </div>
 

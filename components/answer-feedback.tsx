@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ThumbsDown, ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { track } from "@/lib/asmartbear/track";
+import { track } from "@/lib/shiftai/track";
 
 const reasons = [
   ["wrong", "Wrong"],

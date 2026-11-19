@@ -17,6 +17,8 @@ import {
   JetBrains_Mono,
   Poppins,
   Charis_SIL,
+  Bebas_Neue,
+  DM_Mono,
 } from "next/font/google";
 
 // Pre-load all fonts at build time
@@ -111,7 +113,7 @@ const spaceGrotesk = Space_Grotesk({
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-dm-sans",
   display: "swap",
 });
@@ -138,6 +140,20 @@ const charisSil = Charis_SIL({
   display: "swap",
 });
 
+const bebasNeue = Bebas_Neue({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-bebas-neue",
+  display: "swap",
+});
+
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-dm-mono",
+  display: "swap",
+});
+
 // All font instances for className injection
 export const fontInstances = {
   inter,
@@ -158,6 +174,8 @@ export const fontInstances = {
   jetbrainsMono,
   poppins,
   charisSil,
+  bebasNeue,
+  dmMono,
 };
 
 // Map font names (as they come from API) to CSS variables
@@ -181,6 +199,8 @@ const fontNameToVar: Record<string, string> = {
   "JetBrains Mono": "var(--font-jetbrains-mono)",
   "Poppins": "var(--font-poppins)",
   "Charis SIL": "var(--font-charis-sil)",
+  "Bebas Neue": "var(--font-bebas-neue)",
+  "DM Mono": "var(--font-dm-mono)",
 };
 
 // Default font (Inter)

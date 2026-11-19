@@ -1,4 +1,4 @@
-import { sanitizeViewerProfile } from "@/lib/asmartbear/profile";
+import { sanitizeViewerProfile } from "@/lib/shiftai/profile";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { portalClient } from "@/lib/portal-client";
 import type { AIEvent, PlaybackSource, Segment } from "@boldvideo/bold-js";

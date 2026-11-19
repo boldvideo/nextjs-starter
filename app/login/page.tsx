@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Wordmark } from "@/components/shiftai/wordmark";
 import { redirect } from "next/navigation";
 import { getTenantContext } from "@/lib/get-tenant-context";
 import { PortalLoginForm } from "@/components/portal-auth/login-form";
@@ -35,57 +35,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(getSafeRedirect(params.redirect));
   }
 
-  const logoUrl = settings?.logoUrl || "/bold-logo.svg";
-  const logoDark = settings?.logoDarkUrl;
-  const portalName = settings?.account?.name || "Portal";
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full space-y-8 p-8">
-        <div className="text-center">
-          <div className="flex justify-center mb-8">
-            {logoDark ? (
-              <>
-                <Image
-                  src={logoUrl}
-                  alt="Logo"
-                  className="h-20 w-auto object-contain block dark:hidden"
-                  width={200}
-                  height={80}
-                  priority
-                />
-                <Image
-                  src={logoDark}
-                  alt="Logo"
-                  className="h-20 w-auto object-contain hidden dark:block"
-                  width={200}
-                  height={80}
-                  priority
-                />
-              </>
-            ) : (
-              <Image
-                src={logoUrl}
-                alt="Logo"
-                className="h-20 w-auto object-contain"
-                width={200}
-                height={80}
-                priority
-              />
-            )}
-          </div>
-
-          <h2 className="text-2xl font-bold text-foreground">
-            Sign in to {portalName}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Enter the password to access this portal
-          </p>
-        </div>
-
-        <div className="mt-8">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-5">
+      <div className="sx-grid pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="sx-glow pointer-events-none absolute -right-40 -top-56 h-[760px] w-[760px]" aria-hidden="true" />
+      <div className="relative w-full max-w-[440px]">
+        <Wordmark />
+        <p className="sx-label sx-eyebrow mt-12">The AI Revolution Show · Member library</p>
+        <h1 className="sx-display mt-6 text-[64px] md:text-[80px]">
+          Members <span className="text-acid">only.</span>
+        </h1>
+        <p className="mt-5 text-[17px] leading-[1.65] text-muted-foreground">
+          Every episode, searchable, with an assistant that tells you which founder already faced your decision.
+        </p>
+        <div className="mt-9 border border-border bg-surface p-6">
           <PortalLoginForm />
         </div>
+        <p className="sx-label mt-6 !text-[10px] text-dim">A private demo for Shift AI, built on Bold</p>
       </div>
     </div>
   );

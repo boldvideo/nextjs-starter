@@ -1,31 +1,32 @@
 import { visit, SKIP } from "unist-util-visit";
 import type { Root, Text, Link, Parent } from "mdast";
-import { EPISODE_INDEX } from "./episode-index";
+import { EPISODE_INDEX, GUEST_RE, episodeKeyForName } from "./episode-index";
 
-// "E10" or "E10 (Mindstamp)" -> a link node the `a` renderer turns into an
-// episode chip. Text already inside a link is left alone.
-const RE = /\bE(0[1-9]|1[0-2])\b(\s*\([^)\n]{1,40}\))?/g;
-
+// A guest's name in an answer ("Olivier Pailhès (Aircall)") becomes a link the
+// `a` renderer turns into an episode reference. Only the first mention of each
+// guest in a text node is linked; text already inside a link is left alone.
 export function remarkEpisodes() {
   return function transform(tree: Root) {
+    const seen = new Set<string>();
     visit(tree, (node, index, parent: Parent | undefined) => {
       if (node.type === "link") return SKIP;
       if (node.type !== "text" || !parent || typeof index !== "number") return;
       const value = (node as Text).value;
       const out: (Text | Link)[] = [];
       let last = 0;
-      RE.lastIndex = 0;
-      for (let m; (m = RE.exec(value)); ) {
-        const num = `E${m[1]}`;
-        const ep = EPISODE_INDEX[num];
-        if (!ep) continue;
+      GUEST_RE.lastIndex = 0;
+      for (let m; (m = GUEST_RE.exec(value)); ) {
+        const key = episodeKeyForName(m[1]);
+        const ep = key ? EPISODE_INDEX[key] : null;
+        if (!key || !ep?.slug || seen.has(key)) continue;
+        seen.add(key);
         if (m.index > last) out.push({ type: "text", value: value.slice(last, m.index) });
         out.push({
           type: "link",
           url: `/v/${ep.slug}`,
           title: null,
           children: [{ type: "text", value: m[0] }],
-          data: { hProperties: { "data-episode": num } },
+          data: { hProperties: { "data-episode": key } },
         });
         last = m.index + m[0].length;
       }

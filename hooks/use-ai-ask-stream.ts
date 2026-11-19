@@ -1,13 +1,13 @@
 "use client";
 
-import { storedViewerProfile } from "@/lib/asmartbear/company-store";
+import { storedViewerProfile } from "@/lib/shiftai/company-store";
 
 import type { PlaybackSource } from "@boldvideo/bold-js";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { AskCitation } from "@/lib/ask";
 import { AnswerInteraction } from "@/lib/source-engagement";
-import { track } from "@/lib/asmartbear/track";
-import { readCompany as readCompanyForTrack } from "@/lib/asmartbear/company-store";
+import { track } from "@/lib/shiftai/track";
+import { readCompany as readCompanyForTrack } from "@/lib/shiftai/company-store";
 
 export interface ChatAttachment {
   id: string;

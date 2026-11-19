@@ -3,8 +3,8 @@ import { useAIAssistantContext } from "./context"; // Import context hook
 import type { Message } from "./types"; // Import Message type from types.ts
 import { useVideoVoice } from "@/components/video/chat/voice-provider";
 import { AnswerInteraction } from "@/lib/source-engagement";
-import { track } from "@/lib/asmartbear/track";
-import { readCompany as readCompanyForTrack } from "@/lib/asmartbear/company-store";
+import { track } from "@/lib/shiftai/track";
+import { readCompany as readCompanyForTrack } from "@/lib/shiftai/company-store";
 
 export type { Message }; // Re-export Message type
 

@@ -10,6 +10,13 @@
   --tw-prose-body: var(--foreground);
   --font-sans: var(--font-body);
   --font-heading: var(--font-heading);
+  --font-mono: var(--font-dm-mono), ui-monospace, monospace;
+  --font-display: var(--font-bebas-neue), Impact, sans-serif;
+  --color-raised: var(--raised);
+  --color-acid: var(--acid);
+  --color-acid-dim: var(--acid-dim);
+  --color-europe: var(--europe);
+  --color-dim: var(--dim);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -166,5 +173,135 @@
     vertical-align: -0.15em;
     background-color: color-mix(in srgb, var(--color-primary) 75%, transparent);
     animation: cursor-blink 1s steps(2) infinite;
+  }
+}
+
+/* ── Shift AI ──────────────────────────────────────────────────────────────
+   Their own tokens (shiftai.events Webflow variables). Dark only. These win
+   over the generated theme so the palette is exact, not derived. */
+html:root,
+html.dark,
+html.light {
+  --radius: 2px;
+  --background: #0a0a08;
+  --surface: #111110;
+  --raised: #1a1a17;
+  --muted: #1a1a17;
+  --border: #3a3a35;
+  --input: #3a3a35;
+  --foreground: #f4f2ec;
+  --muted-foreground: #a3a39b;
+  --dim: #6b6b65;
+  --accent: #e8ff47;
+  --primary: #e8ff47;
+  --accent-foreground: #0a0a08;
+  --ring: #e8ff47;
+  --acid: #e8ff47;
+  --acid-dim: #c8e030;
+  --europe: #47c4ff;
+  --signal: #e8ff47;
+  --signal-soft: rgba(232, 255, 71, 0.1);
+  --signal-line: rgba(232, 255, 71, 0.32);
+  --font-heading: var(--font-dm-sans);
+  --font-body: var(--font-dm-sans);
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: #e8ff47;
+    color: #0a0a08;
+  }
+}
+
+@layer components {
+  /* Bebas display: always uppercase, tight, with their tracking */
+  .sx-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 0.92;
+    color: #fafaf8;
+  }
+  /* DM Mono label */
+  .sx-label {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 11px;
+    line-height: 18px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  /* Eyebrow: 24x2 acid rule, then the label */
+  .sx-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--acid);
+  }
+  .sx-eyebrow::before {
+    content: "";
+    width: 24px;
+    height: 2px;
+    background: var(--acid);
+    flex: none;
+  }
+  .sx-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 22px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    border: 1px solid var(--acid);
+    background: var(--acid);
+    color: #0a0a08;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease, transform 120ms ease;
+  }
+  .sx-btn:hover {
+    background: var(--acid-dim);
+    border-color: var(--acid-dim);
+  }
+  .sx-btn:active {
+    transform: scale(0.98);
+  }
+  .sx-btn:focus-visible {
+    outline: 2px solid var(--acid);
+    outline-offset: 3px;
+  }
+  .sx-btn-ghost {
+    background: transparent;
+    color: var(--foreground);
+    border-color: var(--border);
+  }
+  .sx-btn-ghost:hover {
+    background: transparent;
+    border-color: var(--muted-foreground);
+  }
+  /* Faint acid grid, faded out radially */
+  .sx-grid {
+    background-image:
+      linear-gradient(rgba(232, 255, 71, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232, 255, 71, 0.045) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 70% 70% at 70% 30%, #000 0%, transparent 75%);
+  }
+  .sx-glow {
+    background: radial-gradient(circle, rgba(232, 255, 71, 0.09) 0%, transparent 65%);
+  }
+  .sx-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a35 transparent;
   }
 }
