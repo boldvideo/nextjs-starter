@@ -21,7 +21,137 @@
         "at": 1776,
         "quote": "So it's very important for me that all companies, you have a core strategy, but you need to have a lab."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Olivier explains why Aircall's board brought back a founder: AI is a massive disruption and a threat to a phone-based business, and navigating it takes founder-builder conviction rather than a professional CEO's engine optimization.",
+        "quote": "But then obviously AI came in, and actually AI appeared in 2023, but it really materialized a bit later, right?",
+        "start": 140,
+        "end": 207,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Olivier says the CEO job is now ten times more exciting because AI lets teams build in days what used to take quarters.",
+        "quote": "And second, it's extremely exciting. Like, yeah, the job I have now is just 10x more exciting than what it was 10 years ago. Like, yeah, all the, like, AI has given us superpowers.",
+        "start": 268,
+        "end": 299,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Olivier makes agentic AI fluency a hiring bar, with the interview question 'Tell me about the AI workflows you've built and how you use them.'",
+        "quote": "Yes, but it's, I know it, like I know it's intuition and I think everybody understands this when you dig into the topic.",
+        "start": 445,
+        "end": 494,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Olivier says that even though Aircall is profitable and growing at 700 people, it must change massively because it now competes with fast, AI-leveraged AI-native companies, and culture change is his biggest challenge.",
+        "quote": "And that's actually going to be the biggest challenge for us. Like, we're a 700-people company. We're actually very successful. We're growing very nicely. We're profitable. We're innovating. So we're not— we don't need to change.",
+        "start": 494,
+        "end": 549,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "After three years away from software, Olivier spent three weeks in San Francisco building and training agents and creating his own AI harness, and he wants every Aircall colleague to make that effort.",
+        "quote": "But there's— we obviously have to refresh our mindset. This is the first thing I did when I joined.",
+        "start": 573,
+        "end": 580,
+        "speaker": "Olivier Pailhès",
+        "type": "story"
+      },
+      {
+        "title": "Olivier is removing sequential processes, such as talk to customer, scope, test and ship, and having teams do those steps at the same time because AI makes them fast.",
+        "quote": "The one thing we need to refresh ourselves is the culture. And that takes time, of course, because you have— we have this inertia of a few hundred people that have been working a certain way and you have to undo.",
+        "start": 655,
+        "end": 686,
+        "speaker": "Olivier Pailhès",
+        "type": "framework"
+      },
+      {
+        "title": "Olivier says AI is good at cleaning legacy code, so Aircall maintains its core contact-center platform while putting most new effort into building voice agents rather than refactoring.",
+        "quote": "It's actually easier than one can think. Like, AI is actually pretty good at getting into spaghetti code and like legacy code and cleaning it. So, so we're doing this.",
+        "start": 721,
+        "end": 761,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Aircall keeps per-minute pricing for SMB and low-mid-market customers because they want simplicity and outcomes are hard to define, while testing outcome-based pricing, which enterprises prefer.",
+        "quote": "So they like simplicity, but they like a correlation with the business outcomes. What we see today is that we typically price per minute. It's as simple as that.",
+        "start": 826,
+        "end": 914,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Olivier reminds listeners that customers adopt AI far more slowly than Silicon Valley, with many SMBs meeting AI for the first time through Aircall, so vendors should match their customers' speed.",
+        "quote": "We're selling in a market that's extremely dense, extremely deep. And so we have early adopters, yes, but not everyone has a Silicon Valley company.",
+        "start": 1057,
+        "end": 1130,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Olivier says Europe's main disadvantage is missing compute and frontier models, though voice is an exception with European leaders such as ElevenLabs and Gradient.",
+        "quote": "So fundamentally, I think we're We're missing compute and we're missing frontier models. So, and that's, I mean, we have what we have, but in Europe it's essentially Mistral. And the compute is massively in the US, right?",
+        "start": 1173,
+        "end": 1216,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Olivier argues the frontier-model game has largely played out but Europe competes strongly at the application layer, and Aircall aims to be the worldwide leader in voice agents for SMBs.",
+        "quote": "So I think, like, it sounds like the frontier model game sounds a bit— it has played out. But I think all the application layer, Europe is competing actually in a very strong way.",
+        "start": 1256,
+        "end": 1291,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Aircall's partnership engine with HubSpot, Zendesk and Salesforce has faded as they focus on becoming AI companies, so Aircall flipped to reseller and channel partners who act as mini FDEs configuring its voice agents.",
+        "quote": "And then there's this third layer that was key to our success, that was the partnerships. So we really exploded before 2022 thanks to HubSpot, Zendesk, Salesforce, Salesforce, right?",
+        "start": 1401,
+        "end": 1485,
+        "speaker": "Olivier Pailhès",
+        "type": "story"
+      },
+      {
+        "title": "Olivier set an impossible goal of 10% weekly growth for voice agents (they hit about 1%) and told the team to contact the top 500 customers within a week rather than a quarter, because thinking in weeks changes resource allocation and urgency.",
+        "quote": "So this has changed, but the fundamental DNA, interestingly, and I realized 2 months ago when I came back in New York, And the same vibe came back in Paris, same vibe, same energy, the gong, like the big hairy goals on the screens.",
+        "start": 1485,
+        "end": 1557,
+        "speaker": "Olivier Pailhès",
+        "type": "story"
+      },
+      {
+        "title": "Olivier contrasts a founder with an outside CEO who comes to package and sell the company, saying he returned to build the best product and transform how Aircall works for the next ten years.",
+        "quote": "I think for me, the very hard challenge is internal, is transforming the company to make it fit for the next 10 years. It's as well something where as a founder, you think differently from an outside CEO.",
+        "start": 1584,
+        "end": 1634,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Olivier describes how fast the market moves, with weekly acquisitions and technology announcements that constantly force him to question his strategy and make bold moves quickly.",
+        "quote": "And then the second big like challenge I see, I think, is just the markets, the speed of the markets outside of us. It's insane. I mean, it's insane.",
+        "start": 1635,
+        "end": 1694,
+        "speaker": "Olivier Pailhès",
+        "type": "insight"
+      },
+      {
+        "title": "Olivier explains Air Labs: alongside a focused core voice-agent strategy, Aircall funds founder-led bets with $1.5M each on adjacent ideas, because you need a core strategy plus a lab when the market moves this fast.",
+        "quote": "So there's something I have very clear that, that we've set up since I'm back, which is we have a core strategy, like we want leading voice agents, okay, like for mid-sized companies, growing companies, okay, good, let's do that.",
+        "start": 1694,
+        "end": 1783,
+        "speaker": "Olivier Pailhès",
+        "type": "framework"
+      }
+    ]
   },
   "Lhd-pOysdU8": {
     "brief": {
@@ -45,7 +175,113 @@
         "at": 1488,
         "quote": "If that thing works for you, then you get a 2-year monopoly or competitive advantage against your peers."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Arjun defines Docket as a demand agent that answers buyers' specific questions on a website so they don't have to submit a form and wait days for sales to respond.",
+        "quote": "Yeah, Docket is a demand agent for your inbound traffic. So the world is at a point where everybody is outsourcing their searches to ChatGPT and Claude.",
+        "start": 77,
+        "end": 105,
+        "speaker": "Arjun Pillai",
+        "type": "insight"
+      },
+      {
+        "title": "Arjun explains that only 1% of website visitors submit a form while 99% bounce, making inbound conversion the lowest-hanging fruit in the revenue funnel and the reason he built Docket.",
+        "quote": "So if you look at the whole thing, right, the whole revenue stack, when somebody is on your website, they are 1% likely to submit on the form, just 1%.",
+        "start": 176,
+        "end": 224,
+        "speaker": "Arjun Pillai",
+        "type": "insight"
+      },
+      {
+        "title": "Arjun argues vibe coding can't scale an enterprise-grade company, describes Docket's code factory that cut work from 7–9 days to 1–2 days, and defines AI-native as a product that is useless without AI.",
+        "quote": "Even today, I kind of, you know, unless you are doing it for some internal app, for like a small indie app sort of a thing, for the kind of use cases that we handle, which is for enterprise and upper mid-market sort of use cases, I challenge the vibe coding thing.",
+        "start": 281,
+        "end": 372,
+        "speaker": "Arjun Pillai",
+        "type": "framework"
+      },
+      {
+        "title": "Arjun gives a second test for AI-nativeness: whether the product can tap a company's hiring budget, distinguishing the investor view from the technology view.",
+        "quote": "Second thing is, is our AI able to kind of get into the hiring budget in a company? The answer is yes, right?",
+        "start": 373,
+        "end": 390,
+        "speaker": "Arjun Pillai",
+        "type": "insight"
+      },
+      {
+        "title": "Arjun proposes a third AI category beyond augmentation and replacement: human-like interactions that were previously cost-prohibitive, illustrated by a Dyson vacuum versus a car showroom.",
+        "quote": "That's a great question. There are— it's a little bit to unpack there for me. Alex, most of the times we hear about 2 distinct conversations.",
+        "start": 423,
+        "end": 509,
+        "speaker": "Arjun Pillai",
+        "type": "framework"
+      },
+      {
+        "title": "Arjun argues that outcome-based pricing only works when an agent is close to a measurable outcome; for long revenue workflows with hard attribution, Docket uses platform plus consumption pricing instead of seats.",
+        "quote": "Now coming to your outcome-based pricing or the pricing model in general. See, there was the seat pricing.",
+        "start": 509,
+        "end": 572,
+        "speaker": "Arjun Pillai",
+        "type": "framework"
+      },
+      {
+        "title": "Arjun explains how Docket found its first design partners: 19 conversations led to 16 interested and 8 unpaid pilots, converting to paid with a 50–60% early-adopter discount.",
+        "quote": "Absolutely. I believe that for an AI company to go to market, the first set of design partners is very, very, very critical, which is what I also did. I cannot get into a room and build something.",
+        "start": 610,
+        "end": 682,
+        "speaker": "Arjun Pillai",
+        "type": "story"
+      },
+      {
+        "title": "Arjun lists Docket's current top-of-funnel mix: paid ads on Google, Meta and LinkedIn, events, cold outreach, relationship mapping, inbound, and customer or portfolio referrals.",
+        "quote": "Then from there, we obviously scaled out marketing. So if you ask me today, I have a full engine kicking across the company, right? I have a customer success leader, marketing leader, sales leader, product leader, technology leader.",
+        "start": 683,
+        "end": 781,
+        "speaker": "Arjun Pillai",
+        "type": "insight"
+      },
+      {
+        "title": "Arjun says the hardest CEO challenge is winning buyer attention and helping buyers know where to bucket Docket, since AI adoption is less mature than the hype and vendors' messaging sounds identical.",
+        "quote": "Yeah, getting attention from the business decision makers is probably the most difficult thing now, which is, again, I have to go, which is where these conferences help because they are there to learn.",
+        "start": 792,
+        "end": 892,
+        "speaker": "Arjun Pillai",
+        "type": "insight"
+      },
+      {
+        "title": "Arjun tells how VP of Marketing Gary cold-messaged Lucid to partner on an $80,000 car giveaway at HubSpot Unbound within three weeks, and how the car showroom concept tied to Docket's new Showroom agent feature for demoing software.",
+        "quote": "Absolutely. That was one of the crazy things that we are doing. We haven't given away the car. The contest ends today and it's going to happen in a couple of weeks.",
+        "start": 924,
+        "end": 1065,
+        "speaker": "Arjun Pillai",
+        "type": "story"
+      },
+      {
+        "title": "Arjun introduces the marketing factory: marketing leaders and a few people will design assembly lines of self-triggering agents for content, AEO/SEO and demand gen that escalate approvals to humans, rather than using AI only for personal productivity.",
+        "quote": "See, every marketer who I speak with, they are trying to understand what does future of marketing look like.",
+        "start": 1130,
+        "end": 1266,
+        "speaker": "Arjun Pillai",
+        "type": "framework"
+      },
+      {
+        "title": "Arjun explains GTM skepticism toward AI: AI SDR vendors broke promises and trust by overselling, and AI in go-to-market has yet to reach product-market fit.",
+        "quote": "Good question. I don't want to put the blame only on the people who are not changing on the go-to-market, right? But let me preface and then I'll come to that advice in one minute.",
+        "start": 1352,
+        "end": 1440,
+        "speaker": "Arjun Pillai",
+        "type": "insight"
+      },
+      {
+        "title": "Arjun's advice to skeptical founders: GTM edge goes to early adopters of what works, so they should test AI GTM approaches like a marketing factory even without trusting them, because the head start can be worth about two years — \"be skeptical, but start experimenting.\"",
+        "quote": "See, go-to-market is a beast in the sense that if you find something that works, the person next to you is going to start doing it.",
+        "start": 1445,
+        "end": 1505,
+        "speaker": "Arjun Pillai",
+        "type": "insight"
+      }
+    ]
   },
   "OXntdt6N0Mc": {
     "brief": {
@@ -69,7 +305,105 @@
         "at": 1953,
         "quote": "But if you are not sure about your go-to-market, if you are not sure about your PMF, money is utterly useless."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Emeric recounts hearing Vidyard CEO Michael Litt declare 'SaaS is dead' and push result-as-a-service at an AI conference, which unsettled him about Agorapulse.",
+        "quote": "First of all, I'd like to share a story with you. A year ago, it was in January, so not really a year ago, 9 months ago, I was in British Columbia in Canada attending a conference, a small conference about AI that Dan Martell was running.",
+        "start": 82,
+        "end": 146,
+        "speaker": "Emeric Ernoult",
+        "type": "story"
+      },
+      {
+        "title": "Emeric explains how vibe coding means any basic feature can be rebuilt by thousands of apps and that even complex features are now only weeks from being copied, eroding the complexity moat.",
+        "quote": "What it has, what has happened since the beginning of this year is that now, and you know that because I know you vibe code and I vibe code too, you create stuff on your own on a Sunday afternoon that would have taken 2 months to a freelance developer a year ago.",
+        "start": 562,
+        "end": 645,
+        "speaker": "Emeric Ernoult",
+        "type": "insight"
+      },
+      {
+        "title": "Emeric argues that scheduling, replying to comments, and analytics dashboards are all heading to zero value because AI makes them trivial.",
+        "quote": "Simple and SMB, it's going to be disrupted super fast. Complex and enterprise, it's going to take a little bit more time.",
+        "start": 769,
+        "end": 828,
+        "speaker": "Emeric Ernoult",
+        "type": "insight"
+      },
+      {
+        "title": "Emeric lays out Agorapulse's new vision: change the problem solved from distributing content to ideating and creating content that generates leads and eventually sales.",
+        "quote": "So basically the vision is like, We have to completely change the problem we solve.",
+        "start": 1043,
+        "end": 1108,
+        "speaker": "Emeric Ernoult",
+        "type": "framework"
+      },
+      {
+        "title": "Emeric explains that Archie only gets adopted if its posts sound like the user, which is why the product team spent 3 weeks on voice testing.",
+        "quote": "So we asked the product team to go and work on that. They spent 3 weeks testing everything you can test on how we make it sound like you.",
+        "start": 1197,
+        "end": 1239,
+        "speaker": "Emeric Ernoult",
+        "type": "insight"
+      },
+      {
+        "title": "Emeric argues that winning on social requires quality and quantity together, so Archie captures everything a user says, from podcasts to lunches, as raw material for content.",
+        "quote": "The second thing is Archie was conceived to build content at scale. Because I, what I've seen on, on, on social media is that the people who win, they do quality and quantity at the same time.",
+        "start": 1518,
+        "end": 1608,
+        "speaker": "Emeric Ernoult",
+        "type": "framework"
+      },
+      {
+        "title": "Emeric explains that volume generates audience data so Archie can coach users toward what works, citing Caleb Ralston's point that nobody knows what good content is until the audience decides.",
+        "quote": "And the last thing, and we're not there yet, but we're getting there. That's the vision is that Archie, because there is this quantity, and that's also something I learned from the big creators, quantity, he is here to buy data, to get you the data so that you learn what is good versus what is not.",
+        "start": 1620,
+        "end": 1699,
+        "speaker": "Emeric Ernoult",
+        "type": "framework"
+      },
+      {
+        "title": "Emeric argues that during product discovery money rarely buys time and adds friction, so in the AI age founders need clarity more than capital.",
+        "quote": "Yeah, well, I don't need to raise anything. I have €10 million on my bank account. Like, I have already raised money from my customer for the past 10 years, so I don't need to raise.",
+        "start": 1809,
+        "end": 1890,
+        "speaker": "Emeric Ernoult",
+        "type": "insight"
+      },
+      {
+        "title": "Emeric says money helps only once product-market fit, onboarding, activation, retention, and go-to-market are working, and is useless before that.",
+        "quote": "The second thought is money is good when you if you if you have a GTM that works. Like let's let's let's say you have a great product. It does solve a real problem.",
+        "start": 1894,
+        "end": 1962,
+        "speaker": "Emeric Ernoult",
+        "type": "insight"
+      },
+      {
+        "title": "Emeric explains that EOS gave him a recipe for running the company but left gaps in coaching, expectations, and one-on-ones, and that OKRs get forgotten unless embedded in regular meetings.",
+        "quote": "Yeah, that was a challenge. EOS was really helpful, but then I started to see all the gaps that it does not handle one-on-ones and coaching. How do you coach a team member?",
+        "start": 2081,
+        "end": 2153,
+        "speaker": "Emeric Ernoult",
+        "type": "framework"
+      },
+      {
+        "title": "After X's huge API price increase in May 2025 put Agorapulse at financial risk, forced 25 layoffs, and brought lawsuits, Emeric started writing his book as a constructive project.",
+        "quote": "So obviously I didn't have the time. Long story short, in May 2025, X increased the price of the API by a lot. I'm not allowed to talk about it.",
+        "start": 2159,
+        "end": 2237,
+        "speaker": "Emeric Ernoult",
+        "type": "story"
+      },
+      {
+        "title": "On a flight from LA in January 2026, Emeric opened Lovable to vibe code a small one-on-one tool, which grew into My Company OS, the system Agorapulse now uses for meetings, planning, and reviews.",
+        "quote": "And when the book came out, I say, I thought to myself, this is where things are so crazy. One day I'll need to build a product around the book.",
+        "start": 2285,
+        "end": 2348,
+        "speaker": "Emeric Ernoult",
+        "type": "story"
+      }
+    ]
   },
   "ZC5QrG4Kj5c": {
     "brief": {
@@ -93,7 +427,129 @@
         "at": 750,
         "quote": "Think AI-native, build your moat, and make sure that you can innovate extremely fast. Otherwise, it's tough."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Crespo explains why Pigment keeps its engineering team in Europe, where there is less competition for top talent, while 60% of customers and the executive team are in the US.",
+        "quote": "So at the end of the day, look, I think the talent, if you want like the best engineers, find them in Europe because there is a lot less competition.",
+        "start": 42,
+        "end": 94,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Crespo explains that she saw the cash, revenue and cost planning problem at Google scale, where she was hired to solve it internally, and knew there was a better way.",
+        "quote": "And by the way, what you describe is very common. So I think most of the time I find founders, as soon as they are very smart and they have the drive, they can tackle a lot of different spaces and it's going to work.",
+        "start": 263,
+        "end": 310,
+        "speaker": "Eléonore Crespo",
+        "type": "story"
+      },
+      {
+        "title": "Enterprises can't just use Claude for planning for the same reason small companies could run on Excel: at around 500 employees they need unified data, governance, permissions and scalable complex calculations.",
+        "quote": "So it's the exact same reason as when pre-Claude, I would say at your size, you could do everything on Excel. It's exactly the same.",
+        "start": 416,
+        "end": 471,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Crespo says bolt-on AI doesn't work: ask what you would build if you started Pigment today, keep only the essential primitives like infrastructure and the harness, and rebuild around current model capabilities.",
+        "quote": "So I think first of all, bolt-on doesn't work. you have to think about an AI-native company, meaning like for us it was, let's drop the pen. If we were to start Pigment today, what would we do?",
+        "start": 660,
+        "end": 702,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Beyond thinking AI-native, Crespo adds two more primitives: build a moat because an AI wrapper is not enough, and innovate extremely fast, trashing and rebuilding features constantly.",
+        "quote": "The second thing you have to think about that is critical is your moat. And, you know, building an AI wrapper is not enough. You need to build a moat around it.",
+        "start": 703,
+        "end": 757,
+        "speaker": "Eléonore Crespo",
+        "type": "framework"
+      },
+      {
+        "title": "Pigment's primary moat is hard-to-replicate scalable compute and real-time infrastructure, and the secondary moat is accumulated planning knowledge and customer-specific memory that compounds into tailored experiences.",
+        "quote": "Our moat is, I think, our infrastructure is what we've spent the first years of Pigment building because it's very hard to replicate.",
+        "start": 758,
+        "end": 840,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Crespo advises CEOs not to fight every AI battle: focus first on AI that grows top-line revenue, since other gains will follow.",
+        "quote": "Yeah, sure. So I think first of all, you know, as a CEO, my recommendation is that you cannot fight on every single battle.",
+        "start": 986,
+        "end": 1022,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Pigment's AI-first operating model combines a company-wide mandate to be leaner and faster, embedded AI deploy engineers, a centralized team for complex workflows, and a preference for off-the-shelf tools.",
+        "quote": "Now, clearly, for us, it's been a mandate for the entire company about how can we be leaner, how can we execute faster, and how can every team really use AI to the max and agents to the max in everything they do to operate in a more nimble, agile, and intelligent manner.",
+        "start": 1023,
+        "end": 1094,
+        "speaker": "Eléonore Crespo",
+        "type": "framework"
+      },
+      {
+        "title": "Crespo says the goal is to become leaner every year, framing it not as having too many people but as staying agile and innovating fast, as AI-native customers like Vercel, Glean and Anthropic do with small finance teams.",
+        "quote": "Yeah, great question. So I think definitely like the goal for us is to become leaner and leaner and leaner every year. And this is what we do with our customers.",
+        "start": 1205,
+        "end": 1257,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Crespo explains the co-CEO model: clearly defined roles (her co-founder leads product, technology and HR; she leads everything else) and constant communication that closes the loop between business and product.",
+        "quote": "Yeah, so we've always been 2 CEOs. We are both co-founders of the company. cannot work better for us. I think that really depends on the team, on your co-founder, on your own mentality, on your own personality.",
+        "start": 1288,
+        "end": 1369,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "The first growth driver is an impeccable enterprise sales machine: shorter sales cycles, tight lead qualification, lean operations and fast account-executive ramp-up.",
+        "quote": "Yeah, so it's a combination of things. So if I start, where should I start? Maybe I could start by the go-to-market side and then product.",
+        "start": 1445,
+        "end": 1490,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Crespo completes her growth flywheel: better sales cycles and switching, brand and community building, and above all fast product innovation that brings AI to customers on a silver platter.",
+        "quote": "So that's the first thing, really improving your sales cycle, your ability to switch from players. The second is making noise, marketing everywhere.",
+        "start": 1522,
+        "end": 1577,
+        "speaker": "Eléonore Crespo",
+        "type": "framework"
+      },
+      {
+        "title": "Pigment's free trial lets prospects vibe-code an enterprise app in minutes, reducing buying friction and sales cycles in a category historically sold through long, high-touch processes.",
+        "quote": "Yeah, and that goes into my first point, which is how do you remove the friction for people to buy? And so what we realize is that we have an amazing technology.",
+        "start": 1591,
+        "end": 1672,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Crespo tells early-stage founders that business planning is a must-have, not a nice-to-have, and that like Formula 1 teams, the companies that optimize most win, so they shouldn't wait to start.",
+        "quote": "I think first of all, it's essential. It's not a nice-to-have, it's a must-have because it's the only way for you to improve your top line and your costs in a very efficient manner.",
+        "start": 1780,
+        "end": 1830,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      },
+      {
+        "title": "Excel remains fine for ad hoc analysis, but Crespo argues scalable planning processes shouldn't run on spreadsheets, and her best customers, like L'Oréal, say they could never go back.",
+        "quote": "Let's get the crystal ball out. In 2028, are finance teams, business planners still going to be using Excel for business planning? I think if they do, again, they are not in the right game.",
+        "start": 1877,
+        "end": 1934,
+        "speaker": "Eléonore Crespo",
+        "type": "insight"
+      }
+    ]
   },
   "2swBIdnb_pU": {
     "brief": {
@@ -117,7 +573,129 @@
         "at": 1588,
         "quote": "Is your platform designed for AI plus a human, not human plus AI? Because human plus AI is just bolting on AI."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Alex frames the Groove-to-Helply decision as creative destruction: a 15-year, $5M ARR bootstrapped legacy help desk was killed to start over for the agentic era.",
+        "quote": "We've had a legacy help desk solution called Groove, our prior company Groove, now rebranded to Helply for 15 years in the marketplace.",
+        "start": 114,
+        "end": 154,
+        "speaker": "Alex Turnbull",
+        "type": "story"
+      },
+      {
+        "title": "Alex explains Jason Lemkin's NRR zombie definition: $2M-$20M ARR, 90-100% NRR, 80-90% logo retention, but an inability to acquire new customers.",
+        "quote": "at, as, as it relates to our growth in 2024 as we're hitting $5 million ARR, throughout that year we're seeing signs of Groove becoming what Jason Lemkin referred to as a net revenue retention zombie.",
+        "start": 236,
+        "end": 305,
+        "speaker": "Alex Turnbull",
+        "type": "framework"
+      },
+      {
+        "title": "Alex argues legacy SaaS is fighting an uphill battle, and that falling seat counts and seat-based pricing were killing Groove between 2023 and 2026.",
+        "quote": "And. And now it's completely agentic, right? It's kind of transformed into a completely new era of software, AI-native. And if you're a legacy SaaS, I truly believe that you're fighting an uphill battle.",
+        "start": 373,
+        "end": 432,
+        "speaker": "Alex Turnbull",
+        "type": "insight"
+      },
+      {
+        "title": "In May 2024 Alex wrote to a former business partner that avoiding the NRR zombie stage required rebooting the product, brand and GTM strategy entirely.",
+        "quote": "And I sent out a note to a former business partner and I said, listen, the only way that we're not going to really like sink ourselves into this NRR zombie stage is if we completely, completely reboot the product, reboot the brand, and then also reboot our GTM strategy.",
+        "start": 434,
+        "end": 469,
+        "speaker": "Alex Turnbull",
+        "type": "story"
+      },
+      {
+        "title": "Bolting AI drafts and edits onto Groove produced only minor efficiency gains because a human was still clicking around.",
+        "quote": "So we had started customer development, like first, even before Helply with Groove, we, we bolted on AI onto Groove. Right? Those are the simple things like AI drafts, AI edits.",
+        "start": 502,
+        "end": 539,
+        "speaker": "Alex Turnbull",
+        "type": "insight"
+      },
+      {
+        "title": "Helply V1, an agnostic AI chatbot sold as an add-on to Groove customers, reached 252 paying customers and $1M ARR with strong tier-1 deflection results.",
+        "quote": "At the same time, our our our attempt two was doing a lot of customer development around what is now Helply.",
+        "start": 540,
+        "end": 607,
+        "speaker": "Alex Turnbull",
+        "type": "story"
+      },
+      {
+        "title": "Alex argues a paradigm shift is underway: software and subscriptions persist, but customers increasingly buy the work performed rather than access to tools, and AI performance replaces human measurement.",
+        "quote": "And then there's the measurement piece of it where you're not measuring humans anymore, you're measuring the performance and the outcomes of of AI.",
+        "start": 660,
+        "end": 709,
+        "speaker": "Alex Turnbull",
+        "type": "insight"
+      },
+      {
+        "title": "After stopping Groove signups and Helply V1, Alex concludes the moat is not a chatbot on your site but proprietary data, which you only get by owning the customer's data rather than integrating with Zendesk.",
+        "quote": "In 2025, in September, as we're looking at the landscape, we end up starting literally everything from scratch again. All right.",
+        "start": 748,
+        "end": 813,
+        "speaker": "Alex Turnbull",
+        "type": "insight"
+      },
+      {
+        "title": "Having tried bolt-ons and a drastic V1 experiment, the team rebuilt a fully agentic support platform from the ground up, with workflows designed for AI with a human rather than a human using AI.",
+        "quote": "So we kind of stepped back and said, all right, what, like we've experimented with bolting on AI into Groove. We did this really drastic experiment with Helply version 1.",
+        "start": 813,
+        "end": 886,
+        "speaker": "Alex Turnbull",
+        "type": "story"
+      },
+      {
+        "title": "Alex plans to migrate all 1,400 Groove customers to Helply V2 through 2027, having learned that maintaining two products as a small company is basically impossible.",
+        "quote": "Yes, for sure. And all of the Groove customer base will eventually be migrated over into, into Helply version 2 the new agentic complete customer support platform.",
+        "start": 991,
+        "end": 1037,
+        "speaker": "Alex Turnbull",
+        "type": "insight"
+      },
+      {
+        "title": "Alex says he loves competition because it signals demand, noting the space is more crowded than he has ever seen, with six vendors beside Helply at a recent event.",
+        "quote": "Getting back to your question around like the competition though. Yes, there's competition, right? But again, I've always had this notion where I love competition. I love competition. I think it signals like there's demand in the space.",
+        "start": 1289,
+        "end": 1341,
+        "speaker": "Alex Turnbull",
+        "type": "insight"
+      },
+      {
+        "title": "Seat-based incumbents like Intercom can't drop seats without a 30-40% MRR hit, so bootstrapped Helply can go seatless and charge only for AI work.",
+        "quote": "Now, the way that we look at that too is Getting back to AI, how are you going— like, in terms of pricing, how are you going to, to, to look at the landscape with all of your incumbents that are seat-based?",
+        "start": 1342,
+        "end": 1418,
+        "speaker": "Alex Turnbull",
+        "type": "insight"
+      },
+      {
+        "title": "Alex warns other founders not to copy his path of acquisitions, new brands and a full rebuild, calling it an extreme risk that he hasn't yet proven.",
+        "quote": "So I did it in kind of a, a really twisted way. whether or not it was through acquisitions, through coming up with new brands, like, don't do that, right?",
+        "start": 1543,
+        "end": 1569,
+        "speaker": "Alex Turnbull",
+        "type": "insight"
+      },
+      {
+        "title": "Legacy SaaS founders should ask whether their platform is designed for AI plus a human or human plus AI: bolt-ons are the latter, while AI-first designs experience, workflows and pricing around AI.",
+        "quote": "I do believe Legacy SaaS for sure has to think about making the hard decisions around: Is your platform designed for AI plus a human, not human plus AI? Because human plus AI is just bolting on AI.",
+        "start": 1578,
+        "end": 1633,
+        "speaker": "Alex Turnbull",
+        "type": "framework"
+      },
+      {
+        "title": "Because AI lets teams code far faster, now is arguably the best time in SaaS history to greenfield a rebuild, though founders should ask whether others can vibe code them out and whether their pricing is right.",
+        "quote": "AI is going to help you do it ten x more efficiently. With with now the the ability to code like. 10 times faster.",
+        "start": 1647,
+        "end": 1716,
+        "speaker": "Alex Turnbull",
+        "type": "framework"
+      }
+    ]
   },
   "QHXQKyaYmc0": {
     "brief": {
@@ -141,7 +719,81 @@
         "at": 254,
         "quote": "if you line them all up, you say like, what are the 5 or 6 main constraints that are holding me back?"
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Jacco says AI companies are repeating the mistakes that sank SaaS, only faster, with effects from 2027, and that AI did not cause SaaS's problems but exposed them.",
+        "quote": "I think of them as software companies, and there's different kinds of software companies. Hard to extract who is SaaS and AI. I think that's one.",
+        "start": 101,
+        "end": 135,
+        "speaker": "Jacco van der Kooij",
+        "type": "insight"
+      },
+      {
+        "title": "Jacco recalls warning the industry at SaaStock in 2018-19 and argues the repeat is preventable, especially for a more reasonable European audience.",
+        "quote": "What I mean with that is that AI actually can be the solution to many of the problems that we have run into in SaaS.",
+        "start": 137,
+        "end": 208,
+        "speaker": "Jacco van der Kooij",
+        "type": "story"
+      },
+      {
+        "title": "Jacco outlines a constraint-first approach to AI: list the 5-6 main constraints, ask AI for their causes, and use it to eliminate them rather than for spam or SDR replacement, which is like using a Ferrari as a lawnmower.",
+        "quote": "Yeah, the main realization that we need to have is that AI can help lots of the problems historically that were the constraints to our business.",
+        "start": 241,
+        "end": 310,
+        "speaker": "Jacco van der Kooij",
+        "type": "framework"
+      },
+      {
+        "title": "Jacco argues no individual has all the answers about AI, so practitioners should learn and test together in communities rather than as individualists.",
+        "quote": "Now, my big thing of that, Alex, and what you have always done over the years is this. No single person has all the knowledge on this.",
+        "start": 311,
+        "end": 367,
+        "speaker": "Jacco van der Kooij",
+        "type": "insight"
+      },
+      {
+        "title": "Jacco says the timing matters: it is hard to project even 3-6 months ahead, and a new season of gatherings beyond Dreamforce-style enthusiasm is needed.",
+        "quote": "Second thing I wanna point out to you, It's the timing, Alex. The timing is so important.",
+        "start": 479,
+        "end": 530,
+        "speaker": "Jacco van der Kooij",
+        "type": "insight"
+      },
+      {
+        "title": "Jacco urges leaders to bring colleagues to AI events because the topic touches every function: better one event with 2-3 people than three events with one person.",
+        "quote": "Many organizations— there's another thing I want to bring up, you know, like, and we see the importance of this, Aleks. I want people to hear this video and say, don't come alone.",
+        "start": 615,
+        "end": 673,
+        "speaker": "Jacco van der Kooij",
+        "type": "insight"
+      },
+      {
+        "title": "Jacco predicts human-to-human connection will be the dominant factor in business for the next two years and splits sales into high-touch (humans aided by AI) and high-volume (AI aided by humans).",
+        "quote": "That the way moving forward is not sales will be replaced by AI. The way moving forward is that the human-to-human connection is more important than ever.",
+        "start": 1008,
+        "end": 1084,
+        "speaker": "Jacco van der Kooij",
+        "type": "framework"
+      },
+      {
+        "title": "Jacco tells anxious leaders to calm down and focus AI on a few basics, and pushes back on AI doom by arguing people have a choice in what to make of it.",
+        "quote": "And I'm sitting here in front of us. How many people, Alex, don't sit right now in a cubicle listening to this and going like, I'm panicking. What do I need to be doing?",
+        "start": 1085,
+        "end": 1165,
+        "speaker": "Jacco van der Kooij",
+        "type": "insight"
+      },
+      {
+        "title": "Jacco explains AI GTM tools underperform because they're applied to old processes, and warns the inbound-dependent model built over 15 years, now being repeated by AI companies, will break.",
+        "quote": "Alex, the reason why that is because we're applying AI to old processes. If we apply AI to old processes, they will do what old processes do, but arguably at a lower cost and at a bigger scale.",
+        "start": 1258,
+        "end": 1335,
+        "speaker": "Jacco van der Kooij",
+        "type": "insight"
+      }
+    ]
   },
   "MVQ7KR2LDFQ": {
     "brief": {
@@ -165,7 +817,153 @@
         "at": 2153,
         "quote": "understand on easy battleground, which is your currently existing clients, how the pricing process can look like, and then start working on your pricing."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "The most expensive SaaS pricing mistake is not treating pricing as an ongoing process, even though volume and costs get continuous attention and pricing is usually a one-off 10% increase every three years.",
+        "quote": "So not treating pricing as a process. I think that this is my— if there is one, this is the one. So think about this, right? I mean, price is a profit slash growth lever, right?",
+        "start": 65,
+        "end": 146,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Companies rarely have even 1.2 FTE responsible for pricing, so a lack of capability and responsibility makes them afraid of it.",
+        "quote": "So a couple of points. The first one that you mentioned, 100%. Rarely there is a person or like even 1.2 FTE that is responsible for pricing. So that's number one.",
+        "start": 164,
+        "end": 191,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Pricing is a leaky bucket, like a disease, because suboptimal pricing does not kill a company fast but quietly cuts the effect of every sales, marketing, and product investment.",
+        "quote": "The third one, and I think this is also quite important, you know, pricing is very rarely, or used to be, and now it's much different, but used to be rarely a burning thing, right?",
+        "start": 191,
+        "end": 253,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Valueships treats pricing as an engineering exercise, drawing on a technology-only client base, a benchmark and pricing-page knowledge base, and constant industry learning.",
+        "quote": "So first of all, we treat pricing as an engineering exercise. So one advantage that we do have is like the database and all the experience that we are having working across multiple industries within technology.",
+        "start": 397,
+        "end": 470,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "framework"
+      },
+      {
+        "title": "The AI era merges the custom-software and cloud/SaaS eras by tailoring a platform to each client through agents, which eventually pushes pricing toward a per-client model.",
+        "quote": "Then we realized maybe this is not needed. We moved into the cloud era, which means that we were much faster, cheaper, but we were solving, let's say, 70-80% of the problems that our clients were having.",
+        "start": 530,
+        "end": 608,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Despite the hype about outcome-only pricing, survey data shows buyers still prefer hybrid models with usage on top of classic SaaS metrics, so companies should avoid an abrupt 180-degree switch from seats to usage-only.",
+        "quote": "If you take all of them into consideration and if you zoom out from the LinkedIn noise or from the buzz, Of course, maybe not of course, but majority of the marketing buzz is telling us that you should move from seats and now we should also only charge per output or outcome.",
+        "start": 654,
+        "end": 730,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Instead of switching everything at once, test alternative value metrics in a new add-on or bundle, since buyers are increasingly open to metrics other than seats.",
+        "quote": "So I would say that first of all, understand your revenue and how changing the value metric can influence your revenue and then implement cadence, right?",
+        "start": 730,
+        "end": 794,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "framework"
+      },
+      {
+        "title": "Choosing a value metric works as a shortlisting funnel: check technical feasibility, check correlation with customer value, then assess the impact on current users.",
+        "quote": "So I don't want to be very boring here, but I see a lot of companies battling their technological debt. So first of all, you need to understand what usage metrics are actually feasible to charge.",
+        "start": 840,
+        "end": 930,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "framework"
+      },
+      {
+        "title": "Before rolling out a new usage metric, model its effect on churn, conversion, and cash flow, then start with beta testers or a new product or add-on.",
+        "quote": "So like if you would like to migrate them or move them to the usage-based plans, how it's going to influence your churn, how it's going to influence your conversion, right?",
+        "start": 930,
+        "end": 994,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "framework"
+      },
+      {
+        "title": "A client went full usage pricing to follow the industry; the value logic and analytics were sound, but customers refused to pay for the chosen metric, so the implementation failed.",
+        "quote": "Recently, I had a client situation where one of my clients basically decided They decided by themselves that they are going full usage because industry is heading that way.",
+        "start": 1130,
+        "end": 1221,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "story"
+      },
+      {
+        "title": "The first steps of a pricing process are to align pricing with company strategy and define the financial KPI to improve, such as margin or NRR.",
+        "quote": "You can increase your prices if you want to boost your margin, which brings me to the answer to your question, which is Pricing is a horizontal function that needs to be aligned with the strategic goals of your company, which means that the first part of the process is actually understanding what we want to achieve, right?",
+        "start": 1357,
+        "end": 1416,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "framework"
+      },
+      {
+        "title": "A pricing test might raise prices for the 10% of clients paying below the median for equal value, then scale if it works and kill if it doesn't, within a four-step process.",
+        "quote": "Then understand what you want to achieve. Then typically you design the test, right? So you want to Boost your revenue from currently existing clients.",
+        "start": 1416,
+        "end": 1476,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "framework"
+      },
+      {
+        "title": "AI-native startups should differentiate packages rather than use one all-in-one price, because even two plans reveal what drives willingness to pay, and 80% of customers on the top plan signals underpricing.",
+        "quote": "So if you're just starting, I would say, and There is— I had a big battle over again LinkedIn on that. So, you know, I don't own the truth. Take your magnifying glass to what I'm preaching.",
+        "start": 1500,
+        "end": 1579,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Valueships' research found that companies with a core value metric plus one or two supporting metrics tend to charge more for the same value proposition, so hybrid models often lift willingness to pay.",
+        "quote": "Through our research, we also Nowadays, see that companies that are having more than one CVM, so like you know core value metric.",
+        "start": 1585,
+        "end": 1626,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "The AI era feels ADD-like, with priorities shifting between pricing, LLM searchability, and AI SDRs, so teams need to filter noise through a revenue lens.",
+        "quote": "Secondly, And this is going to be a very not pricing related, but in general horizontal technology takeaway. I have the feeling that we are like in the very ADD type of a situation right now.",
+        "start": 1783,
+        "end": 1847,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Seats worked as a pricing metric because humans were the measurement system for value, but AI agents break that link between users and output.",
+        "quote": "TL;DR, no. Adding a bit of a context to it, I think it's important to understand why all of this is happening, right? And I think this is all about the measurement system.",
+        "start": 1879,
+        "end": 1963,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Seats will persist where AI only supports humans or where legal, compliance, or hardware barriers are high, and will be at risk where AI can replace humans easily; companies should weigh human replaceability and workflow penetration.",
+        "quote": "So that brings me to my point that for softwares that are very commoditized, for the industries that do have a high entry barrier from the legal standpoint, That for companies that are utilizing hardware plus software, suddenly they're very cool because the barrier of entry to challenge them is quite high.",
+        "start": 1993,
+        "end": 2081,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "insight"
+      },
+      {
+        "title": "Asked what a founder should do this week, Krzysztof notes that 95% of engagements end in a price increase, so founders should align price with value, test on existing clients, and adopt #AlwaysWorkOnPricing.",
+        "quote": "Final question, Chris. So there's a founder that's listening to this. They suspect their pricing is wrong for the AI era. They don't know where to start. What's one thing you would tell them to do this week?",
+        "start": 2107,
+        "end": 2168,
+        "speaker": "Krzysztof Szyszkiewicz",
+        "type": "q_and_a"
+      }
+    ]
   },
   "btPVbtP_erQ": {
     "brief": {
@@ -189,7 +987,153 @@
         "at": 2236,
         "quote": "Isolate 200 customers that you would absolutely love to work with if you could work with any 200 customers, and then start doing things manually."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Dalgleish says AI SDRs have mostly failed so far because the tools started out basic and teams haven't invested the testing and iteration needed, since they are not plug-and-play pipeline generators.",
+        "quote": "So I think the short answer to that for most companies so far has been no.",
+        "start": 32,
+        "end": 113,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish compares an AI SDR tool to a new hire that needs training, and recommends assigning one senior owner who gets into the weeds and is accountable for refining it.",
+        "quote": "Yeah, absolutely. And I think the equivalent is bring on a new hire, right? You're not just going to throw a new hire into the mix and say, you know, good luck.",
+        "start": 231,
+        "end": 281,
+        "speaker": "St John Dalgleish",
+        "type": "framework"
+      },
+      {
+        "title": "Dalgleish explains that short CRO/VP Sales tenures and pressure for fast results clash with the patience needed to train an AI outbound tool, so expectation setting is part of selling it.",
+        "quote": "I think the problem as well that we kind of see is that sales by nature, and if you look at like the CRO or the VP of sales role, the average tenure of these roles is usually about a year and a half.",
+        "start": 281,
+        "end": 353,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish describes how his outbound-team background and his co-founder's ML expertise led from the Perlon Labs AI consultancy to the first basic version of Perlon AI.",
+        "quote": "Yeah, so my background was in building and sort of running outbound teams. I'd spent 4 or 5 years doing this specifically in the pre sort of AI age where my focus had always been telling our teams to write hyper-personalized, really, really well-researched messages.",
+        "start": 473,
+        "end": 551,
+        "speaker": "St John Dalgleish",
+        "type": "story"
+      },
+      {
+        "title": "Perlon's first customer was a UK private-jet broker whose need for hyper-relevant messages shaped the product, and after a few aviation customers an inbound investor email led them to take a small check and focus on product.",
+        "quote": "So yeah, we sold it to one client in the UK. they were a private jet broker, so they were reaching out to ultra-high net worths.",
+        "start": 572,
+        "end": 634,
+        "speaker": "St John Dalgleish",
+        "type": "story"
+      },
+      {
+        "title": "After signing a crypto-compliance customer, the founders realized outbound works broadly the same way across industries, making Perlon a horizontal platform.",
+        "quote": "The third customer, sorry, the fourth customer that we sold it into was a crypto compliance business.",
+        "start": 635,
+        "end": 679,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish says Perlon hands every reply to humans and offers only a human dialer, arguing the best teams combine AI-run email and LinkedIn with humans on the phone and in meetings.",
+        "quote": "Yeah, we very much see it as the fact that sales teams are still going to be needed. You still need these humans.",
+        "start": 706,
+        "end": 773,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish outlines an account-tiering model: tier-1 accounts get fully human outreach while the long tail runs through automation, and the human salesperson isn't going anywhere.",
+        "quote": "So I think that's it. The SDR role, you know, shouldn't really be doing much that's text-based. Apart from for your like absolute tier 1 accounts.",
+        "start": 773,
+        "end": 839,
+        "speaker": "St John Dalgleish",
+        "type": "framework"
+      },
+      {
+        "title": "Dalgleish argues AI cold-calling isn't ready, since many recipients can't tell it's an AI and a brand selling $100K+ products shouldn't trust an AI to make the first call to a senior buyer.",
+        "quote": "So that's it. I think with these AI calls, I don't think the world is really ready for them. And I don't think many people are prepared to be sold to by an AI at this stage.",
+        "start": 865,
+        "end": 940,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Responding to the saturation concern, Dalgleish says GTM must be multifaceted and that email and LinkedIn are noisy mainly because of bad, scraped AI messages, so well-contextualized outreach cuts through.",
+        "quote": "So I think any GTM strategy and any salesperson's outbound strategy needs to be multifaceted and have every kind of angle covered, right?",
+        "start": 996,
+        "end": 1062,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish argues legacy platforms like HubSpot, Outreach and SalesLoft bolted AI onto products not built for agentic outbound, with limited scale and customization of research agents.",
+        "quote": "Yeah. So I think a lot of the old-school kind of tools Have tried to bolt on AI features to to what they do. So, you know, the likes of HubSpot, the likes of Outreach, SalesLoft, etc.",
+        "start": 1321,
+        "end": 1377,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish says an AI-native platform puts contact data, mailbox architecture, LinkedIn automation and a dialer under one roof so an agent can operate the whole outbound stack.",
+        "quote": "That is key because if we look at our product, so we've got everything from contact data to mailbox architecture to LinkedIn automation to a dialer. Everything that you need to run outbound is under one roof.",
+        "start": 1395,
+        "end": 1427,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "The most wrong claim Dalgleish hears is that AI in sales doesn't work; digging in usually reveals insufficient testing, iteration and team adoption.",
+        "quote": "The most, I'd say, I'd say it's just that it doesn't work. Yeah, it doesn't work, you know? And it's like, okay, well, let's have a look at what you've done.",
+        "start": 1451,
+        "end": 1530,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish urges skeptics to revisit AI GTM tools by comparing how far LLMs have come in two years, especially before deciding to hire more salespeople.",
+        "quote": "I think it's very much the same with, with GTM. I think a lot of people maybe did dip their toe in in the early days when these tools sucked.",
+        "start": 1654,
+        "end": 1730,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish says customers measure ROI through reply rates, warm leads, meetings booked and pipeline, plus the selling time returned to SDRs, with expectations depending on ticket size.",
+        "quote": "So a lot of our customers will really kind of look at the sort of core metrics. So those are going to be things like reply rates, number of meetings booked.",
+        "start": 1755,
+        "end": 1840,
+        "speaker": "St John Dalgleish",
+        "type": "q_and_a"
+      },
+      {
+        "title": "Dalgleish says Perlon pairs every customer with a customer success manager to refine campaigns, contrasting this with tools like Clay that have a steep learning curve and little support.",
+        "quote": "And for us, we are, we're very sort of heavy on the human side ourselves. So every customer of ours has a customer success manager.",
+        "start": 1862,
+        "end": 1910,
+        "speaker": "St John Dalgleish",
+        "type": "insight"
+      },
+      {
+        "title": "Dalgleish's advice for founders with struggling outbound: pick 200 ideal customers, manually send hyper-personalized messages, learn what resonates, and only then automate the proven motion.",
+        "quote": "Yeah, I'd say if outbound isn't working for you and you've got a small sales team, go back to fundamentals, go back to basics.",
+        "start": 2230,
+        "end": 2299,
+        "speaker": "St John Dalgleish",
+        "type": "exercise"
+      },
+      {
+        "title": "Dalgleish reflects on selling a product to people it may partly replace, saying Perlon positions itself as an assist that removes manual drudgery and hopes teams grow rather than shrink.",
+        "quote": "I guess I've never been asked what it's like to sell a product into a group of people that you're effectively, in some ways, trying to replace.",
+        "start": 2315,
+        "end": 2401,
+        "speaker": "St John Dalgleish",
+        "type": "story"
+      }
+    ]
   },
   "4VXTqe5Fed4": {
     "brief": {
@@ -213,7 +1157,121 @@
         "at": 1768,
         "quote": "for those specific processes, spend an hour and chat with an agent."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Jay explains why he founded Codegen in late 2022: code is easy to verify, which keeps language models on the rails, and autocomplete scope could keep expanding from lines to whole codebases.",
+        "quote": "Sure. Yeah, there's a lot to unpack there. So Codegen started in late 2022, and at the time, the GPT-3 API had just opened up.",
+        "start": 37,
+        "end": 73,
+        "speaker": "Jay Hack",
+        "type": "insight"
+      },
+      {
+        "title": "Jay describes Codegen's 'build me Netflix' vision: handing entire tasks to an AI that writes code, provisions infrastructure and even recruits, like level-5 self-driving for software.",
+        "quote": "I always thought about it as skating to where the puck is going. So instead of using the technology for what it was capable of at the time, trying to construct the next thing that we would be going towards as a society.",
+        "start": 111,
+        "end": 161,
+        "speaker": "Jay Hack",
+        "type": "story"
+      },
+      {
+        "title": "Jay explains why ClickUp was a better home for agents: its unified workspace avoids the data silos and Slack-style data walls that left Codegen agents unable to find organizational context.",
+        "quote": "And ClickUp had this incredible property, which was it had all of the apps that you care about in order to do a good job at a very wide variety of knowledge work in one place.",
+        "start": 224,
+        "end": 292,
+        "speaker": "Jay Hack",
+        "type": "story"
+      },
+      {
+        "title": "Jay reframes the agents-outnumber-employees claim as the latest step in automation, says the internal ratio is likely near 10 to 1, and argues the right metric is the share of work done autonomously by agents.",
+        "quote": "I mean, I see this as just the latest step in a long progression of increasing automation of knowledge work.",
+        "start": 372,
+        "end": 508,
+        "speaker": "Jay Hack",
+        "type": "insight"
+      },
+      {
+        "title": "Jay lays out a three-step adoption hierarchy: autocomplete, then a synchronous sidebar chat, then asynchronous and parallel agents, with each step making the next easier to adopt.",
+        "quote": "I think there is a hierarchical progression of adoption of automation, and it follows something very similar to what we saw happen in the software engineering industry, which, you know, I'm a trained programmer.",
+        "start": 565,
+        "end": 631,
+        "speaker": "Jay Hack",
+        "type": "framework"
+      },
+      {
+        "title": "Internal influencers publicly demonstrate agents in shared, multiplayer threads, so colleagues watching see the output and replicate it, creating a bottom-up virality mechanism.",
+        "quote": "In terms of driving adoption inside our internal workspace, you know, we have this massive ClickUp instance that's been spinning since 2017.",
+        "start": 643,
+        "end": 704,
+        "speaker": "Jay Hack",
+        "type": "insight"
+      },
+      {
+        "title": "Top-down process mining: have an agent review your recent work and identify automatable processes and handoff friction, an approach ClickUp's CEO hacked together and ClickUp plans to institutionalize.",
+        "quote": "Top down though is also a very useful method that we've identified. And the idea is you just have an agent go off for you and figure out what things you should be automating in the first place.",
+        "start": 740,
+        "end": 809,
+        "speaker": "Jay Hack",
+        "type": "framework"
+      },
+      {
+        "title": "For first workflows, start with a sidebar agent for prioritization, research and drafting, then ask it to run recurring tasks, such as a 7 AM daily dossier, and let it help you climb the autonomy ladder.",
+        "quote": "So we have a sidebar in the ClickUp product, and I'm sure many other products have something similar where you click a button and this thing pops out where it's an agent who's sitting there and doing your work with you.",
+        "start": 1047,
+        "end": 1142,
+        "speaker": "Jay Hack",
+        "type": "exercise"
+      },
+      {
+        "title": "ClickUp governs agents by treating them like users or contractors with granular permissions and requiring explicit human confirmation for destructive actions like deleting backlog tasks.",
+        "quote": "This is something we think about every day. It's the, you know, since the very foundation of our AI program.",
+        "start": 1158,
+        "end": 1269,
+        "speaker": "Jay Hack",
+        "type": "framework"
+      },
+      {
+        "title": "Jay rejects the 'can an agent do the work' premise, invoking the lump of labor fallacy: automation expands the scope of ambition, so ClickUp is still hiring, with a higher bar for adaptable, agent-leveraging people.",
+        "quote": "I think there's this idea of the lump of labor fallacy, which is well known, goes back centuries where people always think there's only a certain amount of work.",
+        "start": 1328,
+        "end": 1398,
+        "speaker": "Jay Hack",
+        "type": "insight"
+      },
+      {
+        "title": "Jay says non-technical rollouts mirrored software engineering's adoption pattern about two years later, while capability growth and eagerness to adopt agents, compared with the slow cloud transition, surprised him.",
+        "quote": "The unexpected, you know, I would say that for the majority, I would say that my experience of rolling out agents to knowledge workers who are largely non-technical, not all non-technical, but mostly people who are, you know, it's like accounting firms, marketing firms, PR firms, construction companies.",
+        "start": 1417,
+        "end": 1563,
+        "speaker": "Jay Hack",
+        "type": "insight"
+      },
+      {
+        "title": "Jay predicts that within a year a single agent could act as executive, engineer and marketer in one, that organizations aren't prepared for this, and that adoption will trail frontier capability by one to one-and-a-half years.",
+        "quote": "Well, you know, I think that you could say for the type of agents that we are building today, how many years until people have mass adoption?",
+        "start": 1601,
+        "end": 1704,
+        "speaker": "Jay Hack",
+        "type": "insight"
+      },
+      {
+        "title": "Jay's one-week starting plan: chat with agents and plug in MCPs, then map your daily tasks with a chat client to find automatable ones, and spend an hour building one focused agentic process and refining it.",
+        "quote": "I think that the best way to familiarize yourself with AI capabilities is chatting with agents and just plugging in MCPs. And MCP is an integration to an external service.",
+        "start": 1717,
+        "end": 1795,
+        "speaker": "Jay Hack",
+        "type": "exercise"
+      },
+      {
+        "title": "Jay says people are stuck in catch-up mode despite a huge capabilities overhang and should ask what comes next; he expects near-term superintelligence that will crush any knowledge work and says he is still wrestling with the implications.",
+        "quote": "I think that there is this huge capabilities overhang already where agents are capable of doing things that, you know, you and I can't even fathom. They're solving frontier math questions.",
+        "start": 1818,
+        "end": 1882,
+        "speaker": "Jay Hack",
+        "type": "insight"
+      }
+    ]
   },
   "cpJw6wYTV2I": {
     "brief": {
@@ -237,7 +1295,89 @@
         "at": 496,
         "quote": "give me an example of a workflow that you built and how did you do it? Did you bump into what went wrong?"
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Wouter recounts how struggling to fairly and efficiently screen thousands of CVs at his remote rug social enterprise led him to copy-paste skills tests and then flip assessment to the top of the funnel, inspiring TestGorilla.",
+        "quote": "Yeah, the idea for TestGorilla was really born out of my own struggles with hiring, struggles with hiring as an entrepreneur. So I've been an entrepreneur for basically my whole life.",
+        "start": 98,
+        "end": 205,
+        "speaker": "Wouter Durville",
+        "type": "story"
+      },
+      {
+        "title": "Wouter explains that AI hasn't changed TestGorilla's mission but made it more urgent, since the old-fashioned CV is worthless when every candidate has a perfect AI-made CV.",
+        "quote": "But it's mostly creating— I think it made our mission actually more urgent, right? If you look at our biggest competitor, like the old-fashioned CV, it's just worthless these days, right?",
+        "start": 319,
+        "end": 355,
+        "speaker": "Wouter Durville",
+        "type": "insight"
+      },
+      {
+        "title": "Wouter lays out TestGorilla's five-pillar AI fluency framework (applied use, learning agility, systems thinking, responsible use, human-AI collaboration) and warns that asking which tools someone uses becomes a vocabulary test.",
+        "quote": "Yeah, great question. And I think one that a lot of customers ask us as well. And the main topic is, how do I test for AI fluency?",
+        "start": 441,
+        "end": 587,
+        "speaker": "Wouter Durville",
+        "type": "framework"
+      },
+      {
+        "title": "Wouter warns white-collar workers with long careers to learn AI tools, and describes moving internally from the carrot of celebrating AI to the stick of making it part of performance reviews.",
+        "quote": "I think in white-collar roles, if you still have a long career ahead of you, you better, yeah, get on the bandwagon, right?",
+        "start": 673,
+        "end": 724,
+        "speaker": "Wouter Durville",
+        "type": "insight"
+      },
+      {
+        "title": "Wouter shares State of AI Fluency findings: 95% of hiring leaders call AI fluency a requirement, but ~60% have already mis-hired and ~40% define the bar as knowing what tools exist.",
+        "quote": "Yeah, yeah, we just launched this report. Yeah, but I think we interviewed over 3,000 hiring managers and recruiters and founders.",
+        "start": 740,
+        "end": 803,
+        "speaker": "Wouter Durville",
+        "type": "insight"
+      },
+      {
+        "title": "Wouter admits TestGorilla hired people who talked positively about AI but had crammed vocabulary, then tightened its process using its own assessments, and describes how AI-first work has made senior leaders hands-on builders again.",
+        "quote": "Yeah, 100%. It's changed completely how we hire and how we work. On the hiring side, yeah, we're lucky to have all these scientists at our company, right, who built that AI fluency framework.",
+        "start": 911,
+        "end": 1020,
+        "speaker": "Wouter Durville",
+        "type": "story"
+      },
+      {
+        "title": "Wouter reflects that the main thing capital buys is time and room for mistakes, but a big raise tempts you to throw an FTE at every problem, which he wouldn't do again.",
+        "quote": "Yeah, nice question. Yeah, it was a very big raise for how small we were at the time, right? I think the main thing capital buys you as an entrepreneur is time, and that, that's incredibly valuable.",
+        "start": 1103,
+        "end": 1173,
+        "speaker": "Wouter Durville",
+        "type": "story"
+      },
+      {
+        "title": "Wouter says his CEO anxiety is how fast tiny startups can build with AI compared to an established scale-up, though adopting AI and changing ways of working can let larger teams move faster.",
+        "quote": "Yeah, I think the one thing that gives me a bit of anxiety is just the speed at which very small teams, small scale-up startups, sorry, can build things. Right.",
+        "start": 1231,
+        "end": 1266,
+        "speaker": "Wouter Durville",
+        "type": "insight"
+      },
+      {
+        "title": "Years of experience is a far weaker signal now, while demonstrated proof of what you can do and human skills like judgment survive in the AI era.",
+        "quote": "Yeah, I think traditional signals, like just years of experience, work experience, right? One of the signals that most recruiters, traditional recruiters, would look at most is way less relevant, right?",
+        "start": 1303,
+        "end": 1336,
+        "speaker": "Wouter Durville",
+        "type": "insight"
+      },
+      {
+        "title": "Wouter tells how skills-based hiring surfaced a Venezuelan medical doctor with no professional SEO history who ranked number one on the SEO assessment, a gem a CV filter would have rejected instantly.",
+        "quote": "Yeah, so of course we come from assessments, right? That's where we started. And I think a lot of people ask us about how to screen people out, right?",
+        "start": 1348,
+        "end": 1436,
+        "speaker": "Wouter Durville",
+        "type": "story"
+      }
+    ]
   },
   "GgWfe27Obg4": {
     "brief": {
@@ -261,7 +1401,137 @@
         "at": 1252,
         "quote": "Put incentives and some game around it to enable and activate this motion in the short run."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Brandt argues funding doesn't imply efficiency; Spain's tough VC climate forced Enginy into a profitable-growth, AI-leveraged mindset that let it compete with 10x better-funded rivals.",
+        "quote": "Well, I think, like, funding doesn't necessarily imply efficiency, right? Indeed, the more funded you are, the less efficient your growth is. And founders tend to underestimate it, right?",
+        "start": 76,
+        "end": 98,
+        "speaker": "Kai Brandt",
+        "type": "insight"
+      },
+      {
+        "title": "Being born post-AI let Enginy reinvent functions, processes and team structures from scratch, reaching $6M ARR with 60-65 people.",
+        "quote": "And that helped a lot, especially being post-AI. We had an advantage amongst other players that were born before because we could reinvent from scratch many functions, many processes, the way we run teams, which is something you cannot do once you start building and operating a team that is pre-AI.",
+        "start": 180,
+        "end": 204,
+        "speaker": "Kai Brandt",
+        "type": "insight"
+      },
+      {
+        "title": "Brandt explains why Enginy entered a crowded market: sales stacks of 6-10 point tools are inefficient, and the future seller will work through a single AI system of action.",
+        "quote": "When you look at the category, there's many, let's say, point solutions, as I named them. That focus on some part of the, let's say, end-to-end sales process or the GTM motion.",
+        "start": 259,
+        "end": 329,
+        "speaker": "Kai Brandt",
+        "type": "framework"
+      },
+      {
+        "title": "Enginy entered as a scrappy data aggregator, and Brandt argues that as AI commoditizes software development, distribution plays a really, really, really big role.",
+        "quote": "However, this is the vision, right? The way we entered the market was being this kind of scrappy tool that allowed you to pull data across different sources. ...",
+        "start": 423,
+        "end": 501,
+        "speaker": "Kai Brandt",
+        "type": "insight"
+      },
+      {
+        "title": "Brandt lists Barcelona's advantages: quality of life, dense and affordable engineering talent, a growing startup ecosystem and an appealing city for international hiring.",
+        "quote": "The beauty of Barcelona is I see many verticals in which, you know, some sort of arguments why I built from here. One of it is the personal one. ...",
+        "start": 586,
+        "end": 728,
+        "speaker": "Kai Brandt",
+        "type": "insight"
+      },
+      {
+        "title": "Enginy's growth was mostly a GTM advantage: using its own product for high-intent outbound, intense cold calling and organic LinkedIn content.",
+        "quote": "Yeah, I think I would say it's mostly a GTM advantage. ... So our main growth channel has been outbound for us, using and leveraging our own technology and our own product to do high-intent targeting, automated outreach, You know, we were quite intense in cold calling.",
+        "start": 872,
+        "end": 918,
+        "speaker": "Kai Brandt",
+        "type": "insight"
+      },
+      {
+        "title": "Telling employees to post failed until Enginy added cash bonuses, vacation days, a leaderboard and a points-based game tied to LinkedIn milestones.",
+        "quote": "Yeah, so we started like just telling the team go post on LinkedIn, right? And of course that doesn't work if it's not aligned to their incentives. ...",
+        "start": 1041,
+        "end": 1089,
+        "speaker": "Kai Brandt",
+        "type": "story"
+      },
+      {
+        "title": "Incentives only kickstart posting; long term, sellers keep posting because audience and trust make outbound easier.",
+        "quote": "I think the combination of these 2 will make them to post. And at the long run, what keeps them posting is not this. ...",
+        "start": 1175,
+        "end": 1236,
+        "speaker": "Kai Brandt",
+        "type": "insight"
+      },
+      {
+        "title": "Brandt describes using Claude and MCP so non-technical staff can run GTM workflows in plain language, from list building and segmentation to dashboards.",
+        "quote": "Yeah, so I think what Claude has made is the ability of everyone in your team who is not necessarily tech savvy to be able to do complex GTM workflows using plain language.",
+        "start": 1304,
+        "end": 1371,
+        "speaker": "Kai Brandt",
+        "type": "framework"
+      },
+      {
+        "title": "The claim that AI can replace SDRs is obviously not true, but properly prompted AI combines outreach volume with personalization when ICP, intent signals and messaging are matched.",
+        "quote": "It's probably you've seen 11x and some companies like that that sold the promise of, you know, AI is your SDR. ... That is obviously not true, right?",
+        "start": 1474,
+        "end": 1506,
+        "speaker": "Kai Brandt",
+        "type": "insight"
+      },
+      {
+        "title": "Brandt says companies shouldn't rebuild all SaaS (the lettuce analogy), but should build custom tools like dashboards or invoice follow-ups where standard software doesn't fit.",
+        "quote": "Yeah, I mean, we, we didn't build lots of tools, to be honest. ... we're not growing our own lettuces, even if it would be cheaper than going to a supermarket, right?",
+        "start": 1671,
+        "end": 1785,
+        "speaker": "Kai Brandt",
+        "type": "insight"
+      },
+      {
+        "title": "What takes a company from 0 to $3M ARR won't take it to $100M: leadership, processes, forecasting and a bigger product narrative are needed, with 30+ product and engineering hires planned.",
+        "quote": "I think we cracked the 0 to 1 in some ways. But, you know, what takes you from 0 to 1 million, 2 million, 3 million of ARR is not what will take you to 100.",
+        "start": 1916,
+        "end": 2080,
+        "speaker": "Kai Brandt",
+        "type": "framework"
+      },
+      {
+        "title": "Initially Brandt just wanted a hacky, scrappy product to win early clients; the long-term end-to-end vision only came after rapid growth and product-market fit.",
+        "quote": "At that time, it's mostly how can I find something hacky and scrappy enough so that not a lot of people have it in the market and people will like to buy it ...",
+        "start": 2115,
+        "end": 2192,
+        "speaker": "Kai Brandt",
+        "type": "story"
+      },
+      {
+        "title": "Brandt argues models, third-party data and even product features will be commoditized, so first-party sales data is the durable moat.",
+        "quote": "When I think about in the era of AI, 5 years from now, the company that will win the market is the one that models are going to come— well, they are already a commodity.",
+        "start": 2252,
+        "end": 2298,
+        "speaker": "Kai Brandt",
+        "type": "framework"
+      },
+      {
+        "title": "To build the first-party data moat Enginy needs to be the everyday sales platform (CRM, dialer) and capture multilingual European sales data that US peers lack.",
+        "quote": "One, we need to have a sales CRM. We need to have a dialer. ... We need to be the everyday platform for anyone in sales, SDRs, AEs, whoever, right?",
+        "start": 2340,
+        "end": 2395,
+        "speaker": "Kai Brandt",
+        "type": "framework"
+      },
+      {
+        "title": "Brandt shares the habit changes (quitting smoking and drinking, sport, meditation, 8-10 hours of sleep) that sustain his decision quality, noting most founders optimize for everything but their sleep.",
+        "quote": "I mean, I, I, I, I used to smoke. I quit smoking. Yeah. I quit drinking. ... whenever I don't do sports because I'm traveling, I truly think I take worse decisions than when I do them, right?",
+        "start": 2548,
+        "end": 2611,
+        "speaker": "Kai Brandt",
+        "type": "story"
+      }
+    ]
   },
   "XQa5KahhD9A": {
     "brief": {
@@ -285,7 +1555,145 @@
         "at": 2069,
         "quote": "every company now has a new product line that they're not aware of, which is pricing."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Aleks explains Alguna's origin: after seeing sales flexibility and billing control work at Dojo, he hit the pain of integrating 5-6 tools to launch new pricing at a payment-orchestration company.",
+        "quote": "I wish it was just one night. It was a few months of, and years of like painfully experiencing the same problem all over again in any pretty much B2B company that I've been part of.",
+        "start": 42,
+        "end": 112,
+        "speaker": "Aleks Đekić",
+        "type": "story"
+      },
+      {
+        "title": "A billing prototype is easy in isolation, but the real moat is a foundation ensuring \"whatever sales quotes, billing can bill\" across discounts, credits, usage and hybrid terms, which enables rapid module-building later.",
+        "quote": "If it's done in isolation with a specific use case that you want to achieve, it is possible to do in that one Sunday morning. But the problem comes to scale and flexibility over time.",
+        "start": 143,
+        "end": 234,
+        "speaker": "Aleks Đekić",
+        "type": "insight"
+      },
+      {
+        "title": "Aleks cites research that top AI B2B SaaS companies change pricing about 3.6 times a year (~90 days), caveats that the average is skewed by firms like Anthropic, and warns that margin erosion from 80% to 50% will force change.",
+        "quote": "Yeah, it's from research from Growth Unhinged from Kyle Poyer. Okay. Yeah, that's the average that they have come up with. Our thesis was changing every 90 days from like our own kind of research in that way.",
+        "start": 384,
+        "end": 455,
+        "speaker": "Aleks Đekić",
+        "type": "insight"
+      },
+      {
+        "title": "Pricing is nominally owned by one person but needs input from finance, engineering, product, sales and rev ops, so \"no one owns it. Everybody wants to have an input,\" and customers suffer through inconsistent pricing.",
+        "quote": "Historically, 6 months of hiring some pricing consulting team coming in, seeing your usage, seeing the benchmarks, doing all the research and seeing what people are willing to pay and how they would pay that, which in B2C works really well at scale.",
+        "start": 513,
+        "end": 603,
+        "speaker": "Aleks Đekić",
+        "type": "insight"
+      },
+      {
+        "title": "Pricing consultants still help, but implementation is the bottleneck: a public company made 8 pricing changes in 15 years, and companies shouldn't wait 6 months to bill a new pricing SKU.",
+        "quote": "Yeah. And I think they're still They still need to be involved in the process because they can save you a lot of time and trouble by having that kind of experience.",
+        "start": 609,
+        "end": 667,
+        "speaker": "Aleks Đekić",
+        "type": "insight"
+      },
+      {
+        "title": "Pricing is as much art as science; since a small share of users drive most usage and switching straight to usage-based cuts reportable revenue, companies should adopt hybrid models with upfront usage plus overages.",
+        "quote": "Pricing is as much science as art, or as much art as science. And it's a two-way street between somebody who is buying and person who is selling.",
+        "start": 701,
+        "end": 799,
+        "speaker": "Aleks Đekić",
+        "type": "framework"
+      },
+      {
+        "title": "Aleks lays out levers for making usage pricing predictable: shared allowances, threshold alerts with customer success offering prepaid bulk discounts, surge protection, tiers, min/max spends, credits, ramps and phases.",
+        "quote": "One of these was setting up that kind of like a layer of allowance to use either per actual seats, a pair of seats, or Like, actually just as like a company shared pool of usage.",
+        "start": 819,
+        "end": 943,
+        "speaker": "Aleks Đekić",
+        "type": "framework"
+      },
+      {
+        "title": "Aleks argues the claim that everything will move to outcome-based pricing is wrong: it works for customer support like Fin and Sierra where success is objective, but boards' ARR expectations and unclear outcomes mean no overnight flip.",
+        "quote": "Wrong. It's always a little bit more on the kind of like case-by-case basis.",
+        "start": 952,
+        "end": 1076,
+        "speaker": "Aleks Đekić",
+        "type": "insight"
+      },
+      {
+        "title": "Aleks calls the outcome-pricing hype an echo chamber; even if inevitable, taped-together billing tools make pricing changes hard, requiring either a costly rip-and-replace or gradual point-solution upgrades.",
+        "quote": "It's a little bit of an echo chamber, I would say. Especially if my algorithm is trained to look for pricing, pricing, pricing, and different billing and monetization flows.",
+        "start": 1112,
+        "end": 1173,
+        "speaker": "Aleks Đekić",
+        "type": "insight"
+      },
+      {
+        "title": "Aleks describes CFOs and CROs reconciling spreadsheets on Friday and Saturday nights, and defines the sales-finance chasm between the contract sales signed and what finance invoices, which Alguna bridges with a single source of truth.",
+        "quote": "We made from day one, we tried to really approach this from a first principle.",
+        "start": 1207,
+        "end": 1302,
+        "speaker": "Aleks Đekić",
+        "type": "story"
+      },
+      {
+        "title": "Alguna won its first 10 customers organically through trust and design partnerships with forward-deployed-style engineers, deliberately spreading wide rather than following Lean Startup, and built reputation by showing up when things go wrong.",
+        "quote": "And first 10 customers was really actually organic. We didn't leverage, not that I ever had a big network of, like, I'm a first-time founder as well as my co-founder.",
+        "start": 1302,
+        "end": 1451,
+        "speaker": "Aleks Đekić",
+        "type": "story"
+      },
+      {
+        "title": "Alguna said it would never build payments, invoicing or dunning, but its first customer needed them, expanding the product to about 30% more scope and becoming a key advantage by letting finance teams close the month in minutes.",
+        "quote": "We always said the background, both my co-founder and I are in payments. And we said we will never touch payments and we will never touch invoicing and dunning and retries and all that.",
+        "start": 1478,
+        "end": 1573,
+        "speaker": "Aleks Đekić",
+        "type": "story"
+      },
+      {
+        "title": "To earn trust from buyers replacing critical billing infrastructure, Alguna involves technical teams early, uses the customer's data by the second call, and asks prospects to push the platform's limits to find the missing 10% before implementation.",
+        "quote": "We try to involve technical teams from early on. So our product engineers are called product engineers because they build the product, but they also support our customers on their journey.",
+        "start": 1692,
+        "end": 1778,
+        "speaker": "Aleks Đekić",
+        "type": "framework"
+      },
+      {
+        "title": "Aleks says prioritization is his hardest challenge; he uses the pipeline to decide where to invest while resisting shiny-object features and customers.",
+        "quote": "Prioritization is number one. Being able to know where resources need to go, where you need to invest more and where you need to invest less.",
+        "start": 1792,
+        "end": 1866,
+        "speaker": "Aleks Đekić",
+        "type": "q_and_a"
+      },
+      {
+        "title": "Aleks predicts per-seat pricing survives in some form because of predictability needs, as pure usage models require investor patience and a long-term view that most seed-to-Series B founders can't afford given ARR benchmarks.",
+        "quote": "I think some shape or form will stay forever because the predictability would be needed. I think, and this is going to sound controversial, so let's see how this is going to go.",
+        "start": 1884,
+        "end": 1976,
+        "speaker": "Aleks Đekić",
+        "type": "q_and_a"
+      },
+      {
+        "title": "The companies most exposed by AI are those with multiple stitched-together tools across CPQ, invoicing, billing, payments and collections, or spreadsheets; those with usage components and engineering involved in pricing are ahead.",
+        "quote": "The most exposed one, the ones that have multiple tools that are stitched together and most of the time don't work well when they're stitched together, from like CPQ, document design, invoicing, billing, payments, collections.",
+        "start": 1986,
+        "end": 2055,
+        "speaker": "Aleks Đekić",
+        "type": "q_and_a"
+      },
+      {
+        "title": "Aleks argues every company now has a new product line, pricing, which needs a dedicated owner, engineering team and stakeholders, with continuous margin-aware iteration instead of an ad hoc 12-month project.",
+        "quote": "I would say It would be that every company now has a new product line that they're not aware of, which is pricing.",
+        "start": 2066,
+        "end": 2147,
+        "speaker": "Aleks Đekić",
+        "type": "insight"
+      }
+    ]
   },
   "kViokYmtTbo": {
     "brief": {
@@ -309,7 +1717,121 @@
         "at": 1518,
         "quote": "you want to sort of maybe start out quite simple and make sure that it does that"
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Sanders describes Light as an intelligent finance platform for globally scaling companies, positioned between Xero/QuickBooks and legacy ERPs, consolidating payments, approvals, and financial statements.",
+        "quote": "Yes. So Light is the finance platform. We're building this intelligent finance platform for companies that want to scale globally.",
+        "start": 41,
+        "end": 83,
+        "speaker": "Jonathan Sanders",
+        "type": "insight"
+      },
+      {
+        "title": "After migrating to Oracle ERP at both Pleo and Juny, Sanders saw that legacy systems take a year to implement, deliver little value and need point solutions, inspiring Light's unified accounting and payments approach.",
+        "quote": "I saw the journey twice where we migrated to an Oracle ERP, first at Pleo and then at Juny. And both of those companies were of course created in smaller countries.",
+        "start": 125,
+        "end": 222,
+        "speaker": "Jonathan Sanders",
+        "type": "story"
+      },
+      {
+        "title": "Legacy ERPs span CRM to HR to accounting with thousands of tables, confusing agents (Copilot in ERP reportedly doesn't work), while Light is purpose-built around finance and AI from day one.",
+        "quote": "So. We, when we started Light, we had this view that we want this platform that can handle both the accounting side and the payment side. And Light is the only sort of company that does that.",
+        "start": 319,
+        "end": 424,
+        "speaker": "Jonathan Sanders",
+        "type": "insight"
+      },
+      {
+        "title": "Sanders argues ERPs are less sticky than assumed because Light uses AI to clean, validate, map and migrate data, and that AI lowers switching costs even as bespoke agents can raise them.",
+        "quote": "Yeah, exactly. You're on zero until it breaks and it sort of breaks at the moment you start to be like multinational and that's when you start to have all of these issues.",
+        "start": 501,
+        "end": 591,
+        "speaker": "Jonathan Sanders",
+        "type": "insight"
+      },
+      {
+        "title": "Beyond speed, AI can add control and accuracy: agents can perform audit-like checks previously uneconomical, with agents checking other agents' work and applying multiple accounting standards with sourcing.",
+        "quote": "Well, I think for finance teams, you want speed, you want control, and you want accuracy.",
+        "start": 615,
+        "end": 808,
+        "speaker": "Jonathan Sanders",
+        "type": "insight"
+      },
+      {
+        "title": "Light's bill-processing evolved from OCR to OCR plus offshore human verification, which still had errors, to a two-agent setup where one processes and the other checks, flagging disagreements, and it proved more accurate than humans.",
+        "quote": "Yeah, we aim for better than human. So I'll give you one example. We, the very first sort of use case of agent was that we had this module in the platform that allowed you to That it allows you to forward bills into the platform.",
+        "start": 838,
+        "end": 962,
+        "speaker": "Jonathan Sanders",
+        "type": "story"
+      },
+      {
+        "title": "Sanders argues automation doesn't eliminate finance jobs but frees capacity for controls like sanctions and VAT checks, illustrated by a gambling company using agents to monitor regulator payments and filing dates.",
+        "quote": "And I think when it comes to data entry and classifications, such as making sure that it comes in different labels, once you have enough context that you've given into a system, the system will very shortly after a couple of weeks outperform what you would normally have.",
+        "start": 965,
+        "end": 1126,
+        "speaker": "Jonathan Sanders",
+        "type": "story"
+      },
+      {
+        "title": "Adopting Light requires learning to manage agents; controllers and AP/AR staff translate each company's bespoke context and approval culture into agent setups, while Light's memory builds knowledge about the business.",
+        "quote": "You need to manage agents, but that is spot on. You need to manage agents. So that is part of the transition is to make sure that you're able to manage agents.",
+        "start": 1158,
+        "end": 1313,
+        "speaker": "Jonathan Sanders",
+        "type": "insight"
+      },
+      {
+        "title": "Asked about the most wrong beliefs on AI in finance, Sanders names fear of job loss and fear of losing control, arguing proper environments allow more controls and audit assertions than before.",
+        "quote": "I think the most wrong thing, number one, It is fear that it's going to lead to job loss. That's the— it's not quite— you don't hear it as much, but it's always sort of unspoken.",
+        "start": 1363,
+        "end": 1445,
+        "speaker": "Jonathan Sanders",
+        "type": "q_and_a"
+      },
+      {
+        "title": "Sanders didn't anticipate that managing agents is a skill; his advice is to start with simple tasks, confirm the agent follows instructions, then layer in complexity rather than dumping in decade-old operating documents.",
+        "quote": "They needed more, more, they, me specifically, I did not anticipate that you need, it's a certain skill set and it's a certain A little, a slightly different way of working when you're managing agents than when you are basically not managing any other employees.",
+        "start": 1464,
+        "end": 1569,
+        "speaker": "Jonathan Sanders",
+        "type": "insight"
+      },
+      {
+        "title": "Light runs hackathons with partners like Lovable, JP Morgan, Deloitte and McKinsey where finance professionals build solutions to their own workflow problems, some using them the next day, discovering AI is easier than expected.",
+        "quote": "And I think the best one is probably in the go-to-market side where we are, you know, we were thinking, how can we give people a little bit of like a taste for what AI is?",
+        "start": 1736,
+        "end": 1827,
+        "speaker": "Jonathan Sanders",
+        "type": "story"
+      },
+      {
+        "title": "Sanders argues legacy software left finance teams dependent on IT consultants for every change, and AI lets finance professionals change software themselves, since software should serve the power user, not foster an industry of third parties.",
+        "quote": "But I think there has been a little bit of apprehension about it. And I think now in the last year, year and a half, we've come a long way in hopefully educating the market in our segment about what is actually possible.",
+        "start": 1828,
+        "end": 1988,
+        "speaker": "Jonathan Sanders",
+        "type": "insight"
+      },
+      {
+        "title": "Light builds trust in AI on the general ledger via an immutable ledger with a permanent audit trail, scoped and configurable agent guardrails, uploadable board-approved GAAP/IFRS policies, and by judging overall system accuracy against the real human-plus-software alternative.",
+        "quote": "We made a lot of choices from day one in how to build the general ledger. So in Light is one of the few general ledgers globally that is immutable.",
+        "start": 2040,
+        "end": 2217,
+        "speaker": "Jonathan Sanders",
+        "type": "framework"
+      },
+      {
+        "title": "Sanders says the hardest parts of scaling are that AI's potential is far from fully tapped, requiring radical UX innovation, and hiring people who understand enterprise context yet think from first principles on a new canvas.",
+        "quote": "I mean, AI is is difficult. AI is, is truly difficult. and I'm saying that not because we're not sort of an AI native or first or whatever you want to claim to be company.",
+        "start": 2337,
+        "end": 2480,
+        "speaker": "Jonathan Sanders",
+        "type": "insight"
+      }
+    ]
   },
   "AHWVdDHf7Ss": {
     "brief": {
@@ -333,7 +1855,161 @@
         "at": 336,
         "quote": "I would just really encourage people, can this be done with AI? It's much farther along than many might think."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Semir explains that Claude Opus and Codex ended his debates about hiring or buying agency help, so two people can punch above their weight in sales tech.",
+        "quote": "And in the last 6 months, especially with this Claude Opus coming out and Codex, it's been a real game changer in how more effectively and more productively we can run with just 2 people still.",
+        "start": 225,
+        "end": 252,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Semir's core advice for 2026 founders is to make 'Can this be done with AI?' a reflex and to ship at the speed of thinking.",
+        "quote": "Yeah, I mean, it's, I mean, 2026, probably every founder has excitement and anxiety emotions at the same exact moment in time because AI is getting more powerful.",
+        "start": 279,
+        "end": 346,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Semir replaced a clunky HubSpot CMS site with a code-based site built via Cursor, GitHub and Vercel, so he can now prompt the website instead of using a CMS.",
+        "quote": "So what AI really has helped me do since February was like kind of our website. It was kind of this thing we had, like, you know, just like a landing page.",
+        "start": 366,
+        "end": 430,
+        "speaker": "Semir Jahic",
+        "type": "story"
+      },
+      {
+        "title": "Semir avoids generic AI slop by having AI mine his CRM, Gmail and Granola call transcripts to write anonymized, customer-informed content for segments like life sciences.",
+        "quote": "The way that you kind of get a bit around that AI slop objection sometimes, because yes, if you just say, hey, create me 50 blog posts on sales, it'll be a bit AI sloppish.",
+        "start": 527,
+        "end": 578,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Semir describes his blog pipeline: Outrank for automatic posts, plus a Claude content plan built from recent meetings, emails and competitors that he reviews and that is then produced automatically with only light skimming.",
+        "quote": "it's more like that. And I don't need to read it as much. There's a, there's a couple of things that are running. So one thing, another tool that I use is called Outrank.",
+        "start": 675,
+        "end": 733,
+        "speaker": "Semir Jahic",
+        "type": "framework"
+      },
+      {
+        "title": "Instead of complaints about AI-written content, a salesperson thanked Semir for an AI-generated PDF sales-methodology template after losing their old one.",
+        "quote": "I've had I've had people actually reach out for the opposite. They said that this was a very useful post.",
+        "start": 749,
+        "end": 795,
+        "speaker": "Semir Jahic",
+        "type": "story"
+      },
+      {
+        "title": "Since the website rebuild, demo bookings have risen and a handful of self-service sign-ups arrive weekly, many discovering Salesmotion through ChatGPT and Claude.",
+        "quote": "I think our demo books have gone up quite a bit since then. I think we had like inbound through like Google a little bit, mostly through LinkedIn because I post on LinkedIn a lot.",
+        "start": 820,
+        "end": 854,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "As a scrappy bootstrapper, Semir had Claude set up self-hosted Plausible analytics on a $2-a-month Hetzner server in about two hours, saving roughly $100 a year.",
+        "quote": "I mean, Google Analytics is very complicated. Plausible is like an open source, like semi-open source thing, and you can pay for it like $100 a year.",
+        "start": 879,
+        "end": 916,
+        "speaker": "Semir Jahic",
+        "type": "story"
+      },
+      {
+        "title": "A long-delayed knowledge base got built when Semir had Claude generate help-center articles from his emails, calls, resolved tickets and product code instead of paying for Intercom.",
+        "quote": "So then I think as a founder, you're always like, oh, okay, we need more traffic, top of funnel, we need to build the product.",
+        "start": 927,
+        "end": 988,
+        "speaker": "Semir Jahic",
+        "type": "story"
+      },
+      {
+        "title": "The AI-written knowledge base is maybe 90% correct with no complaints yet, and it frees founder time for pipeline by tackling tasks that would otherwise never get done.",
+        "quote": "So I have not written any of these articles and it will have everything in here, including nice tables. It breaks it and has access to the code as well of our actual tools.",
+        "start": 988,
+        "end": 1050,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Semir runs Slack alerts, CRM syncs, meeting briefs and a weekly traffic analysis from one operations repo on Vercel, keeping his time for customers and strategy because everything else gets automated.",
+        "quote": "So essentially what we've done is we've done a lot of stuff in our Salesmotion operations repo, if you want, where we talk about Slack notifications that go out for all sorts of things like, hey, there's website visitors, abandoned carts.",
+        "start": 1323,
+        "end": 1391,
+        "speaker": "Semir Jahic",
+        "type": "framework"
+      },
+      {
+        "title": "Semir asks 'can I automate this?' the second time a task recurs, but weighs buy versus build and skips rebuilding tools like Granola, while building notifications, CRM updates and late-payment locks himself.",
+        "quote": "Yeah, I mean, the question definitely comes up the second time around if I then get to automate it because sometimes I'm like, let's just do it.",
+        "start": 1399,
+        "end": 1449,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Semir prototypes product ideas himself in a GitHub branch of the real app so his CTO receives a visual, clickable version and can focus on production reliability rather than interpreting verbal descriptions.",
+        "quote": "And the beautiful thing is we can now really iterate fast on the product as well because we talk a lot about the business side and the marketing and the sales side of everything we're doing.",
+        "start": 1450,
+        "end": 1533,
+        "speaker": "Semir Jahic",
+        "type": "framework"
+      },
+      {
+        "title": "Semir says an idea can reach production almost immediately in low-risk domains like sales tech, notes that regulated fields like fintech need guardrails, and urges founders to start with adjacent tasks such as marketing, help centers and notifications.",
+        "quote": "Like what I said, you can really ship at the speed of thinking almost.",
+        "start": 1547,
+        "end": 1583,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Asked about agent-led sales, Semir warns against the LinkedIn echo chamber and argues that AI-driven research and tailored emails, meetings and decks are now baseline buyer expectations.",
+        "quote": "Yeah, I think it's hard to say still. I mean, so much is changing all the time, and I think it's always important to kind of remember to not fall into the kind of the, what's it called, like the echo chamber of LinkedIn and your founder friends who are all at the bleeding edge.",
+        "start": 1668,
+        "end": 1729,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "With email and LinkedIn saturated by AI spam and polished AI-startup sites easy to fake, Semir says personal connection, case studies and in-person meetings become more valuable in bigger deals.",
+        "quote": "But I do think as well, I think on one hand, it's so much easier. You get a lot of these AI spam cannons these days. Email is saturated, LinkedIn is saturated.",
+        "start": 1730,
+        "end": 1792,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Semir expects a breaking point but says AI saved $20–40K of agency spend for a few hundred dollars of subscriptions, so he'll automate everything non-core first before hiring in sales, customer success or engineering.",
+        "quote": "I mean, I think like— I mean, a little bit like you as well, like you want to try to see how far you can go.",
+        "start": 1821,
+        "end": 1891,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Semir admits he doesn't know the moat, but points to hard data work, customer happiness and bootstrapped agility, noting that VC-backed competitors were acquired or shut down while Salesmotion kept going.",
+        "quote": "Yeah, I think it's that question that every founder is, that's the anxiety part, I think, of that excitement and anxiety between about 30 minutes now about the excitement piece.",
+        "start": 1908,
+        "end": 1982,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      },
+      {
+        "title": "Semir warns that cheap all-inclusive AI subscriptions may give way to credit-based pricing and that thinking consciously about model choice, prompts and efficiency from the start will prevent a cost wake-up call.",
+        "quote": "And with the efficiency in mind, one other thing I'm seeing now at least is with these IPOs coming closer of the big companies is it might not stay so cheap forever.",
+        "start": 1983,
+        "end": 2043,
+        "speaker": "Semir Jahic",
+        "type": "insight"
+      }
+    ]
   },
   "frYP18uDnCY": {
     "brief": {
@@ -357,7 +2033,185 @@
         "at": 2281,
         "quote": "everyone is tasked to kind of explore AI tools for their own workflows and see how far they can push the automations"
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Adam explains he and Devang left DeepMind in 2022 to build with users and iterate quickly as AI moved from understanding sentences to whole conversations.",
+        "quote": "Yeah, no, good question. And we get this one often, as you can imagine. Well, so Devang and I, we met at DeepMind.",
+        "start": 67,
+        "end": 117,
+        "speaker": "Adam Liska",
+        "type": "story"
+      },
+      {
+        "title": "Sales and customer conversations are unique, unstructured organizational data that should drive company strategy, unlike commoditized public data.",
+        "quote": "Yeah, so there's a gap, and there's also a long-term kind of vision behind the company.",
+        "start": 129,
+        "end": 205,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "Adam explains the Glyphic-to-Airspeed rebrand: the old name was hard to pronounce, and the product had shifted from intelligence toward execution and speed.",
+        "quote": "Yeah, 2 things really that led us to the rebrand. I think one thing is people didn't know how to pronounce it. And I think one, you're in a company— Incorrect, actually.",
+        "start": 236,
+        "end": 309,
+        "speaker": "Adam Liska",
+        "type": "story"
+      },
+      {
+        "title": "Two decades of GTM tools collected data and built dashboards, but none closed the gap between knowing what to do and doing it, which is what moves revenue and pipeline.",
+        "quote": "Yeah, so kind of when you look at the go-to-market tech stack over the last 20, 25 years, it's been mostly systems that collect data, aggregate data.",
+        "start": 520,
+        "end": 562,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "AI-native means agents can do anything a human can in the system and AI makes decisions rather than running hardcoded sequences.",
+        "quote": "Yeah, so I mean, AI washing, agent washing, there's a lot of that kind of happening right now, especially kind of as the legacy tools kind of try to show that they're doing something in the AI space.",
+        "start": 593,
+        "end": 660,
+        "speaker": "Adam Liska",
+        "type": "framework"
+      },
+      {
+        "title": "Airspeed is mostly seat-based today but is looking at consumption or hybrid pricing, and says rising token costs from more flexible agents make consumption pricing the likely direction.",
+        "quote": "We're still mostly seat-based. We're innovating on kind of several different directions and we didn't want to innovate both on how do we deliver the value and the pricing. But we're looking at consumption pricing as well.",
+        "start": 724,
+        "end": 744,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "The claim that AI replaces salespeople misunderstands the role: AI removes CRM updates, research and drafting while humans keep engaging prospects and understanding pain points in upper mid-market and enterprise sales.",
+        "quote": "I would say Most really that AI is kind of replacing salespeople. We've heard something similar in, for example, software engineering.",
+        "start": 755,
+        "end": 832,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "Adam recommends re-engaging quiet prospects weekly because the underlying problem that prompted the conversation likely persists even if priorities shifted.",
+        "quote": "I'm just curious, I guess, from a personal level. So let's say a prospective customer has gone quiet. How often would you recommend that you reengage, that you continue to try this person if they're not responding?",
+        "start": 917,
+        "end": 954,
+        "speaker": "Adam Liska",
+        "type": "q_and_a"
+      },
+      {
+        "title": "Moving from research to product, Adam learned that reliability across varied real-world use cases matters more than peak performance, so new frontier models must be evaluated before replacing existing ones.",
+        "quote": "Yeah, I mean, there's a lot of things going from a more research environment to a product environment. I think one of the big ones is around performance and kind of how do people evaluate performance?",
+        "start": 998,
+        "end": 1079,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "As a first-time CEO, Adam most enjoys building and talking to users, while the hardest part is letting go of work he's mastered to push the company's frontier.",
+        "quote": "Yeah, so I mean, I'm an engineer researcher by background, so I really like building products, talking to users, seeing the value that we bring. I think that's the most satisfying part of the job.",
+        "start": 1088,
+        "end": 1130,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "Early users unexpectedly shared Airspeed outputs company-wide, and customers pushed the product into sales coaching and one-to-one support.",
+        "quote": "What surprised us is when we rolled out the product to our customers and to our users the first time, they started sharing the outputs and screenshots internally.",
+        "start": 1154,
+        "end": 1207,
+        "speaker": "Adam Liska",
+        "type": "story"
+      },
+      {
+        "title": "Selling a sales tool to sales teams invites scrutiny: early 2023 LLMs confused buyer and seller, so Airspeed aims to model consultative selling and takes buyers on an AI journey matched to their comfort level.",
+        "quote": "Yeah, definitely. So, yeah, I mean, selling a sales tool to sales teams, it comes with a lot of kind of funny situations.",
+        "start": 1244,
+        "end": 1347,
+        "speaker": "Adam Liska",
+        "type": "story"
+      },
+      {
+        "title": "After the Series A, Adam's hardest challenges were doubling the team to create clear owners, differentiating positioning in a crowded GTM market, and countering build-versus-buy thinking with maintenance costs.",
+        "quote": "Yeah. So, well, I think one thing that was super difficult was around scaling the team. So it was a big focus right after we fundraised. We announced, yeah, we closed it early in the year.",
+        "start": 1368,
+        "end": 1477,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "Alex describes building replacements for tools to about 40% completion before the maintenance burden hits, and Adam predicts a balance of internal builds with dedicated software for core GTM tasks.",
+        "quote": "That's the sad thing that gets me because I probably, like many, I'm super excited about the capabilities of what I can finally build now, right? I couldn't last year or a few years ago.",
+        "start": 1479,
+        "end": 1544,
+        "speaker": "Alex Theuma",
+        "type": "q_and_a"
+      },
+      {
+        "title": "Adam separates internal token use, which is not yet a problem and which he pushes every function to increase, from product token spend, which is rising with flexible agents and pushing Airspeed toward consumption pricing.",
+        "quote": "So I think there's 2 different use cases. One is tokens used to do work internally.",
+        "start": 1713,
+        "end": 1796,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "Adam explains GTM skepticism: fully-replace-salespeople claims are nonsense, and GTM is harder for AI than coding because context spans thousands of daily conversations rather than one codebase.",
+        "quote": "No. So, I mean, there's definitely areas within GTM that are amenable to very quick kind of AI wins.",
+        "start": 1873,
+        "end": 1989,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "Adam qualifies that AI will automate simple transactional sales end to end, but complex upper mid-market and enterprise deals with many stakeholders and unclear buyer problems still need humans.",
+        "quote": "So yeah, let me maybe qualify that. I think on the lower end, kind of simple transactional sales, definitely AI will kind of automate that end to end.",
+        "start": 2004,
+        "end": 2032,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "Adam says AI cold calls will annoy people and saturate, but AI voice or video bots that engage inbound website buyers instead of making them wait for an AE or SDR make sense.",
+        "quote": "I mean, I did receive calls from AI. It's Yeah, I mean, I would engage just to kind of play with it, but at the same time, I don't think this is the best use case because I think you're just going to annoy people.",
+        "start": 2117,
+        "end": 2161,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "The number of GTM tools won't shrink to one or two, but the user experience will collapse into one orchestration layer that owns some tasks and delegates others to integrated tools.",
+        "quote": "I don't think it's going to be one or two, but I think the experience will collapse.",
+        "start": 2201,
+        "end": 2228,
+        "speaker": "Adam Liska",
+        "type": "framework"
+      },
+      {
+        "title": "Adam advises teams to run regular one-to-two-day AI hackathons like customer Firmat Commerce, with leads creating space, and pressure where needed, for everyone to automate their own workflows.",
+        "quote": "Well, Yeah, I mean, if they're running it in the traditional way, there's so much that they can do.",
+        "start": 2254,
+        "end": 2321,
+        "speaker": "Adam Liska",
+        "type": "exercise"
+      },
+      {
+        "title": "Adam says AI raises expected output per employee rather than reducing work: Airspeed still needs owners per function, and like Excel in the 1970s, faster tools mean more gets done, not a shorter workday.",
+        "quote": "Yeah, well, yeah, I mean, we will still need people. And so we needed to hire just so that we've got that ownership and owners of the different functions. Funnily enough, we also mostly— well, actually not true.",
+        "start": 2353,
+        "end": 2444,
+        "speaker": "Adam Liska",
+        "type": "insight"
+      },
+      {
+        "title": "Adam describes Airspeed's longer-term vision of programmable companies: a single space encoding company knowledge and workflows that humans and agents can use and keep improving, starting with GTM data.",
+        "quote": "So I think I actually didn't cover that at the beginning, but kind of the way I think about Airspeed, is how can we make the whole company run more efficiently?",
+        "start": 2463,
+        "end": 2527,
+        "speaker": "Adam Liska",
+        "type": "framework"
+      }
+    ]
   },
   "vc4fW3WnvgA": {
     "brief": {
@@ -381,7 +2235,193 @@
         "at": 1267,
         "quote": "If you were building a company in your space today, what would you build? What would it look like?"
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Des explains Intercom's founding insight: subscription businesses needed loyalty and relationships, which require conversation, and the internet had no good way to do customer communication.",
+        "quote": "The original insight was every business was becoming a kind of an internet SaaS business, and there was no good way to do customer communication, full stop. You couldn't send messages to your customers.",
+        "start": 37,
+        "end": 124,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des recalls an early user's excited monologue on a Skype call about talking to customers all day, which told him Intercom had hit product-market fit.",
+        "quote": "I think the thing that probably caught me off guard, I realized after me and Eoin had a conversation with one of our early users, and he just, as soon as the Skype call connected, that's how old it was, it was a Skype call.",
+        "start": 128,
+        "end": 158,
+        "speaker": "Des Traynor",
+        "type": "story"
+      },
+      {
+        "title": "Des explains why Fin was always built as a separate identity from Intercom: to get a fresh look from the industry, sit alongside new AI companies, and work on other platforms like Salesforce and Zendesk.",
+        "quote": "Well, there's 2 separate things there. I think we always built Fin as a separate identity and as a separate named different thing to Intercom because we needed, at the very least, we needed the industry to kind of give us a fresh look.",
+        "start": 391,
+        "end": 459,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des argues that legacy brand recognition can be a counterweight, using Workday building a payroll app as an example, and explains why retiring Intercom puts the onus on Fin to build its own brand equity.",
+        "quote": "I think people massively underestimate the degree to which their legacy can hold them back. And the way in which they underestimate is twofold. They don't realize how much just being known isn't always useful.",
+        "start": 477,
+        "end": 544,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des says the first test of AI-native is whether the AI actually works, covering reliability, hallucination and escalation, then how Fin goes full stack with its Apex post-trained model and about 27 connected systems.",
+        "quote": "The biggest test initially is just, does the AI actually work? And it sounds silly to say that, but there's so many AI products out there that aren't performing at the level that they need to.",
+        "start": 677,
+        "end": 766,
+        "speaker": "Des Traynor",
+        "type": "framework"
+      },
+      {
+        "title": "Des predicts most SaaS products will converge on a simple text-box interaction model, with dashboards for recurring queries and creative tools like Photoshop and Ableton as exceptions.",
+        "quote": "I mean, at some point you realize those bells and whistles are really just bells and whistles. Like I think the future, like, I started a bit of a controversy on Twitter over this topic.",
+        "start": 886,
+        "end": 972,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des argues that cheaper code and AI-native UI remove the two constraints that kept products small, so software will merge and converge across product boundaries.",
+        "quote": "Or at the very least, we're going to head for this era of what I would call the merge and converge.",
+        "start": 1041,
+        "end": 1132,
+        "speaker": "Des Traynor",
+        "type": "framework"
+      },
+      {
+        "title": "Des advises legacy SaaS founders to 'beware of cope' and evaluate their business coldly by asking what they would build today, and what they'd actually keep.",
+        "quote": "I guess beware of cope. It's useful to get a good distance from your company and to drop some of the nostalgia and fondness that you have for the way things were and evaluate things from a cold perspective.",
+        "start": 1248,
+        "end": 1321,
+        "speaker": "Des Traynor",
+        "type": "framework"
+      },
+      {
+        "title": "Des says Fin's teams are getting smaller, with merged EM/PM/engineer roles and tripled productivity from going all in on Claude Code.",
+        "quote": "I think it'll be leaner relative to the footprint of software and like the product categories that we want to play in. Definitely, yes. Already we see this in that the team sizes are smaller.",
+        "start": 1450,
+        "end": 1519,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des defines a Fin resolution as an answer the user acknowledges or doesn't follow up on within 24 hours, and admits per-resolution pricing means Fin earns nothing when it does lots of work but hands over to a human.",
+        "quote": "The definition is basically pretty much exactly what we'd use for a human, which is like Fin gives an answer and the user can either directly or indirectly acknowledge that answer, or they can just go away.",
+        "start": 1530,
+        "end": 1604,
+        "speaker": "Des Traynor",
+        "type": "q_and_a"
+      },
+      {
+        "title": "Des contrasts Intercom's historic Jobs-to-Be-Done, customer-first product process with the AI era, where customers can't specify what's possible and teams must start with the technology.",
+        "quote": "Well, historically, the way we built software in Intercom was we'd pick a certain job to be done, which would have been evidenced by a product manager through scores of product interviews.",
+        "start": 1672,
+        "end": 1738,
+        "speaker": "Des Traynor",
+        "type": "framework"
+      },
+      {
+        "title": "Des explains that during rapid technological change you must first establish what is doable, performant and reliable, using the example of inferring help docs from source code, and only then find the problems it solves.",
+        "quote": "So you really, like, the technology is changing too fast for our customers to be experts in anything other than the problems that they have.",
+        "start": 1738,
+        "end": 1822,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des says brand is not the moat in AI right now: brand gets Fin into the consideration set, but performance in a bake-off is what wins the contract.",
+        "quote": "I don't think it is right now. I think right now performance is probably still the thing that like most of our larger customers, and we have like customers who like, you know, pay us for like millions of resolutions a year, say, right?",
+        "start": 1863,
+        "end": 1936,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des describes how AI sales shifted from screenshots and feature checklists to evidence-based pilots, where Fin gives customers a script, grading criteria and spreadsheet to score their last 1,000 questions over about four weeks.",
+        "quote": "Yeah, it has. Because of the pilots that we do and the bake-offs. Selling SaaS in the olden days was you show up with a big bag of screenshots and some feature checklists and you're like, ta-da, our product's nicer than their product.",
+        "start": 1938,
+        "end": 2017,
+        "speaker": "Des Traynor",
+        "type": "framework"
+      },
+      {
+        "title": "Des describes the common boomerang where customers try to build their own support agent, stall at about 44% resolution, and learn that the last stretch takes years and dozens of people.",
+        "quote": "There's something around the naivety of the customers. A very common thing we see a lot is people saying, I'm going to go and build my own one. We're like, okay.",
+        "start": 2057,
+        "end": 2148,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Responding to Alex's Claude Code event-tech prototype, Des says a localhost app that looks done may be 3 arrows in appearance but 400 arrows from something shippable and reliable.",
+        "quote": "I think that's valid. Like the security, stability, reliability, like all that sort of stuff, you start to worry about them because it's one thing like to make a play app running on localhost, getting it to something that's going to like, say, withstand the crunch of a popular conference, it's actually just different.",
+        "start": 2204,
+        "end": 2237,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des says replacing SaaS with internally built tools should be a deliberate strategic choice about spending engineering time, not a reaction to a quick Claude Code win.",
+        "quote": "And I think you'll see that happen when people and businesses move into like an extremely crunch profitability mode or whatever.",
+        "start": 2243,
+        "end": 2288,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des predicts that by 2028 most customer queries will be answered instantly and accurately, changing user expectations and reducing software friction.",
+        "quote": "I think 2028 is probably— I think what will happen is the vast majority of customer queries will be answered instantly and accurately, and people will just come to expect that.",
+        "start": 2306,
+        "end": 2349,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des says human support teams will handle the hard, messy, relationship-heavy queries in a deeper, more helpful way once AI strips away the bottom 80-90% of volume.",
+        "quote": "And then what does the human support do? Well, I think that what they'll be doing is frankly the hard, messy relationship building stuff. It'll be the, hey, we need to merge these 2 accounts.",
+        "start": 2350,
+        "end": 2419,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des argues point solutions are no longer a sustainable business position because cheap code lets owners of the wider workflow clone and absorb them.",
+        "quote": "Couple of thoughts. One is like, I don't think being a point solution is a sustainable position anymore. I think you have to solve an entire problem properly end to end.",
+        "start": 2448,
+        "end": 2499,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des says owners of strong systems of record like Salesforce and Workday survive, while second- or third-biggest players will be squeezed and the wedge-to-suite-to-platform strategy will fade.",
+        "quote": "So then that's what doesn't exist for sure. In terms of who definitely survives, anyone who owns a strong system of record, I think, still survives.",
+        "start": 2499,
+        "end": 2572,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des describes building a personal portfolio tool over three weekends to benchmark his angel investments against the S&P, gold and Bitcoin, which showed everyone made bad decisions in 2021.",
+        "quote": "I've definitely built software. I've built, you know, like something I care a lot about is like I invest in a lot of software companies and something I've been trying to work out is, am I actually a good investor or not?",
+        "start": 2607,
+        "end": 2698,
+        "speaker": "Des Traynor",
+        "type": "story"
+      },
+      {
+        "title": "Asked what nobody asks, Des says public discourse over-indexes on AI worries and ignores the potential upside in bringing education and healthcare to billions of people.",
+        "quote": "In the context of press specifically, I think we are getting way too literate in ways to worry about AI and criticize AI.",
+        "start": 2776,
+        "end": 2837,
+        "speaker": "Des Traynor",
+        "type": "q_and_a"
+      }
+    ]
   },
   "sWKRkXP9M0I": {
     "brief": {
@@ -405,7 +2445,97 @@
         "at": 1068,
         "quote": "your number one job is honestly to kind of take a step back and be like, if I started from today, what would I build?"
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Richard explains Fathom began as his own pain point from running sales at a prior startup, and that he saw note-taking as a problem for everyone in meetings, not just sales.",
+        "quote": "Like all my startups, actually, it was a problem I had at my previous startup.",
+        "start": 97,
+        "end": 160,
+        "speaker": "Richard White",
+        "type": "story"
+      },
+      {
+        "title": "Richard describes building Fathom in 2020 for a hypothesized future: transcription costs falling to zero and generative AI arriving, so Fathom chose the data business and built recording infrastructure first, not models.",
+        "quote": "Yeah, I feel like the biggest difference between this startup for me and my earlier ones is like we started Fathom with a couple of strong hypotheses about where the world was going in a couple of years.",
+        "start": 181,
+        "end": 266,
+        "speaker": "Richard White",
+        "type": "story"
+      },
+      {
+        "title": "Richard explains Fathom's two-value-prop model: a free, viral single-player product drives growth, while a separate manager/executive product monetizes, avoiding the trap where productivity tools have no distinct pitch to the buyer.",
+        "quote": "Yeah, that was the other thing that got me excited about this business is that it had a very Actually had 2 value props to 2 different people.",
+        "start": 279,
+        "end": 349,
+        "speaker": "Richard White",
+        "type": "framework"
+      },
+      {
+        "title": "Richard lays out Fathom's three-act data strategy: viral single-player, then team sales, then a valuable organization-wide meeting dataset that users now build custom workflows on.",
+        "quote": "I mean, this is why I think I mentioned, like, we always thought of ourselves as a data company, right? We kind of had this 3-act play.",
+        "start": 467,
+        "end": 530,
+        "speaker": "Richard White",
+        "type": "insight"
+      },
+      {
+        "title": "Fathom is opening its platform rather than hoarding transcripts, aiming to be the most flexible, hackable platform and to learn from power users to build first-class features.",
+        "quote": "And so, One of the big things we're leaning into, and I think it's a little unique in our space, is we're really actually opening up the platform, right?",
+        "start": 530,
+        "end": 569,
+        "speaker": "Richard White",
+        "type": "insight"
+      },
+      {
+        "title": "Richard says he mostly ignores competitors but credits Granola for proving the market was comfortable with client-side capture, which prompted Fathom to revisit its own product principles.",
+        "quote": "So, you know, I think I actually don't pay a lot of attention. I'm very kind of focused on our customers, our team. I think you can learn certain things from competition, right?",
+        "start": 660,
+        "end": 710,
+        "speaker": "Richard White",
+        "type": "insight"
+      },
+      {
+        "title": "Richard argues the note-taker space feels crowded to investors but less so to buyers, and that, as with Zendesk, a few hypothesis-driven early builders will endure after a rush of entrants.",
+        "quote": "I think for the most part though, yeah, it's gotten to be a, quote, pretty crowded space in the last year or two, but not really.",
+        "start": 711,
+        "end": 782,
+        "speaker": "Richard White",
+        "type": "insight"
+      },
+      {
+        "title": "Richard describes Fathom's goal of $100M ARR with under 150 people, a remote, senior, small-engineering-team model that forces high leverage rather than hiring out of problems.",
+        "quote": "I mean, we, so one of our internal goals has always been we want to get to $100 million in revenue ARR with less than 150 people. Okay. And partially that's, we're fully remote.",
+        "start": 824,
+        "end": 898,
+        "speaker": "Richard White",
+        "type": "insight"
+      },
+      {
+        "title": "Richard shares that Fathom's attempt to build an internal AIOps organization and custom AI tools was a disaster due to maintenance costs, so the company now focuses on centralized vendor selection and guardrails.",
+        "quote": "Obviously, there's a lot of stuff around making it easy for people to pick up AI tools, which ones to pick up and not use.",
+        "start": 899,
+        "end": 954,
+        "speaker": "Richard White",
+        "type": "story"
+      },
+      {
+        "title": "Richard argues that while creating software has become cheaper, maintaining it hasn't, and the LLM treadmill of short-lived models makes bespoke internal tools costly, so SaaS remains viable though expectations rise.",
+        "quote": "It's funny because there's a lot of concern about what's going to happen to SaaS with AI, but what's going to— SaaS, one of the big pitches of SaaS, it's not that expensive.",
+        "start": 982,
+        "end": 1043,
+        "speaker": "Richard White",
+        "type": "insight"
+      },
+      {
+        "title": "Richard advises established SaaS founders to ask what they would build starting today, identify their unique data and insights, consider forking the company internally, and avoid bolt-on AI because software is a liability while data and insights are the assets.",
+        "quote": "I think your number one job is honestly to kind of take a step back and be like, if I started from today, what would I build? Yeah.",
+        "start": 1068,
+        "end": 1132,
+        "speaker": "Richard White",
+        "type": "framework"
+      }
+    ]
   },
   "k_nLUB1dtTU": {
     "brief": {
@@ -429,7 +2559,97 @@
         "at": 1055,
         "quote": "So I would ask that question, always tie it back to revenue because that should be the goal and that should be the outcome."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Marty explains why Pylon's early conference approach of paying, showing up and hoping failed, and how they fixed it by picking the right people and setting quotas and incentives like any sales team.",
+        "quote": "Yeah, so it's actually pretty simple. So we did what everyone did at past conferences. And this was before we had an events marketer.",
+        "start": 68,
+        "end": 121,
+        "speaker": "Marty Kausas",
+        "type": "story"
+      },
+      {
+        "title": "Marty shows how to work backwards from demos to qualified opportunities to revenue, and compare that to event and opportunity costs, to set a profitable conference goal.",
+        "quote": "So what we did was we looked at our past conferences. We're like, okay, like. How many people realistically do we think we can book based on attendee count that we expect?",
+        "start": 121,
+        "end": 168,
+        "speaker": "Marty Kausas",
+        "type": "framework"
+      },
+      {
+        "title": "Pylon set a 50-demo goal with a 10-demo personal quota and a team reward, and Marty notes that most other booths had no goal, target or incentive.",
+        "quote": "And so we said, okay, we want to book 50 demos with people here. And we told the team in advance and we also told them, each of you have a quota of 10 people each, 10 demos.",
+        "start": 168,
+        "end": 220,
+        "speaker": "Marty Kausas",
+        "type": "insight"
+      },
+      {
+        "title": "Marty describes Pylon as the AI-native, B2B-focused alternative to Zendesk or Intercom, centralizing customer context that is scattered across calls, emails and Slack.",
+        "quote": "So Pylon is the first AI customer support platform built for B2B companies. So the easiest way to think about this is if you're already using a ticketing system like a Zendesk or an Intercom or a Salesforce Service Cloud, we are the AI-native version of those products, but specifically focused on a B2B use case.",
+        "start": 276,
+        "end": 339,
+        "speaker": "Marty Kausas",
+        "type": "insight"
+      },
+      {
+        "title": "Marty argues that money or a personally experienced problem are poor motivations for a company that takes ten years to build.",
+        "quote": "Yeah, so our motivation for starting a company is purely fun. very different answer than most people. A lot of people are like money or like I had this problem and I wanted to solve it.",
+        "start": 394,
+        "end": 432,
+        "speaker": "Marty Kausas",
+        "type": "insight"
+      },
+      {
+        "title": "Marty outlines Pylon's early go-to-market sequence: crawl the personal network, then send 30-40 customized LinkedIn DMs a day during YC, then lean into organic build-in-public content.",
+        "quote": "And then the next couple were One was a former coworker of one of my co-founders had started a company, and so we sold into them. Another was someone who had tried to hire my third co-founder.",
+        "start": 570,
+        "end": 651,
+        "speaker": "Marty Kausas",
+        "type": "framework"
+      },
+      {
+        "title": "Marty says Pylon's first $8-10 million in revenue largely came from organic LinkedIn storytelling that worked like a real-time TV show, and authentic details like earning minimum wage stuck with people.",
+        "quote": "And we've been doing that for the past 3 years. And actually a lot of our customers, especially early on, probably our first like $8 to $10 million came from organic LinkedIn content where people just like fell in love with the story.",
+        "start": 651,
+        "end": 701,
+        "speaker": "Marty Kausas",
+        "type": "story"
+      },
+      {
+        "title": "Marty gives a reality check: Pylon's roughly 30 engineers use Cursor and Claude Code aggressively, yet measured engineering productivity rose about 40% over five months, not 4-5x.",
+        "quote": "I think it's really cultural, to be honest. I was talking to someone here, a CFO, and they were talking about how their team— they have their engineering team in Europe and they're scared of using AI because they're like, hey, this might replace us or like might reduce our need.",
+        "start": 782,
+        "end": 830,
+        "speaker": "Marty Kausas",
+        "type": "insight"
+      },
+      {
+        "title": "Marty frames AI to the team as an accelerant that expands the pie and market, so Pylon is still hiring engineers and SDRs, with about 30 open roles.",
+        "quote": "And I think it's just, you're limited by the bandwidth of like Hey, when you are building software, there are only so many decisions you can make or like context that you can hold.",
+        "start": 831,
+        "end": 877,
+        "speaker": "Marty Kausas",
+        "type": "insight"
+      },
+      {
+        "title": "Marty says he does not optimize for efficiency but for growth, and pushes back on prospects who claim they can vibe code Pylon's product when a 100-person team using the same frontier models already works on it daily.",
+        "quote": "Here's what I'd say is like, I do not optimize for efficiency at all. I'm optimizing for growth.",
+        "start": 901,
+        "end": 955,
+        "speaker": "Marty Kausas",
+        "type": "insight"
+      },
+      {
+        "title": "Marty's advice on AI strategy: skip the list of AI experiments, ask how you can 10x or make the most money right now, and tie every decision back to revenue.",
+        "quote": "I mean, I just look at where's the opportunity, right? Literally, just ask yourself, like, how can we make the most money right now? And I bet you it's something related to AI.",
+        "start": 1026,
+        "end": 1088,
+        "speaker": "Marty Kausas",
+        "type": "framework"
+      }
+    ]
   },
   "Q8VciMrOqOg": {
     "brief": {
@@ -453,7 +2673,169 @@
         "at": 1921,
         "quote": "take a look at your P&L, take a look at the figures that you report, and just look at the cost items"
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Paul pitches re:cap as the first place a SaaS founder should think of when they need non-dilutive capital, whether they know what they need or not.",
+        "quote": "Imagine you're a SaaS founder and you need some capital and you don't want to give up equity for it. Then we want to be the first place that pops up in your mind.",
+        "start": 15,
+        "end": 31,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul explains he is not a banker and fell into fintech by accident, moving from a university investing club to a micro-investing firm that became Liqid and eventually re:cap.",
+        "quote": "So I'm not a banker. I've never been a banker. It really— the honest answer, it happened by accident. It was at university. The investing club we had there, that was the first exposure I had to finance.",
+        "start": 45,
+        "end": 105,
+        "speaker": "Paul Becker",
+        "type": "story"
+      },
+      {
+        "title": "Paul challenges the 'woke up and wanted to change the world' founder narrative, saying founders are made by being crazy enough to keep going despite early naysayers.",
+        "quote": "I mean, I couldn't agree more. You oftentimes hear these PR stories where founders say, you know, I woke up in the morning and then I had that thought how I will change the world.",
+        "start": 141,
+        "end": 190,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul explains that after experiencing both VC-backed and bootstrapped companies, re:cap chose venture backing because speed and capitalization matter, noting under-capitalized competitors died.",
+        "quote": "Yeah, I mean, first of all, I must confess, the first company that we started, we didn't think about that at all. For the first company, we were just excited.",
+        "start": 225,
+        "end": 305,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul says re:cap's debt product wasn't why it took VC money; different funding instruments suit different purposes, and re:cap doesn't tell founders never to raise equity.",
+        "quote": "And on your comment, that we are somewhat an alternative to venture capital, or our product offers an alternative to that.",
+        "start": 305,
+        "end": 367,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul describes the core challenge of a lending startup: VCs push for maximum growth while debt investors want quality, granularity and liquidity, and companies have failed by growing too fast or too cautiously.",
+        "quote": "I think the real interesting challenge in building up such a company is that you need to balance interests of 2 very different stakeholders.",
+        "start": 428,
+        "end": 515,
+        "speaker": "Paul Becker",
+        "type": "framework"
+      },
+      {
+        "title": "Paul says re:cap recognized the conflict on day one and manages it through tough negotiations with refinancing parties and by resetting VC expectations from quadrupling to tripling.",
+        "quote": "And what did we do differently? I would say That conflict was clear on day one, and we just tried our best to balance it.",
+        "start": 516,
+        "end": 545,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul says the capital-efficiency era and tougher equity markets drove founders to look for alternatives and increased demand for re:cap.",
+        "quote": "I mean, to the first part of the question, you already answered it yourself. Like, capital efficiency was suddenly a very hot topic. Everybody was talking about burn multiples.",
+        "start": 574,
+        "end": 624,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul contrasts SaaS firms using AI to work more efficiently with products that embed AI deeply and see gross margins fall from 85% to 50-60%, noting both can still raise equity.",
+        "quote": "Fast forward to today, I would say it really depends on where you sit across the spectrum as an AI company.",
+        "start": 625,
+        "end": 680,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul says SaaSpocalypse hasn't changed re:cap's thinking because it has always favored B2B SaaS deeply integrated into customer processes, which gives more time to respond to AI.",
+        "quote": "Has SaaSpocalypse had such a meaningful impact on how we think about what companies should be financed or not?",
+        "start": 821,
+        "end": 880,
+        "speaker": "Paul Becker",
+        "type": "framework"
+      },
+      {
+        "title": "Paul says gross margin is just one input to credit decisions alongside integration depth, that no one knows which AI models will work in 5 years, and that structured debt can mitigate change in a way equity cannot.",
+        "quote": "In the end, the short answer to that is obviously gross margin is not everything that drives a credit decision. It's one of many aspects.",
+        "start": 973,
+        "end": 1044,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul explains re:cap has used machine learning since founding for structuring and enriching data, still prefers it to LLMs for cost and accuracy on huge volumes of bank transactions, but expects LLMs to take over.",
+        "quote": "Yeah. So we work with AI in our product since we started the company, but old school AI, I shall say. So machine learning. In that context, we mostly use AI for structuring and enriching data.",
+        "start": 1063,
+        "end": 1124,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul says the biggest wow moment was using AI in re:cap's own non-engineering workflows over the last 3-6 months, more than seeing the product's capabilities.",
+        "quote": "Lastly, and that is probably— might be a bit counterintuitive, but I actually heard similar stories from other founders as well. The last thing where we actually heavily started to use AI is in our own workflows.",
+        "start": 1180,
+        "end": 1222,
+        "speaker": "Paul Becker",
+        "type": "story"
+      },
+      {
+        "title": "Paul says lending remains a relationship game because founders want a reliable partner, so AI should free people to do work that deserves human attention.",
+        "quote": "Yeah, you already named the most crucial aspect. Still a relationship game. Again, I was actually surprised to learn this previously when we were working on Liquid, like a wealth management company.",
+        "start": 1369,
+        "end": 1449,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul describes Capital AI as an embedded LLM with context on a company's connected financials, plus agentic monitoring that gives founders peace of mind.",
+        "quote": "In the end, it's an embedded LLM into our platform that has access to all the data that you as a company have connected to our platform that we have already structured and enriched.",
+        "start": 1553,
+        "end": 1647,
+        "speaker": "Paul Becker",
+        "type": "framework"
+      },
+      {
+        "title": "Paul predicts more early-stage companies will use debt funding by 2028, tempered by uncertainty over media backlash and institutional appetite.",
+        "quote": "When I get questions like this, historically, what I would've always said, and actually I would still say it today, is My projection is more early-stage companies will use debt funding, and we see that clearly more companies do this today than they used to do it like 3 years ago.",
+        "start": 1667,
+        "end": 1720,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul says re:cap keeps a long-term vision and strategy with trial-and-error execution, even as AI's pace makes him question how much long-term planning is worth.",
+        "quote": "So we internally still operate under the same principle, which basically is there must be a vision, a very long-term vision, and there must be a strategy that we believe can bring us to that vision.",
+        "start": 1759,
+        "end": 1844,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Paul advises a $3M ARR, VC-funded SaaS founder to verify their real gross margin, then review each P&L cost item, using equity for R&D and considering debt for acquisition costs that pay back in 6-9 months.",
+        "quote": "So first of all, I would challenge that person. Does she or he really have 90% gross margin? And do a calculation on that and be honest to yourself.",
+        "start": 1868,
+        "end": 1931,
+        "speaker": "Paul Becker",
+        "type": "framework"
+      },
+      {
+        "title": "Paul says the unasked question in financing is the emotional cost of a bad decision, citing founders who accepted high liquidation preferences or raised too much and feel stuck.",
+        "quote": "The thing about what I think people oftentimes don't ask or never I've actually never been publicly asked about this, but I do think it's relevant in the context of what we are doing at Recap, is what is actually the emotional cost of a bad financing or funding decision?",
+        "start": 1947,
+        "end": 2017,
+        "speaker": "Paul Becker",
+        "type": "insight"
+      },
+      {
+        "title": "Asked in one sentence whether AI is killing SaaS, Paul answers 'Absolutely not.'",
+        "quote": "I'm sure many of them are going to be asking, is AI killing their business?",
+        "start": 2030,
+        "end": 2045,
+        "speaker": "Paul Becker",
+        "type": "q_and_a"
+      }
+    ]
   },
   "Hs8HK-o_NAA": {
     "brief": {
@@ -477,7 +2859,113 @@
         "at": 1990,
         "quote": "But the main thing, understand the technology, go deep, open an OpenCLAW right now, you know, and try and make it work for you."
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Roy explains monday.com began by solving the broad problem of how people work together rather than project management, which kept it wide across 200+ industries.",
+        "quote": "Yeah. So when we started, it was Wix was the first customer. And I think we started with an interesting problem, which was like, how do people work together? Not how do we manage projects?",
+        "start": 120,
+        "end": 200,
+        "speaker": "Roy Mann",
+        "type": "insight"
+      },
+      {
+        "title": "Roy explains monday.com's broad ICP worked because of zero-complexity configurability, and recommends considering three ICPs rather than entrenching in one narrow path.",
+        "quote": "Yeah, so I think like we had an ICP, it was just not— it was addressable in a very non-addressable way, which was like people who really want to manage stuff well.",
+        "start": 235,
+        "end": 338,
+        "speaker": "Roy Mann",
+        "type": "framework"
+      },
+      {
+        "title": "Roy describes how the Depulse name held adoption back, how objections and internal pressure arose, and how reframing the rebrand as a simple rename released fears.",
+        "quote": "Yeah, so it was working in a way that we had success before we changed the name, but it wasn't working and it was easy for us to switch a name because like people like told us every day, I'm not introducing this to my team because of the name, you know?",
+        "start": 413,
+        "end": 509,
+        "speaker": "Roy Mann",
+        "type": "story"
+      },
+      {
+        "title": "Roy recounts how an investor suggested the name Monday, which he embraced because it carries emotions about work that the company aims to change.",
+        "quote": "So we were trying to replace the name for like a year and then one of our investors came and told me, you know, I have a name for the company.",
+        "start": 527,
+        "end": 591,
+        "speaker": "Roy Mann",
+        "type": "story"
+      },
+      {
+        "title": "Roy explains the co-CEO relationship with Eran runs on investing in trust and shared context, and that the key is walking the path together rather than getting what he wants.",
+        "quote": "So I think it's like a relationship. Really, we talk about it like a relationship. We invest in the relationship and I know a lot of couple CEOs don't.",
+        "start": 608,
+        "end": 717,
+        "speaker": "Roy Mann",
+        "type": "insight"
+      },
+      {
+        "title": "Roy characterizes the stock decline as a sector-wide SaaS repricing driven by investor uncertainty over who will adapt, not a monday.com-specific event.",
+        "quote": "Yeah. So it wasn't the first drop we had. Like, the first drop was like a 2 years ago when the whole market dropped and I kind of feel the same way about this situation, which means we didn't drop alone.",
+        "start": 766,
+        "end": 847,
+        "speaker": "Roy Mann",
+        "type": "insight"
+      },
+      {
+        "title": "Roy argues software must shift from managing work to doing the work, with consumption pricing for AI work and seats retained for people and agents, and the software pie growing bigger.",
+        "quote": "So I think like there's a lot of changes that has to happen with SaaS. One of them is not relying solely on the seat model.",
+        "start": 889,
+        "end": 976,
+        "speaker": "Roy Mann",
+        "type": "framework"
+      },
+      {
+        "title": "Roy admits agent signups are not yet significant, calling it a classic innovator's dilemma where a small niche will grow into a massive market.",
+        "quote": "Yeah, so we have agents signing up and purchasing seats on the platform, but it's not significant, okay? Why? Because that's how markets evolve, you know?",
+        "start": 1069,
+        "end": 1111,
+        "speaker": "Roy Mann",
+        "type": "insight"
+      },
+      {
+        "title": "Roy lays out three waves of AI and recounts his moment of clarity when an AI coding agent pushed back on building a third feature, acting like a true partner.",
+        "quote": "so I really see the AI changes like 3 waves. The first wave was ChatGPT when it was introduced.",
+        "start": 1134,
+        "end": 1260,
+        "speaker": "Roy Mann",
+        "type": "story"
+      },
+      {
+        "title": "Roy says the first step in adapting is organizational mindset change, after which monday.com quickly shipped agents, monday vibe, and Sidekick.",
+        "quote": "Yeah, so I think like we need to talk like a step back and talk about the organizational change, the mind shift change. Yeah.",
+        "start": 1321,
+        "end": 1394,
+        "speaker": "Roy Mann",
+        "type": "insight"
+      },
+      {
+        "title": "Roy disagrees with the burn-it-down approach, arguing a growing company should bring its existing customers into the AI era while building new AI-native offerings like Agent Talent, bridging the gap where AI adoption and token ROI remain low.",
+        "quote": "Yeah. So I think like that's the tricky part. If you have a massive user base that rely on you and want to use your product and are using it, you need to bring them also to the new world.",
+        "start": 1474,
+        "end": 1630,
+        "speaker": "Roy Mann",
+        "type": "insight"
+      },
+      {
+        "title": "Roy advises SaaS founders to go deep on the technology themselves, noting that the core customer problem may remain but how it is solved will change, and to open OpenClaw now and make it work for them.",
+        "quote": "So I can share what I did. I did like I didn't write code for a long while and I actually think they threw a party when they threw the last line of code from the system that I wrote, you know, but I'm back to coding a lot because I want to understand the technology deeply and I find that it's very important because then I can drive change and then I can move us to a new place.",
+        "start": 1863,
+        "end": 1998,
+        "speaker": "Roy Mann",
+        "type": "insight"
+      },
+      {
+        "title": "Roy challenges the 'SaaS is dead because seats vanish' narrative by noting that vanishing seats imply vanishing jobs, urging people to think more deeply about contradictory assumptions.",
+        "quote": "Well, they ask so, like, so many different questions. Like, I'll tell you what I think people are not doing enough. Which is thinking more deeply into their assumptions.",
+        "start": 2017,
+        "end": 2076,
+        "speaker": "Roy Mann",
+        "type": "insight"
+      }
+    ]
   },
   "h5A9MW4yFJM": {
     "brief": {
@@ -501,6 +2989,160 @@
         "at": 1779,
         "quote": "start experimenting, start using the tools, start building things, start living at the edge of what's capable"
       }
-    }
+    },
+    "moments": [
+      {
+        "title": "Nicolas explains how Attio grew organically from a simple tool he built as a VC to check whether anyone in the fund had already spoken to a contact, which later became a side project that gained traction and led him into CRM.",
+        "quote": "But where it really started was I worked in VC, and while I was working in VC, I had a thesis that we could be doing more with our email and calendar.",
+        "start": 68,
+        "end": 143,
+        "speaker": "Nicolas Sharp",
+        "type": "story"
+      },
+      {
+        "title": "Nicolas says modern AI tools would have sped up his early bootstrapped building, but expectations have risen so much that the old version wouldn't cut it, because easier building means doing more rather than doing the same with less.",
+        "quote": "Yes, a lot would have changed. I mean, the Well, Attio, the previous company I started before that, Funstack, were bootstrapped at the beginning. And that bootstrapping phase was slow.",
+        "start": 163,
+        "end": 218,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas explains that disbelief that Salesforce didn't carry modern product philosophy, plus theses on malleability and high-resolution data, tipped Attio into taking on the category, and that naivety helped because outsiders aren't scared off by knowing too much.",
+        "quote": "And the driving force for us was a little bit of disbelief that in a world of really good software and really good tools, that the biggest one and the most successful one was Salesforce.",
+        "start": 293,
+        "end": 371,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas argues the AI-native versus legacy distinction isn't very helpful; what matters is whether a product's architecture handles data, context and governance and can adapt quickly, citing Replit and Clay as non-AI-native winners.",
+        "quote": "Yeah. So I think there are— I'm not sure how helpful the AI-native versus not AI-native distinction is, because there are going to be some incredible companies in the AI era that were not born AI-native, and companies that we already can see have amazing traction.",
+        "start": 423,
+        "end": 507,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas says companies shouldn't rebuild mission-critical tools like their CRM with AI, because young companies should pour their brainpower into their own product rather than problems others have already solved.",
+        "quote": "Yeah, people will do that. I don't think it's the right thing to do.",
+        "start": 572,
+        "end": 628,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas argues code generation is only a small part of building software, since data security, scalability and content matter too, and most vibe-coded alternatives would have been nice five years ago but aren't where the puck is going.",
+        "quote": "So that's one aspect of it. The other aspect is that code generation is a small part of building a product.",
+        "start": 628,
+        "end": 699,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas explains where vibe coding does belong: internal tools where no good solution exists, away from mission-critical customer data, and last-mile customization built on top of platforms like Attio's SDK.",
+        "quote": "Now, I still think there is an incredible space for vibe coding in companies, and we build a lot of software for internal consumption.",
+        "start": 700,
+        "end": 751,
+        "speaker": "Nicolas Sharp",
+        "type": "framework"
+      },
+      {
+        "title": "Alex shares how a SaaStock colleague returning from maternity leave, with no knowledge of Lovable, built a long-missing community product feature in three weeks.",
+        "quote": "You know, SaaStock is not a software company. We serve the B2B software market.",
+        "start": 774,
+        "end": 842,
+        "speaker": "Alex Theuma",
+        "type": "story"
+      },
+      {
+        "title": "Nicolas names Claude Code as his favorite vibe-coding tool because of his engineering background, while Attio lets its team choose among v0, Replit and Lovable as the tool leaderboard constantly shifts.",
+        "quote": "Are you using or testing all the vibe coding platforms? Lovable, Replit, Claude Code? Do you have a favorite? I have a favorite. For me, it's Claude Code.",
+        "start": 930,
+        "end": 985,
+        "speaker": "Nicolas Sharp",
+        "type": "q_and_a"
+      },
+      {
+        "title": "Nicolas says AI is largely killing SaaS as we knew it but not software itself: expectations are shifting to autonomous, highly customizable products, many companies won't adapt, and new winners will emerge in a do-or-die paradigm shift.",
+        "quote": "Yeah. So the first thing was, is AI killing SaaS? I think the answer to that is yes, to a large degree it is.",
+        "start": 1035,
+        "end": 1123,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas says SaaS had become formulaic and incremental, and now that nobody knows the answers, building software is more interesting and motivating.",
+        "quote": "Yeah, but it's good because this is kind of— I sort of— the reason that people, a lot of people get into software is because they like building things, they like creating things.",
+        "start": 1134,
+        "end": 1205,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas says AI-driven headcount cuts are overblown and often air cover for fixing bloated organizations, because investors now demand either real profit or hypergrowth and slowing companies find cutting easier than accelerating.",
+        "quote": "No, we're very much not stop hiring. I think that it's overblown, and I think in most cases it's really good air cover for fixing other organizational problems.",
+        "start": 1261,
+        "end": 1341,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas says running growth marketing with one person plus agents is plausible, but Anthropic will still grow its marketing department because expectations of output rise an order of magnitude.",
+        "quote": "No, I don't. I don't think that's PR. I think that, I think that you could absolutely run a You could run growth marketing with one person.",
+        "start": 1445,
+        "end": 1477,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas states Attio's thesis that B2B go-to-market systems will become autonomous, designed and monitored by humans but able to run and scale on their own.",
+        "quote": "But fundamentally, we have, you know, we have, we have a thesis on this, which is that It's going to be extremely important, especially when we think about how we position Attio in the market.",
+        "start": 1528,
+        "end": 1561,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas explains why autonomous operations favor consolidated data-rich platforms with transactionally consistent automations, and why narrowly scoped point solutions are being absorbed.",
+        "quote": "In that world, I think platforms become really important, and it becomes really important that you have a platform that is able to kind of store all the data that you need, that has all the context that you need, and importantly, that is malleable enough to actually mould to what you're trying to do.",
+        "start": 1561,
+        "end": 1642,
+        "speaker": "Nicolas Sharp",
+        "type": "framework"
+      },
+      {
+        "title": "Nicolas advises established SaaS founders to confront the AI shift honestly, accept it, and reframe it as one of the biggest opportunities, using the grit that built their company.",
+        "quote": "Yeah, I mean, I think the thing is to just confront the situation in the most honest way that you can, which is that not thinking about it or ignoring it, et cetera, it doesn't change anything, right?",
+        "start": 1707,
+        "end": 1772,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      },
+      {
+        "title": "Nicolas describes Attio's Particle data layer, a highly scalable, flexible object model that can map any business, plus universal context that adds embeddings for free and makes Attio a context engine for agents.",
+        "quote": "The big thing for us is the depth that we have gone to to build the data layer and the automation layer on top. And marrying these things super closely together is what provides all the value.",
+        "start": 1887,
+        "end": 1971,
+        "speaker": "Nicolas Sharp",
+        "type": "framework"
+      },
+      {
+        "title": "Nicolas explains Attio's automation layer, which lets teams slide between fully deterministic workflows like forecasting and probabilistic ones for messy communication data, running millions of automations.",
+        "quote": "And then the next thing is the automation layer on top. And there's a lot of very cool things we're about to announce.",
+        "start": 1982,
+        "end": 2027,
+        "speaker": "Nicolas Sharp",
+        "type": "framework"
+      },
+      {
+        "title": "Nicolas shares his resilience practice for founder highs and lows: don't react to \"it's all over\" or \"we'll crush it\" moments, give yourself a week on autopilot, and the perspective will change.",
+        "quote": "There is one thing that I did do which was really helpful, which is that you have these massive ups and downs, and there are times when something happens and you think, we're going to absolutely crush it.",
+        "start": 2175,
+        "end": 2248,
+        "speaker": "Nicolas Sharp",
+        "type": "insight"
+      }
+    ]
   }
 }
