@@ -53,6 +53,9 @@ export default function ShiftaiHero({ settings, content }: HeroProps) {
     router.push(`/ask?q=${encodeURIComponent(trimmed)}`);
   };
 
+  // Newest episode that is actually in the library.
+  const latest = EPISODES.find((e) => links[e.youtubeId]) ?? null;
+
   const stats = [
     { n: String(EPISODES.length), label: "Founders and operators" },
     { n: `${hours}h ${String(minutes).padStart(2, "0")}`, label: "Of conversation, transcribed" },
@@ -183,7 +186,45 @@ export default function ShiftaiHero({ settings, content }: HeroProps) {
             </p>
           </div>
 
-          <ol className="mt-12 border-t border-border">
+          {/* Latest episode: the one place their own thumbnail leads */}
+          {latest && (
+            <Link
+              href={`/v/${links[latest.youtubeId].slug}`}
+              className="group mt-12 grid gap-px border border-border bg-border transition-colors hover:border-acid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
+            >
+              <span className="relative block aspect-video overflow-hidden bg-raised">
+                {links[latest.youtubeId].thumbnail && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={links[latest.youtubeId].thumbnail ?? ""}
+                    alt=""
+                    className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
+                  />
+                )}
+                <span className="absolute bottom-4 left-4 flex h-14 w-14 items-center justify-center rounded-[2px] bg-acid text-[#0a0a08] transition-transform duration-200 group-hover:scale-105">
+                  <Play className="h-5 w-5 fill-current" aria-hidden="true" />
+                </span>
+              </span>
+              <span className="flex flex-col justify-center bg-background p-6 md:p-10">
+                <span className="sx-label text-acid">
+                  Latest · Episode {String(latest.number).padStart(2, "0")} · {dateLabel(latest.date)}
+                </span>
+                <span className="sx-display mt-5 block text-[clamp(36px,3.6vw,56px)]">{latest.headline}</span>
+                <span className="mt-5 block text-[16px] leading-[1.65] text-muted-foreground">{latest.hook}</span>
+                <span className="mt-7 flex items-center gap-3">
+                  <Face slug={latest.guest.slug} name={latest.guest.name} size={40} />
+                  <span className="leading-tight">
+                    <span className="block text-[15px] text-foreground">{latest.guest.name}</span>
+                    <span className="sx-label mt-1 block !text-[10px] text-muted-foreground">
+                      {latest.guest.role}, {latest.guest.company}
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </Link>
+          )}
+
+          <ol className="mt-10 border-t border-border">
             {EPISODES.map((ep) => {
               const link = links[ep.youtubeId];
               const row = (
