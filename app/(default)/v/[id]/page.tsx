@@ -140,12 +140,23 @@ export default async function VideoPage({
     // The show's own chapters first; Bold's generated ones when an episode has none.
     const own = episode ? showChapters(episode.youtubeId, video.duration || episode.duration) : [];
     const chapters = own.length > 0 && !episode?.chaptersFromFeed ? own : parseChapters(ext.chapters).length > 0 ? parseChapters(ext.chapters) : own;
+    // The player's timeline segments come from a chapters track; hand it the same chapters the page lists.
+    const stamp = (t: number) => new Date(Math.max(0, t) * 1000).toISOString().slice(11, 23);
+    const playable =
+      chapters.length > 0
+        ? ({
+            ...ext,
+            chaptersUrl: `data:text/vtt;charset=utf-8,${encodeURIComponent(
+              `WEBVTT\n\n${chapters.map((c) => `${stamp(c.start)} --> ${stamp(Math.max(c.end, c.start + 1))}\n${c.title}`).join("\n\n")}\n`
+            )}`,
+          } as ExtendedVideo)
+        : ext;
     const pageUrl = `${baseUrl || "https://shiftai.bold.video"}${canonicalPath}`;
     return (
       <>
         <EpisodeSchema video={video} episode={episode} chapters={chapters} paragraphs={paragraphs} url={pageUrl} />
         <EpisodePage
-          video={ext}
+          video={playable}
           settings={settings}
           episode={episode}
           paragraphs={paragraphs}

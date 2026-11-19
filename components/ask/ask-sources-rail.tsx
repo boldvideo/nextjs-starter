@@ -5,10 +5,8 @@ import { X, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
-import {
-  MuxPlayerComponent,
-  MuxPlayerVideoLike,
-} from "@/components/players/player-mux";
+import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
+import { VideoJsMuxPlayer } from "@/components/players/player-videojs-mux";
 import { getCanonicalVideoPath } from "@/lib/video-path";
 import { sourceUrl, type SourceOpen } from "@/lib/source-engagement";
 
@@ -267,7 +265,7 @@ function VideoSourcePanel({
           key={`${citation.videoId}-${citation.startMs}`}
           className="relative aspect-video rounded-lg overflow-hidden border border-border bg-black mb-4"
         >
-          <MuxPlayerComponent
+          <VideoJsMuxPlayer
             video={video}
             engagement={engagement}
             startTime={startSeconds}

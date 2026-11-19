@@ -1,10 +1,14 @@
 "use client";
 
 import { forwardRef, memo } from "react";
-import { MuxPlayerComponent } from "./player-mux";
+import dynamic from "next/dynamic";
+// Video.js renders media state on the client; skip SSR to avoid hydration drift.
+const VideoJsMuxPlayer = dynamic(
+  () => import("./player-videojs-mux").then((m) => m.VideoJsMuxPlayer),
+  { ssr: false, loading: () => <div className="w-full h-full bg-black" /> }
+);
 import type { MuxPlayerVideoLike } from "./player-mux";
 import { extractYouTubeId } from "./player-youtube";
-import dynamic from "next/dynamic";
 
 // Video.js renders media state on the client; skip SSR to avoid hydration drift.
 const VideoJsYouTubePlayer = dynamic(
@@ -52,7 +56,7 @@ const SmartPlayerBase = forwardRef(function SmartPlayer(
   if (playFromSource) {
     return <VideoJsYouTubePlayer ref={ref} video={video} {...rest} />;
   }
-  return <MuxPlayerComponent ref={ref} video={video} {...rest} />;
+  return <VideoJsMuxPlayer ref={ref} video={video} {...rest} />;
 });
 
 export const SmartPlayer = memo(SmartPlayerBase);

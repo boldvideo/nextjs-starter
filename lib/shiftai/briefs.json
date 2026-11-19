@@ -22,5 +22,485 @@
         "quote": "So it's very important for me that all companies, you have a core strategy, but you need to have a lab."
       }
     }
+  },
+  "Lhd-pOysdU8": {
+    "brief": {
+      "move": {
+        "text": "Arjun's team chose tokens over new hires. They run a code factory where agents build the software in loops and humans guide from outside.",
+        "at": 319,
+        "quote": "The team has implemented what you call as a code factory, which is the software is getting created by the software itself, right?"
+      },
+      "numbers": {
+        "text": "From 19 early conversations, 16 wanted a pilot and Docket took 8, unpaid, with a 50 to 60% discount once charging began.",
+        "at": 639,
+        "quote": "Out of that, 16 people wanted to get into the pilot and 8 of them got into the pilot because that's all we could accommodate."
+      },
+      "broke": {
+        "text": "Buyer attention is Arjun's hardest problem. Well-funded vendors all sound alike, and buyers struggle to place Docket in the landscape.",
+        "at": 875,
+        "quote": "So buyer attention and their knowledge of where to bucket you in the landscape, that is the most difficult thing today."
+      },
+      "advice": {
+        "text": "Be sceptical but experiment. Arjun says the first to make a GTM tactic work gets roughly a two-year edge before peers copy it.",
+        "at": 1488,
+        "quote": "If that thing works for you, then you get a 2-year monopoly or competitive advantage against your peers."
+      }
+    }
+  },
+  "OXntdt6N0Mc": {
+    "brief": {
+      "move": {
+        "text": "Emeric is rebuilding Agorapulse's value around Archie, an AI-first tool for content creation and lead generation, because scheduling, replies and reporting are heading to zero.",
+        "at": 1043,
+        "quote": "So basically the vision is like, We have to completely change the problem we solve."
+      },
+      "numbers": {
+        "text": "Three weeks of model testing cut the gap between a user's voice and Archie's posts from about 40% errors to 12%.",
+        "at": 1316,
+        "quote": "the post created by Archie down from like 40% of errors to down to like 12% of errors. It took 3 weeks."
+      },
+      "broke": {
+        "text": "An X API price increase put Agorapulse at financial risk. Emeric had to lay off 25 people at the end of 2025 and faces three lawsuits.",
+        "at": 2190,
+        "quote": "Financially speaking, like, we eventually had to fire 25 people at the end of 2025 because of that."
+      },
+      "advice": {
+        "text": "Emeric says money rarely buys time. Bootstrap until go-to-market and product-market fit are proven, and raise only to scale a working GTM.",
+        "at": 1953,
+        "quote": "But if you are not sure about your go-to-market, if you are not sure about your PMF, money is utterly useless."
+      }
+    }
+  },
+  "ZC5QrG4Kj5c": {
+    "brief": {
+      "move": {
+        "text": "Eléonore treated Pigment as if starting today. She kept the infrastructure and harness, stopped investing where AI now does the work, and shipped agents on top.",
+        "at": 667,
+        "quote": "let's drop the pen. If we were to start Pigment today, what would we do? And we kept the primitives"
+      },
+      "numbers": {
+        "text": "Pigment crossed $100M ARR after three years of doubling. It has about 650 staff, and 60% of customers are in the US.",
+        "at": 154,
+        "quote": "you guys have just crossed $100 million ARR and you've been doubling revenue growth, I think, for the last sort of 3 years."
+      },
+      "broke": {
+        "text": "Eléonore says the hardest part is choosing which problem needs her attention, with daily drama over people, processes and deals competing for it.",
+        "at": 1725,
+        "quote": "That's what's hard, is finding the time, understanding where you have to spend your attention, and being able to let the rest go."
+      },
+      "advice": {
+        "text": "Eléonore tells founders that bolt-on AI is wrong. Think AI-native, build a moat beyond a wrapper, and innovate fast.",
+        "at": 750,
+        "quote": "Think AI-native, build your moat, and make sure that you can innovate extremely fast. Otherwise, it's tough."
+      }
+    }
+  },
+  "2swBIdnb_pU": {
+    "brief": {
+      "move": {
+        "text": "Alex stopped Groove signups at $4.5M ARR and shut Helply V1, rebuilding an agentic support platform because the moat is proprietary data.",
+        "at": 783,
+        "quote": "the moat isn't like that chatbot that sits on your site. The moat is the proprietary data."
+      },
+      "numbers": {
+        "text": "At $5M ARR, Groove had 99% NRR and 90% logo retention but averaged only 25 new customers a month, fewer than it was losing.",
+        "at": 335,
+        "quote": "the catch for us was we were averaging only 25 new customers a month for our SaaS."
+      },
+      "broke": {
+        "text": "The $500 deposits did not hold everyone, and Alex admits some pre-sold customers have gone. He says the rebuild is still unproven.",
+        "at": 1262,
+        "quote": "It's only a $500 deposit. Um, have we lost some customers? For sure."
+      },
+      "advice": {
+        "text": "Alex tells founders to design for AI plus a human, not bolt AI onto human workflows, and to avoid his route of acquisitions and new brands.",
+        "at": 1588,
+        "quote": "Is your platform designed for AI plus a human, not human plus AI? Because human plus AI is just bolting on AI."
+      }
+    }
+  },
+  "QHXQKyaYmc0": {
+    "brief": {
+      "move": {
+        "text": "Jacco bets that for the next two years human-to-human connection will dominate business, with high-touch sales run by humans aided by AI.",
+        "at": 1016,
+        "quote": "the human-to-human connection is more important than ever. And over the next 2 years, it will be the dominant factor"
+      },
+      "numbers": {
+        "text": "As Jacco tells it, Airtable and Miro, both valued at $7 billion and above, sold to the same buyer within 5 weeks for $1 billion and change.",
+        "at": 824,
+        "quote": "both in 5 weeks by the same company, both valued at $7 billion and above, selling for $1 billion and change."
+      },
+      "broke": {
+        "text": "Jacco admits products and services Winning by Design built six months ago are already obsolete. He also warns AI companies are repeating SaaS's inbound dependency.",
+        "at": 870,
+        "quote": "Products and services that we at Winning by Design built 6 months ago are obsolete at this point in time."
+      },
+      "advice": {
+        "text": "Jacco tells founders to list their five or six main constraints, ask AI what causes them, then use AI to remove them rather than automating old processes.",
+        "at": 254,
+        "quote": "if you line them all up, you say like, what are the 5 or 6 main constraints that are holding me back?"
+      }
+    }
+  },
+  "MVQ7KR2LDFQ": {
+    "brief": {
+      "move": {
+        "text": "Krzysztof argues against a 180-degree switch to usage pricing. He favours hybrid models, testing usage metrics through add-ons or bundles on top of seats.",
+        "at": 785,
+        "quote": "Nevertheless, making it all at once, shifting it, shift, shifting it 180 degrees is very rarely a good idea."
+      },
+      "numbers": {
+        "text": "Krzysztof says 95% of Valueships engagements end with a price increase. Its surveys cover 40 to 50 companies a year.",
+        "at": 2122,
+        "quote": "95% of our engagements ends up with increase of the price. So if you have guesstimated your price, most likely you are charging too low."
+      },
+      "broke": {
+        "text": "One of Krzysztof's clients went full usage on its own. The value and revenue case held up, but users were not prepared to accept it.",
+        "at": 1164,
+        "quote": "Apparently, unfortunately for them, users were not prepared for that, right? So they were not accepting to be charged for the things"
+      },
+      "advice": {
+        "text": "Krzysztof tells founders to align price with the value they deliver, test on existing customers first and treat pricing as a continuous process.",
+        "at": 2153,
+        "quote": "understand on easy battleground, which is your currently existing clients, how the pricing process can look like, and then start working on your pricing."
+      }
+    }
+  },
+  "btPVbtP_erQ": {
+    "brief": {
+      "move": {
+        "text": "St John's Perlon automates the first touch only. Once a prospect replies, humans take over, and the built-in dialer is human, not AI.",
+        "at": 718,
+        "quote": "once a prospect responds to one of the messages across whichever platform it might be, that's over to the humans to take up that conversation"
+      },
+      "numbers": {
+        "text": "Perlon's own platform generates about 70% of its new business. St John says that has taken the company to seven figures and above in ARR.",
+        "at": 1148,
+        "quote": "So the Perlon platform generates about 70% of our new business. We use our platform at scale and we test a lot."
+      },
+      "broke": {
+        "text": "St John's hardest problem is change management. Customers say they want AI, then will not commit the time to train and iterate.",
+        "at": 2087,
+        "quote": "But when it comes down to it, like actually attributing the time and getting them to do that, that's the hardest part."
+      },
+      "advice": {
+        "text": "If outbound is failing, St John says go manual first. Pick 200 dream accounts, write bespoke messages, learn what lands, then automate.",
+        "at": 2236,
+        "quote": "Isolate 200 customers that you would absolutely love to work with if you could work with any 200 customers, and then start doing things manually."
+      }
+    }
+  },
+  "4VXTqe5Fed4": {
+    "brief": {
+      "move": {
+        "text": "Jay uses process mining. An agent scans ClickUp's full workspace history and proposes which processes to hand to agents. ClickUp plans to offer this to customers.",
+        "at": 745,
+        "quote": "you just have an agent go off for you and figure out what things you should be automating in the first place"
+      },
+      "numbers": {
+        "text": "Jay puts internal agents at roughly 10 to 1 against staff, up from 3 to 1. He gave no revenue or cost figures for the ROI.",
+        "at": 469,
+        "quote": "and say it's 3 to 1. I have to imagine it's closer to 10 to 1 at this point."
+      },
+      "broke": {
+        "text": "Jay admits organisations are not ready for agents that work like executives. He expects adoption to trail frontier capability by a year to eighteen months.",
+        "at": 1682,
+        "quote": "There's many things that need to shift in the structure of organizations to be able to take on employees"
+      },
+      "advice": {
+        "text": "Map your daily work with a chat assistant and ask what it could automate. Then spend an hour with an agent designing one process.",
+        "at": 1768,
+        "quote": "for those specific processes, spend an hour and chat with an agent."
+      }
+    }
+  },
+  "cpJw6wYTV2I": {
+    "brief": {
+      "move": {
+        "text": "Wouter moved skills tests to the top of the hiring funnel. AI interviews built by in-house scientists now replace first-round interviews.",
+        "at": 376,
+        "quote": "rather than doing a first-round interview, you can just send our AI interviews at first round."
+      },
+      "numbers": {
+        "text": "TestGorilla launched in 2020 and has raised $80 million over three rounds. It has about 120 remote staff across 50 countries.",
+        "at": 226,
+        "quote": "We did 3 rounds of venture capital, raised $80 million, so 8-0 USD in total."
+      },
+      "broke": {
+        "text": "Wouter admits they hired expensive, experienced sales staff before the sales-led motion was ready, and threw headcount at every problem. Money was wasted.",
+        "at": 1204,
+        "quote": "And I think we went way too aggressive at some point on the SLG."
+      },
+      "advice": {
+        "text": "Do not run a vocabulary test. Wouter says to ask candidates for a workflow they built and what went wrong, not which tools they use.",
+        "at": 496,
+        "quote": "give me an example of a workflow that you built and how did you do it? Did you bump into what went wrong?"
+      }
+    }
+  },
+  "GgWfe27Obg4": {
+    "brief": {
+      "move": {
+        "text": "Kai is staying Europe-only and widening Enginy from a scrappy data aggregator into an end-to-end AI sales CRM, built on multilingual first-party data.",
+        "at": 2401,
+        "quote": "Let's build a category-defining software sales CRM as a category that dominates Europe."
+      },
+      "numbers": {
+        "text": "Enginy passed €6M ARR in 24 months with 60 to 65 staff. Kai expects 10M ARR by year end and is hiring 30-plus in product and engineering.",
+        "at": 227,
+        "quote": "We managed to grow to, to grow to, to €6 million ARR with 60, 65 people in our team."
+      },
+      "broke": {
+        "text": "Kai admits forecasting and budgeting were neglected early, and the scrappy aggregator that won the first customers will not reach $100M.",
+        "at": 2000,
+        "quote": "some of these things were some things that we didn't pay attention before and we start to pay attention now"
+      },
+      "advice": {
+        "text": "Kai tells founders to pay staff for LinkedIn milestones and gamify posting, such as $1K and a day off at 10K followers.",
+        "at": 1252,
+        "quote": "Put incentives and some game around it to enable and activate this motion in the short run."
+      }
+    }
+  },
+  "XQa5KahhD9A": {
+    "brief": {
+      "move": {
+        "text": "Aleks chose to build horizontally from day one, against Lean Startup advice, betting that billing can only be fixed end to end.",
+        "at": 1366,
+        "quote": "the only way for us to solve this properly is if we try to solve it as horizontally as possible at the time"
+      },
+      "numbers": {
+        "text": "Aleks cites research that top AI B2B SaaS companies change pricing 3.6 times a year, roughly every 90 to 100 days.",
+        "at": 355,
+        "quote": "top 500 AI B2B SaaS companies have changed pricing on average 3.6 times a year, which averages like 90 to 100 days."
+      },
+      "broke": {
+        "text": "Trust remains the number one objection, followed by whether a young company like Alguna will still be around.",
+        "at": 1642,
+        "quote": "building trust from the get-go has always been number one objection, followed by, are you going to be around?"
+      },
+      "advice": {
+        "text": "Aleks says pricing is a new product line. Give it a dedicated owner and engineering team, not an ad hoc 12-month project.",
+        "at": 2069,
+        "quote": "every company now has a new product line that they're not aware of, which is pricing."
+      }
+    }
+  },
+  "kViokYmtTbo": {
+    "brief": {
+      "move": {
+        "text": "Light dropped its OCR partner and offshore human checkers for bills. Two agents now parse each bill and must agree before it reaches the user.",
+        "at": 934,
+        "quote": "now we have basically 2 agents, one that does a first OCR and a second one that double checks everything the first agent's doing"
+      },
+      "numbers": {
+        "text": "Light runs on about 100 employees with a single person in finance. Jonathan says every BDR is above 2x quota.",
+        "at": 1602,
+        "quote": "So we're a company of like 100 employees. We have one person in finance running the whole show."
+      },
+      "broke": {
+        "text": "Jonathan assumed customers would find it easy to tell agents what to do. Many did not, and needed training to manage agents well.",
+        "at": 1490,
+        "quote": "I thought that would be really easy to describe what you wanted the agents to do and have them do that."
+      },
+      "advice": {
+        "text": "Start agents on one simple task and add complexity once they follow instructions. Do not dump 20 pages of old operating principles on them.",
+        "at": 1518,
+        "quote": "you want to sort of maybe start out quite simple and make sure that it does that"
+      }
+    }
+  },
+  "AHWVdDHf7Ss": {
+    "brief": {
+      "move": {
+        "text": "Semir chose not to hire or use agencies. He rebuilt the website in code with Claude and automated blogs, the help centre and operational alerts.",
+        "at": 238,
+        "quote": "Because I was at the point of, should we hire somebody? Should I get an agency to help me on the marketing side?"
+      },
+      "numbers": {
+        "text": "Semir estimates agencies would have cost $20,000 to $40,000. AI subscriptions cost a few hundred dollars. Self-serve sign-ups now arrive at least a handful a week.",
+        "at": 1847,
+        "quote": "$20K, $30K, $40K spent that we would have had to invest. And that was just a few hundred dollars on AI subscriptions."
+      },
+      "broke": {
+        "text": "Semir admits the AI-written help centre may be only 90% correct. He barely reads the automated blog posts and has no hard data on conversion yet.",
+        "at": 1005,
+        "quote": "And maybe it's 90% correct. Maybe there's some false assumptions in here."
+      },
+      "advice": {
+        "text": "Semir tells founders to ask of every task whether AI can do it. He suggests automating the work around revenue and core product first.",
+        "at": 336,
+        "quote": "I would just really encourage people, can this be done with AI? It's much farther along than many might think."
+      }
+    }
+  },
+  "frYP18uDnCY": {
+    "brief": {
+      "move": {
+        "text": "Adam renamed Glyphic to Airspeed after customers pushed the product from insight towards execution, using an agency for the name and vibe-coding the website.",
+        "at": 291,
+        "quote": "move more from that kind of intelligence language type of name to something that has some significance around speed, around motion"
+      },
+      "numbers": {
+        "text": "Adam closed the Series A early in the year and very quickly doubled the team, which now stands at 35 people.",
+        "at": 1378,
+        "quote": "we closed it early in the year. We announced it just recently. It was kind of very very quickly double the size of the team."
+      },
+      "broke": {
+        "text": "Product token spend is rising as agents grow more capable, eating into margins while pricing stays mostly seat-based. Adam expects to move to consumption pricing.",
+        "at": 1783,
+        "quote": "especially kind of as we make the agents more flexible, being able to do more things, which definitely kind of eats into our margins"
+      },
+      "advice": {
+        "text": "Adam tells founders to run regular AI hackathons, as customer Firmat Commerce does, and push reluctant staff to automate their own workflows.",
+        "at": 2281,
+        "quote": "everyone is tasked to kind of explore AI tools for their own workflows and see how far they can push the automations"
+      }
+    }
+  },
+  "vc4fW3WnvgA": {
+    "brief": {
+      "move": {
+        "text": "Des and Eoin renamed the company Fin, keeping Intercom only as the help desk name, so the AI agent is judged against new AI companies.",
+        "at": 562,
+        "quote": "That's why we changed our email address, our domain, our blog, everything. It's all Fin."
+      },
+      "numbers": {
+        "text": "Fin is already way over $100 million in revenue and resolves over 70% of queries. Engineering productivity tripled after going all in on Claude.",
+        "at": 658,
+        "quote": "Fin is growing faster than anything we've ever seen. And it's already a very substantial business too, way over $100 million in revenue."
+      },
+      "broke": {
+        "text": "Per-resolution pricing undercharges. If Fin answers six of seven questions and then hands over to a human, the business pays nothing for that conversation.",
+        "at": 1594,
+        "quote": "So Fin could have done a phenomenal amount of work. It could have saved hours."
+      },
+      "advice": {
+        "text": "Des tells founders to beware of cope. Drop the nostalgia and ask what you would build in your space if starting today.",
+        "at": 1267,
+        "quote": "If you were building a company in your space today, what would you build? What would it look like?"
+      }
+    }
+  },
+  "sWKRkXP9M0I": {
+    "brief": {
+      "move": {
+        "text": "Richard is opening up Fathom's platform so customers can take meeting data anywhere. His bet is that the data, not the software, is the asset.",
+        "at": 547,
+        "quote": "we've gone the other direction and said, no, no, we want to be the most flexible, hackable platform"
+      },
+      "numbers": {
+        "text": "Fathom has about 100 people, roughly 25 in engineering. The goal is $100 million ARR with fewer than 150 people.",
+        "at": 868,
+        "quote": "We have a pretty small engineering team. We only have, we got 100 people, about 25 of them are engineering."
+      },
+      "broke": {
+        "text": "Richard's plan 18 months ago for an AIOps team building internal AI tools failed. Maintenance was terrible, so Fathom now focuses on vendor selection.",
+        "at": 909,
+        "quote": "build a whole AIOps organization that was going to be like RevOps, build our own AI tools, whatnot. And that was a complete disaster."
+      },
+      "advice": {
+        "text": "Richard tells founders to ask what they would build starting today, using their unique data and insights, and consider forking the company internally.",
+        "at": 1068,
+        "quote": "your number one job is honestly to kind of take a step back and be like, if I started from today, what would I build?"
+      }
+    }
+  },
+  "k_nLUB1dtTU": {
+    "brief": {
+      "move": {
+        "text": "Marty optimises for growth, not efficiency. Pylon treats AI as an accelerant and is still hiring for 30 open roles.",
+        "at": 901,
+        "quote": "Here's what I'd say is like, I do not optimize for efficiency at all. I'm optimizing for growth."
+      },
+      "numbers": {
+        "text": "Almost 30 engineers using Cursor and Claude Code saw a 40% productivity lift over five months, not the 4x or 5x some expect.",
+        "at": 823,
+        "quote": "we've had a 40% lift in engineering productivity over the course of like 5 months"
+      },
+      "broke": {
+        "text": "Turning up at conferences without targets failed. One New York event yielded about four demos for six staff, prompting a 50-demo target and 10-demo personal quotas.",
+        "at": 83,
+        "quote": "Like I remember we went to one conference in New York and we booked maybe like 4 demos."
+      },
+      "advice": {
+        "text": "Marty tells founders not to chase AI for its own sake. Ask how to 10x, and tie every decision back to revenue.",
+        "at": 1055,
+        "quote": "So I would ask that question, always tie it back to revenue because that should be the goal and that should be the outcome."
+      }
+    }
+  },
+  "Q8VciMrOqOg": {
+    "brief": {
+      "move": {
+        "text": "Paul chose venture capital over bootstrapping for speed and capitalisation. Less well-capitalised rivals in revenue-based financing died along the way.",
+        "at": 280,
+        "quote": "the main reason for us to do this as a venture-backed case was the conviction that speed and capitalization matters."
+      },
+      "numbers": {
+        "text": "Event research that took two juniors a full week now takes a good prompt and two hours. Automated credit memos save about two days per deal.",
+        "at": 1277,
+        "quote": "Historically, 2 juniors working on a larger event for, I don't know, a full week compared to a good prompt and 2 hours."
+      },
+      "broke": {
+        "text": "The growth-quality tension never resolves. Paul still negotiates hard with lenders and tells VCs that tripling must be good enough instead of quadrupling.",
+        "at": 527,
+        "quote": "you can't avoid having some tough discussions and negotiate hard and explain to refinancing parties why that way is the right one"
+      },
+      "advice": {
+        "text": "Paul tells founders to audit gross margin honestly, fund R&D with equity and fund acquisition costs that pay back in 6 to 9 months with debt.",
+        "at": 1921,
+        "quote": "take a look at your P&L, take a look at the figures that you report, and just look at the cost items"
+      }
+    }
+  },
+  "Hs8HK-o_NAA": {
+    "brief": {
+      "move": {
+        "text": "Roy changed monday.com's vision from managing work to doing it. Seats stay for people and agents; consumption pricing is added for the work itself.",
+        "at": 913,
+        "quote": "we shifted that vision to being not only manage work but also doing the work."
+      },
+      "numbers": {
+        "text": "monday.com has 250,000 paying customers and millions of users across more than 200 industries.",
+        "at": 161,
+        "quote": "maybe it's worth mentioning Monday right now has like 250,000 paying companies, paying customers and millions of users."
+      },
+      "broke": {
+        "text": "After February's sell-off and a pulled 2027 target, Roy admits agent seat purchases are not yet significant.",
+        "at": 1070,
+        "quote": "we have agents signing up and purchasing seats on the platform, but it's not significant, okay?"
+      },
+      "advice": {
+        "text": "Roy went back to writing code himself. He tells founders to understand the technology deeply and get an autonomous agent working for them now.",
+        "at": 1990,
+        "quote": "But the main thing, understand the technology, go deep, open an OpenCLAW right now, you know, and try and make it work for you."
+      }
+    }
+  },
+  "h5A9MW4yFJM": {
+    "brief": {
+      "move": {
+        "text": "Nicolas is betting on platforms over point solutions. Attio pairs a flexible data layer with automation built for agents running go-to-market.",
+        "at": 1581,
+        "quote": "And so we're very bullish on platforms. We're very bullish on consolidation, actually."
+      },
+      "numbers": {
+        "text": "Nicolas says writing code is only about 15% of a scaled software company's budget. Attio runs millions of automations a day.",
+        "at": 648,
+        "quote": "It's maybe 15% of their budget would be considered as being spent on actually writing code."
+      },
+      "broke": {
+        "text": "Nicolas admits he did not look after himself in the early years. He calls the overwork wrong and detrimental.",
+        "at": 2149,
+        "quote": "when we were 5 people in a coworking space for multiple years, the answer is I kind of didn't."
+      },
+      "advice": {
+        "text": "Nicolas tells founders with a few million in ARR to face AI honestly and start experimenting with the tools now.",
+        "at": 1779,
+        "quote": "start experimenting, start using the tools, start building things, start living at the edge of what's capable"
+      }
+    }
   }
 }

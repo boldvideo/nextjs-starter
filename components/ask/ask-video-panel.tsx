@@ -5,7 +5,8 @@ import { X, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { AskCitation } from "@/lib/ask";
-import { MuxPlayerComponent, MuxPlayerVideoLike } from "@/components/players/player-mux";
+import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
+import { VideoJsMuxPlayer } from "@/components/players/player-videojs-mux";
 import { getCanonicalVideoPath } from "@/lib/video-path";
 import { sourceUrl, type SourceOpen } from "@/lib/source-engagement";
 
@@ -79,7 +80,7 @@ export function AskVideoPanel({ citation, isOpen, onClose, engagement }: AskVide
 
         {/* Video Player */}
         <div className="aspect-video bg-black flex-shrink-0">
-          <MuxPlayerComponent
+          <VideoJsMuxPlayer
             video={video}
             engagement={engagement}
             startTime={startSeconds}
