@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- company icons come from any host */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, Pencil, Plus } from "lucide-react";
 import { domainOf, type CompanyProfile } from "@/lib/shiftai/profile";
 import { onCompanyChange, readCompany, writeCompany } from "@/lib/shiftai/company-store";
@@ -264,6 +265,167 @@ export function CompanyUrlBox({
   );
 }
 
+const STAGES = ["Pre-revenue", "Finding PMF", "Scaling", "Plateau"];
+
+/** What the site told us, then what only the founder knows. Every keystroke is saved; nothing waits for a blur. */
+function CompanyDetails({ profile, onRemove, onClose }: { profile: CompanyProfile; onRemove: () => void; onClose: () => void }) {
+  const [draft, setDraft] = useState<CompanyProfile>(profile);
+  const [editing, setEditing] = useState(false);
+  const set = (patch: Partial<CompanyProfile>) => {
+    const next = { ...draft, ...patch };
+    setDraft(next);
+    writeCompany(next);
+  };
+  const input =
+    "mt-1.5 block w-full rounded-[2px] border border-border bg-background px-3 h-11 font-sans text-[16px] sm:text-[15px] font-light normal-case tracking-normal text-foreground outline-none transition-colors placeholder:text-dim focus:border-acid";
+  const label = "sx-label block !text-[10px] text-muted-foreground";
+
+  return (
+    <>
+      <div className="flex items-center gap-3">
+        <CompanyLogo profile={draft} size={36} />
+        <span className="min-w-0 flex-1 leading-tight">
+          <strong className="block truncate text-[16px] font-medium text-foreground">{draft.business_name}</strong>
+          <span className="sx-label !text-[10px] text-dim">{domainOf(draft.website)}</span>
+        </span>
+        <button type="button" onClick={onRemove} className="sx-label min-h-9 px-2 !text-[10px] text-muted-foreground hover:text-[#ff6b47]">
+          Remove
+        </button>
+      </div>
+
+      {/* What we read */}
+      <div className="mt-4 border-t border-border pt-4">
+        <div className="flex items-center justify-between">
+          <p className={label}>Read from your site</p>
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            className="inline-flex items-center gap-1.5 text-[12px] text-acid hover:underline"
+          >
+            <Pencil className="h-3 w-3" /> {editing ? "Done" : "Correct it"}
+          </button>
+        </div>
+        {editing ? (
+          <textarea
+            value={draft.summary ?? ""}
+            onChange={(e) => set({ summary: e.target.value })}
+            rows={4}
+            autoFocus
+            className="mt-2 block w-full resize-none rounded-[2px] border border-acid bg-background px-3 py-2 text-[16px] leading-relaxed text-foreground outline-none sm:text-[14px]"
+            {...PASSWORD_MANAGERS_OFF}
+          />
+        ) : (
+          <p className="mt-2 text-[14px] leading-relaxed text-foreground/90">{draft.summary}</p>
+        )}
+        {!editing && draft.facts && draft.facts.length > 0 && (
+          <dl className="mt-3 space-y-2 text-[13px] leading-snug">
+            {draft.facts.map((f) => (
+              <div key={f.label} className="grid grid-cols-[64px_1fr] gap-3">
+                <dt className={label}>{f.label}</dt>
+                <dd className="line-clamp-2 text-muted-foreground" title={f.value}>
+                  {f.value}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+
+      {/* What a website never says */}
+      <div className="mt-4 border-t border-border pt-4">
+        <p className={label}>What your site doesn’t say · all optional</p>
+
+        <div className="mt-3 grid grid-cols-2 gap-px border border-border bg-border" role="radiogroup" aria-label="Transformer or Builder">
+          {(
+            [
+              ["Transformer", "Existing SaaS, going AI-first"],
+              ["Builder", "AI-native from the start"],
+            ] as const
+          ).map(([kind, hint]) => {
+            const on = draft.kind === kind;
+            return (
+              <button
+                key={kind}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => set({ kind: on ? undefined : kind })}
+                className={cn(
+                  "px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-acid",
+                  on ? "bg-acid text-[#0a0a08]" : "bg-background text-foreground hover:bg-raised"
+                )}
+              >
+                <span className="block text-[14px] font-medium">{kind}</span>
+                <span className={cn("block text-[12px] leading-snug", on ? "text-[#0a0a08]/75" : "text-muted-foreground")}>{hint}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-3">
+          <label className={label}>
+            ARR
+            <input
+              value={draft.arr ?? ""}
+              onChange={(e) => set({ arr: e.target.value })}
+              placeholder="€2.4M"
+              inputMode="text"
+              autoComplete="off"
+              className={input}
+              {...PASSWORD_MANAGERS_OFF}
+            />
+          </label>
+          <label className={label}>
+            Stage, in your words
+            <input
+              value={draft.stage ?? ""}
+              onChange={(e) => set({ stage: e.target.value })}
+              placeholder="Finding PMF"
+              autoComplete="off"
+              className={input}
+              {...PASSWORD_MANAGERS_OFF}
+            />
+          </label>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {STAGES.map((st) => (
+            <button
+              key={st}
+              type="button"
+              onClick={() => set({ stage: st })}
+              className={cn(
+                "rounded-[2px] border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors",
+                draft.stage === st ? "border-acid text-acid" : "border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+              )}
+            >
+              {st}
+            </button>
+          ))}
+        </div>
+
+        <label className={cn(label, "mt-3")}>
+          The decision in front of you
+          <input
+            value={draft.goal ?? ""}
+            onChange={(e) => set({ goal: e.target.value })}
+            placeholder="Move off per-seat pricing this quarter?"
+            autoComplete="off"
+            className={input}
+            {...PASSWORD_MANAGERS_OFF}
+          />
+        </label>
+      </div>
+
+      <div className="mt-5 flex items-center justify-between gap-3">
+        <p className="text-[12px] leading-snug text-dim">Saved as you type, in this browser only.</p>
+        <button type="button" onClick={onClose} className="sx-btn !min-h-10 !px-5 shrink-0">
+          Done
+        </button>
+      </div>
+    </>
+  );
+}
+
 /** Details for a set company (or the URL field when none): a popover, a bottom sheet on phones. */
 export function CompanyPopover({
   onClose,
@@ -275,7 +437,6 @@ export function CompanyPopover({
   align?: "left" | "right";
 }) {
   const [profile, setProfile] = useCompanyProfile();
-  const [editing, setEditing] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -294,106 +455,37 @@ export function CompanyPopover({
     };
   }, [onClose]);
 
-  const update = (patch: Partial<CompanyProfile>) => {
-    const current = readCompany();
-    if (current) setProfile({ ...current, ...patch });
-  };
+  // Rendered at the end of <body>: a dialog must not sit inside the composer's <form>,
+  // and it should never be clipped by the header or a scrolling panel.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
 
-  const field = (key: "mrr" | "churn" | "stage", label: string, placeholder: string) => (
-    <label className="block text-[11px] text-muted-foreground">
-      {label}
-      <input
-        defaultValue={profile?.[key] ?? ""}
-        onBlur={(e) => update({ [key]: e.target.value })}
-        placeholder={placeholder}
-        autoComplete="off"
-        className="mt-1 block w-full rounded-[2px] border border-border bg-background px-2 py-1.5 text-[16px] sm:text-[13px] text-foreground outline-none focus:border-acid"
-        {...PASSWORD_MANAGERS_OFF}
-      />
-    </label>
-  );
-
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-40 bg-black/20 sm:hidden" aria-hidden="true" onClick={onClose} />
+      <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-[2px]" aria-hidden="true" onClick={onClose} />
       <div
         ref={ref}
         role="dialog"
+        aria-modal="true"
         aria-label="Your company"
         className={cn(
-          "z-50 bg-background border border-border shadow-[0_24px_60px_rgba(0,0,0,0.6)] p-4 text-left",
-          "fixed inset-x-0 bottom-0 rounded-t-2xl pb-6",
-          "sm:absolute sm:inset-x-auto sm:w-[340px] sm:rounded-[2px] sm:pb-4",
-          placement === "up" ? "sm:bottom-full sm:mb-2" : "sm:bottom-auto sm:top-full sm:mt-2",
-          align === "left" ? "sm:left-0" : "sm:right-0"
+          "fixed z-[61] border border-border bg-surface p-5 text-left shadow-[0_24px_80px_rgba(0,0,0,0.7)] overflow-y-auto sx-scroll",
+          "inset-x-0 bottom-0 max-h-[88dvh] rounded-t-[10px] pb-6",
+          "sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[460px] sm:max-w-[calc(100vw-2rem)] sm:max-h-[min(720px,calc(100dvh-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[2px] sm:p-6"
         )}
       >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border sm:hidden" />
         {profile?.business_name ? (
-          <>
-            <div className="flex items-center gap-2.5">
-              <CompanyLogo profile={profile} size={34} />
-              <span className="flex-1 min-w-0 leading-tight">
-                <strong className="block truncate text-[15px]">{profile.business_name}</strong>
-                <span className="text-[12px] text-muted-foreground">{domainOf(profile.website)}</span>
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  track("Company removed", { domain: domainOf(profile.website) });
-                  setProfile(null);
-                  onClose();
-                }}
-                className="px-2 min-h-9 text-[12px] text-muted-foreground hover:text-[#ff6b47]"
-              >
-                Remove
-              </button>
-            </div>
-            {editing ? (
-              <textarea
-                defaultValue={profile.summary ?? ""}
-                onBlur={(e) => update({ summary: e.target.value })}
-                rows={3}
-                autoFocus
-                className="mt-3 block w-full resize-none rounded-[2px] border border-acid px-2.5 py-2 text-[16px] sm:text-[13px] leading-relaxed outline-none"
-                {...PASSWORD_MANAGERS_OFF}
-              />
-            ) : (
-              <p className="mt-3 text-[13px] leading-relaxed text-foreground/85 line-clamp-4">{profile.summary}</p>
-            )}
-            {!editing && profile.facts && profile.facts.length > 0 && (
-              <dl className="mt-3 space-y-1.5 border-t border-border pt-3 text-[12px] leading-snug">
-                {profile.facts.map((f) => (
-                  <div key={f.label} className="grid grid-cols-[52px_1fr] gap-2">
-                    <dt className="font-semibold text-muted-foreground">{f.label}</dt>
-                    <dd className="line-clamp-2 text-foreground/85" title={f.value}>{f.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {field("mrr", "MRR", "$")}
-              {field("churn", "Churn", "%")}
-              {field("stage", "Stage", "Plateau")}
-            </div>
-            <div className="mt-3 flex items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => setEditing((v) => !v)}
-                className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-acid hover:underline"
-              >
-                <Pencil className="h-3 w-3" /> {editing ? "Done editing" : "Edit how it reads your company"}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="sm:hidden rounded-[2px] px-4 min-h-11 text-[14px] font-semibold text-[#0a0a08]"
-                style={{ background: GREEN }}
-              >
-                Done
-              </button>
-            </div>
-          </>
+          <CompanyDetails
+            profile={profile}
+            onRemove={() => {
+              track("Company removed", { domain: domainOf(profile.website) });
+              setProfile(null);
+              onClose();
+            }}
+            onClose={onClose}
+          />
         ) : (
           <>
             <p className="font-medium text-[17px]">Add your company</p>
@@ -403,6 +495,7 @@ export function CompanyPopover({
         )}
       </div>
     </>
+    , document.body
   );
 }
 

@@ -14,8 +14,12 @@ export interface CompanyProfile {
   churn?: string;
   /** "What's your biggest problem right now?" */
   goal?: string;
-  /** Growth stage in their words, e.g. "plateau at $40K MRR" */
+  /** Stage in their words, e.g. "finding PMF" */
   stage?: string;
+  /** Annual recurring revenue as they type it, e.g. "€2.4M" */
+  arr?: string;
+  /** Shift AI's two kinds of member: existing SaaS going AI-first, or AI-native from the start */
+  kind?: "Transformer" | "Builder";
   /** Buyer / price / motion as read from the site, for display (the full profile is business_description) */
   facts?: { label: string; value: string }[];
   /** The site's icon, for display only (never sent to Bold) */
@@ -47,7 +51,8 @@ export function viewerProfile(p: CompanyProfile | null | undefined): Record<stri
     mrr: p.mrr,
     churn: p.churn,
     goal: p.goal,
-    stage: p.stage,
+    // One line the prompt already knows how to read: "Transformer, finding PMF, €2.4M ARR".
+    stage: [p.kind, p.stage?.trim(), p.arr?.trim() ? `${p.arr.trim().replace(/\s*ARR$/i, "")} ARR` : ""].filter(Boolean).join(", "),
   });
 }
 

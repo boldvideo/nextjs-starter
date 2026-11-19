@@ -1,0 +1,25 @@
+import { chromium } from "playwright";
+const [base, out, w = "1440", h = "900"] = process.argv.slice(2);
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: +w, height: +h } });
+const errors = [];
+page.on("pageerror", (e) => errors.push(String(e).slice(0, 200)));
+page.on("console", (m) => m.type() === "error" && errors.push(m.text().slice(0, 160)));
+await page.goto(base + "/login?redirect=/", { waitUntil: "networkidle" });
+if (page.url().includes("/login")) { await page.fill("#password", "shift2027"); await page.click("button[type=submit]"); await page.waitForURL((u) => !u.pathname.startsWith("/login")); }
+await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ website: "https://boldvideo.com", business_name: "Bold", summary: "Bold is a video platform for coaching programmes and memberships: hosting, transcripts, and an AI assistant that answers members from the library.", facts: [{ label: "Buyer", value: "Founders of high-ticket coaching programmes and academies" }, { label: "Price", value: "Membership $499/mo annual, $599 month to month" }, { label: "Motion", value: "Sales-led: every programme starts with a 30-minute demo call" }] })), "asb-company-v1");
+await page.goto(base + "/", { waitUntil: "networkidle" });
+await page.waitForTimeout(800);
+await page.click("[data-company-trigger]");
+await page.waitForTimeout(500);
+await page.getByPlaceholder("Finding PMF").fill("finding PMF");
+await page.getByRole("radio", { name: /Builder/ }).click();
+await page.getByPlaceholder("€2.4M").fill("€30k");
+await page.getByRole("button", { name: "Done" }).click();
+await page.waitForTimeout(300);
+const saved = await page.evaluate((k) => JSON.parse(localStorage.getItem(k)), "asb-company-v1");
+await page.click("[data-company-trigger]");
+await page.waitForTimeout(500);
+await page.screenshot({ path: out });
+console.log(JSON.stringify({ saved: { stage: saved.stage, kind: saved.kind, arr: saved.arr }, errors }));
+await browser.close();
