@@ -45,7 +45,7 @@ export default function ConnectPage() {
             with the guest named and a link to the second they said it.
           </p>
 
-          <div className="mt-10 max-w-[720px] border border-border bg-surface p-5 md:p-6">
+          <div className="mt-10 max-w-[720px] rounded-card border border-border bg-surface p-5 md:p-6">
             <p className="sx-label text-muted-foreground">The address</p>
             <div className="mt-3">
               <CopyField value={MCP_URL} label="the Shift AI connector address" what="url" />
@@ -62,7 +62,7 @@ export default function ConnectPage() {
         <div className="mx-auto max-w-[1360px] px-5 py-16 md:px-8 md:py-20">
           <p className="sx-label sx-eyebrow">Set it up</p>
           <h2 className="sx-display mt-6 text-[clamp(40px,5vw,72px)]">Two minutes. Once.</h2>
-          <div className="mt-10 grid gap-px border border-border bg-border lg:grid-cols-3">
+          <div className="mt-10 grid gap-px overflow-hidden rounded-card border border-border bg-border lg:grid-cols-3">
             {clients.map((c) => (
               <div key={c.name} className="bg-background p-6 md:p-8">
                 <h3 className="sx-display text-[38px]">{c.name}</h3>
@@ -116,7 +116,7 @@ export default function ConnectPage() {
       <section className="border-b border-border">
         <div className="mx-auto max-w-[1360px] px-5 py-16 md:px-8 md:py-20">
           <p className="sx-label sx-eyebrow">What a member gets</p>
-          <div className="mt-8 grid gap-px border border-border bg-border md:grid-cols-3">
+          <div className="mt-8 grid gap-px overflow-hidden rounded-card border border-border bg-border md:grid-cols-3">
             {[
               ["Answers from the transcripts", "Every answer is built from what was said on the show. If the library doesn’t cover it, it says so."],
               ["Who said it, and when", "Each point carries the guest, their company and a link that opens the episode at that second."],

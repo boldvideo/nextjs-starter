@@ -48,7 +48,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <p className="mt-5 text-[17px] leading-[1.65] text-muted-foreground">
           Every episode, searchable, with an assistant that tells you which founder already faced your decision.
         </p>
-        <div className="mt-9 border border-border bg-surface p-6">
+        <div className="mt-9 rounded-card border border-border bg-surface p-6">
           <PortalLoginForm />
         </div>
         <p className="sx-label mt-6 !text-[10px] text-dim">A private demo for Shift AI, built on Bold</p>

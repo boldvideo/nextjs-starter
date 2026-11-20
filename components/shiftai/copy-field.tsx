@@ -18,7 +18,7 @@ export function CopyField({ value, label, what }: { value: string; label: string
         });
       }}
       aria-label={`Copy ${label}`}
-      className="group flex w-full items-center gap-4 border border-border bg-background px-4 py-3.5 text-left transition-colors hover:border-acid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid"
+      className="group flex w-full items-center gap-4 rounded-ctl border border-input bg-background px-4 py-3.5 text-left transition-colors hover:border-acid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid"
     >
       <span className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap font-mono text-[14px] text-foreground [scrollbar-width:none]">{value}</span>
       <span className="sx-label flex shrink-0 items-center gap-2 !text-[10px] text-muted-foreground transition-colors group-hover:text-acid" aria-live="polite">

@@ -55,7 +55,7 @@ export function PortalLoginForm() {
           required
           disabled={isLoading}
           autoFocus
-          className="block h-12 w-full rounded-[2px] border border-border bg-background px-4 text-[16px] text-foreground outline-none transition-colors placeholder:text-dim focus:border-acid"
+          className="block h-12 w-full rounded-ctl border border-input bg-background px-4 text-[16px] text-foreground outline-none transition-colors placeholder:text-dim focus:border-acid"
         />
       </div>
 

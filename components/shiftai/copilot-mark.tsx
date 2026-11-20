@@ -2,7 +2,7 @@
 export function CopilotMark({ size = 32 }: { size?: number }) {
   return (
     <span
-      className="inline-flex shrink-0 items-center justify-center rounded-[2px] bg-acid text-[#0a0a08]"
+      className="inline-flex shrink-0 items-center justify-center rounded-ctl bg-acid text-[#0a0a08]"
       style={{ width: size, height: size }}
       aria-hidden="true"
     >

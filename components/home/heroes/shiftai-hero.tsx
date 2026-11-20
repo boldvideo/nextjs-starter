@@ -91,7 +91,7 @@ export default function ShiftaiHero({ settings, content }: HeroProps) {
 
           {/* Ask */}
           <div className="self-end">
-            <div className="border border-border bg-surface/95 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur md:p-6">
+            <div className="rounded-card border border-border bg-surface/95 p-5 shadow-[0_30px_80px_rgba(0,0,0,0.45)] backdrop-blur md:p-6">
               <div className="flex items-center gap-3">
                 <CopilotMark size={36} />
                 <div className="leading-tight">
@@ -108,7 +108,7 @@ export default function ShiftaiHero({ settings, content }: HeroProps) {
                     e.preventDefault();
                     ask(question);
                   }}
-                  className="mt-5 min-h-[124px] border border-border bg-background transition-colors focus-within:border-acid"
+                  className="mt-5 min-h-[124px] rounded-card border border-input bg-background transition-colors focus-within:border-acid"
                 >
                   <textarea
                     value={question}
@@ -130,7 +130,7 @@ export default function ShiftaiHero({ settings, content }: HeroProps) {
                       type="submit"
                       aria-label="Ask"
                       disabled={!question.trim()}
-                      className="ml-auto flex h-10 w-10 items-center justify-center rounded-[2px] bg-acid text-[#0a0a08] transition hover:bg-acid-dim active:scale-95 disabled:bg-raised disabled:text-dim"
+                      className="ml-auto flex h-10 w-10 items-center justify-center rounded-ctl bg-acid text-[#0a0a08] transition hover:bg-acid-dim active:scale-95 disabled:bg-raised disabled:text-dim"
                     >
                       <ArrowUp className="h-4 w-4" strokeWidth={2.5} />
                     </button>
@@ -190,7 +190,7 @@ export default function ShiftaiHero({ settings, content }: HeroProps) {
           {latest && (
             <Link
               href={`/v/${links[latest.youtubeId].slug}`}
-              className="group mt-12 grid gap-px border border-border bg-border transition-colors hover:border-acid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
+              className="group mt-12 grid gap-px overflow-hidden rounded-card border border-border bg-border transition-colors hover:border-acid focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]"
             >
               <span className="relative block aspect-video overflow-hidden bg-raised">
                 {links[latest.youtubeId].thumbnail && (
@@ -201,7 +201,7 @@ export default function ShiftaiHero({ settings, content }: HeroProps) {
                     className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.025]"
                   />
                 )}
-                <span className="absolute bottom-4 left-4 flex h-14 w-14 items-center justify-center rounded-[2px] bg-acid text-[#0a0a08] transition-transform duration-200 group-hover:scale-105">
+                <span className="absolute bottom-4 left-4 flex h-14 w-14 items-center justify-center rounded-ctl bg-acid text-[#0a0a08] transition-transform duration-200 group-hover:scale-105">
                   <Play className="h-5 w-5 fill-current" aria-hidden="true" />
                 </span>
               </span>
@@ -298,7 +298,7 @@ export default function ShiftaiHero({ settings, content }: HeroProps) {
               Connect it <span aria-hidden="true">→</span>
             </Link>
           </div>
-          <div className="border border-border border-l-[3px] border-l-acid bg-surface p-6 font-mono text-[13px] leading-[1.9] text-muted-foreground md:p-8">
+          <div className="rounded-card border border-border border-l-[3px] border-l-acid bg-surface p-6 font-mono text-[13px] leading-[1.9] text-muted-foreground md:p-8">
             <p className="text-dim">You, in Claude</p>
             <p className="mt-1 text-foreground">We’re at €4M ARR on per-seat pricing. Who on the show moved off it, and how?</p>
             <p className="mt-5 text-dim">Claude, using Shift AI</p>

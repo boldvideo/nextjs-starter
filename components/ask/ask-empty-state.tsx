@@ -9,7 +9,7 @@ import { PoweredByBold } from "@/components/powered-by-bold";
 import { askLabel } from "@/lib/utils";
 
 const H1_CLASS =
-  "font-[family-name:var(--font-heading)] font-bold text-4xl md:text-5xl tracking-tight leading-[1.08] mb-3";
+  "font-[family-name:var(--font-heading)] font-light text-[28px] md:text-[36px] leading-[1.22] text-foreground mb-4";
 const SUB_CLASS =
   "text-lg text-muted-foreground leading-relaxed max-w-[52ch] mb-8";
 
@@ -40,8 +40,7 @@ function Greeting({ greeting }: { greeting: string }) {
           <InlineMarkdown text={headline} />
         </h1>
         <p className={SUB_CLASS}>
-          Ask anything from the series and get a straight answer — with the
-          exact moments to watch for yourself.
+          Every answer names the guest and links to the moment they said it.
         </p>
       </>
     );

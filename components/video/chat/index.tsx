@@ -61,6 +61,8 @@ interface AIAssistantProps {
   placeholder?: string;
   /** Short line under the assistant's name in panel mode */
   tagline?: string;
+  /** Cards for the episodes an answer draws on. Off where the page already is that episode. */
+  episodeCards?: boolean;
 }
 
 /**
@@ -213,6 +215,7 @@ export const AIAssistant = ({
   starters,
   placeholder,
   tagline,
+  episodeCards = true,
 }: AIAssistantProps) => {
   const panel = variant === "panel";
   const { onTimeClick } = useAIAssistantContext();
@@ -479,7 +482,7 @@ export const AIAssistant = ({
                     type="button"
                     onClick={() => handleSubmit(s)}
                     disabled={isPending}
-                    className="text-left text-[14.5px] leading-snug rounded-[2px] border border-border bg-background px-3.5 py-3 text-muted-foreground hover:border-acid hover:text-foreground transition-colors"
+                    className="text-left text-[14.5px] leading-snug rounded-card border border-input bg-background px-3.5 py-2.5 text-muted-foreground hover:border-acid hover:text-foreground transition-colors"
                   >
                     {s}
                   </button>
@@ -526,8 +529,8 @@ export const AIAssistant = ({
                 "rounded-lg p-3 prose max-w-none dark:prose-invert prose-p:my-0 prose-strong:text-inherit prose-headings:text-inherit prose-a:text-primary prose-a:no-underline hover:prose-a:underline [&_ul]:marker:text-current [&_ol]:marker:text-current",
                 panel
                   ? message.role === "user"
-                    ? "!ml-auto w-fit max-w-[85%] !rounded-[2px] border border-border bg-raised text-foreground !px-4 !py-2.5 text-[15px]"
-                    : "!p-0 !ml-0 bg-transparent text-foreground text-[15.5px] leading-relaxed prose-p:my-2.5"
+                    ? "!ml-auto w-fit max-w-[85%] !rounded-card border border-border bg-raised text-foreground !px-4 !py-2.5 text-[15px]"
+                    : "!p-0 !ml-0 bg-transparent text-[15px] leading-[1.6] text-foreground/85 prose-p:my-2.5 prose-strong:!text-foreground prose-strong:font-medium prose-ul:my-3 prose-ul:pl-[1.1em] prose-li:my-3 prose-li:pl-0 [&_li>strong:first-child]:block [&_li>strong:first-child]:mb-0.5"
                   : message.role === "user"
                   ? "bg-muted/50 text-foreground border border-border/50"
                   : "bg-muted text-foreground",
@@ -589,7 +592,7 @@ export const AIAssistant = ({
                 >
                   {message.content}
                 </ReactMarkdown>
-                {message.role === "assistant" && !isStreamingMessage && (
+                {episodeCards && message.role === "assistant" && !isStreamingMessage && (
                   <EpisodeCards text={message.content} narrow />
                 )}
                 </>
@@ -682,7 +685,7 @@ export const AIAssistant = ({
         {voiceActive ? <VoiceBar /> : panel && composerOverride ? (
           composerOverride
         ) : panel ? (
-        <div ref={inputContainerRef} className="rounded-[2px] border border-border bg-background focus-within:border-acid transition-colors">
+        <div ref={inputContainerRef} className="rounded-card border border-input bg-background focus-within:border-acid transition-colors">
           <textarea
             ref={textareaRef}
             value={inputValue}
@@ -711,7 +714,7 @@ export const AIAssistant = ({
               aria-label="Send question"
               onClick={() => handleSubmit()}
               disabled={isPending || !inputValue.trim()}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] bg-acid text-[#0a0a08] transition hover:bg-acid-dim active:scale-95 disabled:bg-raised disabled:text-dim"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-ctl bg-acid text-[#0a0a08] transition hover:bg-acid-dim active:scale-95 disabled:bg-raised disabled:text-dim"
             >
               <Send size={16} />
             </button>
@@ -753,7 +756,7 @@ export const AIAssistant = ({
               aria-label="Ask about this video"
               rows={2}
               className={cn(
-                "min-w-0 w-full rounded-[2px] resize-none overflow-hidden",
+                "min-w-0 w-full rounded-ctl resize-none overflow-hidden",
                 "focus:outline-none focus:ring-2 focus:ring-primary/50 text-base sm:text-sm",
                 isEmbedded
                   ? "bg-muted text-foreground"

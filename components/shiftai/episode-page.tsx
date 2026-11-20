@@ -26,7 +26,7 @@ const GREEN = "#E8FF47";
 const NAVY = "#1A1A17";
 const SPEAKER_COLORS = ["#F4F2EC", "#E8FF47", "#47C4FF", "#FF6B47", "#A3A39B"];
 
-type Tab = "transcript" | "ask" | "chapters" | "moments";
+type Tab = "brief" | "transcript" | "ask" | "chapters" | "moments";
 
 /** lg breakpoint; the rail exists only above it. Defaults to desktop for SSR. */
 function useIsDesktop() {
@@ -64,8 +64,8 @@ function PlayPill({ at, filled = false }: { at: string; filled?: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-[2px] border px-2 py-1 font-mono text-[11px] tracking-[0.08em] tabular-nums leading-none transition-colors duration-150",
-        filled ? "border-acid bg-acid text-[#0a0a08]" : "border-border bg-transparent text-acid"
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[11px] tracking-[0.08em] tabular-nums leading-none transition-colors duration-150",
+        filled ? "border-acid bg-acid text-[#0a0a08]" : "border-input bg-transparent text-acid"
       )}
     >
       <Play className="h-2.5 w-2.5 fill-current" aria-hidden="true" />
@@ -83,7 +83,7 @@ function Stamp({ at, onSeek, className }: { at?: string | null; onSeek: (s: numb
       onClick={() => onSeek(s)}
       aria-label={`Play from ${at}`}
       className={cn(
-        "group/stamp align-middle rounded-[2px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid focus-visible:ring-offset-2 focus-visible:ring-offset-background [&>span]:hover:border-acid [&>span]:hover:bg-acid [&>span]:hover:text-[#0a0a08] active:scale-[0.97] transition-transform",
+        "group/stamp align-middle rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acid focus-visible:ring-offset-2 focus-visible:ring-offset-background [&>span]:hover:border-acid [&>span]:hover:bg-acid [&>span]:hover:text-[#0a0a08] active:scale-[0.97] transition-transform",
         className
       )}
     >
@@ -97,7 +97,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
   const transcriptRef = useRef<HTMLDivElement | null>(null);
   const ai = getPortalConfig(settings).ai;
 
-  const [tab, setTab] = useState<Tab>("transcript");
+  const [tab, setTab] = useState<Tab>(brief ? "brief" : "transcript");
   const [now, setNow] = useState(0);
   const [follow, setFollow] = useState(true);
   const [query, setQuery] = useState("");
@@ -306,6 +306,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
   const seconds = video.duration || durationHint || 0;
   const duration = seconds ? formatDuration(seconds) : null;
   const tabs: { id: Tab; label: string; count?: string; show: boolean }[] = [
+    { id: "brief", label: "Brief", show: !!brief },
     { id: "transcript", label: "Transcript", count: duration ?? undefined, show: paragraphs.length > 0 },
     { id: "ask", label: "Ask", show: !isDesktop },
     { id: "chapters", label: "Chapters", count: String(chapters.length), show: chapters.length > 0 },
@@ -348,12 +349,13 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
               composerAccessory={<ComposerCompanyPill onAdd={() => setUrlMode(true)} />}
               composerBottom={<ChatDetectStrip />}
               className="h-full"
+              episodeCards={false}
             />
   );
   const nextCard = episode?.next?.slug && (
     <Link
       href={`/v/${episode.next.slug}`}
-      className="group flex items-center gap-4 border border-border bg-surface px-4 py-4 transition-colors hover:border-acid"
+      className="group flex items-center gap-4 rounded-card border border-border bg-surface px-4 py-4 transition-colors hover:border-acid"
     >
       <Face person={episode.next.guest} size={44} />
       <span className="min-w-0 flex-1 leading-snug">
@@ -386,14 +388,14 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
       <div className="max-w-[1360px] mx-auto px-5 md:px-7 pt-5 pb-20 lg:pb-6 flex flex-wrap gap-9 items-start">
         {/* MAIN */}
         <main className="flex-[999_1_640px] min-w-0">
-          <div ref={placeholderRef} className="relative aspect-video bg-surface -mx-5 md:mx-0 rounded-none md:rounded-[2px]">
+          <div ref={placeholderRef} className="relative aspect-video bg-surface -mx-5 md:mx-0 rounded-none md:rounded-card">
             <div
               style={mini ? miniStyle : undefined}
               className={cn(
                 "bg-black overflow-hidden",
                 mini
-                  ? cn("z-40 shadow-[0_18px_40px_rgba(0,0,0,0.28)]", isDesktop ? "rounded-[2px]" : "rounded-none")
-                  : "absolute inset-0 rounded-none md:rounded-[2px]"
+                  ? cn("z-40 shadow-[0_18px_40px_rgba(0,0,0,0.28)]", isDesktop ? "rounded-card" : "rounded-none")
+                  : "absolute inset-0 rounded-none md:rounded-card"
               )}
             >
               <Player video={video} autoPlay={false} ref={playerRef} startTime={startTime} className="w-full h-full" />
@@ -421,13 +423,26 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
           </div>
 
           <header className="mt-8">
-            <p className="sx-label sx-eyebrow">
-              {number ? `Episode ${number}` : "The AI Revolution Show"}
-              {published && ` · ${published}`}
-              {duration && ` · ${duration}`}
-            </p>
-            <h1 className="sx-display mt-5 text-[clamp(40px,5vw,76px)]">{episode?.headline ?? video.title}</h1>
-            {episode?.hook && <p className="mt-5 max-w-3xl text-[18px] leading-[1.65] text-muted-foreground md:text-[19px]">{episode.hook}</p>}
+            <div className="flex items-center justify-between gap-4">
+              <p className="sx-label sx-eyebrow">
+                {number ? `Episode ${number}` : "The AI Revolution Show"}
+                {published && ` · ${published}`}
+                {duration && ` · ${duration}`}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  track("Episode share", { episode: `E${number}` });
+                  navigator.share?.({ title: episode?.title ?? video.title, url: window.location.href }).catch(() => {});
+                }}
+                aria-label="Share this episode"
+                className="sx-label inline-flex min-h-9 min-w-9 shrink-0 items-center justify-center gap-2 rounded-full border border-input px-2.5 !text-[10px] text-muted-foreground transition-colors hover:border-muted-foreground hover:text-foreground sm:px-3.5"
+              >
+                <Share2 className="h-3 w-3" /> <span className="max-sm:hidden">Share</span>
+              </button>
+            </div>
+            <h1 className="sx-display mt-4 text-[clamp(36px,4.2vw,60px)]">{episode?.headline ?? video.title}</h1>
+            {episode?.hook && <p className="mt-4 max-w-[62ch] text-[17px] leading-[1.6] text-muted-foreground">{episode.hook}</p>}
           </header>
 
           {/* Cast */}
@@ -442,7 +457,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
                   href={p.companyUrl}
                   target="_blank"
                   rel="noopener"
-                  className="flex items-center gap-3 border border-border bg-surface py-2.5 pl-2.5 pr-5 transition-colors hover:border-muted-foreground"
+                  className="flex min-h-[66px] items-center gap-3 rounded-card border border-border bg-surface py-2.5 pl-2.5 pr-5 transition-colors hover:border-input"
                 >
                   <Face person={p} size={44} />
                   <span className="leading-tight">
@@ -452,63 +467,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
                 </a>
               ))}
               <CompanySeat />
-              <span className="flex-1" />
-              <button
-                type="button"
-                onClick={() => {
-                  track("Episode share", { episode: `E${number}` });
-                  navigator.share?.({ title: episode.title, url: window.location.href }).catch(() => {});
-                }}
-                className="sx-btn sx-btn-ghost self-center"
-              >
-                <Share2 className="h-3.5 w-3.5" /> Share
-              </button>
             </div>
-          )}
-
-          {/* The brief: the newsletter's own shape, each cell a moment you can play */}
-          {brief && (
-            <section aria-labelledby="brief" className="mt-12">
-              <h2 id="brief" className="sx-label sx-eyebrow">
-                The brief
-              </h2>
-              <div className="mt-5 grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
-                {briefCells.map(({ key, label }) => {
-                  const cell = brief[key];
-                  if (!cell?.text) return null;
-                  const at = typeof cell.at === "number" ? formatStamp(cell.at) : null;
-                  const body = (
-                    <>
-                      <span className="sx-label mb-3 block !text-[10px] text-acid">{label}</span>
-                      <span className="block text-[15px] leading-[1.6] text-foreground">{cell.text}</span>
-                      {at && (
-                        <span className="mt-auto block pt-5 [&>span]:group-hover:border-acid [&>span]:group-hover:bg-acid [&>span]:group-hover:text-[#0a0a08]">
-                          <PlayPill at={at} />
-                        </span>
-                      )}
-                    </>
-                  );
-                  return at ? (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => {
-                        track("Episode jump", { from: "brief", part: label, episode: `E${number}` });
-                        seek(cell.at as number);
-                      }}
-                      aria-label={`${label}: play from ${at}`}
-                      className="group flex flex-col bg-background p-5 text-left transition-colors duration-150 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-acid"
-                    >
-                      {body}
-                    </button>
-                  ) : (
-                    <div key={key} className="flex flex-col bg-background p-5">
-                      {body}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
           )}
 
           {/* Sticky bar: tabs, plus the transcript tools while on that tab */}
@@ -535,7 +494,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
           </div>
           {tab === "transcript" && (
             <div className="flex flex-wrap items-center gap-3 py-3">
-              <label className="flex flex-1 min-w-[220px] items-center gap-2 rounded-[2px] border border-border px-3 py-2 text-sm text-muted-foreground focus-within:border-acid">
+              <label className="flex flex-1 min-w-[220px] items-center gap-2 rounded-ctl border border-input px-3 py-2 text-sm text-muted-foreground focus-within:border-acid">
                 <Search className="h-4 w-4" aria-hidden="true" />
                 <span className="sr-only">Search this transcript</span>
                 <input
@@ -551,8 +510,8 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
                 onClick={() => setFollow((f) => !f)}
                 aria-pressed={follow}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-[2px] border px-3.5 min-h-11 text-[13px] font-semibold transition-colors",
-                  follow ? "border-acid bg-raised text-acid" : "border-border text-muted-foreground"
+                  "inline-flex items-center gap-2 rounded-ctl border px-3.5 min-h-11 text-[13px] font-semibold transition-colors",
+                  follow ? "border-acid bg-raised text-acid" : "border-input text-muted-foreground"
                 )}
               >
                 <ArrowDown className="h-4 w-4" /> Follow video
@@ -560,6 +519,48 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
             </div>
           )}
           </div>
+
+          {/* The brief: four lines, each one a moment you can play */}
+          {brief && (
+            <ol hidden={tab !== "brief"} className="mt-5 divide-y divide-border overflow-hidden rounded-card border border-border bg-surface">
+              {briefCells.map(({ key, label }) => {
+                const cell = brief[key];
+                if (!cell?.text) return null;
+                const at = typeof cell.at === "number" ? formatStamp(cell.at) : null;
+                const row = "grid w-full grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1.5 px-5 py-4 text-left sm:grid-cols-[124px_1fr_auto]";
+                const body = (
+                  <>
+                    <span className="sx-label !text-[10px] text-acid max-sm:order-1">{label}</span>
+                    <span className="text-[15.5px] leading-[1.6] text-foreground max-sm:order-3 max-sm:col-span-2">{cell.text}</span>
+                    {at && (
+                      <span className="max-sm:order-2 [&>span]:group-hover:border-acid [&>span]:group-hover:bg-acid [&>span]:group-hover:text-[#0a0a08]">
+                        <PlayPill at={at} />
+                      </span>
+                    )}
+                  </>
+                );
+                return (
+                  <li key={key}>
+                    {at ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          track("Episode jump", { from: "brief", part: label, episode: `E${number}` });
+                          seek(cell.at as number);
+                        }}
+                        aria-label={`${label}: play from ${at}`}
+                        className={cn(row, "group transition-colors duration-150 hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-acid")}
+                      >
+                        {body}
+                      </button>
+                    ) : (
+                      <div className={row}>{body}</div>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          )}
 
           {/* Transcript: rendered in full on the server so it is readable by search and AI crawlers */}
           <div hidden={tab !== "transcript"} ref={transcriptRef}>
@@ -595,7 +596,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
                         }}
                         title={`Play from ${formatStamp(p.start)}`}
                         className={cn(
-                          "flex flex-col sm:flex-row gap-1.5 sm:gap-5 rounded-[2px] px-3 sm:px-4 transition-colors cursor-pointer hover:bg-surface",
+                          "flex flex-col sm:flex-row gap-1.5 sm:gap-5 rounded-ctl px-3 sm:px-4 transition-colors cursor-pointer hover:bg-surface",
                           tiny ? "py-1" : showSpeaker ? "pt-4 pb-2" : "py-2",
                           i === activeIndex && "!bg-raised"
                         )}
@@ -634,7 +635,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
               <button
                 type="button"
                 onClick={() => setFollow(true)}
-                className="sticky bottom-4 mx-auto mt-[-56px] block rounded-[2px] px-4 min-h-11 text-sm font-semibold text-[#0a0a08] shadow-lg"
+                className="sticky bottom-4 mx-auto mt-[-56px] block rounded-ctl px-4 min-h-11 text-sm font-semibold text-[#0a0a08] shadow-lg"
                 style={{ background: GREEN }}
               >
                 Jump to now · {formatStamp(now)}
@@ -645,7 +646,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
           {/* Ask (phones) */}
           {!isDesktop && (
             <div hidden={tab !== "ask"} className="pt-3">
-              <div style={{ height: boxHeight }} className="rounded-[2px] border border-border bg-surface flex flex-col overflow-hidden">
+              <div style={{ height: boxHeight }} className="rounded-card border border-border bg-surface flex flex-col overflow-hidden">
                 {chat}
               </div>
             </div>
@@ -663,7 +664,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
                       track("Episode jump", { from: "chapter", part: c.title, episode: `E${number}` });
                       seek(c.start);
                     }}
-                    className={cn("w-full flex items-center gap-4 px-3 py-3.5 border-b border-border text-left rounded-[2px]", i === activeChapter && "bg-raised")}
+                    className={cn("w-full flex items-center gap-4 px-3 py-3.5 border-b border-border text-left rounded-ctl", i === activeChapter && "bg-raised")}
                   >
                     <span className="w-16 tabular-nums text-sm font-semibold text-acid">{formatStamp(c.start)}</span>
                     <span className="flex-1 font-sans text-[17px]">{c.title}</span>
@@ -679,7 +680,7 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
 
           {/* Moments */}
           <div hidden={tab !== "moments"} className="pt-5">
-            <div className="grid grid-cols-1 gap-px border border-border bg-border md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-px overflow-hidden rounded-card border border-border bg-border md:grid-cols-2">
               {moments.map((m, i) => (
                 <button
                   key={`${m.start}-${i}`}
@@ -717,8 +718,8 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
           // The rail always fills the screen: slot + next card take their size, the chat takes the rest.
           style={{ height: "calc(100dvh - var(--header-height, 57px) - 50px)", minHeight: 560 }}
         >
-          {mini && <div ref={slotRef} className="aspect-video w-full shrink-0 rounded-[2px] bg-surface" aria-hidden="true" />}
-          <section className="flex-1 min-h-[300px] rounded-[2px] border border-border bg-surface flex flex-col overflow-hidden">
+          {mini && <div ref={slotRef} className="aspect-video w-full shrink-0 rounded-card bg-surface" aria-hidden="true" />}
+          <section className="flex-1 min-h-[300px] rounded-card border border-border bg-surface flex flex-col overflow-hidden">
             {chat}
           </section>
           {!mini && <div className="shrink-0">{nextCard}</div>}

@@ -29,7 +29,7 @@ export function EpisodeCards({ text, narrow = false }: { text: string; narrow?: 
   return (
     <div className="not-prose mt-6">
       <p className="sx-label mb-2.5 !text-[10px] text-dim">{keys.length === 1 ? "The episode" : "The episodes"}</p>
-      <div className={`grid grid-cols-1 gap-px border border-border bg-border ${narrow ? "" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
+      <div className={`grid grid-cols-1 gap-px overflow-hidden rounded-card border border-border bg-border ${narrow ? "" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
         {keys.map((key) => {
           const ep = EPISODE_INDEX[key];
           return (

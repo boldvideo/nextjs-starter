@@ -50,6 +50,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-card: 10px;
+  --radius-ctl: 6px;
 }
 
 :root {
@@ -182,12 +184,14 @@
 html:root,
 html.dark,
 html.light {
-  --radius: 2px;
+  /* Their community pages: 10px cards, pills for chips. Controls sit between. */
+  --radius: 10px;
   --background: #0a0a08;
   --surface: #111110;
   --raised: #1a1a17;
   --muted: #1a1a17;
-  --border: #3a3a35;
+  /* Hairlines and card edges are quiet; controls (--input) keep the stronger line. */
+  --border: #2a2a26;
   --input: #3a3a35;
   --foreground: #f4f2ec;
   --muted-foreground: #a3a39b;
@@ -263,7 +267,7 @@ html.light {
     font-size: 12px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    border-radius: 2px;
+    border-radius: var(--radius-ctl);
     border: 1px solid var(--acid);
     background: var(--acid);
     color: #0a0a08;
@@ -283,7 +287,7 @@ html.light {
   .sx-btn-ghost {
     background: transparent;
     color: var(--foreground);
-    border-color: var(--border);
+    border-color: var(--input);
   }
   .sx-btn-ghost:hover {
     background: transparent;

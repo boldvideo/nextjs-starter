@@ -103,14 +103,14 @@ export function CompanyLogo({ profile, size = 22 }: { profile: CompanyProfile | 
         width={size}
         height={size}
         onError={() => setBroken(true)}
-        className="shrink-0 rounded-[2px] object-cover bg-white ring-1 ring-black/5"
+        className="shrink-0 rounded-ctl object-cover bg-white ring-1 ring-black/5"
         style={{ width: size, height: size }}
       />
     );
   }
   return (
     <span
-      className="shrink-0 rounded-[2px] bg-[#141414] text-[#0a0a08] font-bold flex items-center justify-center"
+      className="shrink-0 rounded-ctl bg-[#141414] text-[#0a0a08] font-bold flex items-center justify-center"
       style={{ width: size, height: size, fontSize: size * 0.48 }}
     >
       {letter}
@@ -137,8 +137,8 @@ export function CompanyPill({
         onClick={onOpen}
         aria-expanded={open}
         className={cn(
-          "inline-flex max-w-full items-center gap-1.5 rounded-[2px] border py-1 pl-1 pr-2.5 text-[13px] text-acid transition-colors",
-          open ? "border-acid bg-raised" : "border-border bg-raised hover:bg-raised"
+          "inline-flex max-w-full items-center gap-1.5 rounded-full border py-1 pl-1 pr-2.5 text-[13px] text-acid transition-colors",
+          open ? "border-acid bg-raised" : "border-input bg-raised hover:bg-raised"
         )}
       >
         <CompanyLogo profile={profile} />
@@ -151,7 +151,7 @@ export function CompanyPill({
     <button
       type="button"
       onClick={onAdd}
-      className="inline-flex items-center gap-1.5 rounded-[2px] border border-border bg-background py-1 pl-1 pr-3 min-h-8 text-[13px] font-semibold text-acid hover:border-acid transition-colors"
+      className="inline-flex items-center gap-1.5 rounded-full border border-input bg-background py-1 pl-1 pr-3 min-h-8 text-[13px] font-semibold text-acid hover:border-acid transition-colors"
     >
       <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px] border-dashed border-border text-acid">
         <Plus className="h-3 w-3" />
@@ -185,7 +185,7 @@ export function CompanyUrlBox({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-[2px] border-[1.5px] border-acid bg-background shadow-[0_0_0_4px_rgba(232,255,71,0.10)] flex flex-col",
+        "relative overflow-hidden rounded-card border border-acid bg-background shadow-[0_0_0_4px_rgba(232,255,71,0.10)] flex flex-col",
         className
       )}
     >
@@ -198,7 +198,7 @@ export function CompanyUrlBox({
       {reading ? (
         <div className="flex-1 px-4 pt-3.5 flex flex-col gap-1.5" aria-live="polite">
           <span className="flex items-center gap-2 text-[14px] font-semibold">
-            <span className="h-[18px] w-[18px] rounded-[2px] bg-muted animate-pulse" />
+            <span className="h-[18px] w-[18px] rounded-ctl bg-muted animate-pulse" />
             {state.domain}
           </span>
           <span className="text-[13px] text-muted-foreground line-clamp-2">
@@ -254,7 +254,7 @@ export function CompanyUrlBox({
             type="button"
             onClick={() => void submit()}
             disabled={!value.trim()}
-            className="rounded-[2px] px-4 min-h-9 text-[13px] font-semibold text-[#0a0a08] disabled:opacity-40 transition-opacity"
+            className="rounded-ctl px-4 min-h-9 text-[13px] font-semibold text-[#0a0a08] disabled:opacity-40 transition-opacity"
             style={{ background: GREEN }}
           >
             Read it
@@ -277,7 +277,7 @@ function CompanyDetails({ profile, onRemove, onClose }: { profile: CompanyProfil
     writeCompany(next);
   };
   const input =
-    "mt-1.5 block w-full rounded-[2px] border border-border bg-background px-3 h-11 font-sans text-[16px] sm:text-[15px] font-light normal-case tracking-normal text-foreground outline-none transition-colors placeholder:text-dim focus:border-acid";
+    "mt-1.5 block w-full rounded-ctl border border-input bg-background px-3 h-11 font-sans text-[16px] sm:text-[15px] font-light normal-case tracking-normal text-foreground outline-none transition-colors placeholder:text-dim focus:border-acid";
   const label = "sx-label block !text-[10px] text-muted-foreground";
 
   return (
@@ -311,7 +311,7 @@ function CompanyDetails({ profile, onRemove, onClose }: { profile: CompanyProfil
             onChange={(e) => set({ summary: e.target.value })}
             rows={4}
             autoFocus
-            className="mt-2 block w-full resize-none rounded-[2px] border border-acid bg-background px-3 py-2 text-[16px] leading-relaxed text-foreground outline-none sm:text-[14px]"
+            className="mt-2 block w-full resize-none rounded-ctl border border-acid bg-background px-3 py-2 text-[16px] leading-relaxed text-foreground outline-none sm:text-[14px]"
             {...PASSWORD_MANAGERS_OFF}
           />
         ) : (
@@ -335,7 +335,7 @@ function CompanyDetails({ profile, onRemove, onClose }: { profile: CompanyProfil
       <div className="mt-4 border-t border-border pt-4">
         <p className={label}>What your site doesn’t say · all optional</p>
 
-        <div className="mt-3 grid grid-cols-2 gap-px border border-border bg-border" role="radiogroup" aria-label="Transformer or Builder">
+        <div className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-ctl border border-input bg-input" role="radiogroup" aria-label="Transformer or Builder">
           {(
             [
               ["Transformer", "Existing SaaS, going AI-first"],
@@ -394,7 +394,7 @@ function CompanyDetails({ profile, onRemove, onClose }: { profile: CompanyProfil
               type="button"
               onClick={() => set({ stage: st })}
               className={cn(
-                "rounded-[2px] border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors",
+                "rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors",
                 draft.stage === st ? "border-acid text-acid" : "border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
               )}
             >
@@ -470,9 +470,9 @@ export function CompanyPopover({
         aria-modal="true"
         aria-label="Your company"
         className={cn(
-          "fixed z-[61] border border-border bg-surface p-5 text-left shadow-[0_24px_80px_rgba(0,0,0,0.7)] overflow-y-auto sx-scroll",
+          "fixed z-[61] rounded-t-card sm:rounded-card border border-border bg-surface p-5 text-left shadow-[0_24px_80px_rgba(0,0,0,0.7)] overflow-y-auto sx-scroll",
           "inset-x-0 bottom-0 max-h-[88dvh] rounded-t-[10px] pb-6",
-          "sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[460px] sm:max-w-[calc(100vw-2rem)] sm:max-h-[min(720px,calc(100dvh-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[2px] sm:p-6"
+          "sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[460px] sm:max-w-[calc(100vw-2rem)] sm:max-h-[min(720px,calc(100dvh-3rem))] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-ctl sm:p-6"
         )}
       >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border sm:hidden" />
@@ -517,7 +517,7 @@ export function CompanyDetectStrip({ text, className }: { text: string; classNam
   return (
     <div
       className={cn(
-        "mt-2 flex flex-wrap items-center gap-2 rounded-[2px] border border-border bg-surface px-3 py-2 text-[13.5px]",
+        "mt-2 flex flex-wrap items-center gap-2 rounded-card border border-border bg-surface px-3 py-2 text-[13.5px]",
         className
       )}
       aria-live="polite"
@@ -538,7 +538,7 @@ export function CompanyDetectStrip({ text, className }: { text: string; classNam
           <button
             type="button"
             onClick={() => void read(domain)}
-            className="rounded-[2px] px-3.5 min-h-8 text-[13px] font-semibold text-[#0a0a08]"
+            className="rounded-ctl px-3.5 min-h-8 text-[13px] font-semibold text-[#0a0a08]"
             style={{ background: GREEN }}
           >
             Yes
@@ -568,29 +568,29 @@ export function CompanySeat() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         className={cn(
-          "flex items-center gap-2.5 rounded-[2px] border-[1.5px] py-2 pl-2 text-left transition-colors",
+          "flex h-full min-h-[66px] items-center gap-3 rounded-card border py-2.5 pl-2.5 text-left transition-colors",
           profile?.business_name
-            ? "border-acid bg-raised hover:bg-raised pr-3"
-            : "border-dashed border-border bg-surface hover:bg-raised pr-4"
+            ? "border-acid bg-surface hover:bg-raised pr-4"
+            : "border-dashed border-input bg-surface hover:bg-raised pr-5"
         )}
       >
         {profile?.business_name ? (
           <>
-            <CompanyLogo profile={profile} size={40} />
-            <span className="text-[13px] leading-tight">
-              <span className="block font-semibold text-foreground">{profile.business_name}</span>
-              <span className="text-acid">You · answers are for you</span>
+            <CompanyLogo profile={profile} size={44} />
+            <span className="leading-tight">
+              <span className="block text-[15px] text-foreground">{profile.business_name}</span>
+              <span className="sx-label mt-1 block !text-[10px] text-acid">You · answers are for you</span>
             </span>
-            <Pencil className="ml-1 h-3.5 w-3.5 text-acid" />
+            <Pencil className="ml-2 h-3.5 w-3.5 text-acid" />
           </>
         ) : (
           <>
-            <span className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-dashed border-border text-acid">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full border border-dashed border-input text-acid">
               <Plus className="h-4 w-4" />
             </span>
-            <span className="text-[13px] leading-tight">
-              <span className="block font-semibold text-acid">You</span>
-              <span className="text-foreground/70">Add your company</span>
+            <span className="leading-tight">
+              <span className="block text-[15px] text-foreground">You</span>
+              <span className="sx-label mt-1 block !text-[10px] text-acid">Add your company</span>
             </span>
           </>
         )}
