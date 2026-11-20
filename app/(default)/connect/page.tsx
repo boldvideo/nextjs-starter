@@ -129,7 +129,7 @@ export default function ConnectPage() {
             ))}
           </div>
           <p className="mt-6 max-w-3xl text-[14px] leading-[1.6] text-dim">
-            In this demo the address is open to anyone who has it and covers the 21 public episodes. Member sign-in and per-tier access are
+            In this demo the address is open to anyone who has it and covers the public episodes. Member sign-in and per-tier access are
             switched on when it runs on your own member accounts.
           </p>
           <Link href="/" className="sx-btn sx-btn-ghost mt-10">

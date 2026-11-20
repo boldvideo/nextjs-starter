@@ -2238,7 +2238,7 @@
     },
     "moments": [
       {
-        "title": "Des explains Intercom's founding insight: subscription businesses needed loyalty and relationships, which require conversation, and the internet had no good way to do customer communication.",
+        "title": "Des explains Intercom's founding insight: internet businesses had no good way to talk to customers, and subscription models made loyalty built through conversation critical.",
         "quote": "The original insight was every business was becoming a kind of an internet SaaS business, and there was no good way to do customer communication, full stop. You couldn't send messages to your customers.",
         "start": 37,
         "end": 124,
@@ -2246,15 +2246,23 @@
         "type": "insight"
       },
       {
-        "title": "Des recalls an early user's excited monologue on a Skype call about talking to customers all day, which told him Intercom had hit product-market fit.",
-        "quote": "I think the thing that probably caught me off guard, I realized after me and Eoin had a conversation with one of our early users, and he just, as soon as the Skype call connected, that's how old it was, it was a Skype call.",
-        "start": 128,
+        "title": "Des recalls an early user's excited monologue on a Skype call that made him realize Intercom had hit product-market fit.",
+        "quote": "And then to the question of, did I think or did we think it was going to get that big?",
+        "start": 124,
         "end": 158,
         "speaker": "Des Traynor",
         "type": "story"
       },
       {
-        "title": "Des explains why Fin was always built as a separate identity from Intercom: to get a fresh look from the industry, sit alongside new AI companies, and work on other platforms like Salesforce and Zendesk.",
+        "title": "Des names mid-stage upmarket pricing as his biggest regret and moving the Intercom widget onto websites as a major growth unlock.",
+        "quote": "The taking back stuff is easy. It'd be everything to do with pricing in the mid-stage. I think I'm really happy where our pricing is now. I think we did a lot of great work.",
+        "start": 181,
+        "end": 225,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des explains why Fin was always built as a separate identity from Intercom: to get a fresh look from the industry and to work independently on any platform.",
         "quote": "Well, there's 2 separate things there. I think we always built Fin as a separate identity and as a separate named different thing to Intercom because we needed, at the very least, we needed the industry to kind of give us a fresh look.",
         "start": 391,
         "end": 459,
@@ -2262,127 +2270,111 @@
         "type": "insight"
       },
       {
-        "title": "Des argues that legacy brand recognition can be a counterweight, using Workday building a payroll app as an example, and explains why retiring Intercom puts the onus on Fin to build its own brand equity.",
+        "title": "Des argues that legacy brand recognition can be a counterweight, using Workday building a payroll app as an example, and that you must be willing to shed it.",
         "quote": "I think people massively underestimate the degree to which their legacy can hold them back. And the way in which they underestimate is twofold. They don't realize how much just being known isn't always useful.",
         "start": 477,
-        "end": 544,
+        "end": 525,
         "speaker": "Des Traynor",
         "type": "insight"
       },
       {
-        "title": "Des says the first test of AI-native is whether the AI actually works, covering reliability, hallucination and escalation, then how Fin goes full stack with its Apex post-trained model and about 27 connected systems.",
+        "title": "Des says the first test of an AI-native product is simply whether the AI works: answers reliably, stays on topic, avoids hallucination, and escalates well.",
         "quote": "The biggest test initially is just, does the AI actually work? And it sounds silly to say that, but there's so many AI products out there that aren't performing at the level that they need to.",
         "start": 677,
-        "end": 766,
+        "end": 735,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des describes how full-stack Fin is: its own post-trained model Apex, six or seven architecture revisions, and about 27 connected systems.",
+        "quote": "Then you're like, the question is then how full stack has the business gone on that?",
+        "start": 735,
+        "end": 762,
+        "speaker": "Des Traynor",
+        "type": "insight"
+      },
+      {
+        "title": "Des contrasts AI-native design, which minimizes user input and infers what it can, with AI-assisted UI that merely adds a sparkly autofill button.",
+        "quote": "And then you get up to the actual product layer, and then you get up to the UI. And I think from top to bottom, you need to be thinking about it from an AI-first perspective.",
+        "start": 763,
+        "end": 842,
         "speaker": "Des Traynor",
         "type": "framework"
       },
       {
-        "title": "Des predicts most SaaS products will converge on a simple text-box interaction model, with dashboards for recurring queries and creative tools like Photoshop and Ableton as exceptions.",
+        "title": "Des predicts most SaaS products will converge on a simple text-area interface, with dashboards for recurring queries and creative tools like Photoshop as exceptions.",
         "quote": "I mean, at some point you realize those bells and whistles are really just bells and whistles. Like I think the future, like, I started a bit of a controversy on Twitter over this topic.",
         "start": 886,
-        "end": 972,
+        "end": 973,
         "speaker": "Des Traynor",
         "type": "insight"
       },
       {
-        "title": "Des argues that cheaper code and AI-native UI remove the two constraints that kept products small, so software will merge and converge across product boundaries.",
+        "title": "Des argues that cheap code and AI-native UI remove the two historical limits on product scope, leading to an era of merging and converging products.",
         "quote": "Or at the very least, we're going to head for this era of what I would call the merge and converge.",
         "start": 1041,
-        "end": 1132,
+        "end": 1099,
         "speaker": "Des Traynor",
         "type": "framework"
       },
       {
-        "title": "Des advises legacy SaaS founders to 'beware of cope' and evaluate their business coldly by asking what they would build today, and what they'd actually keep.",
+        "title": "Asked how legacy SaaS companies should handle rebuilding, Des says 'beware of cope' and proposes a cold-distance test of what you'd build today, as if someone else inherited your business.",
         "quote": "I guess beware of cope. It's useful to get a good distance from your company and to drop some of the nostalgia and fondness that you have for the way things were and evaluate things from a cold perspective.",
         "start": 1248,
-        "end": 1321,
+        "end": 1324,
         "speaker": "Des Traynor",
         "type": "framework"
       },
       {
-        "title": "Des says Fin's teams are getting smaller, with merged EM/PM/engineer roles and tripled productivity from going all in on Claude Code.",
+        "title": "Des says Fin's teams are shrinking and roles merging, with Claude Code tripling productivity.",
         "quote": "I think it'll be leaner relative to the footprint of software and like the product categories that we want to play in. Definitely, yes. Already we see this in that the team sizes are smaller.",
         "start": 1450,
-        "end": 1519,
+        "end": 1508,
         "speaker": "Des Traynor",
         "type": "insight"
       },
       {
-        "title": "Des defines a Fin resolution as an answer the user acknowledges or doesn't follow up on within 24 hours, and admits per-resolution pricing means Fin earns nothing when it does lots of work but hands over to a human.",
+        "title": "Des defines a Fin resolution like a human one and admits the per-resolution pricing model means Fin earns nothing when it does lots of work before handing off.",
         "quote": "The definition is basically pretty much exactly what we'd use for a human, which is like Fin gives an answer and the user can either directly or indirectly acknowledge that answer, or they can just go away.",
         "start": 1530,
         "end": 1604,
         "speaker": "Des Traynor",
-        "type": "q_and_a"
+        "type": "insight"
       },
       {
-        "title": "Des contrasts Intercom's historic Jobs-to-Be-Done, customer-first product process with the AI era, where customers can't specify what's possible and teams must start with the technology.",
+        "title": "Des explains why building AI agents has flipped Intercom's customer-backward Jobs to Be Done process into a technology-first one, since customers can't know what's possible and reliability must come first.",
         "quote": "Well, historically, the way we built software in Intercom was we'd pick a certain job to be done, which would have been evidenced by a product manager through scores of product interviews.",
         "start": 1672,
-        "end": 1738,
+        "end": 1751,
         "speaker": "Des Traynor",
         "type": "framework"
       },
       {
-        "title": "Des explains that during rapid technological change you must first establish what is doable, performant and reliable, using the example of inferring help docs from source code, and only then find the problems it solves.",
-        "quote": "So you really, like, the technology is changing too fast for our customers to be experts in anything other than the problems that they have.",
-        "start": 1738,
-        "end": 1822,
-        "speaker": "Des Traynor",
-        "type": "insight"
-      },
-      {
-        "title": "Des says brand is not the moat in AI right now: brand gets Fin into the consideration set, but performance in a bake-off is what wins the contract.",
-        "quote": "I don't think it is right now. I think right now performance is probably still the thing that like most of our larger customers, and we have like customers who like, you know, pay us for like millions of resolutions a year, say, right?",
-        "start": 1863,
-        "end": 1936,
-        "speaker": "Des Traynor",
-        "type": "insight"
-      },
-      {
-        "title": "Des describes how AI sales shifted from screenshots and feature checklists to evidence-based pilots, where Fin gives customers a script, grading criteria and spreadsheet to score their last 1,000 questions over about four weeks.",
-        "quote": "Yeah, it has. Because of the pilots that we do and the bake-offs. Selling SaaS in the olden days was you show up with a big bag of screenshots and some feature checklists and you're like, ta-da, our product's nicer than their product.",
-        "start": 1938,
+        "title": "Des describes how AI sales now require pilots: Fin gives customers a script to pull their last 1,000 questions, a grading framework, and a spreadsheet to score, leading to a four-week evaluation.",
+        "quote": "Because of the pilots that we do and the bake-offs. Selling SaaS in the olden days was you show up with a big bag of screenshots and some feature checklists and you're like, ta-da, our product's nicer than their product.",
+        "start": 1939,
         "end": 2017,
         "speaker": "Des Traynor",
         "type": "framework"
       },
       {
-        "title": "Des describes the common boomerang where customers try to build their own support agent, stall at about 44% resolution, and learn that the last stretch takes years and dozens of people.",
-        "quote": "There's something around the naivety of the customers. A very common thing we see a lot is people saying, I'm going to go and build my own one. We're like, okay.",
-        "start": 2057,
-        "end": 2148,
+        "title": "Des describes customers who try to build their own support agent, plateau around 44%, and boomerang back, since the last stretch takes years and dozens of engineers.",
+        "quote": "A very common thing we see a lot is people saying, I'm going to go and build my own one. We're like, okay.",
+        "start": 2062,
+        "end": 2135,
         "speaker": "Des Traynor",
         "type": "insight"
       },
       {
-        "title": "Responding to Alex's Claude Code event-tech prototype, Des says a localhost app that looks done may be 3 arrows in appearance but 400 arrows from something shippable and reliable.",
+        "title": "Des says a convincing prototype may be 3 arrows when shipping needs 400, and that replacing SaaS with internal builds should be a deliberate strategy, not a Claude Code quick win.",
         "quote": "I think that's valid. Like the security, stability, reliability, like all that sort of stuff, you start to worry about them because it's one thing like to make a play app running on localhost, getting it to something that's going to like, say, withstand the crunch of a popular conference, it's actually just different.",
         "start": 2204,
-        "end": 2237,
+        "end": 2273,
         "speaker": "Des Traynor",
         "type": "insight"
       },
       {
-        "title": "Des says replacing SaaS with internally built tools should be a deliberate strategic choice about spending engineering time, not a reaction to a quick Claude Code win.",
-        "quote": "And I think you'll see that happen when people and businesses move into like an extremely crunch profitability mode or whatever.",
-        "start": 2243,
-        "end": 2288,
-        "speaker": "Des Traynor",
-        "type": "insight"
-      },
-      {
-        "title": "Des predicts that by 2028 most customer queries will be answered instantly and accurately, changing user expectations and reducing software friction.",
-        "quote": "I think 2028 is probably— I think what will happen is the vast majority of customer queries will be answered instantly and accurately, and people will just come to expect that.",
-        "start": 2306,
-        "end": 2349,
-        "speaker": "Des Traynor",
-        "type": "insight"
-      },
-      {
-        "title": "Des says human support teams will handle the hard, messy, relationship-heavy queries in a deeper, more helpful way once AI strips away the bottom 80-90% of volume.",
+        "title": "Des predicts that by 2028 human support will focus on messy, high-stakes relationship work while AI handles the bottom 80-90% of queries.",
         "quote": "And then what does the human support do? Well, I think that what they'll be doing is frankly the hard, messy relationship building stuff. It'll be the, hey, we need to merge these 2 accounts.",
         "start": 2350,
         "end": 2419,
@@ -2390,15 +2382,15 @@
         "type": "insight"
       },
       {
-        "title": "Des argues point solutions are no longer a sustainable business position because cheap code lets owners of the wider workflow clone and absorb them.",
-        "quote": "Couple of thoughts. One is like, I don't think being a point solution is a sustainable position anymore. I think you have to solve an entire problem properly end to end.",
-        "start": 2448,
+        "title": "Des argues point solutions are no longer sustainable businesses because cheap code lets whoever owns the rest of the workflow clone them.",
+        "quote": "One is like, I don't think being a point solution is a sustainable position anymore. I think you have to solve an entire problem properly end to end.",
+        "start": 2449,
         "end": 2499,
         "speaker": "Des Traynor",
         "type": "insight"
       },
       {
-        "title": "Des says owners of strong systems of record like Salesforce and Workday survive, while second- or third-biggest players will be squeezed and the wedge-to-suite-to-platform strategy will fade.",
+        "title": "Des says owners of strong systems of record will survive, while second- or third-biggest players face pressure and the wedge-suite-platform strategy fades, leaving fewer, bigger businesses.",
         "quote": "So then that's what doesn't exist for sure. In terms of who definitely survives, anyone who owns a strong system of record, I think, still survives.",
         "start": 2499,
         "end": 2572,
@@ -2406,20 +2398,12 @@
         "type": "insight"
       },
       {
-        "title": "Des describes building a personal portfolio tool over three weekends to benchmark his angel investments against the S&P, gold and Bitcoin, which showed everyone made bad decisions in 2021.",
-        "quote": "I've definitely built software. I've built, you know, like something I care a lot about is like I invest in a lot of software companies and something I've been trying to work out is, am I actually a good investor or not?",
-        "start": 2607,
-        "end": 2698,
+        "title": "Des describes building a personal portfolio tool over three weekends to benchmark his angel investments against the S&P, gold, and Bitcoin, finding that everyone made poor decisions in 2021.",
+        "quote": "I've built, you know, like something I care a lot about is like I invest in a lot of software companies and something I've been trying to work out is, am I actually a good investor or not?",
+        "start": 2612,
+        "end": 2696,
         "speaker": "Des Traynor",
         "type": "story"
-      },
-      {
-        "title": "Asked what nobody asks, Des says public discourse over-indexes on AI worries and ignores the potential upside in bringing education and healthcare to billions of people.",
-        "quote": "In the context of press specifically, I think we are getting way too literate in ways to worry about AI and criticize AI.",
-        "start": 2776,
-        "end": 2837,
-        "speaker": "Des Traynor",
-        "type": "q_and_a"
       }
     ]
   },
@@ -3141,6 +3125,176 @@
         "start": 2175,
         "end": 2248,
         "speaker": "Nicolas Sharp",
+        "type": "insight"
+      }
+    ]
+  },
+  "qoTze6YO7oU": {
+    "brief": {
+      "move": {
+        "text": "Besnik stopped bolting AI features onto Salesflow and rebuilt it as a full-stack GTM agent on a new stack, keeping the brand.",
+        "at": 708,
+        "quote": "That's why we went from an outreach tool to a fully full-stack GTM agent effectively."
+      },
+      "numbers": {
+        "text": "Besnik estimates the 8-month rebuild at up to $300,000 to $500,000, including team time and spend budgeted for the next three months.",
+        "at": 991,
+        "quote": "that's kind of the level that we put in so far would be around up to 300,000 to 500,000, I would say"
+      },
+      "broke": {
+        "text": "As a non-technical founder, Besnik depended on hires he could not fully judge. Finding the right AI engineers took longer than he wanted.",
+        "at": 1441,
+        "quote": "which means you will have a level of dependency on ensuring that these folks that you're hiring know what they're doing"
+      },
+      "advice": {
+        "text": "Besnik tells founders to assess their market and what customers now expect from AI, and to set the depth of rebuild by sector.",
+        "at": 2537,
+        "quote": "my advice would be that you should obviously assess your market and your customers' expectations in the AI."
+      }
+    },
+    "moments": [
+      {
+        "title": "Besnik explains that in-person events give him first-party market information, market signals and relationships, including 16 meetings at Shift AI Europe.",
+        "quote": "I think with any events, that it's the art of showing up ultimately is about what sort of things that you know you could be missing out if you're not there in front with like-minded people, founders, investors, partners.",
+        "start": 30,
+        "end": 118,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Besnik compares running multiple lean businesses to placing bets on several stocks, with the difference that he controls value creation from inception, while Salesflow remains the main focus.",
+        "quote": "3 different businesses in different sectors, effectively. Mostly, well, because I mean, if you look at how people do stocks, what do you do? You place bets on multiple stocks.",
+        "start": 161,
+        "end": 196,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Besnik defines AI-native with three criteria: agentic-led through an intelligent layer first, MCP-led, and moving toward headless.",
+        "quote": "I suppose the short answer would be yes, but I guess the long answer is depends how you coin what AI-native really means, right? So it's agentic-led.",
+        "start": 232,
+        "end": 263,
+        "speaker": "Besnik Vrellaku",
+        "type": "framework"
+      },
+      {
+        "title": "Besnik traces his AI awareness to a San Francisco summit four years earlier, which led first to bolting AI features onto Salesflow, including acquiring a small agentic personalization SaaS.",
+        "quote": "So it probably started actually when I was in San Francisco 4 years ago. When 4 years was one of the first AI summits that I went to.",
+        "start": 297,
+        "end": 373,
+        "speaker": "Besnik Vrellaku",
+        "type": "story"
+      },
+      {
+        "title": "After an engineering-heavy New York conference in May, Besnik concluded that the 8-year-old stack limited velocity and that only a full rebuild could add exponential value versus bolt-ons.",
+        "quote": "But over the last year, equally again, I went to a little bit more of an engineering-heavy conference in New York in May.",
+        "start": 374,
+        "end": 454,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Besnik ran a dual-track rebuild by hiring a separate AI engineering squad so the existing team could keep serving thousands of users.",
+        "quote": "So what I did was naturally we still had to serve, we almost have to serve thousands of users, right?",
+        "start": 600,
+        "end": 678,
+        "speaker": "Besnik Vrellaku",
+        "type": "framework"
+      },
+      {
+        "title": "Besnik says the real IP now lies in a specialized, secure agentic layer rather than front-end or back-end features or a generic ChatGPT wrapper.",
+        "quote": "is no longer the case. The IP lays in the agentic layer, right? Obviously, still application, many, but you go into as far as how can you really create a sophisticated agent that's not used off the back of just ChatGPT's dots or Grok or beyond.",
+        "start": 751,
+        "end": 806,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Besnik explains that the rebuild required sacrificing go-to-market activity for five to six months and redirecting scarce bootstrapped resources into engineering.",
+        "quote": "I think I had to make a bit of a sacrifice, to be honest. That sacrifice entailed that naturally in a bootstrapped business, cash is always king.",
+        "start": 839,
+        "end": 923,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Besnik explains why he kept the Salesflow brand: rebuilding tech is one thing, but starting a new brand means earning trust from zero.",
+        "quote": "Starting from scratch, rebuild tech is one thing. Starting from scratch from another brand is like you're acting like any other tool.",
+        "start": 1253,
+        "end": 1317,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Alex shares that shutting down SaaStock after 10.5 years to launch Shift AI showed how hard it is to rebuild trust and credibility under a new brand.",
+        "quote": "Makes sense. And I can speak from personal experience of having run SaaStock for 10 and a half years, deciding to, you know, shutter it and then build a new AI conference.",
+        "start": 1319,
+        "end": 1364,
+        "speaker": "Alex Theuma",
+        "type": "story"
+      },
+      {
+        "title": "Besnik says the hardest lesson as a non-technical founder was finding and judging the right AI engineering talent, since the person leading the transformation is core IP.",
+        "quote": "I think it's, yeah, it's literally going back as a founder mode rebuild. It means that There's a lot you don't know.",
+        "start": 1426,
+        "end": 1510,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Besnik explains a hybrid pricing structure combining a base price with scalable credits, because buyers still want budget predictability from agentic systems.",
+        "quote": "So the way we structured it was a bit of both, basically, because for a lot of reasons, this is the same conundrum that we had around how do we structure branding and With this, in order to— I think that people still want predictability.",
+        "start": 1633,
+        "end": 1709,
+        "speaker": "Besnik Vrellaku",
+        "type": "framework"
+      },
+      {
+        "title": "Besnik argues that in GTM software, SaaS companies that don't deliver ten times the value will be outcompeted, and the real issue is value rather than seat versus credit pricing.",
+        "quote": "that people are making out there. Otherwise, the competition will come in and provide that because that's why SaaS has been— we talk about SaaS is dying and so forth.",
+        "start": 1786,
+        "end": 1839,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Besnik explains the staged early-access-to-January launch as a lean-startup way to control intake and meet quality gates before scaling aggressively.",
+        "quote": "Well, in the conventional Lean Startup world methodologies is always in alpha, beta, then more public sort of soft launch aspect is to control quality.",
+        "start": 1873,
+        "end": 1944,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Besnik says an AI rebuild means redesigning the team as well as the product, so each person can do the work of five.",
+        "quote": "The only way, a part of the rebuild is not just the tech. It's the team organizational design. If we talk about business lessons 101 is what does also your business organization actually look like?",
+        "start": 2077,
+        "end": 2124,
+        "speaker": "Besnik Vrellaku",
+        "type": "insight"
+      },
+      {
+        "title": "Over eight months Salesflow stripped out every internal tool that agents couldn't work with, so MCPs and gathered context support ten times the output, now equivalent to a team of 60–70.",
+        "quote": "So what we've done over the course of 8 months is we stripped out every single tool we use internally.",
+        "start": 2278,
+        "end": 2365,
+        "speaker": "Besnik Vrellaku",
+        "type": "framework"
+      },
+      {
+        "title": "Besnik advises SaaS founders that rebuild depth depends on sector, regulation, switching costs and threat level, and points to Nathan Latka's worksheet for categorizing a SaaS as data, model or infrastructure.",
+        "quote": "I suppose it varies per industry, right? Because if you're in fintech regulated industries, there's only so much rebuild you can really do. Okay? So for us, we're a full-stack GTM AI agent for revenue teams or whatever.",
+        "start": 2450,
+        "end": 2536,
+        "speaker": "Besnik Vrellaku",
+        "type": "framework"
+      },
+      {
+        "title": "Besnik predicts that 50% of SaaS will rebuild, 20% will be wiped out and 20% have more time, with higher-ACV products most at risk from customers building internally and PLG products more protected.",
+        "quote": "So my advice would be just depending on your sector, it might— and that's why I say rebuild is because I think its majority will have to rebuild because right now, I think a lot of companies will the next 2, 3 years be in a position where they can build part of what they want to solve internally.",
+        "start": 2568,
+        "end": 2653,
+        "speaker": "Besnik Vrellaku",
         "type": "insight"
       }
     ]

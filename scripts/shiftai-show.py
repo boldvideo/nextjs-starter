@@ -2,6 +2,7 @@
 import re, html, json, sys, unicodedata
 R = "/Users/mf/code/BOLD/_RESEARCH/brand-dossier-shiftai"
 HEAD = {  # yt id -> (episode number in the podcast feed, headline in the show's own title words)
+ "qoTze6YO7oU": (24, "Your tech stack is holding you back."),
  "6YA50yEZFpU": (23, "We used to ship in a week. Now it's 2 hours."),
  "OXntdt6N0Mc": (22, "$23M ARR and still not safe."),
  "Lhd-pOysdU8": (21, "Inside Docket's demand agent."),
@@ -28,7 +29,7 @@ SHORT = {"Fin (formerly Intercom)": "Fin", "Airspeed (formerly Glyphic AI)": "Ai
 URLS = {"Aircall": "aircall.io", "Agorapulse": "agorapulse.com", "Docket": "docket.io", "Helply": "helply.com", "Pigment": "pigment.com",
  "Winning by Design": "winningbydesign.com", "Perlon AI": "perlon.ai", "Valueships": "valueships.com", "ClickUp": "clickup.com", "Enginy": "enginy.ai",
  "TestGorilla": "testgorilla.com", "Alguna": "alguna.com", "Light": "light.inc", "Airspeed": "airspeed.ai", "Salesmotion": "salesmotion.io", "Fin": "fin.ai",
- "Fathom": "fathom.ai", "Pylon": "usepylon.com", "re:cap": "re-cap.com", "monday.com": "monday.com", "Attio": "attio.com"}
+ "Fathom": "fathom.ai", "Pylon": "usepylon.com", "re:cap": "re-cap.com", "monday.com": "monday.com", "Attio": "attio.com", "Salesflow": "salesflow.io"}
 def slug(s):
     s = s.replace("Đ", "D").replace("đ", "d")
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
@@ -60,6 +61,8 @@ for it in re.findall(r"<item>(.*?)</item>", feed, re.S):
         if len(out) + len(s) > 235 and out: break
         out = (out + " " + s).strip()
     hooks[n] = out
+# Episodes the podcast feed does not list yet: the hook is the opening of the YouTube description.
+hooks.setdefault(24, "Salesflow was doing multi-million in revenue, but it was running on an eight-year-old tech stack. Besnik Vrellaku spent years adding AI features on top, and every one was held back by what sat underneath.")
 eps = []
 for yt, (n, headline) in HEAD.items():
     r = rows[yt]; co = SHORT.get(r["company"], r["company"])

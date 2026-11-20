@@ -9,6 +9,102 @@ export const HOST = { name: "Alex Theuma", slug: "alex-theuma", role: "Host", co
 
 export const EPISODES: ShowEpisode[] = [
   {
+    "number": 24,
+    "youtubeId": "qoTze6YO7oU",
+    "headline": "Your tech stack is holding you back.",
+    "title": "Your Tech Stack Is Holding You Back. Besnik Vrellaku, CEO of Salesflow AI, on Going AI-Native",
+    "hook": "Salesflow was doing multi-million in revenue, but it was running on an eight-year-old tech stack. Besnik Vrellaku spent years adding AI features on top, and every one was held back by what sat underneath.",
+    "date": "2026-11-20",
+    "duration": 2683,
+    "chaptersFromFeed": false,
+    "guest": {
+      "name": "Besnik Vrellaku",
+      "slug": "besnik-vrellaku",
+      "role": "CEO",
+      "company": "Salesflow",
+      "companyNote": null,
+      "companyUrl": "https://salesflow.io"
+    },
+    "chapters": [
+      {
+        "t": 0,
+        "title": "Reconnecting after Shift AI Europe in Barcelona"
+      },
+      {
+        "t": 143,
+        "title": "Bootstrapping since 16 and running three businesses"
+      },
+      {
+        "t": 218,
+        "title": "Is Salesflow AI-native? His three-part test"
+      },
+      {
+        "t": 297,
+        "title": "The San Francisco talk that planted the idea four years ago"
+      },
+      {
+        "t": 430,
+        "title": "Why bolt-on AI wasn’t enough"
+      },
+      {
+        "t": 570,
+        "title": "Running the rebuild without disrupting thousands of users"
+      },
+      {
+        "t": 703,
+        "title": "From outreach tool to full-stack GTM agent"
+      },
+      {
+        "t": 825,
+        "title": "Halting go-to-market to fund engineering"
+      },
+      {
+        "t": 966,
+        "title": "What the rebuild cost"
+      },
+      {
+        "t": 1007,
+        "title": "Keep the brand or launch something new?"
+      },
+      {
+        "t": 1411,
+        "title": "The hardest lesson: hiring the right AI engineers"
+      },
+      {
+        "t": 1571,
+        "title": "Early access and the January launch"
+      },
+      {
+        "t": 1620,
+        "title": "Pricing: base price plus credits"
+      },
+      {
+        "t": 1853,
+        "title": "Why a controlled rollout"
+      },
+      {
+        "t": 1947,
+        "title": "A team of 20 doing the work of 70"
+      },
+      {
+        "t": 2362,
+        "title": "“No choice but to rebuild”: the bootstrapper’s view"
+      },
+      {
+        "t": 2406,
+        "title": "Advice for SaaS founders who haven’t rebuilt yet"
+      },
+      {
+        "t": 2634,
+        "title": "“50% will rebuild, 20% will get wiped out”"
+      },
+      {
+        "t": 2655,
+        "title": "Wrap-up"
+      }
+    ]
+  },
+  {
     "number": 23,
     "youtubeId": "6YA50yEZFpU",
     "headline": "We used to ship in a week. Now it's 2 hours.",

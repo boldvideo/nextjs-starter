@@ -698,7 +698,10 @@ export function EpisodePage({ video, settings, episode, paragraphs, chapters, mo
                     m.summary && <span className="mt-2 block text-[15px] leading-[1.6] text-muted-foreground">{m.summary}</span>
                   )}
                   <span className="mt-auto flex items-center justify-between pt-5">
-                    <span className="sx-label !text-[10px] text-dim">{m.speaker ?? ""}</span>
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      {m.speaker && <Face person={people.get(m.speaker)} size={24} />}
+                      <span className="sx-label truncate !text-[10px] text-muted-foreground">{m.speaker ?? ""}</span>
+                    </span>
                     <span className="[&>span]:group-hover:border-acid [&>span]:group-hover:bg-acid [&>span]:group-hover:text-[#0a0a08]">
                       <PlayPill at={formatStamp(m.start)} />
                     </span>
