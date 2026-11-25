@@ -116,6 +116,7 @@ export interface VideoSummary {
   title: string;
   duration: number;
   thumbnail: string | null;
+  publishedAt?: string | null;
 }
 
 /**
@@ -138,11 +139,12 @@ export const getPublished = unstable_cache(
         title: v.title,
         duration: v.duration ?? 0,
         thumbnail: v.thumbnail ?? null,
+        publishedAt: (v as unknown as { publishedAt?: string | null }).publishedAt ?? null,
       };
     }
     return out;
   },
-  ["goatmire-published"],
+  ["goatmire-published-v2"],
   { revalidate: 60 }
 );
 
@@ -167,7 +169,18 @@ const getUnpublished = unstable_cache(
  */
 export async function getAvailable(year: Year): Promise<Record<string, VideoSummary>> {
   const published = await getPublished();
-  const all = Object.values(published);
+  // Fallback matching may only use videos nobody else owns, published after
+  // this edition began. A returning speaker's older talk must never fill a
+  // new slot.
+  const claimed = new Set<string>();
+  for (const y of [2025, 2026] as Year[]) {
+    for (const t of talks(y)) if (t.uuid) claimed.add(t.uuid);
+    for (const x of PROGRAMMES[y].extras ?? []) claimed.add(x.uuid);
+  }
+  const editionStart = PROGRAMMES[year].days[0]?.date ?? "1970-01-01";
+  const all = Object.values(published).filter(
+    (v) => !claimed.has(v.uuid) && (v.publishedAt ?? "") >= editionStart
+  );
   const out: Record<string, VideoSummary> = {};
   const items: Array<{ slug: string; uuid?: string; speaker?: string }> = [
     ...talks(year).map((t) => ({ slug: t.slug, uuid: t.uuid, speaker: t.speakers[0]?.name })),
@@ -185,7 +198,8 @@ export async function getAvailable(year: Year): Promise<Record<string, VideoSumm
       continue;
     }
     const speaker = t.speaker?.toLowerCase();
-    const hit = speaker ? all.find((v) => v.title.toLowerCase().endsWith(speaker)) : undefined;
+    const hit = speaker ? all.find((v) => !claimed.has(v.uuid) && v.title.toLowerCase().endsWith(speaker)) : undefined;
+    if (hit) claimed.add(hit.uuid);
     if (hit) out[t.slug] = hit;
   }
   return out;
