@@ -96,6 +96,7 @@ export function Watch({
   meta,
   aside,
   pendingText,
+  poster,
 }: {
   video: WatchVideo;
   startTime?: number;
@@ -103,6 +104,7 @@ export function Watch({
   meta: React.ReactNode;
   aside: React.ReactNode;
   pendingText: string;
+  poster?: string;
 }) {
   const playerRef = useRef<BoldPlayerHandle | null>(null);
   const bold = useBold();
@@ -184,6 +186,7 @@ export function Watch({
             ref={playerRef}
             video={video as unknown as BoldPlayerVideo}
             bold={bold}
+            poster={poster}
             startTime={effectiveStart}
             onTimeUpdate={onTimeUpdate}
             accentColor={dialect === "y25" ? "#ff00ff" : "#ff914d"}

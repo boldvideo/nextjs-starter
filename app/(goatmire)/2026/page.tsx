@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PROGRAMMES, getAvailable, formatDuration, speakerLine, talkHref, type TalkEntry } from "@/lib/goatmire";
+import { PROGRAMMES, getAvailable, formatDuration, speakerLine, talkHref, thumb2026, type TalkEntry } from "@/lib/goatmire";
 import { Header26, Temperature } from "@/components/goatmire/chrome";
 import { Watched } from "@/components/goatmire/watched";
 
@@ -34,17 +34,10 @@ export default async function Index2026() {
               <div className="grid26">
                 {talks.map((e) => {
                   const v = videos[e.slug];
-                  const photo = e.speakers[0]?.photo;
                   const inner = (
                     <>
                       <span className="thumb">
-                        {v?.thumbnail ? (
-                          <img src={v.thumbnail} alt="" loading="lazy" />
-                        ) : photo ? (
-                          <img src={photo} alt="" loading="lazy" className="portrait" />
-                        ) : (
-                          <span className="noimg" />
-                        )}
+                        <img src={thumb2026(e.slug, v?.thumbnail)} alt="" loading="lazy" />
                         {v ? (v.duration > 0 && <span className="dur">{formatDuration(v.duration)}</span>) : <span className="soon">Soon</span>}
                         {v && <Watched videoId={v.id} />}
                       </span>

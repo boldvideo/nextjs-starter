@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findBySlug, getAvailable, speakerLine, formatDuration, talkHref } from "@/lib/goatmire";
+import { findBySlug, getAvailable, thumb2026, speakerLine, formatDuration, talkHref } from "@/lib/goatmire";
 import { loadWatchVideo } from "@/lib/goatmire-video";
 import { Header26, Temperature } from "@/components/goatmire/chrome";
 import { Watch } from "@/components/goatmire/watch";
@@ -93,6 +93,7 @@ export default async function Watch2026({
           meta={meta}
           aside={aside}
           pendingText="No transcript yet."
+          poster={thumb2026(slug, mine.thumbnail)}
         />
       </div>
     </div>

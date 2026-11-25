@@ -205,6 +205,15 @@ export async function getAvailable(year: Year): Promise<Record<string, VideoSumm
   return out;
 }
 
+/**
+ * The image for a 2026 talk: Lars's own upload when there is one, otherwise
+ * the designed card. Bold's auto-grabbed frames (image.mux.com) are skipped.
+ */
+export function thumb2026(slug: string, uploaded?: string | null): string {
+  if (uploaded && !uploaded.includes("image.mux.com")) return uploaded;
+  return `/2026/${slug}/thumb`;
+}
+
 export function formatDuration(seconds: number): string {
   const s = Math.round(seconds);
   const h = Math.floor(s / 3600);
