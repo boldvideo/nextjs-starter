@@ -20,7 +20,7 @@ export default async function Index2026() {
           <img src="/goatmire/runes26.svg" alt="ᛁᛚᛁᚴᛋᛁᛦ" className="runes" />
           <p className="when">September 28th to October 3rd, 2026<br />Varberg, Sweden</p>
         </div>
-        {days.map((day, di) => (
+        {days.map((day) => (
           <section key={day.id} id={day.id} className="day26">
             <p className="kicker">{day.track}</p>
             <h2>{day.title}</h2>
