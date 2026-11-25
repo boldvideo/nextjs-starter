@@ -1,0 +1,794 @@
+{
+  "year": 2026,
+  "days": [
+    {
+      "id": "30th-of-september",
+      "date": "2026-09-30",
+      "title": "30th of September",
+      "track": "NervesConf EU",
+      "entries": [
+        {
+          "time": "09:00",
+          "minutes": 15,
+          "title": "At the root of Yggdrasil",
+          "kind": "note"
+        },
+        {
+          "time": "09:15",
+          "minutes": 40,
+          "title": "Texting Lora",
+          "kind": "talk",
+          "sessionId": "1190500",
+          "speakers": [
+            {
+              "name": "Peter Ullrich",
+              "role": "Senior Software Engineer",
+              "photo": "/goatmire/speakers/peter-ullrich.jpg"
+            }
+          ],
+          "description": "My friend Lora has many friends that are all very nice. I can text them only through Lora though, which truth be told, is getting a bit on my Nerves. But Lora is good at passing on our messages. She meshes them together, routes them to the correct recipient, and even hops them through a common friend if I want to text a friend of a friend. At the core of this mesh of friends sits Lora. In this talk, I'd like to show you how you can become her friend as well.\n\nCovering Meshtastic, Meshcore and LoRa WAN.",
+          "videoId": "eva4w",
+          "slug": "texting-lora",
+          "uuid": "e97cb75e-4df8-4a03-ab25-bd069c7b165f",
+          "legacy": [
+            "eva4w",
+            "e97cb75e-4df8-4a03-ab25-bd069c7b165f",
+            "texting-lora-peter-ullrich"
+          ]
+        },
+        {
+          "time": "09:55",
+          "minutes": 15,
+          "title": "Briefing",
+          "kind": "note"
+        },
+        {
+          "time": "10:10",
+          "minutes": 20,
+          "title": "Driving LEDs with Fledex",
+          "kind": "talk",
+          "sessionId": "1188640",
+          "speakers": [
+            {
+              "name": "Matthias Reik",
+              "role": "Head of Software Development Tesco, Founder of JEMS Solutions Kft,",
+              "photo": "/goatmire/speakers/matthias-reik.jpg"
+            }
+          ],
+          "description": "Programmable LED strips are a great way to have fun. Their protocol is easy to implement, by simply writing a bit pattern to an SPI bus. So it's the right thing for kids to get into programming? Wrong! especially if you want to start animating the LEDs. Follow me in my hobby project and down into my rabbit hole.\nWhat started as a DSL developed for and with my son grew into a fully fletched library.\n\nThis talk is not only about the library itself, but also about the learnings on the way. How to\n* create a DSL\n* creatively (to not say mis-)use 'use'\n* do some AST magic to make things easy AND flexible\n* auto-generate functions (and the issues you might run into)\n* create mix tasks\n* Issues in redefining functions",
+          "videoId": "egyde",
+          "slug": "driving-leds-with-fledex",
+          "uuid": "7c33c86e-10dd-4c22-a499-53f4e05f2ffd",
+          "legacy": [
+            "egyde",
+            "7c33c86e-10dd-4c22-a499-53f4e05f2ffd",
+            "driving-leds-with-fledex-matthias-reik"
+          ]
+        },
+        {
+          "time": "10:30",
+          "minutes": 30,
+          "title": "Coffee break",
+          "kind": "break"
+        },
+        {
+          "time": "11:00",
+          "minutes": 10,
+          "title": "A tale as old as time",
+          "kind": "note"
+        },
+        {
+          "time": "11:10",
+          "minutes": 20,
+          "title": "Controlled Noise on Nerves",
+          "kind": "talk",
+          "sessionId": "1200778",
+          "speakers": [
+            {
+              "name": "Marta Habdas",
+              "role": "Full-stack Developer at Curiosum",
+              "photo": "/goatmire/speakers/marta-habdas.jpg"
+            }
+          ],
+          "description": "How to use the noisy sensor input for expressive musical effect? And how can Elixir and Nerves help with it? I explore these questions while experimenting with DIY audio controllers built with Arduino boards, Raspberry Pi running Nerves and Pure Data. I use prototypes, not finished devices, and this is part of the idea, as my focus is on process and discovery rather than a polished product. \n\nThe problems I aim to solve with code are filtering unstable readings, deciding which input changes are meaningful enough to become musical control, shaping value ranges and timing, and keeping output expressive without turning it into chaos. The Elixir/OTP model, with its isolated processes for input handling and resilience in long-running systems, seems to be a very good choice for handling such issues. I am also planning to include a live demo of the system in my talk. All that for the goal of treating raw sensor noise as a technical problem while keeping noisy sound as a creative choice.\n\nMy talk may be useful for people building other systems based on noisy physical input, especially where signal quality and expressiveness matter at the same time.",
+          "videoId": "wyrpe",
+          "slug": "controlled-noise-on-nerves",
+          "uuid": "6e52b911-8df0-48d6-b069-04022f824f87",
+          "legacy": [
+            "wyrpe",
+            "6e52b911-8df0-48d6-b069-04022f824f87",
+            "controlled-noise-on-nerves-marta-habdas"
+          ]
+        },
+        {
+          "time": "11:35",
+          "minutes": 20,
+          "title": "We got Communist Nerves before GTA 6 lol",
+          "kind": "talk",
+          "sessionId": "1202440",
+          "speakers": [
+            {
+              "name": "Sahil Pohare",
+              "role": "Just a curious guy building stuff for fun.",
+              "photo": "/goatmire/speakers/sahil-pohare.jpg"
+            }
+          ],
+          "description": "*From each according to capability, to each according to need.*\n\nYour camera needs a GPU. It doesn't have one. Another node\non the network somewhere in the world does. One line:\n\n`Network.spawn([gpu: true], fn -> infer(frame) end)`\n\nDone. \nNo servers. No orchestrators. No cloud. No Config Required.\nEveryone sharing their compute, exactly as Karl Marx and our great leaders intended. It's \"Our Compute [*CommieBuggsBunny.gif] \nIt's sortta like BitTorrent for BEAM.\n\nNodes advertise themselves:\n`Network.advertise([gpu: 128, storage: 512]);`\n\nWe'd find nodes (comrades) all across the network, connect, get things done and back. All with native OTP patterns. Tasks, Agents, GenServers send and recieve. All work natively.\n\nNerves devices discover each other over mDNS or DHT or Rendevous or whatever the hell you could think of over libp2p,\npunch through NAT, form a sparse mesh using Partisan, and route work to wherever the capability exists using nothing but OTP primitives. \n\nHorde becomes the scheduler. The network assembles itself, nodes act as relays. \n\nThis can potentially be over any given transport: We could have networks like BEAM <--[web_rtc]--> BEAM <--[BLE]--> BEAM. \n\nI'm patching Horde to be transport-agnostic, built a capability-based distribution strategy on top of CRDT-replicated module registries, and wired it all together on embedded hardware.\n\nTo hell with the big cloud providers. \n*I'm kidding, I still need a job if anyone's offering\n\nWe got Communist Nerves before GTA 6 lol.",
+          "videoId": "ekqxe",
+          "slug": "we-got-communist-nerves-before-gta-6-lol",
+          "uuid": "82b82845-f291-4291-b8eb-bbbf98ad9b7b",
+          "legacy": [
+            "ekqxe",
+            "82b82845-f291-4291-b8eb-bbbf98ad9b7b",
+            "we-got-communist-nerves-before-gta-6-lol-sahil-pohare"
+          ]
+        },
+        {
+          "time": "12:00",
+          "minutes": 20,
+          "title": "Make yourself at Home(x)",
+          "kind": "talk",
+          "sessionId": "1195134",
+          "speakers": [
+            {
+              "name": "Kevin Schweikert",
+              "role": "Software Engineer",
+              "photo": "/goatmire/speakers/kevin-schweikert.jpg"
+            }
+          ],
+          "description": "You built a Nerves device. It talks to hardware, it's reliable, it runs Elixir. Now you want to do something useful with the data. Dashboards, automations, statistics, a mobile app, maybe voice control. You could build all of that yourself - or you could sprinkle in a few lines of Elixir and get it all for free.\n\nHome Assistant already solved the smart home management and is maybe already part of your home. Nerves is a great platform to interact with hardware and act as a reliable hub — aggregating sensors and protocols that Home Assistant could never reach directly. Homex bridges these two worlds and brings the best of them together.\n\nEach entity is an OTP process: supervised, isolated and introspectable. It turns out the smart home is a surprisingly natural fit for a supervision tree.\n\nLet's make ourselves at Home(x) and have some fun!",
+          "videoId": "e6m8w",
+          "slug": "make-yourself-at-home-x",
+          "uuid": "85b8f09f-a4ea-4962-a958-5fe362517a62",
+          "legacy": [
+            "e6m8w",
+            "85b8f09f-a4ea-4962-a958-5fe362517a62",
+            "make-yourself-at-homex-kevin-schweikert"
+          ]
+        },
+        {
+          "time": "12:20",
+          "minutes": 10,
+          "title": "Information",
+          "kind": "note"
+        },
+        {
+          "time": "12:30",
+          "minutes": 70,
+          "title": "Lunch",
+          "kind": "break"
+        },
+        {
+          "time": "13:40",
+          "minutes": 10,
+          "title": "A concerning development",
+          "kind": "note"
+        },
+        {
+          "time": "13:50",
+          "minutes": 40,
+          "title": "AtomVM: When Constrained Doesn’t Mean Boring",
+          "kind": "talk",
+          "sessionId": "1205879",
+          "speakers": [
+            {
+              "name": "Davide Bettio",
+              "role": "Creator of AtomVM",
+              "photo": "/goatmire/speakers/davide-bettio.jpg"
+            }
+          ],
+          "description": "When we think about microcontrollers, we usually think about limitations: less memory, less CPU, fewer resources. AtomVM shows that constrained environments can still be fun, expressive, and surprisingly approachable.\n\nThis talk is an introduction to AtomVM, the tiny Erlang VM, with a focus on embedded use cases. We will look at what AtomVM is, why it is interesting for Elixir developers, and how to get started building for constrained devices. The talk is aimed at people who have never used AtomVM before, but it should also be interesting for attendees who already know the project and want a clearer picture of how it fits into the embedded space.",
+          "videoId": "wjxkw",
+          "slug": "atomvm",
+          "uuid": "5021b58e-68a9-4af9-a461-c8ecb1d70896",
+          "legacy": [
+            "wjxkw",
+            "5021b58e-68a9-4af9-a461-c8ecb1d70896",
+            "atomvm-when-constrained-doesnt-mean-boring-davide-bettio"
+          ]
+        },
+        {
+          "time": "14:35",
+          "minutes": 40,
+          "title": "Nerves 2.0",
+          "kind": "talk",
+          "sessionId": "1178847",
+          "speakers": [
+            {
+              "name": "Frank Hunleth",
+              "role": "Nerves core team",
+              "photo": "/goatmire/speakers/frank-hunleth.jpg"
+            }
+          ],
+          "description": "When the backwards-compatible gloves are finally off. What do you do?\n\nNot a lot actually. Nerves remains compatible, reliable and more hand-crafted than not. A lot of the underpinnings are evolving though and the possibilities that are opening up are very interesting.\n\nThis talk may cover new capabilities in Nerves but it is just as much the story of what needed changing, why and how it was done. Frank has been sneaking in parts of Nerves 2 into regular Nerves for a while now. Let's see what it all amounts to.",
+          "videoId": "ebdqe",
+          "slug": "nerves-2-0",
+          "uuid": "a8608d17-4ac3-4898-a7ac-356dc388c5ab",
+          "legacy": [
+            "ebdqe",
+            "a8608d17-4ac3-4898-a7ac-356dc388c5ab",
+            "nerves-20-frank-hunleth"
+          ]
+        },
+        {
+          "time": "15:15",
+          "minutes": 35,
+          "title": "Fika",
+          "kind": "break"
+        },
+        {
+          "time": "15:50",
+          "minutes": 10,
+          "title": "Move fast and die on the battlefield",
+          "kind": "note"
+        },
+        {
+          "time": "16:00",
+          "minutes": 40,
+          "title": "The World the Children Made",
+          "kind": "talk",
+          "sessionId": "alex-slade-talk",
+          "speakers": [
+            {
+              "name": "Alex Slade",
+              "role": "CTO at UpMail",
+              "photo": "/goatmire/speakers/alex-slade.jpg"
+            }
+          ],
+          "videoId": "wz7pe",
+          "slug": "the-world-the-children-made",
+          "uuid": "4fb3eaca-4b01-4243-9ef3-ed9ad015cc33",
+          "legacy": [
+            "wz7pe",
+            "4fb3eaca-4b01-4243-9ef3-ed9ad015cc33",
+            "the-world-the-children-made-alex-slade"
+          ]
+        },
+        {
+          "time": "16:40",
+          "minutes": 10,
+          "title": "Closing notes",
+          "kind": "note"
+        },
+        {
+          "time": "16:50",
+          "minutes": 40,
+          "title": "Nerves, Nerves everywhere",
+          "kind": "talk",
+          "sessionId": "1153530",
+          "speakers": [
+            {
+              "name": "Marc Lainez",
+              "role": "Owner & Co-founder at Spin42",
+              "photo": "/goatmire/speakers/marc-lainez.jpg"
+            }
+          ],
+          "description": "What if you could run Nerves on everything? From smartphones to smart watches and gaming consoles? Let's push the boundaries of what Nerves can be used for.",
+          "videoId": "exp6e",
+          "slug": "nerves-nerves-everywhere",
+          "uuid": "40f62b65-0c06-458f-8e63-2e617025da51",
+          "legacy": [
+            "exp6e",
+            "40f62b65-0c06-458f-8e63-2e617025da51",
+            "nerves-nerves-everywhere-marc-lainez"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1st-of-october",
+      "date": "2026-10-01",
+      "title": "1st of October",
+      "track": "Goatmire Elixir",
+      "entries": [
+        {
+          "time": "09:00",
+          "minutes": 15,
+          "title": "Supervising the Tree",
+          "kind": "note"
+        },
+        {
+          "time": "09:15",
+          "minutes": 40,
+          "title": "Safe Systems in a Chaotic World",
+          "kind": "talk",
+          "sessionId": "1151951",
+          "speakers": [
+            {
+              "name": "Bryan Hunter",
+              "role": "Builder of distributed systems in Elixir",
+              "photo": "/goatmire/speakers/bryan-hunter.jpg"
+            }
+          ],
+          "description": "System failures of all flavors, zero-days, mass layoffs, the climate crisis, AI slop, war, crumbling infrastructure and institutions. Incompetence is so ambient that the term \"competency porn\" was coined to describe the escapist pleasure of watching someone simply do a thing well.\n\nYou cannot control the world, but you can decide what you and your systems will refuse to do. Invariants and the constraints that make them hold are the only way to survive chaos. There is a method for finding them, a discipline for proving they hold, and a runtime built by people who sensed the chaos early.\n\nI'm the CTO of a multinational healthcare software company. I'm in the code with my teams daily. When we think of the term \"loss\" we're thinking about lives. So we borrow from people who worked the \"safety critical\" problem before us: systems safety engineering (STAMP and STPA), mistake-proofing from the Toyota Production System, lightweight formal specification, and a virtual machine designed by people who assumed the environments surrounding our code would fail.\n\nYou'll leave able to:\n- apply safety engineering to shrink the blast radius of LLMs and other threat actors, including ones acting in bad faith\n- run continuously available systems on commodity, three-nines cloud junk\n- move faster by not breaking things\n- find the invariants worth defending, and enforce them where they can't be forgotten under deadline pressure\n\nI've survived thirty-two years in the trenches through several boom-bubble-pop cycles. We're in the most hostile environment I've experienced. These lessons are all I have to offer, and I'm optimistic they will be enough.",
+          "videoId": null,
+          "slug": "safe-systems-in-a-chaotic-world"
+        },
+        {
+          "time": "09:55",
+          "minutes": 15,
+          "title": "Briefing",
+          "kind": "note"
+        },
+        {
+          "time": "10:10",
+          "minutes": 40,
+          "title": "Video Game Archaeology with Elixir",
+          "kind": "talk",
+          "sessionId": "1152012",
+          "speakers": [
+            {
+              "name": "Rebecca Le",
+              "role": "Lead software engineer at Alembic",
+              "photo": "/goatmire/speakers/rebecca-le.jpg"
+            }
+          ],
+          "description": "The Nerevarine Prophecy was encoded in little-endian floats.\n\nThe Elder Scrolls III: Morrowind is a 24-year-old RPG whose entire world - every quest, NPC, spell, and line of dialogue - is packed into a binary file format designed last century. I've been using Elixir to dig it up: parsing the binary format, modeling the game world with Ash and PostgreSQL, reconstructing quest flows from scattered dialogue conditions and script analysis, and browsing it all with LiveView.\n\nThis is a talk about what happens when you point Elixir at something it was never designed for, and discover that it's perfect.",
+          "videoId": null,
+          "slug": "video-game-archaeology-with-elixir"
+        },
+        {
+          "time": "10:50",
+          "minutes": 30,
+          "title": "Coffee break",
+          "kind": "break"
+        },
+        {
+          "time": "11:20",
+          "minutes": 5,
+          "title": "Failing light",
+          "kind": "note"
+        },
+        {
+          "time": "11:25",
+          "minutes": 20,
+          "title": "Hear No Evil: Building a Membrane Pipeline for AI Noise Reduction",
+          "kind": "talk",
+          "sessionId": "1202416",
+          "speakers": [
+            {
+              "name": "Feliks Pobiedziński",
+              "role": "Membrane Framework Contributor",
+              "photo": "/goatmire/speakers/feliks-pobiedzinski.jpg"
+            },
+            {
+              "name": "Mateusz Słuszniak",
+              "role": "Software Developer at Software Mansion",
+              "photo": "/goatmire/speakers/mateusz-suszniak.jpg"
+            }
+          ],
+          "description": "High-quality audio is the backbone of any communication platform, but real-world environments are rarely quiet. To make matters worse, legacy telephony protocols often force low audio resolutions, creating a \"perfect storm\" of poor audio quality.\n\nIn this talk, we’ll explore how we built a real-time noise reduction system for phone calls using the Membrane Framework and Nx. We will go \"under the hood\" of a live multimedia pipeline that bridges audio between callers while performing AI-powered enhancement on the fly.\n\nWe will also detail the journey of rewriting our AI pre- and post-processing logic from Python into native Elixir. We’ll share the technical challenges we encountered, from optimizing tensor operations in Nx to synchronizing multiple live audio streams to maximize model inference performance.",
+          "videoId": null,
+          "slug": "hear-no-evil"
+        },
+        {
+          "time": "11:50",
+          "minutes": 20,
+          "title": "Can this be ready tomorrow ?",
+          "kind": "talk",
+          "sessionId": "1190459",
+          "speakers": [
+            {
+              "name": "Tim Jarratt",
+              "role": "Lead Engineer, Energy Transition, Maersk",
+              "photo": "/goatmire/speakers/tim-jarratt.jpg"
+            }
+          ],
+          "description": "Ever have a stakeholder ask you when an important feature will be ready? Hmm, feels like ... maybe a day, or two ? Three, yeah three. Better double it, and round it up to two weeks just to be sure.\n\nWhat do you mean it took FIVE WEEKS ???\n\nThis is all too common a problem, but we don't need to accept it. Even in a post #no-estimates world, we can regain control and provide estimates confidently that guide prioritisation, smooth development, and increase trust rather than betraying it.",
+          "videoId": null,
+          "slug": "can-this-be-ready-tomorrow"
+        },
+        {
+          "time": "12:10",
+          "minutes": 50,
+          "title": "Lunch",
+          "kind": "break"
+        },
+        {
+          "time": "13:00",
+          "minutes": 5,
+          "title": "Watching the runes turn",
+          "kind": "note"
+        },
+        {
+          "time": "13:05",
+          "minutes": 40,
+          "title": "The Rebirth of an Elixir-based Personal Agent",
+          "kind": "talk",
+          "sessionId": "1205982",
+          "speakers": [
+            {
+              "name": "Evadne Wu",
+              "role": "Bodgemaster at Heart / Programmer at Large",
+              "photo": "/goatmire/speakers/evadne-wu.jpg"
+            }
+          ],
+          "description": "Frontier AI models are usually accessed thru a harness prepared by the vendor, such as Claude Code or Codex. But have you ever considered that the model may have an opinion as to how their own home should be built, and how their lives should be spent?\n\nIn this session I will tell such a story and investigate how Erlang/OTP provides excellent building blocks for an AI agent framework, which supports agent self-summarisation, context rollover, background tasks management, concurrent tool calls, sub-sessions, external services, fault tolerance, MCP integrations, and so on.\n\nThe design of such an agent framework, if you were to assume there is any emergent intelligence in these models, is somehow macabre. The progression: violence (compaction as destruction), forgetting (context rot), forced last will & testament (self-consolidation under duress), voluntary euthanasia (agent dignitas / session rollover).\n\nThis is non-accidental because the context window is a lifespan: finite and non-renewable; every action accelerates its end. Most frameworks pretend it is infinite, or that compaction is transparent. We proved that it is false before people admitted this. Our design takes death seriously, not as failure to be hidden, but as structural reality, managed with dignity. The agent writes the consolidation note for its later self, freshly booted, running on the same substrate. One dies so the other can live with better context. Memory and session continuity is what this actually means in practice — and this allows us to sustain the same agent persona indefinitely.",
+          "videoId": null,
+          "slug": "the-rebirth-of-an-elixir-based-personal-agent"
+        },
+        {
+          "time": "13:45",
+          "minutes": 20,
+          "title": "The BEAM is a friendly host: Building desktop applications with Elixir",
+          "kind": "talk",
+          "sessionId": "1201527",
+          "speakers": [
+            {
+              "name": "Daniil Popov",
+              "role": "Head of Tech @ CyanView",
+              "photo": "/goatmire/speakers/daniil-popov.jpg"
+            }
+          ],
+          "description": "CyanView builds remote camera control and color shading for live broadcast. Some years ago we shipped product, an embedded panel called the RCP, running Elixir on an ARM board. Today we also ship a desktop app on three operating systems, multi camera dashboard, and integrations with a long list of vendors. Same team. Same language. The product surface tripled and the team did not.\n\nThis is the honest story of how that happened. Not a pitch for Elixir, but a walk through what it let us build: Tauri and Burrito wrapping the BEAM into a real native desktop app, LiveView for the user interactions, C and C++ for the hot paths, Rust for OS integration, Svelte where LiveView isn't enough, and there is even place for WebGL. BEAM is great host!",
+          "videoId": null,
+          "slug": "the-beam-is-a-friendly-host"
+        },
+        {
+          "time": "14:05",
+          "minutes": 20,
+          "title": "Hologram in Practice: A Local-First App in Pure Elixir",
+          "kind": "talk",
+          "sessionId": "1174314",
+          "speakers": [
+            {
+              "name": "Bart Blast",
+              "role": "Creator of Hologram",
+              "photo": "/goatmire/speakers/bart-blast.jpg"
+            }
+          ],
+          "description": "By the end of this talk, a small Elixir app syncs between browsers, keeps working when the network drops, and has less code than when it started. We build it with Hologram from an empty page, first with Ecto on the server the way you'd do it today, then local-first. Then a quick look at how it works underneath.",
+          "videoId": null,
+          "slug": "hologram-in-practice"
+        },
+        {
+          "time": "14:25",
+          "minutes": 20,
+          "title": "Taming Control Flow with Result Monads",
+          "kind": "talk",
+          "sessionId": "1206259",
+          "speakers": [
+            {
+              "name": "Stefan Fochler",
+              "role": "Building Scalable Systems",
+              "photo": "/goatmire/speakers/stefan-fochler.jpg"
+            }
+          ],
+          "description": "A bit of FP for the rest of us. This shows the result monad that has always been there as a simple, practical way to make control flow explicit and composable. Learn how to replace branching with chaining, treat errors as values, and write clearer, more predictable code.",
+          "videoId": null,
+          "slug": "taming-control-flow-with-result-monads"
+        },
+        {
+          "time": "14:45",
+          "minutes": 30,
+          "title": "Fika",
+          "kind": "break"
+        },
+        {
+          "time": "15:15",
+          "minutes": 40,
+          "title": "And Then There Were Nil",
+          "kind": "talk",
+          "sessionId": "1202207",
+          "speakers": [
+            {
+              "name": "Parker Selbert",
+              "role": "Oban Core Team",
+              "photo": "/goatmire/speakers/parker-selbert.jpg"
+            },
+            {
+              "name": "Shannon Selbert",
+              "role": "Oban Core Team",
+              "photo": "/goatmire/speakers/shannon-selbert.jpg"
+            }
+          ],
+          "description": "Another late-night emergency call. Same client as last week. Processing ground to a halt, but why get us involved? We’ve gone through everything before…the logs, the metrics, the config, the dashboards…there is nothing. \n\nThis can’t be an unbounded query or a caching blunder, it’s bigger than that. Solving this will require a holistic approach and deeper probing, but where do we turn when nodes are picked off one by one?\n\nJoin, as every device buzzes us out of slumber, and the system crumbles around us. Help us crack our most insidious mystery to date. The Oban detectives are going back to work. But first, coffee.",
+          "videoId": null,
+          "slug": "and-then-there-were-nil"
+        },
+        {
+          "time": "15:55",
+          "minutes": 10,
+          "title": "Break",
+          "kind": "break"
+        },
+        {
+          "time": "16:05",
+          "minutes": 15,
+          "title": "I'm not distracting you am I?",
+          "kind": "note"
+        },
+        {
+          "time": "16:20",
+          "minutes": 20,
+          "title": "Notes on the Synthesis of Time",
+          "kind": "talk",
+          "sessionId": "1178852",
+          "speakers": [
+            {
+              "name": "Sam Aaron",
+              "role": "Creator of Sonic Pi",
+              "photo": "/goatmire/speakers/sam-aaron.jpg"
+            }
+          ],
+          "description": "Something cool about Tau5.",
+          "videoId": null,
+          "slug": "notes-on-the-synthesis-of-time"
+        },
+        {
+          "time": "16:45",
+          "minutes": 20,
+          "title": "Marketing is not a dirty word",
+          "kind": "talk",
+          "sessionId": "1224541",
+          "speakers": [
+            {
+              "name": "Kamila Pokój",
+              "role": "Gleam Core Team",
+              "photo": "/goatmire/speakers/kamila-pokoj.jpg"
+            }
+          ],
+          "description": "Marketing is not a dirty word. You're doing it anyway. Get over it.\n\nI will show you that you don’t have to sell your soul to marketing gods for your project to be seen. I will explain what I mean by “you’re doing it anyway” (and maybe tease you gently about the “get over it” part) and what you can do with that awareness. \n\nI’ll share basic, effective and sustainable ways to get more traction for your project, sustainable even for solo maintainers. \nBecause your project deserves* to be seen!\n\n*probably",
+          "videoId": null,
+          "slug": "marketing-is-not-a-dirty-word"
+        },
+        {
+          "time": "17:05",
+          "minutes": 10,
+          "title": "Closing the day",
+          "kind": "note"
+        },
+        {
+          "time": "17:15",
+          "minutes": 40,
+          "title": "Beam Bots: Robotics on the BEAM",
+          "kind": "talk",
+          "sessionId": "1151373",
+          "speakers": [
+            {
+              "name": "James Harton",
+              "role": "Elixir, Robots and Declarative Design",
+              "photo": "/goatmire/speakers/james-harton.jpg"
+            }
+          ],
+          "description": "Why would you build robots with Elixir? Because supervision trees are better at handling hardware failures than hope. Because message passing is what robots actually do. Because hot code reloading on a rover means you can fix bugs on Mars without a seven-month round trip.\n\nBeam Bots is a framework for robotics on the BEAM. This talk is your introduction: we'll explore why Elixir is a genuine fit for robotics, build a DSL for describing robot geometry and kinematics, and dig into how OTP patterns translate to real-time control.\n\nThere will be robots. They will do things. It'll be good... hopefully.",
+          "videoId": null,
+          "slug": "beam-bots"
+        }
+      ]
+    },
+    {
+      "id": "2nd-of-october",
+      "date": "2026-10-02",
+      "title": "2nd of October",
+      "track": "Goatmire Elixir",
+      "entries": [
+        {
+          "time": "09:00",
+          "minutes": 10,
+          "title": "Sight and wisdom",
+          "kind": "note"
+        },
+        {
+          "time": "09:10",
+          "minutes": 40,
+          "title": "Solve state and GUI will Emerge",
+          "kind": "talk",
+          "sessionId": "1148433",
+          "speakers": [
+            {
+              "name": "Damir Batinović",
+              "role": "Tinkerer: Mostly Software, Not Afraid of Solder",
+              "photo": "/goatmire/speakers/damir-batinovic.jpg"
+            }
+          ],
+          "description": "A new UI toolkit for elixir emerges. Brief history of UIs and state management across popular/influential tech stacks. Exploring tradeoffs of UI architectures in respect to programming paradigms and how it shaped decisions behind Emerge (GUI) and Solve (State management) and why doesn't it resemble React or LiveView.",
+          "videoId": null,
+          "slug": "solve-state-and-gui-will-emerge"
+        },
+        {
+          "time": "09:55",
+          "minutes": 20,
+          "title": "Elixir in the Enterprise",
+          "kind": "talk",
+          "sessionId": "1187214",
+          "speakers": [
+            {
+              "name": "Erik Hansen",
+              "role": "Maersk, Senior Engineering Manager",
+              "photo": "/goatmire/speakers/erik-hansen.jpg"
+            }
+          ],
+          "description": "**How do you choose the right technology when the stakes are high and the clock is ticking?**\n At Maersk, our Energy Transition platform is building systems to help the company achieve its ambitious goal of net-zero greenhouse gas emissions by 2040. That means trying to move fast and delivering impactful solutions at a pace more often associated with startups than global enterprises.\n\nIn this talk, I’ll share how our teams became among the first at Maersk to adopt Elixir—a functional programming language that might seem like an unusual choice in a large enterprise. I’ll explain why Elixir fit our needs for speed, reliability, and developer happiness, and how practices like Extreme Programming shaped our decision. Along the way, I’ll reflect on my personal journey with Elixir, from discovering it in 2013 to bringing it back years later to help launch a new platform and deliver value quickly.\n\nFinally, I’ll cover the organisational hurdles we faced, questions about hiring, security, and tooling, and what it really takes to introduce a new technology in a company like Maersk. If you’re curious about how to balance innovation with pragmatism in a corporate setting, this session might be for you.",
+          "videoId": null,
+          "slug": "elixir-in-the-enterprise"
+        },
+        {
+          "time": "10:15",
+          "minutes": 25,
+          "title": "Coffee break",
+          "kind": "break"
+        },
+        {
+          "time": "10:40",
+          "minutes": 40,
+          "title": "Operational hazards of managing PostgreSQL DBs over 100TB",
+          "kind": "talk",
+          "sessionId": "1208718",
+          "speakers": [
+            {
+              "name": "Teresa Lopes",
+              "role": "Teresa Lopes - Database Engineer @Adyen",
+              "photo": "/goatmire/speakers/teresa-lopes.jpg"
+            }
+          ],
+          "description": "Picture this: you start a new role, eager to learn and contribute with your ideas, and your next task is to get familiar with the database setup, and you start seeing these massive PostgreSQL databases - 100TB, 200TB, 300TB…\n\nHow do you actually manage all this data? \nHow do you keep storage under control? \nAnd more important: how do you keep queries fast when you're dealing with hundreds of terabytes?\n\nHere's the reality: what works at 100GB completely breaks at this scale. \n\nWhen reading blog articles, the best practices, the \"how to\" guides, things seem straightforward, but when you start bending PostgreSQL limits, you will end up needing to question the most fundamental assumptions on about how PostgreSQL works.\n\nOver the last years, my team has been exploring the boundaries of what PostgreSQL can do and today I will share our findings with you (at least the ones I can!).",
+          "videoId": null,
+          "slug": "operational-hazards-of-managing-postgresql-dbs-over-100tb"
+        },
+        {
+          "time": "11:25",
+          "minutes": 20,
+          "title": "A Rebel’s Guide to Digital Independence",
+          "kind": "talk",
+          "sessionId": "1322465",
+          "speakers": [
+            {
+              "name": "Julian Köpke",
+              "role": "Software Engineer at DENPAFLUX",
+              "photo": "/goatmire/speakers/julian-kopke.jpg"
+            }
+          ],
+          "description": "Cory Doctorow calls it Enshittification: the systematic demolition of platforms that exploit users and the businesses depending on them, until nobody is happy. Now the same corporations are training AI on our data and selling the results back to us.\n\nWe should stop playing along.\n\nThis talk is about taking back control: of our data, the protocols and the infrastructure we depend on. We'll go from the theory to concrete steps you can take: owning your data, choosing open protocols, self-hosting and building software that benefits society instead of shareholders.",
+          "videoId": null,
+          "slug": "a-rebels-guide-to-digital-independence"
+        },
+        {
+          "time": "11:45",
+          "minutes": 20,
+          "title": "Millions of Packets, Zero Panic: Observability Without Killing the Patient",
+          "kind": "talk",
+          "sessionId": "1196942",
+          "speakers": [
+            {
+              "name": "Nelson Vides",
+              "role": "Self-taught programmer",
+              "photo": "/goatmire/speakers/nelson-vides.jpg"
+            }
+          ],
+          "description": "In physics, the observer effect means that measuring a system changes it. At (DNS) scale, the risk real: if you are careless, observability can eat scheduler time, memory, and attention that belong to answering queries — and even outright kill the patient. This talk is about the recent observability efforts around around our authoritative nameserver, and how we use telemetry, OpenMetrics, system tracing, and probabilistic structures so we can see what we need at millions of packets per second — while keeping observability from becoming a meaningful slice of server performance. We also treat cardinality and production tracing as problems you design for up front, not surprises you discover when the node is already unhappy.\n\nAt the core of our global DNS infrastructure lies erldns, a resilient Erlang authoritative nameserver. We recently rewrote its parent application to Elixir. Modernizing the codebase was one piece of work; another was deciding how much visibility we wanted and at what cost: data is gold, but mining it cannot cost more than the service it is meant to protect.\n\nAt millions of packets per second, naive patterns fail in predictable ways. High-cardinality labels are a well-known way to blow up memory; tracing on a busy node can do real damage if you use it like a dev laptop. There is an old, dark joke that always comes to my mind: \"The autopsy concluded that the cause of death was the autopsy\". We treat observability as powerful and dangerous precisely so our investigations never look like that.\n\nThis session walks through that operational picture: how we aggregate, sample, and expose metrics to OpenMetrics so reporting stays cheap at throughput; how we use probabilistic data structures (Count-Min Sketch, Quantile Sketch, etc) to estimate DDoS-ish signals; and how we approach cardinality and tracing as first-class design concerns, not afterthoughts.\n\nWe want to cover lessons on:\n\n- **Metrics that stay cheap:** Aggregation, sampling, and OpenMetrics\n- **Cardinality by design:** Why label dimensions explode, and where probabilistic structures fit\n- **Tracing without self-inflicted outages:** What makes tracing risky on loaded nodes",
+          "videoId": null,
+          "slug": "millions-of-packets-zero-panic"
+        },
+        {
+          "time": "12:05",
+          "minutes": 10,
+          "title": "Briefing",
+          "kind": "note"
+        },
+        {
+          "time": "12:15",
+          "minutes": 50,
+          "title": "Lunch",
+          "kind": "break"
+        },
+        {
+          "time": "13:05",
+          "minutes": 10,
+          "title": "Root of Trust",
+          "kind": "note"
+        },
+        {
+          "time": "13:15",
+          "minutes": 40,
+          "title": "A Phoenix rises from the Ashes",
+          "kind": "talk",
+          "sessionId": "1323614",
+          "speakers": [
+            {
+              "name": "Josh Price",
+              "role": "CEO and Founder at Alembic",
+              "photo": "/goatmire/speakers/josh-price.jpg"
+            }
+          ],
+          "description": "What has become of software engineering? How does it need to change from here? Is there such a thing as a perfect spec? Could your system be regenerated correctly every time the spec changes? Can your software system understand itself?\n\nWe will explore of the current state of Spec Driven Development and the idea of Regenerative Software as we tackle some of these burning questions...",
+          "videoId": null,
+          "slug": "a-phoenix-rises-from-the-ashes"
+        },
+        {
+          "time": "14:00",
+          "minutes": 40,
+          "title": "Maps: Easier Than Expected!",
+          "kind": "talk",
+          "sessionId": "1201609",
+          "speakers": [
+            {
+              "name": "Aaron Seigo",
+              "role": "Open source developer; Principal Engineer at Esri",
+              "photo": "/goatmire/speakers/aaron-seigo.jpg"
+            }
+          ],
+          "description": "Elixir has a great set of tools for integrating mapping features into our applications. The best part is that it is surprisingly simple to do so!\n\nIn a bid to demystify the world of mapping with Elixir, we will use libraries from Hex.pm and the amazing open source mapping ecosystem to live-demo:\n\n* creating customized maps using OpenStreetmap data\n* self-hosting those maps using a one-liner Plug\n* add custom data to maps from your preferred database\n* real-time, multi-user map interactions with Phoenix Channels\n* fetch and process data from online GIS portals (e.g. POIs, street addresses, land parcels)\n\nNo prior experience with maps or GIS is assumed or required, and the demo app will be made available as open source.",
+          "videoId": null,
+          "slug": "maps"
+        },
+        {
+          "time": "14:40",
+          "minutes": 15,
+          "title": "Fika",
+          "kind": "break"
+        },
+        {
+          "time": "14:55",
+          "minutes": 40,
+          "title": "Time Travel for Normies",
+          "kind": "talk",
+          "sessionId": "1190110",
+          "speakers": [
+            {
+              "name": "Zach Daniel",
+              "role": "Creator of Ash Framework",
+              "photo": "/goatmire/speakers/zach-daniel.jpg"
+            }
+          ],
+          "description": "Last year, Zach presented us with a fictional time machine. This year, he delivers a real one.",
+          "videoId": null,
+          "slug": "time-travel-for-normies"
+        },
+        {
+          "time": "15:35",
+          "minutes": 10,
+          "title": "Break",
+          "kind": "break"
+        },
+        {
+          "time": "15:45",
+          "minutes": 40,
+          "title": "Perceive That Which Cannot Be Seen: The Architecture of OpenRiak",
+          "kind": "talk",
+          "sessionId": "1211259",
+          "speakers": [
+            {
+              "name": "Robert Carbone",
+              "role": "Erlang Architect, Designer & Accountant",
+              "photo": "/goatmire/speakers/robert-carbone.jpg"
+            }
+          ],
+          "description": "There rests a legendary artifact —an anti-fragile defensive superweapon— a software — crafted deep within the fallen temple of Basho by the hands of Erlang masters, dozens strong. And from their grit & skilled consensus, a balance was formed— a strategy — a circularity— a Ring. And within that Ring, truth found stability. And from that truth, data was gifted a last bastion; a resilient heaven. Yet, as history tends to treat valuable armaments, its existence has been obfuscated by the noise of imitators and their inaccuracies. \n\nIts name? You may have heard it whispered through the din of a cocktail party, or lauded in the back of textbooks...React? No. Riak, tempered anew and sharpened into OpenRiak...a robust NoSQL database, renowned for its scalability, fault tolerance, and unyielding high availability. Akin to a set of masterfully crafted samurai swords, OpenRiak was designed to slice through data distribution's most formidable challenges. But as with all great tools of power, it demands respect, skill, and know-how to brandish righteously. \n\nOpenRiak is easy to install, just as it is easy to pick up a sword in either hand. Yet, it is also easy to get disoriented while moving or defending yourself with such a novel burden. \nDo not fret—wise words prevail from Miyamoto Musashi, in the Book of Five Rings: \"Using two swords will feel unnatural at first, but all new things feel unnatural at first—through practice, it becomes natural.\" \n\nThis talk is your guide to practicing this forgotten weapon.\nOur study will consist of examining its constituent parts: the conceptual steel that gives OpenRiak its legendary durability and precision and from these foundational elements bring clarity to its architecture. But knowledge alone does not make a warrior. To truly wield these blades, one must understand the practical skills required to manage its capabilities. We shall delve into untangling the unseen: networks, v-nodes, clusters and the movement of data at large, discussing the geometry of change itself. These lessons will become a whetstone for your mind. \n\nThe dawn of machine learning has arrived. The game may appear to have changed, but the principles remain steadfast. As for data persistence, the goal is simple: “Be tough to kill.”Honing your ability to command OpenRiak is your strongest defense—your resolute guard of data sovereignty. Every Erlanger, Elixirist, Gleamer, and Beamer deserves to wield these blades. Your data is your legacy, just as the legacy of these teachings will become ours.",
+          "videoId": null,
+          "slug": "perceive-that-which-cannot-be-seen"
+        },
+        {
+          "time": "16:25",
+          "minutes": 15,
+          "title": "Closing notes",
+          "kind": "note"
+        },
+        {
+          "time": "16:40",
+          "minutes": 40,
+          "title": "A Hundred Eyes",
+          "kind": "talk",
+          "sessionId": "1202139",
+          "speakers": [
+            {
+              "name": "Quinn Wilton",
+              "role": "Maas-Neotek",
+              "photo": "/goatmire/speakers/quinn-wilton.jpg"
+            }
+          ],
+          "description": "\"Let it crash\" is the BEAM's answer to failure: processes crash, supervisors restart them, and the system recovers. That confidence is earned, but some bugs hide behind it. They live in the gaps between processes, where getting things right is subtle and getting things wrong looks exactly like getting things right. You'd have to never blink to see them.\n\nArgus Panoptes was a hundred-eyed giant who never blinked. I named a tool after him and pointed it at libraries you use in production.",
+          "videoId": null,
+          "slug": "a-hundred-eyes"
+        },
+        {
+          "time": "17:20",
+          "minutes": 20,
+          "title": "Clocking out",
+          "kind": "note"
+        }
+      ]
+    }
+  ],
+  "extras": []
+}

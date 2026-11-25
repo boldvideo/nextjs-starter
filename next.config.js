@@ -33,4 +33,28 @@ const nextConfig = {
   },
 };
 
+// Goatmire: every old portal link (/v/<hashid>, /v/<uuid>, /v/<slug>) moves
+// permanently to the talk's place in its edition, e.g. /2025/the-oban-murders.
+// The running-order JSON is the mapping.
+nextConfig.redirects = async () => {
+  const out = [];
+  for (const year of [2025, 2026]) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- CommonJS config
+    const programme = require(`./content/${year}.json`);
+    const items = [
+      ...programme.days.flatMap((d) => d.entries.filter((e) => e.kind === "talk")),
+      ...(programme.extras || []),
+    ];
+    for (const t of items) {
+      for (const legacy of t.legacy || []) {
+        for (const prefix of ["/v/", `/${year}/`]) {
+          if (`${prefix}${legacy}` === `/${year}/${t.slug}`) continue;
+          out.push({ source: `${prefix}${legacy}`, destination: `/${year}/${t.slug}`, permanent: true });
+        }
+      }
+    }
+  }
+  return out;
+};
+
 module.exports = nextConfig;

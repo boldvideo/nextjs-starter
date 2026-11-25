@@ -1,0 +1,856 @@
+{
+  "year": 2025,
+  "days": [
+    {
+      "id": "wednesday-10-september",
+      "date": "2025-09-10",
+      "title": "Wednesday 10 September",
+      "track": "NervesConf EU",
+      "entries": [
+        {
+          "time": "09:00",
+          "minutes": 40,
+          "title": "A Nerves Car",
+          "kind": "talk",
+          "sessionId": "869627",
+          "speakers": [
+            {
+              "name": "Marc Lainez",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "In december 2023, Loïc, Thibault and Marc embarked on a journey to convert a 2007 VW Polo into an EV.\nAt Elixirconf 2024, they presented their early prototype showing the car's wheels spinning and the future plans they had for it. \n\nThis time, they are back to show us a fully driveable EV running on Elixir, and more...\n\nThey have now managed to make the car remote controlled, still using Nerves and Elixir running on Raspberry Pis and using a few Arduinos. \n\nIn this presentation, they will talk about the major changes they had to do over the past year to go from a low fidelity prototype to their current version,\nboth from a hardware and software perspective. They will also share some insights about what their platform,\nOpen Vehicle Control System, has become today, pushing Elixir to unexpected places.",
+          "videoId": "ywpqe",
+          "slug": "a-nerves-car",
+          "uuid": "01c44578-0cee-451e-9505-791417010826",
+          "legacy": [
+            "ywpqe",
+            "01c44578-0cee-451e-9505-791417010826"
+          ]
+        },
+        {
+          "time": "09:40",
+          "minutes": 15,
+          "title": "Practical information",
+          "kind": "note"
+        },
+        {
+          "time": "10:00",
+          "minutes": 20,
+          "title": "Overcoming my hardware phobia and getting the Nerves",
+          "kind": "talk",
+          "sessionId": "858567",
+          "speakers": [
+            {
+              "name": "Ellyse Cedeno",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "I've always been afraid of hardware, all thumbs, and away from the safe world of programming and mathematics. When I first heard Elixir, my favourite language, worked on embedded systems, I was confused, isn't that for the systems language folks? Emboldened by my recent Elixir Nx experience where I saw how Elixir can work with GPUs, I thought: \"This is my time to finally get dirty!\" This talk is about what my adventure into Nerves was like, from someone who has Zero experience with hardware and afraid of touching wires. I got myself a RPI Zero 2W and the adventure began.",
+          "videoId": "qe8qw",
+          "slug": "overcoming-my-hardware-phobia-and-getting-the-nerves",
+          "uuid": "d2505744-c18d-4e7e-ba1f-0849c0f7531e",
+          "legacy": [
+            "qe8qw",
+            "d2505744-c18d-4e7e-ba1f-0849c0f7531e"
+          ]
+        },
+        {
+          "time": "10:20",
+          "minutes": 30,
+          "title": "Coffee break",
+          "kind": "break"
+        },
+        {
+          "time": "10:50",
+          "minutes": 40,
+          "title": "Sound the alarm: Recovering devices at scale",
+          "kind": "talk",
+          "sessionId": "869604",
+          "speakers": [
+            {
+              "name": "Frank Hunleth",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Through many years with Nerves at SmartRent we've seen a lot of failure modes for devices. From the plain to the novel. At the scale we operate, we need most devices to recover from failure on their own.\n\nA while back we made a bet on Erlang alarms as a strategy for improving robustness and recovering from failure. The alarmist library is open source and provides a solid alarm handler and a lot of lessons learned.\n\nWe will look at how this build on top of the failure recovery of Nerves, the fault tolerance of Erlang and what it brings us beyond those fundamentals. Based on real experiences at scale.",
+          "videoId": "rwd3e",
+          "slug": "sound-the-alarm",
+          "uuid": "4172cb19-c47e-4d27-92cf-bde2d1e546a0",
+          "legacy": [
+            "rwd3e",
+            "4172cb19-c47e-4d27-92cf-bde2d1e546a0"
+          ]
+        },
+        {
+          "time": "11:35",
+          "minutes": 20,
+          "title": "An Elixir Savannah Modem Safari",
+          "kind": "talk",
+          "sessionId": "870976",
+          "speakers": [
+            {
+              "name": "Taun Chapman",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Escaping from the VintageNetMobile Chatscript Land Rover into the vast Elixir savannah. Or, “What to do when your VintageNetMobile modem driver needs get more complicated than a Chatscript can easily manage?”",
+          "videoId": "nw7xe",
+          "slug": "an-elixir-savannah-modem-safari",
+          "uuid": "5e21393a-d8b6-4b07-b5a7-071e0787d055",
+          "legacy": [
+            "nw7xe",
+            "5e21393a-d8b6-4b07-b5a7-071e0787d055"
+          ]
+        },
+        {
+          "time": "12:00",
+          "minutes": 40,
+          "title": "Design a hardware product with Nerves",
+          "kind": "talk",
+          "sessionId": "842678",
+          "speakers": [
+            {
+              "name": "Gus Workman",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Have you ever wanted to launch your own hardware product from scratch? In this talk, we will take a look at the process of designing hardware for Nerves projects and the steps required to manufacture your products at scale",
+          "videoId": "qwr9e",
+          "slug": "design-a-hardware-product-with-nerves",
+          "uuid": "108b3249-a0d6-45a5-ae60-a2458ebc8f63",
+          "legacy": [
+            "qwr9e",
+            "108b3249-a0d6-45a5-ae60-a2458ebc8f63"
+          ]
+        },
+        {
+          "time": "12:40",
+          "minutes": 60,
+          "title": "Lunch",
+          "kind": "break"
+        },
+        {
+          "time": "13:40",
+          "minutes": 40,
+          "title": "Trellis board hack time",
+          "kind": "note"
+        },
+        {
+          "time": "14:25",
+          "minutes": 40,
+          "title": "Small Hydro Power Plants with Elixir",
+          "kind": "talk",
+          "sessionId": "920423",
+          "speakers": [
+            {
+              "name": "Yutaka Kikuchi",
+              "role": "",
+              "photo": null
+            },
+            {
+              "name": "Ryota Kinukawa",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Part 1 - Introduction\n\nWe have been exploring methods for using Elixir in industrial applications and challenging ourselves to use it to control several small hydroelectric power plants. In the latest project, we explored the appropriate industrial approach, not just using Elixir.\nIn this presentation, we will first provide an overview of the control system for small hydroelectric power plants, followed by an explanation of the system architecture with Nerves. We will then discuss the issues encountered during the on-site installation.\nThe subsequent presentation by KINUKAWA Ryota, also known as @pojiro, will introduce details of the technical methods applied.\n\nPart 2 - Implementation\n\nThis session dives into the technical design and real-world challenges of building a distributed control system for a small hydroelectric power plant using Nerves and Elixir.\n\nWe will first present a system map, showing how an Erlang cluster was formed over a fiber-optic network and how different nodes interface with industrial devices.\n\nNext, we will introduce \"Modbuzz,\" a custom Modbus communication library for our needs, and explain how we implemented plant operations using GenServer-based control sequences.\n\nSpecial focus will be given to safety considerations, such as fault monitoring processes and failure handling strategies when the processes or the Nerves device itself go down.\n\nWe will also share insights on what can be prepared in advance versus what can only be resolved on-site. Specifically, we will introduce how we used `Mox` for testing to prepare in advance, and how we effectively used `mix upload.hotswap` for on-site troubleshooting.\n\nThis session will share practical insights and perspectives for engineers interested in applying Nerves to production-critical and field-deployed systems.",
+          "videoId": "3ev4e",
+          "slug": "small-hydro-power-plants-with-elixir",
+          "uuid": "c53a4da8-14ca-44d5-9787-4dd023b54213",
+          "legacy": [
+            "3ev4e",
+            "c53a4da8-14ca-44d5-9787-4dd023b54213"
+          ]
+        },
+        {
+          "time": "15:05",
+          "minutes": 20,
+          "title": "Nerves of Vision",
+          "kind": "talk",
+          "sessionId": "1032156",
+          "speakers": [
+            {
+              "name": "Alvise Susmel",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "YOLO object detection, Nx, Hailo and the Raspberry Pi AI Kit.",
+          "videoId": "wd53e",
+          "slug": "nerves-of-vision",
+          "uuid": "74c0761a-192d-4424-b1cb-87e417528b37",
+          "legacy": [
+            "wd53e",
+            "74c0761a-192d-4424-b1cb-87e417528b37"
+          ]
+        },
+        {
+          "time": "15:30",
+          "minutes": 50,
+          "title": "Fika",
+          "kind": "break"
+        },
+        {
+          "time": "16:20",
+          "minutes": 40,
+          "title": "Power up applications with Reactor",
+          "kind": "talk",
+          "sessionId": "850269",
+          "speakers": [
+            {
+              "name": "James Harton",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Reactor is a graph powered saga runner, usually used to give transaction-like semantics to operations that cross system boundaries.\n\nIn this talk, we'll show how we can use Reactor's graph-driven asynchrony to shorten start up time for Nerves applications by running migrations, provisioning application secrets and starting OTP applications and processes.\n\nWe'll start by giving an overview of Reactor and how it is usually used in Elixir applications before moving on to demonstrate working with files and finally demonstrate working with it as a replacement for a standard Nerves application startup.",
+          "videoId": "8wype",
+          "slug": "power-up-applications-with-reactor",
+          "uuid": "701879d4-9718-4d01-9a2c-fe4212751dc1",
+          "legacy": [
+            "8wype",
+            "701879d4-9718-4d01-9a2c-fe4212751dc1"
+          ]
+        },
+        {
+          "time": "17:05",
+          "minutes": 40,
+          "title": "Fly me a camera",
+          "kind": "talk",
+          "sessionId": "869616",
+          "speakers": [
+            {
+              "name": "Damir Batinović",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Leveraging the Elixir ecosystem to stream live video from a drone. Using Membrane to tie low-level multimedia bits into pipelines, and Nerves to package it all onto embedded hardware. The system also sends flight instructions to the drone, combining control and streaming in one application. The talk covers the architecture, key implementation details, and challenges of building a real-time system like this on the BEAM.",
+          "videoId": "w5vve",
+          "slug": "fly-me-a-camera",
+          "uuid": "92dcdf97-78cf-4a4b-a9c0-b55f8105e529",
+          "legacy": [
+            "w5vve",
+            "92dcdf97-78cf-4a4b-a9c0-b55f8105e529"
+          ]
+        },
+        {
+          "time": "17:45",
+          "minutes": 15,
+          "title": "Closing notes",
+          "kind": "note"
+        }
+      ]
+    },
+    {
+      "id": "thursday-11-september",
+      "date": "2025-09-11",
+      "title": "Thursday 11 September",
+      "track": "Goatmire Elixir",
+      "entries": [
+        {
+          "time": "09:00",
+          "minutes": 40,
+          "title": "A letter to ourselves",
+          "kind": "talk",
+          "sessionId": "869609",
+          "speakers": [
+            {
+              "name": "Zach Daniel",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Elixir has a storied past—but what does its future hold? In this session, we won’t be unveiling new features or delivering a roadmap. And yet, somehow, the future makes an appearance.\n\nExpect familiar ideas in unfamiliar contexts, surprise guests, and a few predictions that may or may not be from your timeline. It’s part retrospective, part speculative fiction, and all Elixir. Buckle up.",
+          "videoId": "e37me",
+          "slug": "a-letter-to-ourselves",
+          "uuid": "7d4b5a34-5866-4990-a8b0-0c950fce9463",
+          "legacy": [
+            "e37me",
+            "7d4b5a34-5866-4990-a8b0-0c950fce9463"
+          ]
+        },
+        {
+          "time": "09:40",
+          "minutes": 15,
+          "title": "Practical information",
+          "kind": "note"
+        },
+        {
+          "time": "09:55",
+          "minutes": 20,
+          "title": "Introducing Tau5",
+          "kind": "talk",
+          "sessionId": "1016077",
+          "speakers": [
+            {
+              "name": "Sam Aaron",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Out here processes don't just run, they thrash. Supervision trees fracture into a recursive geometry of light and sound.\n\nIntroducing Tau5 - Live. Code. Together.\n\nDon't just pattern match - rhythm catch.",
+          "videoId": "4e68e",
+          "slug": "introducing-tau5",
+          "uuid": "a480c6f0-10a7-457f-9db2-6540b034c94f",
+          "legacy": [
+            "4e68e",
+            "a480c6f0-10a7-457f-9db2-6540b034c94f"
+          ]
+        },
+        {
+          "time": "10:20",
+          "minutes": 25,
+          "title": "Coffee break",
+          "kind": "break"
+        },
+        {
+          "time": "10:45",
+          "minutes": 20,
+          "title": "Giocci: a resource-permeating computing platform for wide-area distributed systems",
+          "kind": "talk",
+          "sessionId": "918611",
+          "speakers": [
+            {
+              "name": "Hideki Takase",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "In wide-area distributed systems based on 5G and Beyond 5G mobile communication systems, we can now flexibly utilize computing resources deployed in the network such as MEC (Multi-Access Edge Computing) servers. However, constructing a high-quality IoT system is still challenging, e.g., dealing with a wide variety of devices, various types and amounts of data, and different processing methods.\n\nWe are developing an IoT platform in Elixir, named \"Giocci\". \nThis platform realizes the features below to empower developers.\n1) Transparent use of computing resources (edge-side, MEC, cloud)\n2) Node-to-node access methods\n3) Data storage and sharing\n\nThis talk will introduce you to the Giocci world.\n- Giocci's concept and architecture\n- The efficient inter-node communication derived from Zenoh\n- The motivational example application for Giocci that employs an object detection model (YOLOv3) running on SRv6 MUP in the commercial 5G network powered by SoftBank\n\nWe aim to discuss Elixir and BEAM's potential in developing wide\narea distributed IoT systems.",
+          "videoId": "9wjke",
+          "slug": "giocci",
+          "uuid": "ee578fa1-ddad-42a0-bcb2-ed4fdef3a9ff",
+          "legacy": [
+            "9wjke",
+            "ee578fa1-ddad-42a0-bcb2-ed4fdef3a9ff"
+          ]
+        },
+        {
+          "time": "11:10",
+          "minutes": 20,
+          "title": "Elixir Hot Takes",
+          "kind": "talk",
+          "sessionId": "1032160",
+          "speakers": [
+            {
+              "name": "Brian Underwood",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "An opinion-piece on how to use Elixir. Is it spicy? You decide.",
+          "videoId": "nebqw",
+          "slug": "elixir-hot-takes",
+          "uuid": "c73b43ab-47f0-4100-a113-902f091abac6",
+          "legacy": [
+            "nebqw",
+            "c73b43ab-47f0-4100-a113-902f091abac6"
+          ]
+        },
+        {
+          "time": "11:35",
+          "minutes": 20,
+          "title": "The Roots of Resiliency",
+          "kind": "talk",
+          "sessionId": "857302",
+          "speakers": [
+            {
+              "name": "Meks McClure",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Ever ship a feature you were proud of, only to have requirements change—leading you to rebuild it again—and again? I did, with a gnarly multi‑step Phoenix form. It was frustrating, it sparked doubt, and it drifted into defeatism. This talk traces the journey to becoming a more resilient engineer by reframing rework as adaptive growth, deleting code boldly, and drawing strength from your community. Expect practical, lightweight habits for Elixir/Phoenix teams to bend without breaking when requirements shift—to keep momentum, clarity, and care for users.",
+          "videoId": "ywzpw",
+          "slug": "the-roots-of-resiliency",
+          "uuid": "2e72323f-77ae-4352-b0f8-80d68db45856",
+          "legacy": [
+            "ywzpw",
+            "2e72323f-77ae-4352-b0f8-80d68db45856"
+          ]
+        },
+        {
+          "time": "11:55",
+          "minutes": 20,
+          "title": "Desirable Shores",
+          "kind": "talk",
+          "sessionId": "1016080",
+          "speakers": [
+            {
+              "name": "Dan Janowski",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "We have great strength in OTP, Elixir, and the industrious work of the community. We must work together to understand the obstacles to broader and sticky adoption. In a few minutes, I will illustrate our shared challenge and how we can, and must, collaborate to realize the full potential of our ecosystem and ensure its long term health and sustainability. Together we can reach desirable shores through the rough waters ahead.",
+          "videoId": "mex6e",
+          "slug": "desirable-shores",
+          "uuid": "da8fa4b8-61e3-42cc-b0bc-f84dcf9fa9b5",
+          "legacy": [
+            "mex6e",
+            "da8fa4b8-61e3-42cc-b0bc-f84dcf9fa9b5"
+          ]
+        },
+        {
+          "time": "12:20",
+          "minutes": 20,
+          "title": "From Object-Oriented to Functional Thinking: My Elixir Journey",
+          "kind": "talk",
+          "sessionId": "927573",
+          "speakers": [
+            {
+              "name": "Louise Blanc",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "When i started my programming journey I was focusing on traditional object-oriented programming.\nShifting from objects and mutable state to immutable data and pattern matching was like re-learning how to think about code. But as I embraced Elixir’s simplicity, scalability, and concurrency model, I found joy in solving problems differently.\nNow I can confidently say that learning Elixir changed the way I think, code, and collaborate. It’s not just a language, it’s a new perspective, a different way to build and create!",
+          "videoId": "eggde",
+          "slug": "from-object-oriented-to-functional-thinking",
+          "uuid": "fa8b6aa4-72af-4c33-9078-9fab73b8101e",
+          "legacy": [
+            "eggde",
+            "fa8b6aa4-72af-4c33-9078-9fab73b8101e"
+          ]
+        },
+        {
+          "time": "12:40",
+          "minutes": 60,
+          "title": "Lunch",
+          "kind": "break"
+        },
+        {
+          "time": "13:40",
+          "minutes": 40,
+          "title": "Functioning Among Humans",
+          "kind": "talk",
+          "sessionId": "918027",
+          "speakers": [
+            {
+              "name": "Tobias Pfeiffer",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "In the development world, most people are striving for technical excellence: better code, faster run times, more convenient interfaces, better databases… But is that really what helps us create better software?\n\nIn the end software development is done by groups of people creating products together. To do that communication and collaboration between humans is essential. You can be the best programmer ever, but if you can’t work efficiently with others, what good does it do you?\n\nThis talk will introduce you to relevant, easy to grasp concepts of collaboration and communication as well as give you food for further thought.",
+          "videoId": "wy8pe",
+          "slug": "functioning-among-humans",
+          "uuid": "ccfc9263-f3a9-4c71-89fc-092f6e440da2",
+          "legacy": [
+            "wy8pe",
+            "ccfc9263-f3a9-4c71-89fc-092f6e440da2"
+          ]
+        },
+        {
+          "time": "14:25",
+          "minutes": 20,
+          "title": "Smarter Apps with Ash and the Model Context Protocol",
+          "kind": "talk",
+          "sessionId": "888178",
+          "speakers": [
+            {
+              "name": "Josh Price",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Imagine if you could not only build full stack web applications really quickly. Then picture them being way smarter than the apps you build now.\n\nThis talk explores how combining Ash Framework's powerful introspection capabilities with GenAI and modern LLMs creates a new possibility in application development – one where applications become intelligent conversational partners rather than static interfaces.\n\nAnthropic's new Model Context Protocol is a bidirectional API for LLMs and applications to talk to each other. It's a new standard for interoperation with any LLM or agent.\n\nWe'll look at the Ash framework for building ambitious applications in Elixir and look at how the Model Context Protocol can give Ash and other apps access to a range of LLM integrations so we can make fundamentally more intelligent and useful applications.",
+          "videoId": "ekzxw",
+          "slug": "smarter-apps-with-ash-and-the-model-context-protocol",
+          "uuid": "a56a0f0a-4099-43b1-9ebe-688064a5d69b",
+          "legacy": [
+            "ekzxw",
+            "a56a0f0a-4099-43b1-9ebe-688064a5d69b"
+          ]
+        },
+        {
+          "time": "14:50",
+          "minutes": 20,
+          "title": "Simplicity. This is the way!",
+          "kind": "talk",
+          "sessionId": "877579",
+          "speakers": [
+            {
+              "name": "Johan Mattisson",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "We all love exciting tech—microservices, event sourcing, Kubernetes. But when do we actually need them? Too often, we build for scale before we even have users, piling on complexity that slows us down, makes onboarding harder, and creates a tech debt spiral that’s hard to escape.\nThis talk explores how overengineering creeps in, why simplicity is your best scaling strategy, and how Elixir’s lightweight approach makes it easy to evolve systems sustainably. Through real-world lessons (including my own missteps), we’ll challenge the instinct to overcomplicate and rethink what \"just enough\" really means—not just for today, but for a future that’s sustainable, maintainable and scalable for the long haul.",
+          "videoId": "e6g8w",
+          "slug": "simplicity-this-is-the-way",
+          "uuid": "c5f72074-99a0-4eb2-9445-d7868c19cdf1",
+          "legacy": [
+            "e6g8w",
+            "c5f72074-99a0-4eb2-9445-d7868c19cdf1"
+          ]
+        },
+        {
+          "time": "15:15",
+          "minutes": 20,
+          "title": "BEAMOps in Print: Write Elixir’s Next Chapter",
+          "kind": "talk",
+          "sessionId": "869606",
+          "speakers": [
+            {
+              "name": "Ellie Fairholm",
+              "role": "",
+              "photo": null
+            },
+            {
+              "name": "Josep Lluis Giralt D'Lacoste",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Join Ellie Fairholm and Josep Giralt D’Lacoste as they delve into the journey of authoring Engineering Elixir Applications for The Pragmatic Bookshelf. This talk offers a behind-the-scenes look at how they applied BEAMOps principles throughout the book writing process. Discover\nhow they used Nix for reproducible environments and leveraged CI/CD pipelines to streamline their workflow, ensuring consistency and reliability in both code and content.\n\nThey’ll also discuss the motivation behind the book: to demonstrate how Elixir can simplify complex tech stacks and to clarify common misconceptions about the\noverlap between orchestrators and OTP. By sharing their experiences, Ellie and Josep aim to inspire members of the BEAM community to share their insights through writing, emphasising that the capabilities of the BEAM ecosystem extend beyond traditional boundaries.",
+          "videoId": "wjdkw",
+          "slug": "beamops-in-print",
+          "uuid": "34ca6729-7c38-493b-9cd7-f82250a9a673",
+          "legacy": [
+            "wjdkw",
+            "34ca6729-7c38-493b-9cd7-f82250a9a673"
+          ]
+        },
+        {
+          "time": "15:35",
+          "minutes": 50,
+          "title": "Fika (coffee break)",
+          "kind": "break"
+        },
+        {
+          "time": "16:25",
+          "minutes": 40,
+          "title": "Branching Out with Ecto: Crafting a Git Adapter That Nobody Asked For",
+          "kind": "talk",
+          "sessionId": "844914",
+          "speakers": [
+            {
+              "name": "Luís Ferreira",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "\"Ever thought, 'What if I could query a Git repository like a database?' No? Perfect! This talk is for you.\"\n\nJoin me as I embark on a delightfully unnecessary journey to build a custom Ecto adapter for Git repositories. This isn’t about practicality—it’s about diving headfirst into Ecto’s internals to learn how it all works, one bizarre commit at a time.\n\nYou’ll see how Ecto queries map to commits, branches and tags, and you’ll leave with a deeper understanding of Ecto, Elixir, and how to have fun while breaking things. It’s weird. It’s quirky. It’s utterly unproductive—but it’s the perfect experiment for anyone who wants to explore the building blocks of Ecto with a dash of chaos.\n\nWhether you’re an Ecto enthusiast, a Git geek, or just here for the laughs, this talk will remind you: the best way to learn is by doing something gloriously pointless. Let’s make Elixir weird.",
+          "videoId": "eb4qe",
+          "slug": "branching-out-with-ecto",
+          "uuid": "cd412dc0-7436-4971-a9f2-c149a4247d4f",
+          "legacy": [
+            "eb4qe",
+            "cd412dc0-7436-4971-a9f2-c149a4247d4f"
+          ]
+        },
+        {
+          "time": "17:05",
+          "minutes": 10,
+          "title": "Closing the day",
+          "kind": "note"
+        },
+        {
+          "time": "17:15",
+          "minutes": 55,
+          "title": "Tell me a story",
+          "kind": "talk",
+          "sessionId": "869603",
+          "speakers": [
+            {
+              "name": "Saša Jurić",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Tell me a Story is a three-act monodrama that explores the quiet art of narrative structure in collaborative software work. Through a deceptively simple ritual, something you likely perform every week, we'll examine how small shifts in our mindset and presentation can transform the way we work together. Expect philosophical musings, theatrics, vibe and live coding, and an old man yelling at a cloud. Come for the drama, linger for the revelations, and leave with a new sense of story.",
+          "videoId": "ex36w",
+          "slug": "tell-me-a-story",
+          "uuid": "54bff31b-96b5-454f-a540-6c040a09c96b",
+          "legacy": [
+            "ex36w",
+            "54bff31b-96b5-454f-a540-6c040a09c96b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "friday-12-september",
+      "date": "2025-09-12",
+      "title": "Friday 12 September",
+      "track": "Goatmire Elixir",
+      "entries": [
+        {
+          "time": "09:00",
+          "minutes": 40,
+          "title": "After the Crash: Designing Forgetful Systems",
+          "kind": "talk",
+          "sessionId": "902483",
+          "speakers": [
+            {
+              "name": "Flora Petterson",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Any message passing through your application can be forgotten. The process crashes. The integration broker is down. The database is corrupted. The hacker achieves their goal. An entire data center is flooded, leaving the servers underwater. How do we prepare for this inevitability? Every system can forget. Use the BEAM to help it remember.",
+          "videoId": "w4d5w",
+          "slug": "after-the-crash",
+          "uuid": "c6a0ab5c-a0e2-4e45-8aa6-b94233f648dd",
+          "legacy": [
+            "w4d5w",
+            "c6a0ab5c-a0e2-4e45-8aa6-b94233f648dd"
+          ]
+        },
+        {
+          "time": "09:40",
+          "minutes": 15,
+          "title": "Brief notes",
+          "kind": "note"
+        },
+        {
+          "time": "10:00",
+          "minutes": 20,
+          "title": "BEAM Internals: Understanding the Erlang Scheduler",
+          "kind": "talk",
+          "sessionId": "869601",
+          "speakers": [
+            {
+              "name": "Sanne Kalkman",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Until recently, I took the magic of the BEAM for granted. Like many of us, I spawned processes, passed messages and happily used concurrency without much thought about how any of it really worked. While there is so much more to learn than fits in any one talk, this one aims to give an overview of the Erlang Scheduler and how it allows us write concurrent software without having to think about the hard parts.",
+          "videoId": "wmz7e",
+          "slug": "beam-internals",
+          "uuid": "06c0a7f1-5384-4f1b-8630-5a794651e0a1",
+          "legacy": [
+            "wmz7e",
+            "06c0a7f1-5384-4f1b-8630-5a794651e0a1"
+          ]
+        },
+        {
+          "time": "10:20",
+          "minutes": 30,
+          "title": "Coffee break",
+          "kind": "break"
+        },
+        {
+          "time": "10:50",
+          "minutes": 40,
+          "title": "The Oban Murders",
+          "kind": "talk",
+          "sessionId": "868098",
+          "speakers": [
+            {
+              "name": "Parker Selbert",
+              "role": "",
+              "photo": null
+            },
+            {
+              "name": "Shannon Selbert",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Join us on a thrilling detective tale as we investigate three mysterious Oban failures that haunted users and stumped our finest agents. Meet the victims, follow the clues, and uncover the motivations behind these job deaths. Why did they die, and is it true that they came back to life?\n\nWe'll utilize all the forensic tools at our disposal, including:\n\n* Logging review to retrace the job's footsteps\n* Telemetry investigation to decode internal patterns\n* Query profiling to uncover performance abnormalities\n* Dashboard analysis to manipulate the clues\n\nTogether, let's crack the deepest Oban mysteries and unravel the web of deceit. Will we uncover the killer(s)? The answer lies within the data.",
+          "videoId": "eadjw",
+          "slug": "the-oban-murders",
+          "uuid": "5ce55959-1031-4d3d-8126-9d097410b491",
+          "legacy": [
+            "eadjw",
+            "5ce55959-1031-4d3d-8126-9d097410b491"
+          ]
+        },
+        {
+          "time": "11:35",
+          "minutes": 40,
+          "title": "The Umbrella and the Range",
+          "kind": "talk",
+          "sessionId": "869600",
+          "speakers": [
+            {
+              "name": "Andrea Leopardi",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "(not the Mix thing and the data structure)\n\nIn the age of AI... just kidding, this is no AI talk.\n\nThis is a talk about humans. It's about things that have been told before, but that I got to experience myself throughout my career—and life, for that matter. It's the story of how knowledge dances around different fields, mixes up, and creates. It's advice for younger engineers about specialization and generalization, about impostor syndrome, and about trying to be successful.\n\nBeware: this is not technical in the software engineering sense. I promise to make up for it by citing as much research as I can!",
+          "videoId": "w9nve",
+          "slug": "the-umbrella-and-the-range",
+          "uuid": "0454a6cf-b3b8-4db3-9179-83e090137e9d",
+          "legacy": [
+            "w9nve",
+            "0454a6cf-b3b8-4db3-9179-83e090137e9d"
+          ]
+        },
+        {
+          "time": "12:20",
+          "minutes": 20,
+          "title": "Who is doing the thinking?",
+          "kind": "talk",
+          "sessionId": "872893",
+          "speakers": [
+            {
+              "name": "Bruce Tate",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "You don’t have to offload critical thought to adopt a coding agent. As AI systems become increasingly capable, there's a temptation to offload complex tasks entirely to these technologies. If we’re to effectively shepherd these assistants, we need to accumulate b broad suite of new skills. We need to get good at snap code reviews, understand how and when to throw away code, and think in a whole new way.",
+          "videoId": "e3vmw",
+          "slug": "who-is-doing-the-thinking",
+          "uuid": "322f15e4-c154-4d8b-aad2-dd705b684f02",
+          "legacy": [
+            "e3vmw",
+            "322f15e4-c154-4d8b-aad2-dd705b684f02"
+          ]
+        },
+        {
+          "time": "12:40",
+          "minutes": 60,
+          "title": "Lunch",
+          "kind": "break"
+        },
+        {
+          "time": "13:40",
+          "minutes": 40,
+          "title": "From Freakout to Fix: Navigating a Security Disaster",
+          "kind": "talk",
+          "sessionId": "890972",
+          "speakers": [
+            {
+              "name": "Jonatan Männchen",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "Picture this: you’re chugging coffee late at night when you realize your beloved library has a massive security hole. Worse yet, someone’s already posted a proof-of-concept exploit for the world to see. Suddenly, thousands of projects are at risk, and you’re the one holding the bag. That’s exactly the scenario this talk tackles: the rush of panic, the scramble to inform everyone, and ultimately the hero’s journey to patch things up.\n\nWe’ll step through how to file vulnerabilities through official channels (like the CVE system) and bring clarity to the confusion of those first chaotic hours. You’ll see how simple tools, vulnerability scanners, and a clear emergency plan can make the difference between an all-nighter of sweaty debugging and a smoother return to stability. Along the way, we’ll talk best practices for preventing these disasters in the first place—from well-defined security policies to having the right people on speed dial.\n\nAnd here’s the kicker: vulnerability disclosure isn’t something to hide under the rug. Handled well, it’s proof that you take security seriously, and that alone can earn respect. By the end of this session, you’ll have the knowledge (and the confidence) to handle your very own “Oh no!” moment with a lot less panic and a lot more rock ‘n’ roll.",
+          "videoId": "w5mvw",
+          "slug": "from-freakout-to-fix",
+          "uuid": "37bdc49e-e0c7-4498-a4f1-9f2224b018d8",
+          "legacy": [
+            "w5mvw",
+            "37bdc49e-e0c7-4498-a4f1-9f2224b018d8"
+          ]
+        },
+        {
+          "time": "14:25",
+          "minutes": 40,
+          "title": "Turn old into new: Moving to elixir feature by feature",
+          "kind": "talk",
+          "sessionId": "881609",
+          "speakers": [
+            {
+              "name": "Anita Ludermann",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "It's 2022 and our software feels like 1999. Our developer pace is fine but the habitat is crumbling, the technology is outdated. So in January 2023, we took the plunge and started building the new town over in Elixir Land. \n\nIn this talk, we share our approach to the technology shift and how we integrate this long term goal into our business as usual where we focus on modern software engineering with small incremental steps. We'll take a look at the challenges we have faced and are still facing, some of which are: communicating between old and new system, shifting to functional programming, making existing data usable in Ecto, building bridges and shifting traffic and last but not least doing this all without the user noticing. We'll also take a look at a real life feature that went from ugly duckling to shiny new with the help of the strangler fig pattern.",
+          "videoId": "wnddw",
+          "slug": "turn-old-into-new",
+          "uuid": "d0ead24a-6f71-4f98-986a-4e85ac0aeb3c",
+          "legacy": [
+            "wnddw",
+            "d0ead24a-6f71-4f98-986a-4e85ac0aeb3c"
+          ]
+        },
+        {
+          "time": "15:10",
+          "minutes": 20,
+          "title": "All of the cores",
+          "kind": "talk",
+          "sessionId": "869618",
+          "speakers": [
+            {
+              "name": "Lars Wikman",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "What happens if we put the BEAM on the flagship ARM server processor?\n\nAn Ampere One 192 core beast.\n\nWhat happens if we put many BEAMs on it? No, like many BEAMs?\n\nWe don't know yet. But we have some ideas.\n\nThis talk will tell you all about where this adventure takes us.",
+          "videoId": "wqvpe",
+          "slug": "all-of-the-cores",
+          "uuid": "caf4e3da-3def-4762-a487-6d7526930ba6",
+          "legacy": [
+            "wqvpe",
+            "caf4e3da-3def-4762-a487-6d7526930ba6"
+          ]
+        },
+        {
+          "time": "15:30",
+          "minutes": 50,
+          "title": "Fika (coffee break)",
+          "kind": "break"
+        },
+        {
+          "time": "16:20",
+          "minutes": 20,
+          "title": "State and where to find it",
+          "kind": "talk",
+          "sessionId": "869624",
+          "speakers": [
+            {
+              "name": "Benjamin Milde",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "description": "An exploration of state at various levels of a stack.\n\nParallels will be drawn, differences discussed. \n\nExpect to also find discussions of tools we have access to in elixir where they fit in.",
+          "videoId": "wp5qe",
+          "slug": "state-and-where-to-find-it",
+          "uuid": "04b12e2d-9664-4a25-805d-8dbe9e2425e6",
+          "legacy": [
+            "wp5qe",
+            "04b12e2d-9664-4a25-805d-8dbe9e2425e6"
+          ]
+        },
+        {
+          "time": "16:40",
+          "minutes": 20,
+          "title": "Closing notes",
+          "kind": "note"
+        },
+        {
+          "time": "17:05",
+          "minutes": 40,
+          "title": "Sonic Pi",
+          "kind": "talk",
+          "sessionId": "927776",
+          "speakers": [
+            {
+              "name": "Sam Aaron",
+              "role": "",
+              "photo": null
+            }
+          ],
+          "videoId": "e85qw",
+          "slug": "sonic-pi",
+          "uuid": "0632bccd-4081-44f5-8b6d-0ab9469f8a38",
+          "legacy": [
+            "e85qw",
+            "0632bccd-4081-44f5-8b6d-0ab9469f8a38"
+          ]
+        }
+      ]
+    }
+  ],
+  "extras": [
+    {
+      "slug": "in-summary",
+      "title": "Goatmire Elixir 2025, in summary",
+      "videoId": "w73xw",
+      "uuid": "e389a654-f641-43cb-8b96-937d0fa69e25",
+      "legacy": [
+        "w73xw",
+        "e389a654-f641-43cb-8b96-937d0fa69e25",
+        "goatmire-2025-highlights-rev2-4k"
+      ]
+    }
+  ]
+}
