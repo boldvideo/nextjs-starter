@@ -17,7 +17,7 @@ export default async function Threshold() {
         <span className="bg neon" />
         <span className="inner">
           <span className="date">10–12 September 2025</span>
-          <img src="/goatmire/logo25.svg" alt="Goatmire Elixir" className="logo" />
+          <img src="/goatmire/logo25.png" alt="Goatmire Elixir" className="logo" />
           <span className="sub">Goatmire Elixir &amp; NervesConf EU<br />{n25} talks</span>
         </span>
       </Link>

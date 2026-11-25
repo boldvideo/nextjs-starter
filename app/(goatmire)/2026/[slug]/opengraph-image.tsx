@@ -30,9 +30,8 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const head = words.slice(0, -1).join(" ");
   const last = words[words.length - 1];
 
-  const [bg, fire, logo26, photo] = await Promise.all([
+  const [bg, logo26, photo] = await Promise.all([
     dataUri("bg26-talk.jpg"),
-    dataUri("fire-talk.png"),
     dataUri("logo26.png"),
     talk ? speakerPhoto(slugify(talk.speakers[0].name)) : Promise.resolve(null),
   ]);
@@ -46,12 +45,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         {photo && (
           <div style={{ position: "absolute", top: 0, left: 560, width: 640, height: 630, display: "flex" }}>
             <img src={photo} width={640} height={640} style={{ position: "absolute", top: -5, left: 0 }} />
-            {/* teal tone from above, fade into the left */}
-            <div style={{ position: "absolute", top: 0, left: 0, width: 640, height: 630, display: "flex", background: "linear-gradient(180deg, rgba(6,66,65,0.62) 0%, rgba(6,66,65,0.28) 50%, rgba(0,20,20,0.35) 100%)" }} />
-            <div style={{ position: "absolute", top: 0, left: 0, width: 640, height: 630, display: "flex", background: "linear-gradient(90deg, rgba(2,28,28,1) 0%, rgba(2,28,28,0.75) 22%, rgba(2,28,28,0) 62%)" }} />
+            {/* colour photograph, fading into the dark middle on the left */}
+            <div style={{ position: "absolute", top: 0, left: 0, width: 640, height: 630, display: "flex", background: "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0.7) 20%, rgba(0,0,0,0) 55%)" }} />
           </div>
         )}
-        <img src={fire} width={1200} height={630} style={{ position: "absolute", top: 0, left: 0 }} />
 
         <div style={{ ...full, width: 260, height: 100, left: 64, top: 54 }}>
           <img src={logo26} width={240} height={84} />

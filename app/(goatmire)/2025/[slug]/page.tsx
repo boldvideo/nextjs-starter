@@ -53,7 +53,7 @@ export default async function Watch2025({
 
   const meta = (
     <div className="wmeta25">
-      {day && talk && <div className="crumbs">{day.title} · {talk.time} · {day.track}</div>}
+      {day && talk && <div className="crumbs">{day.title} · {day.track}</div>}
       <h1>{title}</h1>
       {who && <div className="who big">{who}</div>}
       {(video.description || talk?.description) && (
@@ -64,11 +64,9 @@ export default async function Watch2025({
 
   const aside = day ? (
     <div>
-      <div className="sidehd">{weekday(day)}, in order</div>
+      <div className="sidehd">{weekday(day)}</div>
       {day.entries.map((e) => {
-        if (e.kind !== "talk") {
-          return <div className="ubrk" key={`${e.time}-${e.title}`}>{e.time} · {e.title.replace(/\s*\(coffee break\)/i, "")}</div>;
-        }
+        if (e.kind !== "talk") return null;
         const cur = e.slug === slug;
         const v = summaries[e.slug];
         if (!v) {
@@ -76,7 +74,7 @@ export default async function Watch2025({
             <div key={e.slug} className="up off">
               <span className="tw"><span className="noimg" /></span>
               <span>
-                <span className="ut"><span className="time">{e.time}</span>{e.title}</span>
+                <span className="ut">{e.title}</span>
                 <span className="who">{speakerLine(e)}</span>
               </span>
             </div>
@@ -85,13 +83,13 @@ export default async function Watch2025({
         return (
           <Link key={e.slug} href={talkHref(2025, e)} className={`up${cur ? " cur" : ""}`} aria-current={cur ? "page" : undefined}>
             <span className="tw">
-              {v?.thumbnail ? <img src={v.thumbnail} alt="" loading="lazy" /> : <span className="noimg" />}
+              {v.thumbnail ? <img src={v.thumbnail} alt="" loading="lazy" /> : <span className="noimg" />}
               {cur && <span className="eq" aria-hidden><i /><i /><i /></span>}
-              {e.videoId && !cur && <Watched videoId={e.videoId} />}
+              {!cur && <Watched videoId={v.id} />}
             </span>
             <span>
-              <span className="ut"><span className="time">{e.time}</span>{e.title}</span>
-              <span className="who">{speakerLine(e)}{v ? ` · ${formatDuration(v.duration)}` : ""}</span>
+              <span className="ut">{e.title}</span>
+              <span className="who">{speakerLine(e)} · {formatDuration(v.duration)}</span>
             </span>
           </Link>
         );

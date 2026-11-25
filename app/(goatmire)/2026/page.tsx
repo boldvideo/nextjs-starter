@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { PROGRAMMES, getAvailable, formatDuration, speakerLine, talkHref } from "@/lib/goatmire";
-import { Switch26 } from "@/components/goatmire/chrome";
-import { Menu26 } from "@/components/goatmire/menus";
-import { WatchedWord } from "@/components/goatmire/watched";
+import { PROGRAMMES, getAvailable, formatDuration, speakerLine, talkHref, type TalkEntry } from "@/lib/goatmire";
+import { Header26, Temperature } from "@/components/goatmire/chrome";
+import { Watched } from "@/components/goatmire/watched";
 
-export const revalidate = 300;
+export const revalidate = 60;
 export const metadata = {
   title: "2026",
   description: "NervesConf EU & Goatmire Elixir, September 28th to October 3rd 2026, Varberg. The talks, as they are published.",
@@ -17,60 +16,52 @@ export default async function Index2026() {
 
   return (
     <div className="y26 page26">
-      <div className="bg26" aria-hidden />
-      <Menu26 />
-      <div className="col">
-        <div className="hero26">
-          <img src="/goatmire/logo26.svg" alt="Goatmire" className="logo" />
+      <Temperature />
+      <Header26 />
+      <div className="gallery26">
+        <div className="intro26">
           <img src="/goatmire/runes26.svg" alt="ᛁᛚᛁᚴᛋᛁᛦ" className="runes" />
-          <p className="when">September 28th to October 3rd, 2026<br />Varberg, Sweden</p>
-          <Switch26 />
+          <p className="when">September 28th to October 3rd, 2026 · Varberg, Sweden</p>
         </div>
-        {days.map((day) => (
-          <section key={day.id} id={day.id} className="day26">
-            <p className="kicker">{day.track}</p>
-            <h2>{day.title}</h2>
-            <ol className="prog26">
-              {day.entries.map((e, i) => {
-                if (e.kind !== "talk") {
-                  return (
-                    <li key={i} className={`n26 ${e.kind}`}>
-                      <span className="tm">{e.time}</span>
-                      <span className="nt">{e.title}</span>
-                    </li>
+        {days.map((day) => {
+          const talks = day.entries.filter((e): e is TalkEntry => e.kind === "talk");
+          return (
+            <section key={day.id} id={day.id} className="day26">
+              <header>
+                <h2>{day.title}</h2>
+                <span className="kicker">{day.track}</span>
+              </header>
+              <div className="grid26">
+                {talks.map((e) => {
+                  const v = videos[e.slug];
+                  const photo = e.speakers[0]?.photo;
+                  const inner = (
+                    <>
+                      <span className="thumb">
+                        {v?.thumbnail ? (
+                          <img src={v.thumbnail} alt="" loading="lazy" />
+                        ) : photo ? (
+                          <img src={photo} alt="" loading="lazy" className="portrait" />
+                        ) : (
+                          <span className="noimg" />
+                        )}
+                        {v ? (v.duration > 0 && <span className="dur">{formatDuration(v.duration)}</span>) : <span className="soon">Soon</span>}
+                        {v && <Watched videoId={v.id} />}
+                      </span>
+                      <span className="t">{e.title}</span>
+                      <span className="who">{speakerLine(e)}</span>
+                    </>
                   );
-                }
-                const v = videos[e.slug];
-                const available = !!v;
-                const photo = e.speakers[0]?.photo;
-                const body = (
-                  <>
-                    <span className="tm">{e.time}</span>
-                    <span className="ph">{photo ? <img src={photo} alt="" loading="lazy" /> : null}</span>
-                    <span className="tx">
-                      <span className="ti">{e.title}</span>
-                      <span className="by">by {speakerLine(e)}</span>
-                      {e.speakers[0]?.role && <span className="ro">{e.speakers.map((s) => s.role).filter(Boolean).join(" · ")}</span>}
-                    </span>
-                    <span className="d">
-                      {available ? <>{formatDuration(v.duration)}<WatchedWord videoId={v.id} /></> : <em>Soon</em>}
-                    </span>
-                  </>
-                );
-                return (
-                  <li key={i}>
-                    {available ? (
-                      <Link href={talkHref(2026, e)} className="r26">{body}</Link>
-                    ) : (
-                      <div className="r26 soon">{body}</div>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-        ))}
-
+                  return v ? (
+                    <Link className="c26" key={e.slug} href={talkHref(2026, e)}>{inner}</Link>
+                  ) : (
+                    <div className="c26 off" key={e.slug}>{inner}</div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

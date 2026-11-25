@@ -23,7 +23,7 @@ export default async function Image() {
           <img src={bg25} width={600} height={630} />
           <div style={{ ...center, gap: 26 }}>
             <div style={{ fontFamily: "Economica", fontWeight: 700, fontSize: 38, color: "#8a93b5" }}>10–12 September 2025</div>
-            <img src={logo25} width={480} height={146} />
+            <img src={logo25} width={480} height={152} />
           </div>
         </div>
         <div style={{ ...half, left: 600 }}>
