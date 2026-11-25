@@ -15,7 +15,7 @@ export default async function Index2025() {
   return (
     <div className="y25 page25">
       <div className="curtainwash" aria-hidden />
-      <Header25 active="talks" />
+      <Header25 />
       <section className="hero25">
         <Link href="/2025/in-summary" className="feat">
           <img src="https://uploads.eu1.boldvideo.io/uploads/bt_goatmire/thumbnails/712f9896-c97a-4dc7-b35d-c285d8a4c970.jpg" alt="Goatmire Elixir 2025, in summary" />

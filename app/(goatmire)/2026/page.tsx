@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PROGRAMMES, getAvailable, formatDuration, speakerLine, talkHref } from "@/lib/goatmire";
-import { Rail26 } from "@/components/goatmire/chrome";
+import { Switch26 } from "@/components/goatmire/chrome";
+import { Menu26 } from "@/components/goatmire/menus";
 import { WatchedWord } from "@/components/goatmire/watched";
 
 export const revalidate = 300;
@@ -13,12 +14,13 @@ export default async function Index2026() {
   return (
     <div className="y26 page26">
       <div className="bg26" aria-hidden />
-      <Rail26 active="Talks" />
+      <Menu26 />
       <div className="col">
         <div className="hero26">
           <img src="/goatmire/logo26.svg" alt="Goatmire" className="logo" />
           <img src="/goatmire/runes26.svg" alt="ᛁᛚᛁᚴᛋᛁᛦ" className="runes" />
           <p className="when">September 28th to October 3rd, 2026<br />Varberg, Sweden</p>
+          <Switch26 />
         </div>
         {days.map((day) => (
           <section key={day.id} id={day.id} className="day26">

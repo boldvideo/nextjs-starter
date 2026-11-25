@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findBySlug, getAvailable, speakerLine, formatDuration, talkHref } from "@/lib/goatmire";
 import { loadWatchVideo } from "@/lib/goatmire-video";
-import { Rail26 } from "@/components/goatmire/chrome";
+import { Switch26 } from "@/components/goatmire/chrome";
+import { Menu26 } from "@/components/goatmire/menus";
 import { Watch } from "@/components/goatmire/watch";
 import { WatchedWord } from "@/components/goatmire/watched";
 
@@ -70,11 +71,12 @@ export default async function Watch2026({
   return (
     <div className="y26 page26 watch26">
       <div className="bg26" aria-hidden />
-      <Rail26 active={day?.track === "NervesConf EU" ? "NervesConf EU" : "Goatmire Elixir"} />
+      <Menu26 />
       <div className="col wide">
         <Link href="/2026" className="smalllogo" aria-label="Goatmire 2026">
           <img src="/goatmire/logo26.svg" alt="Goatmire" />
         </Link>
+        <Switch26 />
         <Watch
           video={video}
           startTime={t ? Number(t) : undefined}

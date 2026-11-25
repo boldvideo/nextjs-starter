@@ -62,6 +62,8 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: "Goatmire videos", template: "%s · Goatmire" },
     description:
       "Every talk from Goatmire Elixir and NervesConf EU, recorded at Varbergs Teater.",
+    // Staging hosts (goatmire-v2.bold.video) stay out of search results.
+    robots: process.env.GOATMIRE_NOINDEX === "1" ? { index: false, follow: false } : undefined,
   };
 }
 
