@@ -29,7 +29,7 @@ export default async function Threshold() {
           <span className="date">September 28th to October 3rd, 2026</span>
           <img src="/goatmire/logo26.svg" alt="Goatmire" className="logo" />
           <img src="/goatmire/runes26.svg" alt="ᛁᛚᛁᚴᛋᛁᛦ" className="runes" />
-          <span className="sub">NervesConf EU &amp; Goatmire Elixir<br />{n26 === total26 ? `${total26} talks` : `${n26} of ${total26} talks`}</span>
+          <span className="sub">NervesConf EU &amp; Goatmire Elixir<br />{n26 === 0 || n26 === total26 ? `${total26} talks` : `${n26} of ${total26} talks`}</span>
         </span>
       </Link>
       <p className="top">Varbergs Teater, Varberg, Sweden</p>
