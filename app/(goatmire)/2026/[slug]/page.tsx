@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findBySlug, resolveUuid, getVideoSummaries, speakerLine, formatDuration, talkHref } from "@/lib/goatmire";
+import { findBySlug, getAvailable, speakerLine, formatDuration, talkHref } from "@/lib/goatmire";
 import { loadWatchVideo } from "@/lib/goatmire-video";
 import { Rail26 } from "@/components/goatmire/chrome";
 import { Watch } from "@/components/goatmire/watch";
@@ -25,10 +25,10 @@ export default async function Watch2026({
   const { t } = await searchParams;
   const found = findBySlug(2026, slug);
   if (!found) notFound();
-  const uuid = found.extra?.uuid ?? (found.talk ? await resolveUuid(2026, found.talk) : null);
-  if (!uuid) notFound();
-
-  const [video, summaries] = await Promise.all([loadWatchVideo(uuid), getVideoSummaries(2026)]);
+  const summaries = await getAvailable(2026);
+  const mine = summaries[slug];
+  if (!mine) notFound(); // unpublished talks have no page
+  const video = await loadWatchVideo(mine.uuid);
   const { talk, day } = found;
 
   const meta = (
@@ -81,7 +81,7 @@ export default async function Watch2026({
           dialect="y26"
           meta={meta}
           aside={aside}
-          pendingText="The words are still being set down. When they are, every one of them will be here, and each will take you to the moment it was said."
+          pendingText="No transcript yet."
         />
       </div>
     </div>

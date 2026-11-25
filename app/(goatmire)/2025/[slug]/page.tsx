@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findBySlug, resolveUuid, getVideoSummaries, speakerLine, weekday, formatDuration, talkHref } from "@/lib/goatmire";
+import { findBySlug, getAvailable, speakerLine, weekday, formatDuration, talkHref } from "@/lib/goatmire";
 import { loadWatchVideo } from "@/lib/goatmire-video";
 import { Header25 } from "@/components/goatmire/chrome";
 import { Watch } from "@/components/goatmire/watch";
@@ -26,10 +26,10 @@ export default async function Watch2025({
   const { t } = await searchParams;
   const found = findBySlug(2025, slug);
   if (!found) notFound();
-  const uuid = found.extra?.uuid ?? (found.talk ? await resolveUuid(2025, found.talk) : null);
-  if (!uuid) notFound();
-
-  const [video, summaries] = await Promise.all([loadWatchVideo(uuid), getVideoSummaries(2025)]);
+  const summaries = await getAvailable(2025);
+  const mine = summaries[slug];
+  if (!mine) notFound(); // unpublished talks have no page
+  const video = await loadWatchVideo(mine.uuid);
   const { talk, day } = found;
   const title = talk?.title ?? found.extra?.title ?? video.title;
   const who = talk ? speakerLine(talk) : "";
@@ -54,6 +54,17 @@ export default async function Watch2025({
         }
         const cur = e.slug === slug;
         const v = summaries[e.slug];
+        if (!v) {
+          return (
+            <div key={e.slug} className="up off">
+              <span className="tw"><span className="noimg" /></span>
+              <span>
+                <span className="ut"><span className="time">{e.time}</span>{e.title}</span>
+                <span className="who">{speakerLine(e)}</span>
+              </span>
+            </div>
+          );
+        }
         return (
           <Link key={e.slug} href={talkHref(2025, e)} className={`up${cur ? " cur" : ""}`} aria-current={cur ? "page" : undefined}>
             <span className="tw">

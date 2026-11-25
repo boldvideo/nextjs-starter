@@ -1,9 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Player } from "@/components/players";
+import { BoldPlayer, type BoldPlayerHandle, type BoldPlayerVideo } from "@boldvideo/player";
 import type { MuxPlayerVideoLike } from "@/components/players/player-mux";
+import { useBold } from "@/components/providers/bold-provider";
 import { useVideoProgress } from "@/hooks/use-video-progress";
+
+interface Word {
+  start: number;
+  end: number;
+  word?: string;
+  text?: string;
+}
 
 interface Utterance {
   start: number;
@@ -11,6 +19,57 @@ interface Utterance {
   text: string;
   speaker?: string;
   speaker_name?: string;
+  words?: Word[];
+}
+
+/** One readable paragraph: a slice of a speaker turn, with its own start time. */
+interface Para {
+  start: number;
+  text: string;
+  speaker: string;
+}
+
+const SENTENCE_END = /[.?!…]["”’)]?$/;
+
+/**
+ * Speaker turns from the vendor can run for minutes. Break each turn into
+ * paragraphs using the word timings: after a sentence that ends on a pause, or
+ * once a paragraph has grown long, a new one starts. Every paragraph keeps its
+ * own timestamp so it can be clicked and followed.
+ */
+function toParagraphs(utterances: Utterance[], names: Record<string, string | null>): Para[] {
+  const out: Para[] = [];
+  for (const u of utterances) {
+    const label = u.speaker ?? "";
+    const speaker = names[label] || u.speaker_name || label;
+    const words = (u.words ?? []).filter((w) => (w.word ?? w.text ?? "").trim());
+    if (words.length === 0) {
+      if (u.text?.trim()) out.push({ start: u.start, text: u.text.trim(), speaker });
+      continue;
+    }
+    let buf: string[] = [];
+    let start = words[0].start;
+    let sentences = 0;
+    words.forEach((w, i) => {
+      const token = (w.word ?? w.text ?? "").trim();
+      buf.push(token);
+      const next = words[i + 1];
+      if (!SENTENCE_END.test(token)) return;
+      sentences += 1;
+      const pause = next ? next.start - w.end : 0;
+      const long = buf.length >= 55;
+      const breathe = pause >= 0.9 && buf.length >= 18;
+      const tooLong = buf.length >= 110;
+      if (!next || ((long || breathe) && sentences >= 2) || tooLong) {
+        out.push({ start, text: buf.join(" "), speaker });
+        buf = [];
+        sentences = 0;
+        if (next) start = next.start;
+      }
+    });
+    if (buf.length) out.push({ start, text: buf.join(" "), speaker });
+  }
+  return out;
 }
 
 function stamp(seconds: number): string {
@@ -45,16 +104,18 @@ export function Watch({
   aside: React.ReactNode;
   pendingText: string;
 }) {
-  const playerRef = useRef<HTMLVideoElement | null>(null);
+  const playerRef = useRef<BoldPlayerHandle | null>(null);
+  const bold = useBold();
   const [now, setNow] = useState(0);
-  const [lines, setLines] = useState<Utterance[] | null>(null);
+  const [lines, setLines] = useState<Para[] | null>(null);
   const [follow, setFollow] = useState(true);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const { resumePosition } = useVideoProgress({
     videoId: video.id,
     duration: video.duration,
-    playerRef,
+    // The handle is shaped like a media element (currentTime, duration, events).
+    playerRef: playerRef as unknown as React.RefObject<HTMLVideoElement | null>,
   });
   const effectiveStart = startTime || resumePosition || undefined;
 
@@ -70,7 +131,8 @@ export function Watch({
       .then((json) => {
         if (cancelled || !json) return;
         const u: Utterance[] = json.utterances ?? [];
-        setLines(u.filter((x) => x.text?.trim()));
+        const names: Record<string, string | null> = json.metadata?.speakers ?? {};
+        setLines(toParagraphs(u.filter((x) => x.text?.trim()), names));
       })
       .catch(() => setLines([]));
     return () => {
@@ -111,25 +173,31 @@ export function Watch({
     setFollow(true);
   };
 
-  const speakerOf = (u: Utterance) => u.speaker_name || u.speaker || "";
+  const speakerOf = (p: Para) => p.speaker;
   const named = (s: string) => s.length > 2; // bare diarization labels stay unnamed
 
   return (
     <div className={`g-watch is-${dialect}`}>
       <div className="g-main">
         <div className="g-player">
-          <Player
-            video={video}
+          <BoldPlayer
             ref={playerRef}
-            autoPlay={false}
+            video={video as unknown as BoldPlayerVideo}
+            bold={bold}
             startTime={effectiveStart}
             onTimeUpdate={onTimeUpdate}
-            className="w-full h-full"
+            accentColor={dialect === "y25" ? "#ff00ff" : "#ff914d"}
+            style={
+              {
+                "--media-font-family": dialect === "y25" ? "var(--g-bricolage)" : "var(--g-fraunces)",
+                "--media-border-radius": dialect === "y25" ? "7px" : "0px",
+              } as React.CSSProperties
+            }
           />
         </div>
         <div className="g-meta">{meta}</div>
         <section className="g-spoken">
-          <h3>{dialect === "y26" ? "Spoken" : "Transcript"}</h3>
+          <h3>Transcript</h3>
           {lines === null && !video.transcriptUrl && <p className="g-pending">{pendingText}</p>}
           {lines === null && video.transcriptUrl && <div className="g-ghost"><i /><i /><i /><i /></div>}
           {lines && lines.length > 0 && (

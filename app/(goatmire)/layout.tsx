@@ -14,6 +14,7 @@ import { SettingsProvider } from "@/components/providers/settings-provider";
 import { ProgressProvider } from "@/components/providers/progress-provider";
 import { searchIndex } from "@/lib/goatmire";
 import { GoatSearch } from "@/components/goatmire/search";
+import "@boldvideo/player/styles.css";
 import "./goatmire.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -58,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const base = process.env.NEXT_PUBLIC_BASE_URL;
   return {
     metadataBase: base ? new URL(base) : undefined,
-    title: { default: "Goatmire, on tape", template: "%s · Goatmire" },
+    title: { default: "Goatmire videos", template: "%s · Goatmire" },
     description:
       "Every talk from Goatmire Elixir and NervesConf EU, recorded at Varbergs Teater.",
   };

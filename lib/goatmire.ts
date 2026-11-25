@@ -110,89 +110,86 @@ export function speakerLine(t: TalkEntry): string {
 }
 
 export interface VideoSummary {
+  /** Bold hashid (watch progress is keyed by it) */
   id: string;
+  uuid: string;
   title: string;
   duration: number;
   thumbnail: string | null;
 }
 
 /**
- * Published talks the JSON doesn't know yet, matched to their schedule slot by
- * the speaker's name in the video title ("Title - Speaker"). Lets a 2026 talk
- * go from "Soon" to playable the moment it is published in Bold.
+ * Everything Lars has published in Bold, by internal id. This is the single
+ * source of truth for what plays here: unlisted or draft videos never appear,
+ * so a talk goes from "Soon" to playable the moment he publishes it.
  */
-export const getLiveMatches = unstable_cache(
-  async (year: Year): Promise<Record<string, { uuid: string; videoId: string }>> => {
-    const missing = talks(year).filter((t) => !t.uuid);
-    if (missing.length === 0) return {};
+export const getPublished = unstable_cache(
+  async (): Promise<Record<string, VideoSummary>> => {
     const context = await getTenantContext({ includeSettings: false });
     if (!context) return {};
-    let list: Video[] = [];
-    try {
-      const res = await context.client.videos.list(100);
-      list = (res?.data ?? []) as Video[];
-    } catch {
-      return {};
-    }
-    const out: Record<string, { uuid: string; videoId: string }> = {};
-    for (const t of missing) {
-      const speaker = t.speakers[0]?.name.toLowerCase();
-      if (!speaker) continue;
-      const hit = list.find((v) => v.title?.toLowerCase().includes(speaker));
-      const internal = (hit as unknown as { internalId?: string; internal_id?: string } | undefined);
-      const uuid = internal?.internalId ?? internal?.internal_id;
-      if (hit && uuid) out[t.slug] = { uuid, videoId: hit.id };
-    }
-    return out;
-  },
-  ["goatmire-live-matches"],
-  { revalidate: 300 }
-);
-
-/** The Bold internal id for a talk: from the JSON, else from a live match. */
-export async function resolveUuid(year: Year, t: { slug: string; uuid?: string }): Promise<string | null> {
-  if (t.uuid) return t.uuid;
-  const live = await getLiveMatches(year);
-  return live[t.slug]?.uuid ?? null;
-}
-
-/**
- * Durations + thumbnails for every recorded talk in a year, keyed by slug. The
- * 2026 talks are unlisted, so they are fetched one by one by internal id.
- */
-export const getVideoSummaries = unstable_cache(
-  async (year: Year): Promise<Record<string, VideoSummary>> => {
-    const context = await getTenantContext({ includeSettings: false });
-    if (!context) return {};
-    const live = await getLiveMatches(year);
-    const items = [...talks(year), ...(PROGRAMMES[year].extras ?? [])]
-      .map((t) => ({ slug: t.slug, uuid: t.uuid ?? live[t.slug]?.uuid }))
-      .filter((t): t is { slug: string; uuid: string } => !!t.uuid);
-    const results = await Promise.all(
-      items.map(async ({ uuid }) => {
-        try {
-          const { data } = await context.client.videos.get(uuid);
-          return data as Video;
-        } catch {
-          return null;
-        }
-      })
-    );
+    const res = await context.client.videos.list(200);
     const out: Record<string, VideoSummary> = {};
-    results.forEach((v, i) => {
-      if (!v) return;
-      out[items[i].slug] = {
+    for (const v of (res?.data ?? []) as Video[]) {
+      const internalId = (v as unknown as { internalId?: string }).internalId;
+      if (!internalId) continue;
+      out[internalId] = {
         id: v.id,
+        uuid: internalId,
         title: v.title,
         duration: v.duration ?? 0,
         thumbnail: v.thumbnail ?? null,
       };
-    });
+    }
     return out;
   },
-  ["goatmire-video-summaries"],
-  { revalidate: 300 }
+  ["goatmire-published"],
+  { revalidate: 60 }
 );
+
+const getUnpublished = unstable_cache(
+  async (uuid: string): Promise<VideoSummary | null> => {
+    const context = await getTenantContext({ includeSettings: false });
+    if (!context) return null;
+    try {
+      const { data: v } = await context.client.videos.get(uuid);
+      return { id: v.id, uuid, title: v.title, duration: v.duration ?? 0, thumbnail: v.thumbnail ?? null };
+    } catch {
+      return null;
+    }
+  },
+  ["goatmire-unpublished"],
+  { revalidate: 60 }
+);
+
+/**
+ * Published talks for a year, keyed by slug. A talk the JSON has no id for yet
+ * is matched by its speaker's name in the video title ("Title - Speaker").
+ */
+export async function getAvailable(year: Year): Promise<Record<string, VideoSummary>> {
+  const published = await getPublished();
+  const all = Object.values(published);
+  const out: Record<string, VideoSummary> = {};
+  const items: Array<{ slug: string; uuid?: string; speaker?: string }> = [
+    ...talks(year).map((t) => ({ slug: t.slug, uuid: t.uuid, speaker: t.speakers[0]?.name })),
+    ...(PROGRAMMES[year].extras ?? []).map((x) => ({ slug: x.slug, uuid: x.uuid })),
+  ];
+  // Behind deployment protection only: show unpublished talks for review.
+  const preview = process.env.GOATMIRE_SHOW_UNPUBLISHED === "1";
+  for (const t of items) {
+    if (t.uuid) {
+      if (published[t.uuid]) out[t.slug] = published[t.uuid];
+      else if (preview) {
+        const v = await getUnpublished(t.uuid);
+        if (v) out[t.slug] = v;
+      }
+      continue;
+    }
+    const speaker = t.speaker?.toLowerCase();
+    const hit = speaker ? all.find((v) => v.title.toLowerCase().endsWith(speaker)) : undefined;
+    if (hit) out[t.slug] = hit;
+  }
+  return out;
+}
 
 export function formatDuration(seconds: number): string {
   const s = Math.round(seconds);

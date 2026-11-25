@@ -298,3 +298,8 @@ a.r26:hover .ti { color: #ffbd59; }
   .watch26 { padding-right: 220px; }
   .watch26 .col.wide { width: min(1180px, 100% - 40px); }
 }
+
+/* Unpublished 2025 talk: present in the running order, not playable. */
+.c25.off { opacity: .45; cursor: default; }
+.c25.off .thumb { background: rgba(255,255,255,.08); }
+.up.off { opacity: .45; }

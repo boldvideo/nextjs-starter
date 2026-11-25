@@ -133,11 +133,11 @@ export function GoatSearch({ index }: { index: Record<string, { year: Year; slug
     .filter((m) => m.at && (scope === "all" || m.at.year === scope));
 
   return (
-    <div className={`g-search ${dialect}`} role="dialog" aria-label="Search what was said" onClick={() => setOpen(false)}>
+    <div className={`g-search ${dialect}`} role="dialog" aria-label="Search" onClick={() => setOpen(false)}>
       <div className="g-sbox" onClick={(e) => e.stopPropagation()}>
         <div className="g-sin">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.3"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-          <input ref={inputRef} autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search what was said" aria-label="Search what was said" />
+          <input ref={inputRef} autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the talks" aria-label="Search the talks" />
           <button type="button" className="esc" onClick={() => setOpen(false)}>esc</button>
         </div>
         <div className="g-scope">
@@ -146,7 +146,7 @@ export function GoatSearch({ index }: { index: Record<string, { year: Year; slug
               {s === "all" ? "Both years" : s}
             </button>
           ))}
-          {hits && <span className="cnt">{busy ? "Listening…" : moments.length === 1 ? "Said once on stage" : `${moments.length} moments`}</span>}
+          {hits && <span className="cnt">{busy ? "Searching…" : moments.length === 1 ? "1 result" : `${moments.length} results`}</span>}
         </div>
         <div className="g-results">
           {moments.map(({ hit, seg, at }, i) => {
@@ -172,10 +172,10 @@ export function GoatSearch({ index }: { index: Record<string, { year: Year; slug
               </Link>
             );
           })}
-          {hits && !busy && moments.length === 0 && <p className="g-none">Nobody said that on stage. Not in so many words.</p>}
+          {hits && !busy && moments.length === 0 && <p className="g-none">No results.</p>}
         </div>
         {scope !== 2025 && (
-          <p className="g-snote"><span className="tag26">2026</span>This year’s talks join the search as they are published.</p>
+          <p className="g-snote"><span className="tag26">2026</span>2026 talks are searchable once published.</p>
         )}
       </div>
     </div>

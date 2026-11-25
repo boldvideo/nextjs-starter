@@ -14,7 +14,7 @@ export function Header25({ active }: { active?: "talks" }) {
         <Link href="/2025#thursday-11-september">Goatmire Elixir</Link>
         <SearchButton className="search">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-          Search what was said
+          Search
         </SearchButton>
         <Link href="/2026" className="yr26">2026&nbsp;→</Link>
       </nav>
