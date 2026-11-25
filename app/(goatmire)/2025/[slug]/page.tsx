@@ -8,11 +8,28 @@ import { Watched } from "@/components/goatmire/watched";
 
 export const revalidate = 60;
 
+function summary(text?: string | null): string | undefined {
+  if (!text) return undefined;
+  const t = text.replace(/\s+/g, " ").trim();
+  return t.length > 200 ? `${t.slice(0, 197).replace(/\s+\S*$/, "")}…` : t;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const found = findBySlug(2025, slug);
-  if (found?.talk) return { title: `${found.talk.title}, ${speakerLine(found.talk)}` };
-  return { title: found?.extra?.title ?? "2025" };
+  if (!found) return { title: "2025" };
+  const title = found.talk ? `${found.talk.title}, ${speakerLine(found.talk)}` : found.extra?.title ?? "2025";
+  const description = summary(found.talk?.description) ?? "Goatmire Elixir 2025, Varbergs Teater.";
+  // Lars designed a card for every 2025 talk; that is the share image.
+  const available = await getAvailable(2025);
+  const thumb = available[slug]?.thumbnail;
+  const images = thumb ? [{ url: thumb, width: 1280, height: 720, alt: title }] : undefined;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "video.other", images },
+    twitter: { card: "summary_large_image", title, description, images: thumb ? [thumb] : undefined },
+  };
 }
 
 export default async function Watch2025({

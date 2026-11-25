@@ -27,6 +27,11 @@ const nextConfig = {
   // Next.js 16: Enable React Compiler for automatic memoization
   reactCompiler: true,
 
+  // Fonts, logos and portraits for the Goatmire social cards, read from disk.
+  outputFileTracingIncludes: {
+    "/**/*": ["./assets/og/**/*"],
+  },
+
   // Next.js 16: Enable Turbopack filesystem caching for faster dev restarts
   experimental: {
     turbopackFileSystemCacheForDev: true,

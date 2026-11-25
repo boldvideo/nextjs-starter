@@ -4,7 +4,11 @@ import { Header25 } from "@/components/goatmire/chrome";
 import { Watched } from "@/components/goatmire/watched";
 
 export const revalidate = 300;
-export const metadata = { title: "2025" };
+export const metadata = {
+  title: "2025",
+  description: "Goatmire Elixir & NervesConf EU, 10–12 September 2025, Varbergs Teater. Every talk.",
+  openGraph: { title: "Goatmire Elixir & NervesConf EU 2025", description: "10–12 September 2025, Varbergs Teater. Every talk." },
+};
 
 const SUMMARY_ID = "w73xw"; // progress key for the summary film
 

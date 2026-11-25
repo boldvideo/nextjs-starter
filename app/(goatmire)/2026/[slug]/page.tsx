@@ -9,10 +9,24 @@ import { WatchedWord } from "@/components/goatmire/watched";
 
 export const revalidate = 60;
 
+function summary(text?: string | null): string | undefined {
+  if (!text) return undefined;
+  const t = text.replace(/\s+/g, " ").trim();
+  return t.length > 200 ? `${t.slice(0, 197).replace(/\s+\S*$/, "")}…` : t;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const found = findBySlug(2026, slug);
-  return { title: found?.talk ? `${found.talk.title}, ${speakerLine(found.talk)}` : "2026" };
+  if (!found?.talk) return { title: "2026" };
+  const title = `${found.talk.title}, ${speakerLine(found.talk)}`;
+  const description = summary(found.talk.description) ?? `${found.day?.track ?? "Goatmire"} 2026, Varbergs Teater.`;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "video.other" },
+    twitter: { card: "summary_large_image", title, description },
+  };
 }
 
 export default async function Watch2026({

@@ -5,7 +5,11 @@ import { Menu26 } from "@/components/goatmire/menus";
 import { WatchedWord } from "@/components/goatmire/watched";
 
 export const revalidate = 300;
-export const metadata = { title: "2026" };
+export const metadata = {
+  title: "2026",
+  description: "NervesConf EU & Goatmire Elixir, September 28th to October 3rd 2026, Varberg. The talks, as they are published.",
+  openGraph: { title: "Goatmire 2026", description: "NervesConf EU & Goatmire Elixir, September 28th to October 3rd 2026, Varberg." },
+};
 
 export default async function Index2026() {
   const videos = await getAvailable(2026);

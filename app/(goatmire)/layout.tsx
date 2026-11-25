@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import {
   Bricolage_Grotesque,
   Economica,
@@ -56,12 +57,19 @@ const PLAUSIBLE_ID = "pa--k-vCSLuiP9Ajb5GdGTkE";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const base = process.env.NEXT_PUBLIC_BASE_URL;
+  // Social images must resolve on whichever host serves the page
+  // (goatmire-v2.bold.video now, video.goatmire.com later).
+  const h = await headers();
+  const host = h.get("x-forwarded-host") || h.get("host");
+  const proto = h.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
+  const base = host ? `${proto}://${host}` : process.env.NEXT_PUBLIC_BASE_URL;
+  const description = "Every talk from Goatmire Elixir and NervesConf EU, recorded at Varbergs Teater.";
   return {
     metadataBase: base ? new URL(base) : undefined,
     title: { default: "Goatmire videos", template: "%s · Goatmire" },
-    description:
-      "Every talk from Goatmire Elixir and NervesConf EU, recorded at Varbergs Teater.",
+    description,
+    openGraph: { siteName: "Goatmire", type: "website", title: "Goatmire videos", description },
+    twitter: { card: "summary_large_image" },
     // Staging hosts (goatmire-v2.bold.video) stay out of search results.
     robots: process.env.GOATMIRE_NOINDEX === "1" ? { index: false, follow: false } : undefined,
   };
